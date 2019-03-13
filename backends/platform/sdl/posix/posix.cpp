@@ -27,6 +27,11 @@
 #define FORBIDDEN_SYMBOL_EXCEPTION_time_h	//On IRIX, sys/stat.h includes sys/time.h
 #define FORBIDDEN_SYMBOL_EXCEPTION_system
 
+#ifdef __MINT__
+#define FORBIDDEN_SYMBOL_EXCEPTION_random
+#define FORBIDDEN_SYMBOL_EXCEPTION_srandom
+#endif
+
 #include "common/scummsys.h"
 
 #ifdef POSIX

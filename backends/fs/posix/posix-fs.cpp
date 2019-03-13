@@ -30,6 +30,11 @@
 #define FORBIDDEN_SYMBOL_EXCEPTION_getenv
 #define FORBIDDEN_SYMBOL_EXCEPTION_exit		//Needed for IRIX's unistd.h
 
+#ifdef __MINT__
+#define FORBIDDEN_SYMBOL_EXCEPTION_random
+#define FORBIDDEN_SYMBOL_EXCEPTION_srandom
+#endif
+
 #include "backends/fs/posix/posix-fs.h"
 #include "backends/fs/stdiostream.h"
 #include "common/algorithm.h"

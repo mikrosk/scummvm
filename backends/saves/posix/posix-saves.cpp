@@ -28,6 +28,11 @@
 #define FORBIDDEN_SYMBOL_EXCEPTION_mkdir
 #define FORBIDDEN_SYMBOL_EXCEPTION_getenv
 
+#ifdef __MINT__
+#define FORBIDDEN_SYMBOL_EXCEPTION_random
+#define FORBIDDEN_SYMBOL_EXCEPTION_srandom
+#endif
+
 #include "common/scummsys.h"
 
 #if defined(POSIX) && !defined(DISABLE_DEFAULT_SAVEFILEMANAGER)

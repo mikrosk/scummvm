@@ -27,6 +27,11 @@
 #define FORBIDDEN_SYMBOL_EXCEPTION_mkdir
 #define FORBIDDEN_SYMBOL_EXCEPTION_exit		//Needed for IRIX's unistd.h
 
+#ifdef __MINT__
+#define FORBIDDEN_SYMBOL_EXCEPTION_random
+#define FORBIDDEN_SYMBOL_EXCEPTION_srandom
+#endif
+
 #include "backends/fs/chroot/chroot-fs-factory.h"
 #include "backends/fs/chroot/chroot-fs.h"
 
