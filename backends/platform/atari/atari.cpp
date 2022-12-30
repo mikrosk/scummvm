@@ -45,7 +45,7 @@
 #include "backends/timer/default/default-timer.h"
 #include "backends/events/default/default-events.h"
 #include "backends/mixer/null/null-mixer.h"
-#include "backends/graphics/null/null-graphics.h"
+#include "backends/graphics/atari/atari-graphics.h"
 #include "gui/debugger.h"
 
 /*
@@ -101,7 +101,7 @@ void OSystem_Atari::initBackend() {
 	_timerManager = new DefaultTimerManager();
 	_eventManager = new DefaultEventManager(this);
 	_savefileManager = new DefaultSaveFileManager();
-	_graphicsManager = new NullGraphicsManager();
+	_graphicsManager = new AtariGraphicsManager();
 	_mixerManager = new NullMixerManager();
 	// Setup and start mixer
 	_mixerManager->init();

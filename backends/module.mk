@@ -305,6 +305,7 @@ endif
 
 ifeq ($(BACKEND),atari)
 MODULE_OBJS += \
+	graphics/atari/atari-graphics.o \
 	mixer/null/null-mixer.o
 endif
 
