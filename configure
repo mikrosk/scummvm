@@ -3670,6 +3670,10 @@ case $_backend in
 			_sdlnet=no
 		fi
 		;;
+	atari)
+		append_var DEFINES "-DATARI"
+		append_var DEFINES "-DDISABLE_FANCY_THEMES"
+		;;
 	dc)
 		append_var INCLUDES '-I$(srcdir)/backends/platform/dc'
 		append_var INCLUDES "-isystem $RONINDIR/include"

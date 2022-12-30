@@ -1,1 +1,4 @@
--std=c++17
+-std=c++11
+-DATARI
+-DPOSIX
+-D_GNU_SOURCE

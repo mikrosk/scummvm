@@ -303,6 +303,11 @@ MODULE_OBJS += \
 	plugins/3ds/3ds-provider.o
 endif
 
+ifeq ($(BACKEND),atari)
+MODULE_OBJS += \
+	mixer/null/null-mixer.o
+endif
+
 ifeq ($(BACKEND),ds)
 MODULE_OBJS += \
 	events/ds/ds-events.o \

@@ -590,6 +590,7 @@ backends/platform/android/portdefs.h
 backends/platform/android/snprintf.cpp
 backends/platform/android/touchcontrols.cpp
 backends/platform/android/touchcontrols.h
+backends/platform/atari/atari.cpp
 backends/platform/dc/DCLauncherDialog.h
 backends/platform/dc/audio.cpp
 backends/platform/dc/dc-fs.cpp
