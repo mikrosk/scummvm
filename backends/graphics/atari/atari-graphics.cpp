@@ -59,8 +59,8 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 		return OSystem::TransactionError::kTransactionFormatNotSupported;
 
 	if (_oldFormat != _format) {
-		//int16 old_mode = VsetMode(VM_INQUIRE);
-		//VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
+		int16 old_mode = VsetMode(VM_INQUIRE);
+		VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
 
 		_oldFormat = _format;
 	}
@@ -70,7 +70,14 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 
 	if (_oldWidth != _width || _oldHeight != _height) {
 		if (_screen == nullptr) {
-			// just one buffer is needed
+			// no need to realloc each time
+			_chunkyBuffer = (byte*)Mxalloc(SCREEN_WIDTH * SCREEN_HEIGHT + 15, MX_PREFTTRAM);
+			if (!_chunkyBuffer)
+				return OSystem::TransactionError::kTransactionSizeChangeFailed;
+
+			_chunkyBufferAligned = (byte*)(((unsigned long)_chunkyBuffer + 15) & 0xfffffff0);
+			memset(_chunkyBufferAligned, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
+
 			_screen = (byte*)Mxalloc(SCREEN_WIDTH * SCREEN_HEIGHT + 15, MX_STRAM);
 			if (!_screen)
 				return OSystem::TransactionError::kTransactionSizeChangeFailed;
@@ -78,7 +85,13 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 			_screenAligned = (byte*)(((unsigned long)_screen + 15) & 0xfffffff0);
 			memset(_screenAligned, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 
-			//VsetScreen(SCR_NOCHANGE, _screenAligned, SCR_NOCHANGE, SCR_NOCHANGE);
+			VsetScreen(SCR_NOCHANGE, _screenAligned, SCR_NOCHANGE, SCR_NOCHANGE);
+
+			_overlayBuffer = (uint16*)Mxalloc(getOverlayWidth() * getOverlayHeight() * getOverlayFormat().bytesPerPixel, MX_STRAM);
+			if (!_overlayBuffer)
+				return OSystem::TransactionError::kTransactionSizeChangeFailed;
+
+			memset(_overlayBuffer, 0, getOverlayWidth() * getOverlayHeight() * getOverlayFormat().bytesPerPixel);
 		}
 
 		_oldWidth = _width;
@@ -107,12 +120,22 @@ Graphics::Surface *AtariGraphicsManager::lockScreen() {
 	Common::String str = Common::String::format("lockScreen\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
-	return NULL;
+	static Graphics::Surface surface;	// never release via free/delete, we want to Mfree() it
+	surface.init(_width, _height, _width, _chunkyBufferAligned, _format);
+
+	return &surface;
 }
 
 void AtariGraphicsManager::showOverlay() {
 	Common::String str = Common::String::format("showOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	if (_overlayVisible || !_overlayBuffer)
+		return;
+
+	int16 old_mode = VsetMode(VM_INQUIRE);
+	VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS16);
+	VsetScreen(SCR_NOCHANGE, _overlayBuffer, SCR_NOCHANGE, SCR_NOCHANGE);
 
 	_overlayVisible = true;
 }
@@ -121,21 +144,55 @@ void AtariGraphicsManager::hideOverlay() {
 	Common::String str = Common::String::format("hideOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
+	if (!_overlayVisible || !_screenAligned)
+		return;
+
+	int16 old_mode = VsetMode(VM_INQUIRE);
+	VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
+	VsetScreen(SCR_NOCHANGE, _screenAligned, SCR_NOCHANGE, SCR_NOCHANGE);
+
 	_overlayVisible = false;
 }
 
 void AtariGraphicsManager::clearOverlay() {
 	Common::String str = Common::String::format("clearOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	memset(_overlayBuffer, 0, getOverlayWidth() * getOverlayHeight() * getOverlayFormat().bytesPerPixel);
 }
 
 void AtariGraphicsManager::grabOverlay(Graphics::Surface &surface) const {
 	Common::String str = Common::String::format("grabOverlay: %d, %d, %d\n", surface.pitch, surface.w, surface.h);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	static Graphics::Surface overlaySurface;	// never release via free/delete, we want to Mfree() it
+	overlaySurface.init(getOverlayWidth(),
+						getOverlayHeight(),
+						getOverlayWidth() * getOverlayFormat().bytesPerPixel,
+						_overlayBuffer,
+						getOverlayFormat());
+
+	surface.copyFrom(overlaySurface);
 }
 
-void AtariGraphicsManager::copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h)
-{
+void AtariGraphicsManager::copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) {
 	Common::String str = Common::String::format("copyRectToOverlay: %d, %d, %d, %d, %d\n", pitch, x, y, w, h);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	static Graphics::Surface overlaySurface;	// never release via free/delete, we want to Mfree() it
+	overlaySurface.init(getOverlayWidth(),
+						getOverlayHeight(),
+						getOverlayWidth() * getOverlayFormat().bytesPerPixel,
+						_overlayBuffer,
+						getOverlayFormat());
+
+	overlaySurface.copyRectToSurface(buf, pitch, x, y, w, h);
+}
+
+int16 AtariGraphicsManager::getOverlayHeight() const {
+	return SCREEN_HEIGHT;
+}
+
+int16 AtariGraphicsManager::getOverlayWidth() const {
+	return SCREEN_WIDTH;
 }

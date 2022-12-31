@@ -61,8 +61,8 @@ public:
 	void clearOverlay() override;
 	void grabOverlay(Graphics::Surface &surface) const override;
 	void copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) override;
-	int16 getOverlayHeight() const override { return _height; }
-	int16 getOverlayWidth() const override { return _width; }
+	int16 getOverlayHeight() const override;
+	int16 getOverlayWidth() const override;
 
 	bool showMouse(bool visible) override { return !visible; }
 	void warpMouse(int x, int y) override {}
@@ -76,10 +76,13 @@ private:
 	uint _oldWidth = 0, _oldHeight = 0;
 	Graphics::PixelFormat _oldFormat = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	byte* _screen = nullptr;
-	byte* _screenAligned = nullptr;
+	byte *_screen = nullptr;
+	byte *_screenAligned = nullptr;
+	byte *_chunkyBuffer = nullptr;
+	byte *_chunkyBufferAligned = nullptr;
 
 	bool _overlayVisible;
+	uint16 *_overlayBuffer = nullptr;
 };
 
 #endif
