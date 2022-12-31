@@ -48,8 +48,8 @@ public:
 	void copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h) override;
 	Graphics::Surface *lockScreen() override;
 	void unlockScreen() override {}
-	void fillScreen(uint32 col) override {}
-	void updateScreen() override {}
+	void fillScreen(uint32 col) override;
+	void updateScreen() override;
 	void setShakePos(int shakeXOffset, int shakeYOffset) override {}
 	void setFocusRectangle(const Common::Rect& rect) override {}
 	void clearFocusRectangle() override {}
@@ -64,18 +64,21 @@ public:
 	int16 getOverlayHeight() const override;
 	int16 getOverlayWidth() const override;
 
-	bool showMouse(bool visible) override { return !visible; }
-	void warpMouse(int x, int y) override {}
-	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale = false, const Graphics::PixelFormat *format = NULL) override {}
+	bool showMouse(bool visible) override;
+	void warpMouse(int x, int y) override;
+	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale = false, const Graphics::PixelFormat *format = NULL) override;
 	void setCursorPalette(const byte *colors, uint start, uint num) override {}
 
 private:
+	void updateOverlayCursor();
+
 	uint _width = 0, _height = 0;
 	Graphics::PixelFormat _format = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	uint _oldWidth = 0, _oldHeight = 0;
 	Graphics::PixelFormat _oldFormat = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
+	bool _screenModified = false;
 	byte *_screen = nullptr;
 	byte *_screenAligned = nullptr;
 	byte *_chunkyBuffer = nullptr;
@@ -83,6 +86,15 @@ private:
 
 	bool _overlayVisible;
 	uint16 *_overlayBuffer = nullptr;
+
+	bool _mouseVisible = false;
+	int _mouseX = -1, _mouseY = -1;
+
+	bool _cursorModified = false;
+	uint _cursorWidth = 0, _cursorHeight = 0;
+	int _cursorHotspotX = -1, _cursorHotspotY = -1;
+	uint32 _cursorKeycolor = 0;
+	byte* _cursorBuffer = nullptr;
 };
 
 #endif
