@@ -21,19 +21,23 @@
 
 #include "backends/graphics/atari/atari-graphics.h"
 
+#include <mint/falcon.h>
+#include <mint/osbind.h>
+
 #include "common/str.h"
 #include "graphics/surface.h"
 
-bool AtariGraphicsManager::setGraphicsMode(int mode, uint flags)
-{
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	240
+
+bool AtariGraphicsManager::setGraphicsMode(int mode, uint flags) {
 	Common::String str = Common::String::format("setGraphicsMode: %d, %d\n", mode, flags);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	return (mode == 0);
 }
 
-void AtariGraphicsManager::initSize(uint width, uint height, const Graphics::PixelFormat *format)
-{
+void AtariGraphicsManager::initSize(uint width, uint height, const Graphics::PixelFormat *format) {
 	Common::String str = Common::String::format("initSize: %d, %d\n", width, height);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
@@ -42,70 +46,90 @@ void AtariGraphicsManager::initSize(uint width, uint height, const Graphics::Pix
 	_format = format ? *format : Graphics::PixelFormat::createFormatCLUT8();
 }
 
-void AtariGraphicsManager::beginGFXTransaction()
-{
+void AtariGraphicsManager::beginGFXTransaction() {
 	Common::String str = Common::String::format("beginGFXTransaction\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 }
 
-OSystem::TransactionError AtariGraphicsManager::endGFXTransaction()
-{
+OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 	Common::String str = Common::String::format("endGFXTransaction\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	if (_format != Graphics::PixelFormat::createFormatCLUT8())
+		return OSystem::TransactionError::kTransactionFormatNotSupported;
+
+	if (_oldFormat != _format) {
+		//int16 old_mode = VsetMode(VM_INQUIRE);
+		//VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
+
+		_oldFormat = _format;
+	}
+
+	if (_width > SCREEN_WIDTH || _height > SCREEN_HEIGHT)
+		return OSystem::TransactionError::kTransactionSizeChangeFailed;
+
+	if (_oldWidth != _width || _oldHeight != _height) {
+		if (_screen == nullptr) {
+			// just one buffer is needed
+			_screen = (byte*)Mxalloc(SCREEN_WIDTH * SCREEN_HEIGHT + 15, MX_STRAM);
+			if (!_screen)
+				return OSystem::TransactionError::kTransactionSizeChangeFailed;
+
+			_screenAligned = (byte*)(((unsigned long)_screen + 15) & 0xfffffff0);
+			memset(_screenAligned, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
+
+			//VsetScreen(SCR_NOCHANGE, _screenAligned, SCR_NOCHANGE, SCR_NOCHANGE);
+		}
+
+		_oldWidth = _width;
+		_oldHeight = _height;
+	}
 
 	return OSystem::kTransactionSuccess;
 }
 
-void AtariGraphicsManager::setPalette(const byte *colors, uint start, uint num)
-{
+void AtariGraphicsManager::setPalette(const byte *colors, uint start, uint num) {
 	Common::String str = Common::String::format("setPalette: %d, %d\n", start, num);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 }
 
-void AtariGraphicsManager::grabPalette(byte *colors, uint start, uint num) const
-{
+void AtariGraphicsManager::grabPalette(byte *colors, uint start, uint num) const {
 	Common::String str = Common::String::format("grabPalette: %d, %d\n", start, num);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 }
 
-void AtariGraphicsManager::copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h)
-{
+void AtariGraphicsManager::copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h) {
 	Common::String str = Common::String::format("copyRectToScreen: %d, %d, %d, %d, %d\n", pitch, x, y, w, h);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 }
 
-Graphics::Surface *AtariGraphicsManager::lockScreen()
-{
+Graphics::Surface *AtariGraphicsManager::lockScreen() {
 	Common::String str = Common::String::format("lockScreen\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	return NULL;
 }
 
-void AtariGraphicsManager::showOverlay()
-{
+void AtariGraphicsManager::showOverlay() {
 	Common::String str = Common::String::format("showOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	_overlayVisible = true;
 }
 
-void AtariGraphicsManager::hideOverlay()
-{
+void AtariGraphicsManager::hideOverlay() {
 	Common::String str = Common::String::format("hideOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	_overlayVisible = false;
 }
 
-void AtariGraphicsManager::clearOverlay()
-{
+void AtariGraphicsManager::clearOverlay() {
 	Common::String str = Common::String::format("clearOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 }
 
-void AtariGraphicsManager::grabOverlay(Graphics::Surface &surface) const
-{
+void AtariGraphicsManager::grabOverlay(Graphics::Surface &surface) const {
 	Common::String str = Common::String::format("grabOverlay: %d, %d, %d\n", surface.pitch, surface.w, surface.h);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 }

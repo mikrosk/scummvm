@@ -70,8 +70,15 @@ public:
 	void setCursorPalette(const byte *colors, uint start, uint num) override {}
 
 private:
-	uint _width, _height;
-	Graphics::PixelFormat _format;
+	uint _width = 0, _height = 0;
+	Graphics::PixelFormat _format = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+	uint _oldWidth = 0, _oldHeight = 0;
+	Graphics::PixelFormat _oldFormat = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+	byte* _screen = nullptr;
+	byte* _screenAligned = nullptr;
+
 	bool _overlayVisible;
 };
 

@@ -106,6 +106,8 @@ void OSystem_Atari::initBackend() {
 	// Setup and start mixer
 	_mixerManager->init();
 
+	// TODO: store video settings
+
 	BaseBackend::initBackend();
 }
 
@@ -155,6 +157,8 @@ void OSystem_Atari::getTimeAndDate(TimeDate &td, bool skipRecord) const {
 }
 
 void OSystem_Atari::quit() {
+	// TODO: restore video settings
+
 	exit(0);
 }
 
