@@ -24,6 +24,8 @@
 
 #include "backends/graphics/graphics.h"
 
+#include "graphics/surface.h"
+
 class AtariGraphicsManager : public GraphicsManager {
 public:
 	virtual ~AtariGraphicsManager() {}
@@ -83,18 +85,20 @@ private:
 	byte *_screenAligned = nullptr;
 	byte *_chunkyBuffer = nullptr;
 	byte *_chunkyBufferAligned = nullptr;
+	Graphics::Surface _chunkySurface;
 
 	bool _overlayVisible;
 	uint16 *_overlayBuffer = nullptr;
+	Graphics::Surface _overlaySurface;
 
 	bool _mouseVisible = false;
 	int _mouseX = -1, _mouseY = -1;
 
 	bool _cursorModified = false;
 	uint _cursorWidth = 0, _cursorHeight = 0;
-	int _cursorHotspotX = -1, _cursorHotspotY = -1;
+	int _cursorHotspotX = 0, _cursorHotspotY = 0;
 	uint32 _cursorKeycolor = 0;
-	byte* _cursorBuffer = nullptr;
+	Graphics::Surface _cursorSurface;
 };
 
 #endif

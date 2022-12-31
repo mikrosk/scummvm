@@ -26,10 +26,11 @@
 
 #include "common/rect.h"
 #include "common/str.h"
-#include "graphics/surface.h"
 
 #define SCREEN_WIDTH	320
 #define SCREEN_HEIGHT	240
+
+#define SCREEN_ACTIVE
 
 bool AtariGraphicsManager::setGraphicsMode(int mode, uint flags) {
 	Common::String str = Common::String::format("setGraphicsMode: %d, %d\n", mode, flags);
@@ -60,9 +61,10 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 		return OSystem::TransactionError::kTransactionFormatNotSupported;
 
 	if (_oldFormat != _format) {
-		//int16 old_mode = VsetMode(VM_INQUIRE);
-		//VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
-
+#ifdef SCREEN_ACTIVE
+		int16 old_mode = VsetMode(VM_INQUIRE);
+		VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
+#endif
 		_oldFormat = _format;
 	}
 
@@ -79,20 +81,28 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 			_chunkyBufferAligned = (byte*)(((unsigned long)_chunkyBuffer + 15) & 0xfffffff0);
 			memset(_chunkyBufferAligned, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 
+			_chunkySurface.init(_width, _height, _width, _chunkyBufferAligned, _format);
+
 			_screen = (byte*)Mxalloc(SCREEN_WIDTH * SCREEN_HEIGHT + 15, MX_STRAM);
 			if (!_screen)
 				return OSystem::TransactionError::kTransactionSizeChangeFailed;
 
 			_screenAligned = (byte*)(((unsigned long)_screen + 15) & 0xfffffff0);
 			memset(_screenAligned, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
-
-			//VsetScreen(SCR_NOCHANGE, _screenAligned, SCR_NOCHANGE, SCR_NOCHANGE);
-
+#ifdef SCREEN_ACTIVE
+			VsetScreen(SCR_NOCHANGE, _screenAligned, SCR_NOCHANGE, SCR_NOCHANGE);
+#endif
 			_overlayBuffer = (uint16*)Mxalloc(getOverlayWidth() * getOverlayHeight() * getOverlayFormat().bytesPerPixel, MX_STRAM);
 			if (!_overlayBuffer)
 				return OSystem::TransactionError::kTransactionSizeChangeFailed;
 
 			memset(_overlayBuffer, 0, getOverlayWidth() * getOverlayHeight() * getOverlayFormat().bytesPerPixel);
+
+			_overlaySurface.init(getOverlayWidth(),
+				getOverlayHeight(),
+				getOverlayWidth() * getOverlayFormat().bytesPerPixel,
+				_overlayBuffer,
+				getOverlayFormat());
 		}
 
 		_oldWidth = _width;
@@ -116,9 +126,7 @@ void AtariGraphicsManager::copyRectToScreen(const void *buf, int pitch, int x, i
 	Common::String str = Common::String::format("copyRectToScreen: %d, %d, %d, %d, %d\n", pitch, x, y, w, h);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
-	static Graphics::Surface surface;	// never release via free/delete, we want to Mfree() it
-	surface.init(_width, _height, _width, _chunkyBufferAligned, _format);
-	surface.copyRectToSurface(buf, pitch, x, y, w, h);
+	_chunkySurface.copyRectToSurface(buf, pitch, x, y, w, h);
 
 	_screenModified = true;
 }
@@ -127,10 +135,7 @@ Graphics::Surface *AtariGraphicsManager::lockScreen() {
 	Common::String str = Common::String::format("lockScreen\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
-	static Graphics::Surface surface;	// never release via free/delete, we want to Mfree() it
-	surface.init(_width, _height, _width, _chunkyBufferAligned, _format);
-
-	return &surface;
+	return &_chunkySurface;
 }
 
 void AtariGraphicsManager::fillScreen(uint32 col) {
@@ -146,24 +151,32 @@ void AtariGraphicsManager::fillScreen(uint32 col) {
 }
 
 void AtariGraphicsManager::updateScreen() {
-	if (!_screenModified && !_cursorModified)
-		return;
-
 	if (_cursorModified) {
-		if (!isOverlayVisible()) {
-			// TODO: update mouse rectangle
-		} else {
-			updateOverlayCursor();
-		}
-
 		_cursorModified = false;
+
+		if (_mouseX != -1 && _mouseY != -1) {
+			if (isOverlayVisible()) {
+				updateOverlayCursor();
+				return;
+			}
+
+			// TODO: clip
+			_chunkySurface.copyRectToSurface(_cursorSurface,
+				_mouseX - _cursorHotspotX,
+				_mouseY - _cursorHotspotY,
+				Common::Rect(_cursorWidth, _cursorHeight));
+
+			_screenModified = true;
+		}
 	}
 
-	Common::String str = Common::String::format("updateScreen\n");
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	if (_screenModified) {
+		Common::String str = Common::String::format("updateScreen\n");
+		g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
-	// TODO: c2p (maybe remember updated rects from copyRectToScreen?)
-	_screenModified = false;
+		// TODO: c2p (maybe remember updated rects from copyRectToScreen? esp. useful for cursor updates)
+		_screenModified = false;
+	}
 }
 
 void AtariGraphicsManager::showOverlay() {
@@ -173,10 +186,11 @@ void AtariGraphicsManager::showOverlay() {
 	if (_overlayVisible || !_overlayBuffer)
 		return;
 
-	//int16 old_mode = VsetMode(VM_INQUIRE);
-	//VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS16);
-	//VsetScreen(SCR_NOCHANGE, _overlayBuffer, SCR_NOCHANGE, SCR_NOCHANGE);
-
+#ifdef SCREEN_ACTIVE
+	int16 old_mode = VsetMode(VM_INQUIRE);
+	VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS16);
+	VsetScreen(SCR_NOCHANGE, _overlayBuffer, SCR_NOCHANGE, SCR_NOCHANGE);
+#endif
 	_overlayVisible = true;
 }
 
@@ -187,10 +201,11 @@ void AtariGraphicsManager::hideOverlay() {
 	if (!_overlayVisible || !_screenAligned)
 		return;
 
-	//int16 old_mode = VsetMode(VM_INQUIRE);
-	//VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
-	//VsetScreen(SCR_NOCHANGE, _screenAligned, SCR_NOCHANGE, SCR_NOCHANGE);
-
+#ifdef SCREEN_ACTIVE
+	int16 old_mode = VsetMode(VM_INQUIRE);
+	VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
+	VsetScreen(SCR_NOCHANGE, _screenAligned, SCR_NOCHANGE, SCR_NOCHANGE);
+#endif
 	_overlayVisible = false;
 }
 
@@ -205,26 +220,14 @@ void AtariGraphicsManager::grabOverlay(Graphics::Surface &surface) const {
 	Common::String str = Common::String::format("grabOverlay: %d, %d, %d\n", surface.pitch, surface.w, surface.h);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
-	static Graphics::Surface overlaySurface;	// never release via free/delete, we want to Mfree() it
-	overlaySurface.init(getOverlayWidth(),
-						getOverlayHeight(),
-						getOverlayWidth() * getOverlayFormat().bytesPerPixel,
-						_overlayBuffer,
-						getOverlayFormat());
-	surface.copyFrom(overlaySurface);
+	surface.copyFrom(_overlaySurface);
 }
 
 void AtariGraphicsManager::copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) {
 	Common::String str = Common::String::format("copyRectToOverlay: %d, %d, %d, %d, %d\n", pitch, x, y, w, h);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
-	static Graphics::Surface overlaySurface;	// never release via free/delete, we want to Mfree() it
-	overlaySurface.init(getOverlayWidth(),
-						getOverlayHeight(),
-						getOverlayWidth() * getOverlayFormat().bytesPerPixel,
-						_overlayBuffer,
-						getOverlayFormat());
-	overlaySurface.copyRectToSurface(buf, pitch, x, y, w, h);
+	_overlaySurface.copyRectToSurface(buf, pitch, x, y, w, h);
 }
 
 int16 AtariGraphicsManager::getOverlayHeight() const {
@@ -241,6 +244,16 @@ bool AtariGraphicsManager::showMouse(bool visible) {
 
 	if (_mouseVisible == visible) {
 		return visible;
+	}
+
+	if (_mouseX == -1 || _mouseY == -1) {
+		if (isOverlayVisible()) {
+			_mouseX = getOverlayWidth() / 2;
+			_mouseY = getOverlayHeight() / 2;
+		} else {
+			_mouseX = getWidth() / 2;
+			_mouseY = getHeight() / 2;
+		}
 	}
 
 	_cursorModified = true;
@@ -264,20 +277,26 @@ void AtariGraphicsManager::warpMouse(int x, int y) {
 }
 
 void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale, const Graphics::PixelFormat *format) {
-	if (_cursorWidth == w && _cursorHeight == h
-			&& _cursorHotspotX == hotspotX && _cursorHotspotY == hotspotY
-			&& _cursorKeycolor == keycolor)
-		return;
-
-	Common::String str = Common::String::format("setMouseCursor: %d, %d, %d, %d, %d, %p\n", w, h, hotspotX, hotspotY, keycolor, format);
+	Common::String str = Common::String::format("setMouseCursor: %d, %d, %d, %d, %d, %p\n", w, h, hotspotX, hotspotY, keycolor, (const void*)format);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	if (format != nullptr && *format != _format)
 		return;
 
-	delete[] _cursorBuffer;
-	_cursorBuffer = new byte[w * h];
-	memcpy(_cursorBuffer, buf, w * h);
+	if (w == 0 || h == 0) {
+		_cursorSurface.free();
+		return;
+	}
+
+	if (_cursorWidth != w && _cursorHeight != h) {
+		_cursorSurface.free();
+		_cursorSurface.create(w, h, _format);
+	}
+
+	if (_cursorKeycolor != keycolor)
+		_cursorSurface.fillRect(Common::Rect(_cursorSurface.w, _cursorSurface.h), keycolor);
+
+	_cursorSurface.copyRectToSurfaceWithKey(buf, w, 0, 0, w, h, keycolor);
 
 	_cursorWidth = w;
 	_cursorHeight = h;
@@ -290,5 +309,35 @@ void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int h
 
 void AtariGraphicsManager::updateOverlayCursor()
 {
+	static byte palette[256*3] = {};
 
+	// TODO: system palette?
+	static bool paletteInitialised;
+	if (!paletteInitialised) {
+		for (int i = 0; i < 4; ++i) {
+			palette[i * 3 + 0] = (byte)(63 + i * 64);
+			palette[i * 3 + 1] = (byte)(63 + i * 64);
+			palette[i * 3 + 2] = (byte)(63 + i * 64);
+		}
+		paletteInitialised = true;
+	}
+
+	const Graphics::PixelFormat dstFormat = getOverlayFormat();
+
+	// TODO: clipping
+	for (int y = 0; y < _cursorSurface.h; y++) {
+		const byte *srcRow = (const byte *)_cursorSurface.getBasePtr(0, y);
+		byte *dstRow = (byte *)_overlaySurface.getBasePtr(_mouseX - _cursorHotspotX, _mouseY - _cursorHotspotY + y);
+
+		for (int x = 0; x < _cursorSurface.w; x++) {
+			byte index = *srcRow++;
+			byte r = palette[index * 3];
+			byte g = palette[index * 3 + 1];
+			byte b = palette[index * 3 + 2];
+
+			*((uint16 *)dstRow) = dstFormat.RGBToColor(r, g, b);
+
+			dstRow += dstFormat.bytesPerPixel;
+		}
+	}
 }
