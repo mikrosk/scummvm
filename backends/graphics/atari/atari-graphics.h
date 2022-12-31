@@ -32,23 +32,21 @@ public:
 	void setFeatureState(OSystem::Feature f, bool enable) override {}
 	bool getFeatureState(OSystem::Feature f) const override { return false; }
 
-	void initSize(uint width, uint height, const Graphics::PixelFormat *format = NULL) override {
-		_width = width;
-		_height = height;
-		_format = format ? *format : Graphics::PixelFormat::createFormatCLUT8();
-	}
+	bool setGraphicsMode(int mode, uint flags = OSystem::kGfxModeNoFlags) override;
+
+	void initSize(uint width, uint height, const Graphics::PixelFormat *format = NULL) override;
 
 	int getScreenChangeID() const override { return 0; }
 
-	void beginGFXTransaction() override {}
-	OSystem::TransactionError endGFXTransaction() override { return OSystem::kTransactionSuccess; }
+	void beginGFXTransaction() override;
+	OSystem::TransactionError endGFXTransaction() override;
 
 	int16 getHeight() const override { return _height; }
 	int16 getWidth() const override { return _width; }
-	void setPalette(const byte *colors, uint start, uint num) override {}
-	void grabPalette(byte *colors, uint start, uint num) const override {}
-	void copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h) override {}
-	Graphics::Surface *lockScreen() override { return NULL; }
+	void setPalette(const byte *colors, uint start, uint num) override;
+	void grabPalette(byte *colors, uint start, uint num) const override;
+	void copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h) override;
+	Graphics::Surface *lockScreen() override;
 	void unlockScreen() override {}
 	void fillScreen(uint32 col) override {}
 	void updateScreen() override {}
@@ -56,13 +54,13 @@ public:
 	void setFocusRectangle(const Common::Rect& rect) override {}
 	void clearFocusRectangle() override {}
 
-	void showOverlay() override { _overlayVisible = true; }
-	void hideOverlay() override { _overlayVisible = false; }
+	void showOverlay() override;
+	void hideOverlay() override;
 	bool isOverlayVisible() const override { return _overlayVisible; }
 	Graphics::PixelFormat getOverlayFormat() const override { return Graphics::PixelFormat(2, 5, 6, 5, 0, 11, 5, 0, 0); }
-	void clearOverlay() override {}
-	void grabOverlay(Graphics::Surface &surface) const override {}
-	void copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) override {}
+	void clearOverlay() override;
+	void grabOverlay(Graphics::Surface &surface) const override;
+	void copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) override;
 	int16 getOverlayHeight() const override { return _height; }
 	int16 getOverlayWidth() const override { return _width; }
 
