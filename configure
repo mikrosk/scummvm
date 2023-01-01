@@ -1615,6 +1615,11 @@ ios7-arm64)
 	_host_cpu=aarch64
 	_host_alias=arm64-apple-darwin11
 	;;
+m68k-atari-mint)
+	_host_os=mint
+	_host_cpu=m68k
+	_host_alias=m68k-atari-mint
+	;;
 maemo)
 	_host_os=maemo
 	_host_cpu=arm
@@ -3443,6 +3448,10 @@ if test -n "$_host"; then
 			_timidity=no
 			;;
 		m68k-atari-mint)
+			if test "$_release_build" = yes -o "$_debug_build" != yes; then
+				append_var CXXFLAGS "-fomit-frame-pointer"
+				append_var LDFLAGS "-s"
+			fi
 			_seq_midi=no
 			_timidity=no
 			;;
@@ -3673,6 +3682,9 @@ case $_backend in
 	atari)
 		append_var DEFINES "-DATARI"
 		append_var DEFINES "-DDISABLE_FANCY_THEMES"
+		append_var ASFLAGS "-m68030"
+		append_var CXXFLAGS "-m68020-60"
+		append_var LDFLAGS "-m68020-60"
 		;;
 	dc)
 		append_var INCLUDES '-I$(srcdir)/backends/platform/dc'
