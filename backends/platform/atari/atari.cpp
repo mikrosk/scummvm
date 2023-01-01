@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include <mint/osbind.h>
+
 // We use some stdio.h functionality here thus we need to allow some
 // symbols. Alternatively, we could simply allow everything by defining
 // FORBIDDEN_SYMBOL_ALLOW_ALL
@@ -78,6 +80,11 @@ public:
 
 private:
 	clock_t _startTime;
+	bool _ikbd_initialized = false;
+	int _mouseX = -1;
+	int _mouseY = -1;
+	bool _oldLmbDown = false;
+	bool _oldRmbDown = false;
 };
 
 OSystem_Atari::OSystem_Atari() {
@@ -96,6 +103,9 @@ void intHandler(int dummy) {
 	intReceived = true;
 }
 
+extern "C" void atari_ikbd_init();
+extern "C" void atari_ikbd_shutdown();
+
 void OSystem_Atari::initBackend() {
 	_startTime = clock();
 
@@ -110,9 +120,17 @@ void OSystem_Atari::initBackend() {
 	_mixerManager->init();
 
 	// TODO: store video settings
+	Supexec(atari_ikbd_init);
+	_ikbd_initialized = true;
 
 	BaseBackend::initBackend();
 }
+
+//! bit 0: rmb
+//! bit 1: lmb
+volatile uint8	g_atari_ikbd_mouse_buttons_state = 0;
+volatile int16	g_atari_ikbd_mouse_delta_x = 0;
+volatile int16	g_atari_ikbd_mouse_delta_y = 0;
 
 bool OSystem_Atari::pollEvent(Common::Event &event) {
 	((DefaultTimerManager *)getTimerManager())->checkTimers();
@@ -129,6 +147,91 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		}
 
 		event.type = Common::EVENT_QUIT;
+		return true;
+	}
+
+	if (_mouseX == -1 || _mouseY == -1) {
+		if (isOverlayVisible()) {
+			_mouseX = getOverlayWidth() / 2;
+			_mouseY = getOverlayHeight() / 2;
+		} else {
+			_mouseX = getWidth() / 2;
+			_mouseY = getHeight() / 2;
+		}
+
+		Common::String str = Common::String::format("warping to: %d, %d (%d)\n", _mouseX, _mouseY, isOverlayVisible());
+		logMessage(LogMessageType::kDebug, str.c_str());
+
+		warpMouse(_mouseX, _mouseY);
+	}
+
+	if ((g_atari_ikbd_mouse_buttons_state & 0x01) && !_oldRmbDown) {
+		Common::String str = Common::String::format("EVENT_RBUTTONDOWN\n");
+		logMessage(LogMessageType::kDebug, str.c_str());
+
+		event.type = Common::EVENT_RBUTTONDOWN;
+		_oldRmbDown = true;
+		return true;
+	}
+
+	if (!(g_atari_ikbd_mouse_buttons_state & 0x01) && _oldRmbDown) {
+		Common::String str = Common::String::format("EVENT_RBUTTONUP\n");
+		logMessage(LogMessageType::kDebug, str.c_str());
+
+		event.type = Common::EVENT_RBUTTONUP;
+		_oldRmbDown = false;
+		return true;
+	}
+
+	if ((g_atari_ikbd_mouse_buttons_state & 0x02) && !_oldLmbDown) {
+		Common::String str = Common::String::format("EVENT_LBUTTONDOWN\n");
+		logMessage(LogMessageType::kDebug, str.c_str());
+
+		event.type = Common::EVENT_LBUTTONDOWN;
+		_oldLmbDown = true;
+		return true;
+	}
+
+	if (!(g_atari_ikbd_mouse_buttons_state & 0x02) && _oldLmbDown) {
+		Common::String str = Common::String::format("EVENT_LBUTTONUP\n");
+		logMessage(LogMessageType::kDebug, str.c_str());
+
+		event.type = Common::EVENT_LBUTTONUP;
+		_oldLmbDown = false;
+		return true;
+	}
+
+	if (g_atari_ikbd_mouse_delta_x > 0 || g_atari_ikbd_mouse_delta_y > 0) {
+		const int deltaX = g_atari_ikbd_mouse_delta_x;
+		const int deltaY = g_atari_ikbd_mouse_delta_y;
+
+		g_atari_ikbd_mouse_delta_x = g_atari_ikbd_mouse_delta_y = 0;
+
+		_mouseX += deltaX;
+		_mouseY += deltaY;
+
+		const int maxX = isOverlayVisible() ? getOverlayWidth() : getWidth();
+		const int maxY = isOverlayVisible() ? getOverlayHeight() : getHeight();
+
+		if (_mouseX < 0)
+			_mouseX = 0;
+		else if (_mouseX >= maxX)
+			_mouseX = maxX - 1;
+
+		if (_mouseY < 0)
+			_mouseY = 0;
+		else if (_mouseY >= maxY)
+			_mouseY = maxY - 1;
+
+		event.type = Common::EVENT_MOUSEMOVE;
+		event.mouse	= Common::Point(_mouseX, _mouseY);
+		event.relMouse = Common::Point(deltaX, deltaY);
+
+		Common::String str = Common::String::format("warping to: %d, %d (%d)\n", deltaX, deltaY, isOverlayVisible());
+		logMessage(LogMessageType::kDebug, str.c_str());
+
+		warpMouse(_mouseX, _mouseY);
+
 		return true;
 	}
 
@@ -173,6 +276,10 @@ Common::HardwareInputSet *OSystem_Atari::getHardwareInputSet()
 
 void OSystem_Atari::quit() {
 	// TODO: restore video settings
+	if (_ikbd_initialized) {
+		Supexec(atari_ikbd_shutdown);
+		_ikbd_initialized = false;
+	}
 
 	exit(0);
 }

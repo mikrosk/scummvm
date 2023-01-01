@@ -247,16 +247,6 @@ bool AtariGraphicsManager::showMouse(bool visible) {
 		return visible;
 	}
 
-	if (_mouseX == -1 || _mouseY == -1) {
-		if (isOverlayVisible()) {
-			_mouseX = getOverlayWidth() / 2;
-			_mouseY = getOverlayHeight() / 2;
-		} else {
-			_mouseX = getWidth() / 2;
-			_mouseY = getHeight() / 2;
-		}
-	}
-
 	_cursorModified = true;
 
 	bool last = _mouseVisible;
