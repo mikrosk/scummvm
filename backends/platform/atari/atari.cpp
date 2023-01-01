@@ -206,7 +206,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		return true;
 	}
 
-	if (g_atari_ikbd_mouse_delta_x > 0 || g_atari_ikbd_mouse_delta_y > 0) {
+	if (g_atari_ikbd_mouse_delta_x != 0 || g_atari_ikbd_mouse_delta_y != 0) {
 		const int deltaX = g_atari_ikbd_mouse_delta_x;
 		const int deltaY = g_atari_ikbd_mouse_delta_y;
 
@@ -231,9 +231,6 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		event.type = Common::EVENT_MOUSEMOVE;
 		event.mouse	= Common::Point(_mouseX, _mouseY);
 		event.relMouse = Common::Point(deltaX, deltaY);
-
-		Common::String str = Common::String::format("warping to: %d, %d (%d)\n", deltaX, deltaY, isOverlayVisible());
-		logMessage(LogMessageType::kDebug, str.c_str());
 
 		warpMouse(_mouseX, _mouseY);
 
