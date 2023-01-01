@@ -106,6 +106,9 @@ void intHandler(int dummy) {
 extern "C" void atari_ikbd_init();
 extern "C" void atari_ikbd_shutdown();
 
+extern void nf_init(void);
+extern void nf_print(const char* msg);
+
 void OSystem_Atari::initBackend() {
 	_startTime = clock();
 
@@ -118,6 +121,8 @@ void OSystem_Atari::initBackend() {
 	_mixerManager = new NullMixerManager();
 	// Setup and start mixer
 	_mixerManager->init();
+
+	nf_init();
 
 	// TODO: store video settings
 	Supexec(atari_ikbd_init);
@@ -294,6 +299,8 @@ void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
 
 	fputs(message, output);
 	fflush(output);
+
+	nf_print(message);
 }
 
 void OSystem_Atari::addSysArchivesToSearchSet(Common::SearchSet &s, int priority) {
