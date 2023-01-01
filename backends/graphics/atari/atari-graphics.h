@@ -24,6 +24,7 @@
 
 #include "backends/graphics/graphics.h"
 
+#include "common/rect.h"
 #include "graphics/surface.h"
 
 class AtariGraphicsManager : public GraphicsManager {
@@ -72,6 +73,7 @@ public:
 	void setCursorPalette(const byte *colors, uint start, uint num) override {}
 
 private:
+	void updateCursorRect();
 	void updateOverlayCursor();
 
 	uint _width = 0, _height = 0;
@@ -82,23 +84,27 @@ private:
 
 	bool _screenModified = false;
 	byte *_screen = nullptr;
-	byte *_screenAligned = nullptr;
+	Graphics::Surface _screenSurface8;
+	Graphics::Surface _screenSurface16;
+
 	byte *_chunkyBuffer = nullptr;
-	byte *_chunkyBufferAligned = nullptr;
 	Graphics::Surface _chunkySurface;
 
 	bool _overlayVisible;
-	uint16 *_overlayBuffer = nullptr;
 	Graphics::Surface _overlaySurface;
 
 	bool _mouseVisible = false;
 	int _mouseX = -1, _mouseY = -1;
 
-	bool _cursorModified = false;
 	uint _cursorWidth = 0, _cursorHeight = 0;
 	int _cursorHotspotX = 0, _cursorHotspotY = 0;
 	uint32 _cursorKeycolor = 0;
 	Graphics::Surface _cursorSurface;
+	Graphics::Surface _clippedCursorSurface;
+
+	Common::Rect _cursorRect;
+	Common::Rect _oldCursorRect;
+
 };
 
 #endif
