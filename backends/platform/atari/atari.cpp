@@ -37,6 +37,7 @@
 #include "common/scummsys.h"
 
 #if defined(ATARI)
+#include "backends/keymapper/hardware-input.h"
 #include "backends/modular-backend.h"
 #include "backends/mutex/null/null-mutex.h"
 #include "base/main.h"
@@ -58,20 +59,22 @@ public:
 	OSystem_Atari();
 	virtual ~OSystem_Atari();
 
-	virtual void initBackend();
+	void initBackend() override;
 
-	virtual bool pollEvent(Common::Event &event);
+	bool pollEvent(Common::Event &event) override;
 
-	virtual Common::MutexInternal *createMutex();
-	virtual uint32 getMillis(bool skipRecord = false);
-	virtual void delayMillis(uint msecs);
-	virtual void getTimeAndDate(TimeDate &td, bool skipRecord = false) const;
+	Common::MutexInternal *createMutex() override;
+	uint32 getMillis(bool skipRecord = false) override;
+	void delayMillis(uint msecs) override;
+	void getTimeAndDate(TimeDate &td, bool skipRecord = false) const override;
 
-	virtual void quit();
+	Common::HardwareInputSet *getHardwareInputSet() override;
 
-	virtual void logMessage(LogMessageType::Type type, const char *message);
+	void quit() override;
 
-	virtual void addSysArchivesToSearchSet(Common::SearchSet &s, int priority);
+	void logMessage(LogMessageType::Type type, const char *message) override;
+
+	void addSysArchivesToSearchSet(Common::SearchSet &s, int priority) override;
 
 private:
 	clock_t _startTime;
@@ -137,7 +140,8 @@ Common::MutexInternal *OSystem_Atari::createMutex() {
 }
 
 uint32 OSystem_Atari::getMillis(bool skipRecord) {
-	return (uint32)(0.5 + 1000.0 * (clock() - _startTime) / CLOCKS_PER_SEC);
+	// CLOCKS_PER_SEC is 200, so no need to use floats
+	return 1000 * (clock() - _startTime) / CLOCKS_PER_SEC;
 }
 
 void OSystem_Atari::delayMillis(uint msecs) {
@@ -146,6 +150,7 @@ void OSystem_Atari::delayMillis(uint msecs) {
 
 void OSystem_Atari::getTimeAndDate(TimeDate &td, bool skipRecord) const {
 	time_t curTime = time(0);
+	// TODO: if too slow (e.g. when calling RandomSource::RandomSource()), rewrite
 	struct tm t = *localtime(&curTime);
 	td.tm_sec = t.tm_sec;
 	td.tm_min = t.tm_min;
@@ -154,6 +159,16 @@ void OSystem_Atari::getTimeAndDate(TimeDate &td, bool skipRecord) const {
 	td.tm_mon = t.tm_mon;
 	td.tm_year = t.tm_year;
 	td.tm_wday = t.tm_wday;
+}
+
+Common::HardwareInputSet *OSystem_Atari::getHardwareInputSet()
+{
+	Common::CompositeHardwareInputSet *inputSet = new Common::CompositeHardwareInputSet();
+	inputSet->addHardwareInputSet(new Common::MouseHardwareInputSet(Common::defaultMouseButtons));
+	inputSet->addHardwareInputSet(new Common::KeyboardHardwareInputSet(Common::defaultKeys, Common::defaultModifiers));
+	//inputSet->addHardwareInputSet(new Common::JoystickHardwareInputSet(Common::defaultJoystickButtons, Common::defaultJoystickAxes));
+
+	return inputSet;
 }
 
 void OSystem_Atari::quit() {

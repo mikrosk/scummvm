@@ -30,7 +30,7 @@
 #define SCREEN_WIDTH	320
 #define SCREEN_HEIGHT	240
 
-#define SCREEN_ACTIVE
+//#define SCREEN_ACTIVE
 
 bool AtariGraphicsManager::setGraphicsMode(int mode, uint flags) {
 	Common::String str = Common::String::format("setGraphicsMode: %d, %d\n", mode, flags);
@@ -154,7 +154,8 @@ void AtariGraphicsManager::updateScreen() {
 	if (_cursorModified) {
 		_cursorModified = false;
 
-		if (_mouseX != -1 && _mouseY != -1) {
+		// TODO: what is mouse cursor becomes invisible?
+		if (_mouseX != -1 && _mouseY != -1 && _mouseVisible) {
 			if (isOverlayVisible()) {
 				updateOverlayCursor();
 				return;
@@ -277,8 +278,8 @@ void AtariGraphicsManager::warpMouse(int x, int y) {
 }
 
 void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale, const Graphics::PixelFormat *format) {
-	Common::String str = Common::String::format("setMouseCursor: %d, %d, %d, %d, %d, %p\n", w, h, hotspotX, hotspotY, keycolor, (const void*)format);
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	//Common::String str = Common::String::format("setMouseCursor: %d, %d, %d, %d, %d, %p\n", w, h, hotspotX, hotspotY, keycolor, (const void*)format);
+	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	if (format != nullptr && *format != _format)
 		return;
