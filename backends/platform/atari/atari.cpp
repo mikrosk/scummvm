@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include <mint/cookie.h>
 #include <mint/osbind.h>
 
 // We use some stdio.h functionality here thus we need to allow some
@@ -39,6 +40,7 @@
 #include "common/scummsys.h"
 
 #if defined(ATARI)
+#include "backends/graphics/atari/atari-graphics-asm.h"
 #include "backends/keymapper/hardware-input.h"
 #include "backends/modular-backend.h"
 #include "backends/mutex/null/null-mutex.h"
@@ -80,6 +82,7 @@ public:
 
 private:
 	clock_t _startTime;
+	bool _video_initialized = false;
 	bool _ikbd_initialized = false;
 	int _mouseX = -1;
 	int _mouseY = -1;
@@ -101,7 +104,11 @@ OSystem_Atari::~OSystem_Atari() {
 	Common::String str = Common::String::format("OSystem_Atari::~OSystem_Atari()\n");
 	logMessage(LogMessageType::kDebug, str.c_str());
 
-	// TODO: restore video settings
+	if (_video_initialized) {
+		Supexec(asm_screen_falcon_restore);
+		_video_initialized = false;
+	}
+
 	if (_ikbd_initialized) {
 		Supexec(atari_ikbd_shutdown);
 		_ikbd_initialized = false;
@@ -118,6 +125,29 @@ void intHandler(int dummy) {
 }
 
 void OSystem_Atari::initBackend() {
+	enum {
+		MCH_ST = 0,
+		MCH_STE,
+		MCH_TT,
+		MCH_FALCON,
+		MCH_CLONE,
+		MCH_ARANYM
+	};
+
+	long mch = MCH_ST<<16;
+	Getcookie(C__MCH, &mch);
+	mch >>= 16;
+
+	if (mch != MCH_FALCON && mch != MCH_ARANYM) {
+		logMessage(LogMessageType::kError, "ScummVM works only on Atari Falcon and ARAnyM\n");
+		quit();
+	}
+
+	if (mch == MCH_ARANYM && Getcookie(C_fVDI, NULL) == C_FOUND) {
+		logMessage(LogMessageType::kError, "Disable fVDI, ScummVM accesses Videl directly\n");
+		quit();
+	}
+
 	_startTime = clock();
 
 	last_handler = signal(SIGINT, intHandler);
@@ -132,9 +162,11 @@ void OSystem_Atari::initBackend() {
 
 	nf_init();
 
-	// TODO: store video settings
 	Supexec(atari_ikbd_init);
 	_ikbd_initialized = true;
+
+	Supexec(asm_screen_falcon_save);
+	_video_initialized = true;
 
 	BaseBackend::initBackend();
 }

@@ -423,6 +423,8 @@ backends/graphics/android/android-graphics.cpp
 backends/graphics/android/android-graphics.h
 backends/graphics/atari/atari-graphics.cpp
 backends/graphics/atari/atari-graphics.h
+backends/graphics/atari/atari-graphics-asm.h
+backends/graphics/atari/atari-graphics-asm.S
 backends/graphics/default-palette.h
 backends/graphics/gph/gph-graphics.cpp
 backends/graphics/gph/gph-graphics.h
