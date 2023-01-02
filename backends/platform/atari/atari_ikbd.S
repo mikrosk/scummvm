@@ -32,6 +32,10 @@
 	.globl	_g_atari_ikbd_mouse_delta_x
 	.globl	_g_atari_ikbd_mouse_delta_y
 
+	.globl	_g_atari_ikbd_scancodes
+	.globl	_g_atari_ikbd_scancodes_size
+	.globl	_g_atari_ikbb_scancodes_head
+
 
 	.text
 
@@ -130,12 +134,30 @@ ikbd:
 
 	moveb	0xfffffc02:w,d0
 
+	| Not supported packets ?
+
+	| status report
+	cmpb	#0xf6,d0
+	beqs	ikbd_endit_stack
+	| absolute mouse position record
+	cmpb	#0xf7,d0
+	beqs	ikbd_endit_stack
+	| time-of-day
+	cmpb	#0xfc,d0
+	beqs	ikbd_endit_stack
+
+	| Joystick packet ?
+
+	| joystick report (both sticks), joystick 0 event, joystick 1 event
+	cmpb	#0xfd,d0
+	bhss	ikbd_endit_stack
+
 	| Mouse packet ?
 
 	cmpb	#0xf8,d0
-	bmis	ikbd_no_mouse
+	blos	ikbd_no_mouse
 	cmpb	#0xfc,d0
-	bpls	ikbd_no_mouse
+	bhss	ikbd_no_mouse
 
 	| Mouse packet, byte #1
 
@@ -149,13 +171,16 @@ ikbd_yes_mouse:
 	| Keyboard press/release
 
 ikbd_no_mouse:
-	moveb	d0,d1
-#if 0	// TODO
-	lea	_SDL_AtariIkbd_keyboard,a0
-	andw	#0x7f,d1
-	btst	#7,d0
-	seq	a0@(0,d1:w)
-#endif
+	lea	_g_atari_ikbd_scancodes,a0
+	movew	_g_atari_ikbb_scancodes_head,d1
+
+	| g_atari_ikbd_scancodes[g_atari_ikbb_scancodes_head] = scancode
+
+	moveb	d0,(0.b,a0,d1.w)
+
+	addql	#1,d1
+	andw	_g_atari_ikbd_scancodes_mask,d1
+	movew	d1,_g_atari_ikbb_scancodes_head
 
 	| End of interrupt
 
@@ -206,127 +231,3 @@ ikbd_mousey:
 
 	movel	#ikbd,0x118:w
 	bras	ikbd_endit_stack
-
-
-
-
-#if 0
-	;.globl	_g_scancodeBuffer
-	;.globl	_g_scancodeBufferHead
-	;.globl	_g_scancodeShiftDepressed
-
-	.text
-
-// called via Supexec(), no need to store d2/a2
-_atari_ikbd_init:
-	move.w	#0x22,-(sp)			| Kbdvbase()
-	trap	#14
-	addq.l	#2,sp
-
-	move.l	d0,a0
-
-wait_for_packet1:
-	tst.b	(36.w,a0)			| ikbdstate
-	bne.b	wait_for_packet1
-
-	move	sr,-(sp)
-	or	#0x700,sr
-
-	lea	(32.w,a0),a0			| get adress to ikbdsys
-	move.l	a0,ikbdsys_pointer
-	move.l	(a0),old_ikbdsys
-	move.l	#new_ikbdsys,(a0)
-
-	move	(sp)+,sr
-	rts
-
-
-// called via Supexec(), no need to store d2/a2
-_atari_ikbd_shutdown:
-	move.w	#0x22,-(sp)			| Kbdvbase()
-	trap	#14
-	addq.l	#2,sp
-
-	move.l	d0,a0
-
-wait_for_packet2:
-	tst.b	(36.w,a0)			| ikbdstate
-	bne.b	wait_for_packet2
-
-	move	sr,-(sp)
-	or	#0x700,sr
-
-	move.l	old_ikbdsys,(32.w,a0)
-
-	move	(sp)+,sr
-	rts
-
-
-new_ikbdsys:
-	move.b	0xfffffc02.w,d0
-	cmp.b	#0xf6,d0
-	blo.b	not_ikbd_packet
-
-	cmp.b	#0xf8,d0
-	blo.b	not_mouse
-
-	cmp.b	#0xfb,d0
-	bhi.b	not_mouse
-
-mouse:	move.b	d0,_g_atari_ikbd_mouse_buttons_state
-
-	move.l	ikbdsys_pointer,a0
-	move.l	#ikbdsys_mouse_x,(a0)
-
-not_mouse:
-not_ikbd_packet:
-	rts
-
-/*
-not_mouse:
-not_ikbd_packet:
-	cmp.b	#0x2a,d1
-	bne.b	shift_not_pressed
-	move.l	#1,_g_scancodeShiftDepressed
-	bra.b	shift_skip
-
-shift_not_pressed:
-	cmp.b	#0x36,d1
-	bne.b	shift_skip
-	move.l	#1,_g_scancodeShiftDepressed
-
-shift_skip:
-	lea	_g_scancodeBuffer,a0
-	move.l	_g_scancodeBufferHead,d0
-
-	move.b	d1,(0.b,a0,d0.l)		| g_scancodeBuffer[g_scancodeBufferHead] = scancode
-
-	addq.l	#1,d0
-	and.l	#256-1,d0			| SCANCODE_BUFFER_SIZE-1
-	move.l	d0,_g_scancodeBufferHead
-
-	movem.l	(sp)+,d0-d1/a0	| TODO
-	jmp	([old_ikbdsys])
-*/
-
-ikbdsys_mouse_x:
-	move.b	0xfffffc02.w,d0
-	extb.w	d0
-
-	add.w	d0,_g_atari_ikbd_mouse_delta_x
-
-	move.l	ikbdsys_pointer,a0
-	move.l	#ikbdsys_mouse_y,(a0)
-	rts
-
-ikbdsys_mouse_y:
-	move.b	0xfffffc02.w,d0
-	extb.w	d0
-
-	add.w	d0,_g_atari_ikbd_mouse_delta_y
-
-skip_my:
-	move.l	ikbdsys_pointer,a0
-	move.l	#new_ikbdsys,(a0)		| set original pointer
-	rts
-#endif

@@ -337,8 +337,7 @@ void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int h
 	_cursorKeycolor = keycolor;
 }
 
-void AtariGraphicsManager::updateCursorRect()
-{
+void AtariGraphicsManager::updateCursorRect() {
 	_oldCursorRect = _cursorRect;
 
 	Common::Rect cursorSrcBounds(_cursorSurface.w, _cursorSurface.h);
@@ -382,8 +381,7 @@ void AtariGraphicsManager::updateCursorRect()
 #endif
 }
 
-void AtariGraphicsManager::updateOverlayCursor()
-{
+void AtariGraphicsManager::updateOverlayCursor() {
 	static byte palette[256*3] = {};
 
 	// TODO: system palette?
