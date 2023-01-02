@@ -87,11 +87,25 @@ private:
 	bool _oldRmbDown = false;
 };
 
+extern "C" void atari_ikbd_init();
+extern "C" void atari_ikbd_shutdown();
+
+extern void nf_init(void);
+extern void nf_print(const char* msg);
+
 OSystem_Atari::OSystem_Atari() {
 	_fsFactory = new POSIXFilesystemFactory();
 }
 
 OSystem_Atari::~OSystem_Atari() {
+	Common::String str = Common::String::format("OSystem_Atari::~OSystem_Atari()\n");
+	logMessage(LogMessageType::kDebug, str.c_str());
+
+	// TODO: restore video settings
+	if (_ikbd_initialized) {
+		Supexec(atari_ikbd_shutdown);
+		_ikbd_initialized = false;
+	}
 }
 
 static volatile bool intReceived = false;
@@ -102,12 +116,6 @@ void intHandler(int dummy) {
 	signal(SIGINT, last_handler);
 	intReceived = true;
 }
-
-extern "C" void atari_ikbd_init();
-extern "C" void atari_ikbd_shutdown();
-
-extern void nf_init(void);
-extern void nf_print(const char* msg);
 
 void OSystem_Atari::initBackend() {
 	_startTime = clock();
@@ -175,6 +183,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		logMessage(LogMessageType::kDebug, str.c_str());
 
 		event.type = Common::EVENT_RBUTTONDOWN;
+		event.mouse = Common::Point(_mouseX, _mouseY);
 		_oldRmbDown = true;
 		return true;
 	}
@@ -184,6 +193,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		logMessage(LogMessageType::kDebug, str.c_str());
 
 		event.type = Common::EVENT_RBUTTONUP;
+		event.mouse = Common::Point(_mouseX, _mouseY);
 		_oldRmbDown = false;
 		return true;
 	}
@@ -193,6 +203,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		logMessage(LogMessageType::kDebug, str.c_str());
 
 		event.type = Common::EVENT_LBUTTONDOWN;
+		event.mouse = Common::Point(_mouseX, _mouseY);
 		_oldLmbDown = true;
 		return true;
 	}
@@ -202,6 +213,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		logMessage(LogMessageType::kDebug, str.c_str());
 
 		event.type = Common::EVENT_LBUTTONUP;
+		event.mouse = Common::Point(_mouseX, _mouseY);
 		_oldLmbDown = false;
 		return true;
 	}
@@ -229,7 +241,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 			_mouseY = maxY - 1;
 
 		event.type = Common::EVENT_MOUSEMOVE;
-		event.mouse	= Common::Point(_mouseX, _mouseY);
+		event.mouse = Common::Point(_mouseX, _mouseY);
 		event.relMouse = Common::Point(deltaX, deltaY);
 
 		warpMouse(_mouseX, _mouseY);
@@ -277,11 +289,10 @@ Common::HardwareInputSet *OSystem_Atari::getHardwareInputSet()
 }
 
 void OSystem_Atari::quit() {
-	// TODO: restore video settings
-	if (_ikbd_initialized) {
-		Supexec(atari_ikbd_shutdown);
-		_ikbd_initialized = false;
-	}
+	Common::String str = Common::String::format("OSystem_Atari::quit()\n");
+	logMessage(LogMessageType::kDebug, str.c_str());
+
+	g_system->destroy();
 
 	exit(0);
 }
