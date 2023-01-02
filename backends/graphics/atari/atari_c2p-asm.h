@@ -19,24 +19,12 @@
  *
  */
 
-#ifndef BACKENDS_GRAPHICS_ATARI_ASM_H
-#define BACKENDS_GRAPHICS_ATARI_ASM_H
-
-#include <stdint.h>
+#ifndef BACKENDS_GRAPHICS_ATARI_C2P_ASM_H
+#define BACKENDS_GRAPHICS_ATARI_C2P_ASM_H
 
 extern "C" {
 
-void asm_screen_tt_save(void);
-void asm_screen_falcon_save(void);
-
-void asm_screen_tt_restore(void);
-void asm_screen_falcon_restore(void);
-
-void asm_screen_set_tt_palette(const uint16_t pPalette[256]);
-void asm_screen_set_falcon_palette(const uint32_t pPalette[256]);
-
-void asm_screen_set_vram(const void* pScreen);
-void asm_screen_set_scp_res(const void* pScp);
+void c2p1x1_8_falcon(const char* pChunky, const char* pChunkyEnd, char* pScreen);
 
 }
 

@@ -29,7 +29,7 @@
 
 class AtariGraphicsManager : public GraphicsManager {
 public:
-	virtual ~AtariGraphicsManager() {}
+	virtual ~AtariGraphicsManager();
 
 	bool hasFeature(OSystem::Feature f) const override { return false; }
 	void setFeatureState(OSystem::Feature f, bool enable) override {}
@@ -105,6 +105,7 @@ private:
 	Common::Rect _cursorRect;
 	Common::Rect _oldCursorRect;
 
+	uint _palette[256] = {};
 };
 
 #endif

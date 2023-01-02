@@ -421,6 +421,8 @@ backends/fs/windows/windows-fs.cpp
 backends/fs/windows/windows-fs.h
 backends/graphics/android/android-graphics.cpp
 backends/graphics/android/android-graphics.h
+backends/graphics/atari/atari_c2p-asm.h
+backends/graphics/atari/atari_c2p-asm.S
 backends/graphics/atari/atari-graphics.cpp
 backends/graphics/atari/atari-graphics.h
 backends/graphics/atari/atari-graphics-asm.h

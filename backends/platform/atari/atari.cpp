@@ -315,7 +315,6 @@ Common::HardwareInputSet *OSystem_Atari::getHardwareInputSet()
 	Common::CompositeHardwareInputSet *inputSet = new Common::CompositeHardwareInputSet();
 	inputSet->addHardwareInputSet(new Common::MouseHardwareInputSet(Common::defaultMouseButtons));
 	inputSet->addHardwareInputSet(new Common::KeyboardHardwareInputSet(Common::defaultKeys, Common::defaultModifiers));
-	//inputSet->addHardwareInputSet(new Common::JoystickHardwareInputSet(Common::defaultJoystickButtons, Common::defaultJoystickAxes));
 
 	return inputSet;
 }

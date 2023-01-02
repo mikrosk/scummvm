@@ -21,9 +21,12 @@
 
 #include "backends/graphics/atari/atari-graphics.h"
 
-#include <mint/falcon.h>
 #include <mint/osbind.h>
 
+#include "backends/graphics/atari/320x240x8_vga.h"
+#include "backends/graphics/atari/320x240x16_vga.h"
+#include "backends/graphics/atari/atari_c2p-asm.h"
+#include "backends/graphics/atari/atari-graphics-asm.h"
 #include "common/str.h"
 
 // max(screen, overlay)
@@ -32,6 +35,14 @@
 #define SCREEN_DEPTH	2
 
 #define SCREEN_ACTIVE
+
+AtariGraphicsManager::~AtariGraphicsManager() {
+	Mfree(_chunkyBuffer);
+	_chunkyBuffer = nullptr;
+
+	Mfree(_screen);
+	_screen = nullptr;
+}
 
 bool AtariGraphicsManager::setGraphicsMode(int mode, uint flags) {
 	Common::String str = Common::String::format("setGraphicsMode: %d, %d\n", mode, flags);
@@ -63,8 +74,7 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 
 	if (_oldFormat != _format) {
 #ifdef SCREEN_ACTIVE
-		int16 old_mode = VsetMode(VM_INQUIRE);
-		VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
+		asm_screen_set_scp_res(scp_320x240x8_vga);
 #endif
 		_oldFormat = _format;
 	}
@@ -76,7 +86,6 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 		if (_screen == nullptr) {
 			// no need to realloc each time
 
-			// TODO: Mfree() in the destructor
 			_chunkyBuffer = (byte*)Mxalloc(SCREEN_WIDTH * SCREEN_HEIGHT + 15, MX_PREFTTRAM);
 			if (!_chunkyBuffer)
 				return OSystem::TransactionError::kTransactionSizeChangeFailed;
@@ -86,7 +95,6 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 
 			_chunkySurface.init(_width, _height, _width, chunkyBufferAligned, _format);
 
-			// TODO: Mfree() in the destructor
 			_screen = (byte*)Mxalloc(SCREEN_WIDTH * SCREEN_HEIGHT * SCREEN_DEPTH + 15, MX_STRAM);
 			if (!_screen)
 				return OSystem::TransactionError::kTransactionSizeChangeFailed;
@@ -96,7 +104,7 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 
 			_screenSurface8.init(_width, _height, _width * _format.bytesPerPixel, screenAligned, _format);
 #ifdef SCREEN_ACTIVE
-			VsetScreen(SCR_NOCHANGE, _screenSurface8.getPixels(), SCR_NOCHANGE, SCR_NOCHANGE);
+			asm_screen_set_vram(_screenSurface8.getPixels());
 #endif
 			_overlaySurface.create(getOverlayWidth(), getOverlayHeight(), getOverlayFormat());
 			_screenSurface16.init(_overlaySurface.w, _overlaySurface.h, _overlaySurface.pitch, screenAligned, _overlaySurface.format);
@@ -110,18 +118,38 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 }
 
 void AtariGraphicsManager::setPalette(const byte *colors, uint start, uint num) {
-	Common::String str = Common::String::format("setPalette: %d, %d\n", start, num);
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	//Common::String str = Common::String::format("setPalette: %d, %d\n", start, num);
+	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	uint *pal = &_palette[start];
+
+	for (uint i = 0; i < num; ++i) {
+		// RRRRRRRR GGGGGGGG BBBBBBBB -> RRRRRRrr GGGGGGgg 00000000 BBBBBBbb
+		pal[i] = (colors[i * 3 + 0] << 24) | (colors[i * 3 + 1] << 16) | colors[i * 3 + 2];
+	}
+
+#ifdef SCREEN_ACTIVE
+	asm_screen_set_falcon_palette(_palette);
+#endif
 }
 
 void AtariGraphicsManager::grabPalette(byte *colors, uint start, uint num) const {
-	Common::String str = Common::String::format("grabPalette: %d, %d\n", start, num);
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	//Common::String str = Common::String::format("grabPalette: %d, %d\n", start, num);
+	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	const uint *pal = &_palette[start];
+
+	for (uint i = 0; i < num; ++i) {
+		// RRRRRRrr GGGGGGgg 00000000 BBBBBBbb -> RRRRRRRR GGGGGGGG BBBBBBBB
+		colors[i * 3 + 0] = pal[i] >> 24;
+		colors[i * 3 + 1] = pal[i] >> 16;
+		colors[i * 3 + 2] = pal[i];
+	}
 }
 
 void AtariGraphicsManager::copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h) {
-	Common::String str = Common::String::format("copyRectToScreen: %d, %d, %d, %d, %d\n", pitch, x, y, w, h);
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	//Common::String str = Common::String::format("copyRectToScreen: %d, %d, %d, %d, %d\n", pitch, x, y, w, h);
+	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	_chunkySurface.copyRectToSurface(buf, pitch, x, y, w, h);
 
@@ -149,15 +177,18 @@ void AtariGraphicsManager::fillScreen(uint32 col) {
 
 void AtariGraphicsManager::updateScreen() {
 	if (_screenModified) {
-		Common::String str = Common::String::format("updateScreen\n");
-		g_system->logMessage(LogMessageType::kDebug, str.c_str());
+		//Common::String str = Common::String::format("updateScreen\n");
+		//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 		// TODO: maybe remember updated rects from copyRectToScreen / copyRectToOverlay?
 		if (isOverlayVisible()) {
 			//_screenSurface16.copyRectToSurface(_overlaySurface, 0, 0, Common::rect(_overlaySurface.w, _overlaySurface.h));
 			memcpy(_screenSurface16.getPixels(), _overlaySurface.getPixels(), _overlaySurface.pitch * _overlaySurface.h);
 		} else {
-			// TODO: c2p
+			c2p1x1_8_falcon(
+				(char*)_chunkySurface.getPixels(),
+				(char*)_chunkySurface.getPixels() + _chunkySurface.pitch * _chunkySurface.h,
+				(char*)_screenSurface8.getPixels() + _screenSurface8.pitch * ((SCREEN_HEIGHT - _chunkySurface.h) / 2));
 		}
 
 		_screenModified = false;
@@ -203,8 +234,7 @@ void AtariGraphicsManager::showOverlay() {
 		return;
 
 #ifdef SCREEN_ACTIVE
-	int16 old_mode = VsetMode(VM_INQUIRE);
-	VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS16);
+	asm_screen_set_scp_res(scp_320x240x16_vga);
 #endif
 	_overlayVisible = true;
 }
@@ -217,8 +247,8 @@ void AtariGraphicsManager::hideOverlay() {
 		return;
 
 #ifdef SCREEN_ACTIVE
-	int16 old_mode = VsetMode(VM_INQUIRE);
-	VsetMode(VERTFLAG | (old_mode&PAL) | (old_mode&VGA) | COL40 | BPS8);
+	memset(_screenSurface16.getPixels(), 0, _screenSurface16.pitch * _screenSurface16.h);
+	asm_screen_set_scp_res(scp_320x240x8_vga);
 #endif
 	_overlayVisible = false;
 }
@@ -237,8 +267,8 @@ void AtariGraphicsManager::grabOverlay(Graphics::Surface &surface) const {
 }
 
 void AtariGraphicsManager::copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) {
-	Common::String str = Common::String::format("copyRectToOverlay: %d, %d, %d, %d, %d\n", pitch, x, y, w, h);
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	//Common::String str = Common::String::format("copyRectToOverlay: %d, %d, %d, %d, %d\n", pitch, x, y, w, h);
+	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	_overlaySurface.copyRectToSurface(buf, pitch, x, y, w, h);
 
@@ -254,8 +284,8 @@ int16 AtariGraphicsManager::getOverlayWidth() const {
 }
 
 bool AtariGraphicsManager::showMouse(bool visible) {
-	Common::String str = Common::String::format("showMouse: %d\n", visible);
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	//Common::String str = Common::String::format("showMouse: %d\n", visible);
+	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	if (_mouseVisible == visible) {
 		return visible;
