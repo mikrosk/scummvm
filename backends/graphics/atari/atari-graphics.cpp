@@ -284,7 +284,11 @@ void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int h
 	if (format != nullptr && *format != _format)
 		return;
 
-	if (w == 0 || h == 0) {
+	if (w == 0 || h == 0 || buf == nullptr) {
+		_cursorWidth = _cursorHeight = 0;
+		_cursorHotspotX = _cursorHotspotY = 0;
+		_cursorKeycolor = 0;
+
 		_cursorSurface.free();
 		return;
 	}
