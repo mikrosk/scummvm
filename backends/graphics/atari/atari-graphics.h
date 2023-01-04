@@ -72,9 +72,12 @@ public:
 	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale = false, const Graphics::PixelFormat *format = NULL) override;
 	void setCursorPalette(const byte *colors, uint start, uint num) override {}
 
+	bool isMouseOutOfScreen() const { return _mouseOutOfScreen; }
+
 private:
 	void updateCursorRect();
-	void updateOverlayCursor();
+	void prepareCursorSurface8();
+	void copyCursorSurface16(int screenCorrection);
 
 	uint _width = 0, _height = 0;
 	Graphics::PixelFormat _format = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -94,14 +97,16 @@ private:
 	Graphics::Surface _overlaySurface;
 
 	bool _mouseVisible = false;
+	bool _mouseOutOfScreen = false;
 	int _mouseX = -1, _mouseY = -1;
 
-	uint _cursorWidth = 0, _cursorHeight = 0;
-	int _cursorHotspotX = 0, _cursorHotspotY = 0;
-	uint32 _cursorKeycolor = 0;
+	bool _cursorModified = false;
 	Graphics::Surface _cursorSurface;
 	Graphics::Surface _clippedCursorSurface;
-
+	Graphics::Surface _cursorSurface8;
+	int _cursorHotspotX;
+	int _cursorHotspotY;
+	uint32 _cursorKeycolor;
 	Common::Rect _cursorRect;
 	Common::Rect _oldCursorRect;
 

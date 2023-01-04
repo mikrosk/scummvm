@@ -22,9 +22,11 @@
 #ifndef BACKENDS_GRAPHICS_ATARI_C2P_ASM_H
 #define BACKENDS_GRAPHICS_ATARI_C2P_ASM_H
 
+#include <stdint.h>
+
 extern "C" {
 
-void c2p1x1_8_falcon(const char* pChunky, const char* pChunkyEnd, char* pScreen);
+void c2p1x1_8_falcon(const char* pChunky, const char* pChunkyEnd, uint32_t chunkyWidth, uint32_t chunkyPitch, char* pScreen, uint32_t screenPitch);
 
 }
 

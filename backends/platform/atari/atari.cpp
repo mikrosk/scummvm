@@ -81,6 +81,8 @@ public:
 	void addSysArchivesToSearchSet(Common::SearchSet &s, int priority) override;
 
 private:
+	AtariGraphicsManager *_atariGraphicsManager;
+
 	clock_t _startTime;
 
 	bool _video_initialized = false;
@@ -305,7 +307,8 @@ void OSystem_Atari::initBackend() {
 	_timerManager = new DefaultTimerManager();
 	_eventManager = new DefaultEventManager(this);
 	_savefileManager = new DefaultSaveFileManager();
-	_graphicsManager = new AtariGraphicsManager();
+	_atariGraphicsManager = new AtariGraphicsManager();
+	_graphicsManager = _atariGraphicsManager;
 	_mixerManager = new NullMixerManager();
 	// Setup and start mixer
 	_mixerManager->init();
@@ -340,10 +343,30 @@ volatile uint16	g_atari_ikbb_scancodes_head = 0;
 static uint16	g_atari_ikbb_scancodes_tail = 0;
 
 bool OSystem_Atari::pollEvent(Common::Event &event) {
+	static uint32 oldMillis = getMillis();
+	uint32 curMillis = getMillis();
+
+	uint32 diff = curMillis - oldMillis;
+	oldMillis = curMillis;
+
+	static int counter;
+	static uint32 diffAvg;
+
+	if (counter == 60) {
+		Common::String str = Common::String::format("avg ms per frame: %d\n", diffAvg / 60);
+		g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+		counter = 0;
+		diffAvg = 0;
+	} else {
+		counter++;
+		diffAvg += diff;
+	}
+
 	((DefaultTimerManager *)getTimerManager())->checkTimers();
 	((NullMixerManager *)_mixerManager)->update(1);
 
-	if (_mouseX == -1 || _mouseY == -1) {
+	if (_mouseX == -1 || _mouseY == -1 || _atariGraphicsManager->isMouseOutOfScreen()) {
 		if (isOverlayVisible()) {
 			_mouseX = getOverlayWidth() / 2;
 			_mouseY = getOverlayHeight() / 2;
@@ -352,7 +375,8 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 			_mouseY = getHeight() / 2;
 		}
 
-		warpMouse(_mouseX, _mouseY);
+		// can't use this->warpMouse()
+		_atariGraphicsManager->warpMouse(_mouseX, _mouseY);
 	}
 
 	if ((g_atari_ikbd_mouse_buttons_state & 0x01) && !_oldRmbDown) {
