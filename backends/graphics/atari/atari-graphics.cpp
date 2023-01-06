@@ -223,7 +223,7 @@ void AtariGraphicsManager::updateScreen() {
 	if (_mouseOutOfScreen)
 		return;
 
-	if (_mouseVisible /*&& _cursorModified*/ && !isOverlayVisible()) {
+	if (_mouseVisible && !_cursorRect.isEmpty() /*&& _cursorModified*/ && !isOverlayVisible()) {
 		// updates _cursorRect
 		prepareCursorSurface8();
 	}
@@ -252,7 +252,7 @@ void AtariGraphicsManager::updateScreen() {
 
 	// TODO: we can't use _cursorModified yet because we'd need to detect whether
 	//       the cursor shouldn't be updated if rect underneath has changed.
-	if (_mouseVisible /*&& _cursorModified*/) {
+	if (_mouseVisible && !_cursorRect.isEmpty() /*&& _cursorModified*/) {
 		if (isOverlayVisible()) {
 			copyCursorSurface16(screenCorrection);
 		} else {
@@ -280,7 +280,9 @@ void AtariGraphicsManager::showOverlay() {
 	asm_screen_set_scp_res(scp_320x240x16_vga);
 #endif
 
+	_oldCursorRect = Common::Rect();
 	_modifiedChunkyRects.clear();
+	handleModifiedRect(Common::Rect(_overlaySurface.w, _overlaySurface.h), _modifiedOverlayRects, _overlaySurface);
 
 	_overlayVisible = true;
 }
@@ -297,7 +299,9 @@ void AtariGraphicsManager::hideOverlay() {
 	asm_screen_set_scp_res(scp_320x240x8_vga);
 #endif
 
+	_oldCursorRect = Common::Rect();
 	_modifiedOverlayRects.clear();
+	handleModifiedRect(Common::Rect(_chunkySurface.w, _chunkySurface.h), _modifiedChunkyRects, _chunkySurface);
 
 	_overlayVisible = false;
 }
@@ -305,6 +309,8 @@ void AtariGraphicsManager::hideOverlay() {
 void AtariGraphicsManager::clearOverlay() {
 	Common::String str = Common::String::format("clearOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	memset(_overlaySurface.getPixels(), 0, _overlaySurface.pitch * _overlaySurface.h);
 }
 
 void AtariGraphicsManager::grabOverlay(Graphics::Surface &surface) const {

@@ -219,12 +219,15 @@ c2p1x1_8_falcon_start:
 	cmp.l	a0,a2					| end of src line?
 	bne	c2p1x1_8_falcon_pix16
 
+	cmp.l	chunky_end,a2
+	beq	c2p1x1_8_falcon_done
+
 	add.l	(chunky_offset,pc),a0
 	add.l	(chunky_pitch,pc),a2
 
-	cmp.l	chunky_end,a2
-	bne	c2p1x1_8_falcon_pix16
+	bra	c2p1x1_8_falcon_pix16
 
+c2p1x1_8_falcon_done:
 	move.l	a3,(a1)+
 	move.l	a4,(a1)+
 	move.l	a5,(a1)+
