@@ -27,6 +27,7 @@
 #include "backends/graphics/atari/320x240x16_vga.h"
 #include "backends/graphics/atari/atari_c2p-asm.h"
 #include "backends/graphics/atari/atari-graphics-asm.h"
+#include "common/foreach.h"
 #include "common/str.h"
 
 // max(screen, overlay)
@@ -153,7 +154,7 @@ void AtariGraphicsManager::copyRectToScreen(const void *buf, int pitch, int x, i
 
 	_chunkySurface.copyRectToSurface(buf, pitch, x, y, w, h);
 
-	_screenModified = true;
+	handleModifiedRect(Common::Rect(x, y, x + w, y + h), _modifiedChunkyRects, _chunkySurface);
 }
 
 Graphics::Surface *AtariGraphicsManager::lockScreen() {
@@ -167,41 +168,48 @@ void AtariGraphicsManager::fillScreen(uint32 col) {
 	Common::String str = Common::String::format("fillScreen: %d\n", col);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
-	Graphics::Surface *screen = lockScreen();
-	if (screen)
-		screen->fillRect(Common::Rect(_width, _height), col);
-	unlockScreen();
+	const Common::Rect rect = Common::Rect(_width, _height);
 
-	_screenModified = true;
+	_chunkySurface.fillRect(rect, col);
+
+	handleModifiedRect(rect, _modifiedChunkyRects, _chunkySurface);
 }
 
 // TODO: double buffering & avoid _overlaySurface / _chunkyBufferSurface
 //       when in a native format (16bpp, SuperVidel+8bpp). This requires
-//       special cursor handling as we'd need to store the rect underneath it.
+//       special cursor handling as we'd need to store the rect underneath it (or better, use a mask).
 void AtariGraphicsManager::updateScreen() {
+	//Common::String str = Common::String::format("updateScreen\n");
+	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
 	const int screenCorrection = isOverlayVisible()
 		? (SCREEN_HEIGHT - _overlaySurface.h) / 2
 		: (SCREEN_HEIGHT - _chunkySurface.h) / 2;
 
-	if (_screenModified) {
-		// TODO: maybe remember updated rects from copyRectToScreen / copyRectToOverlay?
-		if (isOverlayVisible()) {
-			//_screenSurface16.copyRectToSurface(_overlaySurface, 0, screenCorrection, Common::rect(_overlaySurface.w, _overlaySurface.h));
-			memcpy(
-				(byte*)_screenSurface16.getBasePtr(0, screenCorrection),
-				_overlaySurface.getPixels(),
-				_overlaySurface.pitch * _overlaySurface.h);
-		} else {
-			c2p1x1_8_falcon(
-				(char*)_chunkySurface.getPixels(),
-				(char*)_chunkySurface.getBasePtr(0, _chunkySurface.h),
-				_chunkySurface.w,
-				_chunkySurface.pitch,
-				(char*)_screenSurface8.getBasePtr(0, screenCorrection),
-				_screenSurface8.pitch);
-		}
+	while (!_modifiedOverlayRects.empty()) {
+		const Common::Rect &rect = _modifiedOverlayRects.back();
 
-		_screenModified = false;
+		_screenSurface16.copyRectToSurface(
+			_overlaySurface.getBasePtr(rect.left, rect.top),
+			_overlaySurface.pitch,
+			rect.left, rect.top + screenCorrection,
+			rect.width(), rect.height());
+
+		_modifiedOverlayRects.pop_back();
+	}
+
+	while (!_modifiedChunkyRects.empty()) {
+		const Common::Rect &rect = _modifiedChunkyRects.back();
+
+		c2p1x1_8_falcon(
+			(char*)_chunkySurface.getBasePtr(rect.left, rect.top),
+			(char*)_chunkySurface.getBasePtr(rect.right, rect.bottom),
+			rect.width(),
+			_chunkySurface.pitch,
+			(char*)_screenSurface8.getBasePtr(rect.left, rect.top + screenCorrection),
+			_screenSurface8.pitch);
+
+		_modifiedChunkyRects.pop_back();
 	}
 
 	if (_mouseVisible) {
@@ -271,6 +279,9 @@ void AtariGraphicsManager::showOverlay() {
 #ifdef SCREEN_ACTIVE
 	asm_screen_set_scp_res(scp_320x240x16_vga);
 #endif
+
+	_modifiedChunkyRects.clear();
+
 	_overlayVisible = true;
 }
 
@@ -285,6 +296,9 @@ void AtariGraphicsManager::hideOverlay() {
 	memset(_screenSurface16.getPixels(), 0, _screenSurface16.pitch * _screenSurface16.h);
 	asm_screen_set_scp_res(scp_320x240x8_vga);
 #endif
+
+	_modifiedOverlayRects.clear();
+
 	_overlayVisible = false;
 }
 
@@ -307,7 +321,7 @@ void AtariGraphicsManager::copyRectToOverlay(const void *buf, int pitch, int x, 
 
 	_overlaySurface.copyRectToSurface(buf, pitch, x, y, w, h);
 
-	_screenModified = true;
+	handleModifiedRect(Common::Rect(x, y, x + w, y + h), _modifiedOverlayRects, _overlaySurface);
 }
 
 int16 AtariGraphicsManager::getOverlayHeight() const {
@@ -364,6 +378,31 @@ void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int h
 	_cursorKeycolor = keycolor;
 
 	_cursorModified = true;
+}
+
+void AtariGraphicsManager::handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface)
+{
+	// align on 16px
+	rect.left &= 0xfff0;
+	rect.right = (rect.right + 15) & 0xfff0;
+	if (rect.right > surface.w)
+		rect.right = surface.w;
+
+	if (rect.width() == surface.w && rect.height() == surface.h) {
+		Common::String str = Common::String::format("handleModifiedRect: purge\n");
+		g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+		rects.clear();
+		rects.push_back(rect);
+		return;
+	}
+
+	for (const Common::Rect &r : rects) {
+		if (r.contains(rect))
+			return;
+	}
+
+	rects.push_back(rect);
 }
 
 void AtariGraphicsManager::updateCursorRect() {

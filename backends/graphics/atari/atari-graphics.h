@@ -24,6 +24,7 @@
 
 #include "backends/graphics/graphics.h"
 
+#include "common/array.h"
 #include "common/rect.h"
 #include "graphics/surface.h"
 
@@ -75,6 +76,8 @@ public:
 	bool isMouseOutOfScreen() const { return _mouseOutOfScreen; }
 
 private:
+	static void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
+
 	void updateCursorRect();
 	void prepareCursorSurface8();
 	void copyCursorSurface16(int screenCorrection);
@@ -85,16 +88,17 @@ private:
 	uint _oldWidth = 0, _oldHeight = 0;
 	Graphics::PixelFormat _oldFormat = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	bool _screenModified = false;
 	byte *_screen = nullptr;
 	Graphics::Surface _screenSurface8;
 	Graphics::Surface _screenSurface16;
 
 	byte *_chunkyBuffer = nullptr;
 	Graphics::Surface _chunkySurface;
+	Common::Array<Common::Rect> _modifiedChunkyRects;
 
 	bool _overlayVisible;
 	Graphics::Surface _overlaySurface;
+	Common::Array<Common::Rect> _modifiedOverlayRects;
 
 	bool _mouseVisible = false;
 	bool _mouseOutOfScreen = false;
