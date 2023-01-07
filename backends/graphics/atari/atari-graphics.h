@@ -80,15 +80,14 @@ private:
 
 	void updateCursorRect();
 	void prepareCursorSurface8();
-	void copyCursorSurface16(int screenCorrection);
+	void copyCursorSurface16();
 
 	uint _width = 0, _height = 0;
 	Graphics::PixelFormat _format = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
-
 	uint _oldWidth = 0, _oldHeight = 0;
-	Graphics::PixelFormat _oldFormat = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	byte *_screen = nullptr;
+	int _screenCorrection = 0;
 	Graphics::Surface _screenSurface8;
 	Graphics::Surface _screenSurface16;
 

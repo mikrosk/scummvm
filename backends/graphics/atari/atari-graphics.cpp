@@ -25,15 +25,18 @@
 
 #include "backends/graphics/atari/320x240x8_vga.h"
 #include "backends/graphics/atari/320x240x16_vga.h"
+#include "backends/graphics/atari/640x480x8_vga.h"
 #include "backends/graphics/atari/atari_c2p-asm.h"
 #include "backends/graphics/atari/atari-graphics-asm.h"
 #include "common/foreach.h"
 #include "common/str.h"
 
-// max(screen, overlay)
-#define SCREEN_WIDTH	320
-#define SCREEN_HEIGHT	240
-#define SCREEN_DEPTH	2
+#define OVERLAY_WIDTH	320
+#define OVERLAY_HEIGHT	240
+
+// maximum screen dimensions
+#define SCREEN_WIDTH	640
+#define SCREEN_HEIGHT	480
 
 #define SCREEN_ACTIVE
 
@@ -53,7 +56,7 @@ bool AtariGraphicsManager::setGraphicsMode(int mode, uint flags) {
 }
 
 void AtariGraphicsManager::initSize(uint width, uint height, const Graphics::PixelFormat *format) {
-	Common::String str = Common::String::format("initSize: %d, %d\n", width, height);
+	Common::String str = Common::String::format("initSize: %d, %d, %d\n", width, height, format ? format->bytesPerPixel : 1);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	_width = width;
@@ -73,14 +76,8 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 	if (_format != Graphics::PixelFormat::createFormatCLUT8())
 		return OSystem::TransactionError::kTransactionFormatNotSupported;
 
-	if (_oldFormat != _format) {
-#ifdef SCREEN_ACTIVE
-		asm_screen_set_scp_res(scp_320x240x8_vga);
-#endif
-		_oldFormat = _format;
-	}
-
-	if (_width > SCREEN_WIDTH || _height > SCREEN_HEIGHT)
+	if ((_width != 320 || (_height != 200 && _height != 240))
+		&& (_width != 640 || (_height != 400 && _height != 480)))
 		return OSystem::TransactionError::kTransactionSizeChangeFailed;
 
 	if (_oldWidth != _width || _oldHeight != _height) {
@@ -96,20 +93,36 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 
 			_chunkySurface.init(_width, _height, _width, chunkyBufferAligned, _format);
 
-			_screen = (byte*)Mxalloc(SCREEN_WIDTH * SCREEN_HEIGHT * SCREEN_DEPTH + 15, MX_STRAM);
+			_screen = (byte*)Mxalloc(SCREEN_WIDTH * SCREEN_HEIGHT + 15, MX_STRAM);
 			if (!_screen)
 				return OSystem::TransactionError::kTransactionSizeChangeFailed;
 
 			byte* screenAligned = (byte*)(((unsigned long)_screen + 15) & 0xfffffff0);
-			memset(screenAligned, 0, SCREEN_WIDTH * SCREEN_HEIGHT * SCREEN_DEPTH);
+			memset(screenAligned, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 
 			_screenSurface8.init(_width, _height, _width * _format.bytesPerPixel, screenAligned, _format);
-#ifdef SCREEN_ACTIVE
-			asm_screen_set_vram(_screenSurface8.getPixels());
-#endif
+
 			_overlaySurface.create(getOverlayWidth(), getOverlayHeight(), getOverlayFormat());
 			_screenSurface16.init(_overlaySurface.w, _overlaySurface.h, _overlaySurface.pitch, screenAligned, _overlaySurface.format);
+		} else {
+			_chunkySurface.init(_width, _height, _width, _chunkySurface.getPixels(), _format);
+			_screenSurface8.init(_width, _height, _width, _screenSurface8.getPixels(), _format);
 		}
+
+#ifdef SCREEN_ACTIVE
+		if (_width == 320)
+			asm_screen_set_scp_res(scp_320x240x8_vga);
+		else
+			asm_screen_set_scp_res(scp_640x480x8_vga);
+
+		asm_screen_set_vram(_screenSurface8.getPixels());
+#endif
+		if (_height == 200)
+			_screenCorrection = (240 - _height) / 2;
+		else if (_height == 400)
+			_screenCorrection = (480 - _height) / 2;
+		else
+			_screenCorrection = 0;
 
 		_oldWidth = _width;
 		_oldHeight = _height;
@@ -158,17 +171,17 @@ void AtariGraphicsManager::copyRectToScreen(const void *buf, int pitch, int x, i
 }
 
 Graphics::Surface *AtariGraphicsManager::lockScreen() {
-	Common::String str = Common::String::format("lockScreen\n");
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	//Common::String str = Common::String::format("lockScreen\n");
+	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	return &_chunkySurface;
 }
 
 void AtariGraphicsManager::fillScreen(uint32 col) {
-	Common::String str = Common::String::format("fillScreen: %d\n", col);
-	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+	{Common::String str = Common::String::format("fillScreen: %d\n", col);
+	g_system->logMessage(LogMessageType::kDebug, str.c_str());}
 
-	const Common::Rect rect = Common::Rect(_width, _height);
+	const Common::Rect rect = Common::Rect(_chunkySurface.w, _chunkySurface.h);
 
 	_chunkySurface.fillRect(rect, col);
 
@@ -193,10 +206,6 @@ void AtariGraphicsManager::updateScreen() {
 
 	const bool updateCursor = !_mouseOutOfScreen && _mouseVisible && !_cursorRect.isEmpty();
 
-	const int screenCorrection = isOverlayVisible()
-		? (SCREEN_HEIGHT - _overlaySurface.h) / 2
-		: (SCREEN_HEIGHT - _chunkySurface.h) / 2;
-
 	while (!_modifiedOverlayRects.empty()) {
 		const Common::Rect &rect = _modifiedOverlayRects.back();
 
@@ -206,7 +215,7 @@ void AtariGraphicsManager::updateScreen() {
 		_screenSurface16.copyRectToSurface(
 			_overlaySurface.getBasePtr(rect.left, rect.top),
 			_overlaySurface.pitch,
-			rect.left, rect.top + screenCorrection,
+			rect.left, rect.top,
 			rect.width(), rect.height());
 
 		_modifiedOverlayRects.pop_back();
@@ -223,7 +232,7 @@ void AtariGraphicsManager::updateScreen() {
 			(char*)_chunkySurface.getBasePtr(rect.right, rect.bottom),
 			rect.width(),
 			_chunkySurface.pitch,
-			(char*)_screenSurface8.getBasePtr(rect.left, rect.top + screenCorrection),
+			(char*)_screenSurface8.getBasePtr(rect.left, rect.top + _screenCorrection),
 			_screenSurface8.pitch);
 
 		_modifiedChunkyRects.pop_back();
@@ -238,7 +247,7 @@ void AtariGraphicsManager::updateScreen() {
 				_screenSurface16.copyRectToSurface(
 					_overlaySurface.getBasePtr(_oldCursorRect.left, _oldCursorRect.top),
 					_overlaySurface.pitch,
-					_oldCursorRect.left, _oldCursorRect.top + screenCorrection,
+					_oldCursorRect.left, _oldCursorRect.top,
 					_oldCursorRect.width(), _oldCursorRect.height());
 			} else {
 				c2p1x1_8_falcon(
@@ -246,7 +255,7 @@ void AtariGraphicsManager::updateScreen() {
 					(char*)_chunkySurface.getBasePtr(_oldCursorRect.right, _oldCursorRect.bottom),
 					_oldCursorRect.width(),
 					_chunkySurface.w,
-					(char*)_screenSurface8.getBasePtr(_oldCursorRect.left, _oldCursorRect.top + screenCorrection),
+					(char*)_screenSurface8.getBasePtr(_oldCursorRect.left, _oldCursorRect.top + _screenCorrection),
 					_screenSurface8.pitch);
 			}
 		}
@@ -260,14 +269,14 @@ void AtariGraphicsManager::updateScreen() {
 		//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 		if (isOverlayVisible()) {
-			copyCursorSurface16(screenCorrection);
+			copyCursorSurface16();
 		} else {
 			c2p1x1_8_falcon(
 				(char*)_cursorSurface8.getPixels(),
 				(char*)_cursorSurface8.getBasePtr(0, _cursorSurface8.h),
 				_cursorSurface8.w,
 				_cursorSurface8.pitch,
-				(char*)_screenSurface8.getBasePtr(_cursorRect.left, _cursorRect.top + screenCorrection),
+				(char*)_screenSurface8.getBasePtr(_cursorRect.left, _cursorRect.top + _screenCorrection),
 				_screenSurface8.pitch);
 		}
 
@@ -302,7 +311,11 @@ void AtariGraphicsManager::hideOverlay() {
 
 #ifdef SCREEN_ACTIVE
 	memset(_screenSurface16.getPixels(), 0, _screenSurface16.pitch * _screenSurface16.h);
-	asm_screen_set_scp_res(scp_320x240x8_vga);
+
+	if (_width == 320)
+		asm_screen_set_scp_res(scp_320x240x8_vga);
+	else
+		asm_screen_set_scp_res(scp_640x480x8_vga);
 #endif
 
 	_oldCursorRect = Common::Rect();
@@ -337,11 +350,11 @@ void AtariGraphicsManager::copyRectToOverlay(const void *buf, int pitch, int x, 
 }
 
 int16 AtariGraphicsManager::getOverlayHeight() const {
-	return SCREEN_HEIGHT;
+	return OVERLAY_HEIGHT;
 }
 
 int16 AtariGraphicsManager::getOverlayWidth() const {
-	return SCREEN_WIDTH;
+	return OVERLAY_WIDTH;
 }
 
 bool AtariGraphicsManager::showMouse(bool visible) {
@@ -486,7 +499,7 @@ void AtariGraphicsManager::prepareCursorSurface8() {
 	_cursorRect = backgroundCursorRect;
 }
 
-void AtariGraphicsManager::copyCursorSurface16(int screenCorrection) {
+void AtariGraphicsManager::copyCursorSurface16() {
 	static byte palette[256*3] = {};
 	{
 		// TODO: system palette?
@@ -505,7 +518,7 @@ void AtariGraphicsManager::copyCursorSurface16(int screenCorrection) {
 	if (_cursorSurface.format == _screenSurface16.format) {
 		_screenSurface16.copyRectToSurfaceWithKey(
 			_clippedCursorSurface,
-			_cursorRect.left, _cursorRect.top + screenCorrection,
+			_cursorRect.left, _cursorRect.top,
 			_cursorRect,
 			_cursorKeycolor);
 	} else {
@@ -515,7 +528,7 @@ void AtariGraphicsManager::copyCursorSurface16(int screenCorrection) {
 		const Graphics::PixelFormat dstFormat = _screenSurface16.format;
 
 		const byte *srcRow = (const byte *)_clippedCursorSurface.getPixels();
-		uint16 *dstRow = (uint16 *)_screenSurface16.getBasePtr(_cursorRect.left, _cursorRect.top + screenCorrection);
+		uint16 *dstRow = (uint16 *)_screenSurface16.getBasePtr(_cursorRect.left, _cursorRect.top);
 
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
