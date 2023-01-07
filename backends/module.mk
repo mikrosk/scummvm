@@ -308,7 +308,7 @@ MODULE_OBJS += \
 	graphics/atari/atari_c2p-asm.o \
 	graphics/atari/atari-graphics.o \
 	graphics/atari/atari-graphics-asm.o \
-	mixer/null/null-mixer.o
+	mixer/atari/atari-mixer.o
 endif
 
 ifeq ($(BACKEND),ds)

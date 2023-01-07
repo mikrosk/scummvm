@@ -48,7 +48,7 @@
 #include "backends/saves/default/default-saves.h"
 #include "backends/timer/default/default-timer.h"
 #include "backends/events/default/default-events.h"
-#include "backends/mixer/null/null-mixer.h"
+#include "backends/mixer/atari/atari-mixer.h"
 #include "backends/graphics/atari/atari-graphics.h"
 #include "common/hashmap.h"
 #include "gui/debugger.h"
@@ -302,6 +302,8 @@ void OSystem_Atari::initBackend() {
 		quit();
 	}
 
+	nf_init();
+
 	_startTime = clock();
 
 	_timerManager = new DefaultTimerManager();
@@ -309,17 +311,17 @@ void OSystem_Atari::initBackend() {
 	_savefileManager = new DefaultSaveFileManager();
 	_atariGraphicsManager = new AtariGraphicsManager();
 	_graphicsManager = _atariGraphicsManager;
-	_mixerManager = new NullMixerManager();
+	_mixerManager = new AtariMixerManager();
 	// Setup and start mixer
 	_mixerManager->init();
-
-	nf_init();
 
 	_KEYTAB *pKeyTables = (_KEYTAB*)Keytbl(KT_NOCHANGE, KT_NOCHANGE, KT_NOCHANGE);
 
 	memcpy(_unshiftToAscii, pKeyTables->unshift, 128);
 	memcpy(_shiftToAscii, pKeyTables->shift, 128);
 	memcpy(_capsToAscii, pKeyTables->caps, 128);
+
+	// TODO: etv_term exit vector
 
 	Supexec(atari_ikbd_init);
 	_ikbd_initialized = true;
@@ -363,8 +365,8 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		diffAvg += diff;
 	}
 
-	((DefaultTimerManager *)getTimerManager())->checkTimers();
-	((NullMixerManager *)_mixerManager)->update(1);
+	((DefaultTimerManager *)_timerManager)->checkTimers();
+	((AtariMixerManager *)_mixerManager)->update();
 
 	if (_mouseX == -1 || _mouseY == -1 || _atariGraphicsManager->isMouseOutOfScreen()) {
 		if (isOverlayVisible()) {
@@ -375,7 +377,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 			_mouseY = getHeight() / 2;
 		}
 
-		// can't use this->warpMouse()
+		// TODO: can't use this->warpMouse()
 		_atariGraphicsManager->warpMouse(_mouseX, _mouseY);
 	}
 
@@ -541,16 +543,10 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 			break;
 		}
 
-		//uint16 xxx = '?';
 		if (ascii >= ' ' && ascii <= '~') {
 			if (keycode == Common::KEYCODE_INVALID)
 				keycode = _asciiToKeycode[ascii - ' '];
-			//xxx = ascii;
 		}
-
-		//Common::String str = Common::String::format("scancode: %01x, pressed: %d, keycode: %04x, ascii: %c (%04x)\n",
-		//											scancode, pressed, keycode, xxx, ascii);
-		//logMessage(LogMessageType::kDebug, str.c_str());
 
 		event.type = pressed ? Common::EVENT_KEYDOWN : Common::EVENT_KEYUP;
 		event.kbd = Common::KeyState(keycode, ascii);
