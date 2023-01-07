@@ -182,12 +182,26 @@ void AtariGraphicsManager::updateScreen() {
 	//Common::String str = Common::String::format("updateScreen\n");
 	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
+	// prepare _cursorRect first
+	if (_mouseVisible) {
+		updateCursorRect();
+	} else if (!_cursorRect.isEmpty()) {
+		// force cursor background restore
+		_oldCursorRect = _cursorRect;
+		_cursorRect = Common::Rect();
+	}
+
+	const bool updateCursor = !_mouseOutOfScreen && _mouseVisible && !_cursorRect.isEmpty();
+
 	const int screenCorrection = isOverlayVisible()
 		? (SCREEN_HEIGHT - _overlaySurface.h) / 2
 		: (SCREEN_HEIGHT - _chunkySurface.h) / 2;
 
 	while (!_modifiedOverlayRects.empty()) {
 		const Common::Rect &rect = _modifiedOverlayRects.back();
+
+		if (updateCursor)
+			_cursorModified |= rect.intersects(_cursorRect);
 
 		_screenSurface16.copyRectToSurface(
 			_overlaySurface.getBasePtr(rect.left, rect.top),
@@ -201,6 +215,9 @@ void AtariGraphicsManager::updateScreen() {
 	while (!_modifiedChunkyRects.empty()) {
 		const Common::Rect &rect = _modifiedChunkyRects.back();
 
+		if (updateCursor)
+			_cursorModified |= rect.intersects(_cursorRect);
+
 		c2p1x1_8_falcon(
 			(char*)_chunkySurface.getBasePtr(rect.left, rect.top),
 			(char*)_chunkySurface.getBasePtr(rect.right, rect.bottom),
@@ -212,21 +229,8 @@ void AtariGraphicsManager::updateScreen() {
 		_modifiedChunkyRects.pop_back();
 	}
 
-	if (_mouseVisible) {
-		updateCursorRect();
-	} else if (!_cursorRect.isEmpty()) {
-		// force cursor background restore
-		_oldCursorRect = _cursorRect;
-		_cursorRect = Common::Rect();
-	}
-
 	if (_mouseOutOfScreen)
 		return;
-
-	if (_mouseVisible && !_cursorRect.isEmpty() /*&& _cursorModified*/ && !isOverlayVisible()) {
-		// updates _cursorRect
-		prepareCursorSurface8();
-	}
 
 	if (_oldCursorRect != _cursorRect) {
 		if (!_oldCursorRect.isEmpty()) {
@@ -250,9 +254,11 @@ void AtariGraphicsManager::updateScreen() {
 		_oldCursorRect = _cursorRect;
 	}
 
-	// TODO: we can't use _cursorModified yet because we'd need to detect whether
-	//       the cursor shouldn't be updated if rect underneath has changed.
-	if (_mouseVisible && !_cursorRect.isEmpty() /*&& _cursorModified*/) {
+	if (updateCursor && _cursorModified) {
+		//Common::String str = Common::String::format("Redraw cursor: %d %d %d %d\n",
+		//											_cursorRect.left, _cursorRect.top, _cursorRect.width(), _cursorRect.height());
+		//g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
 		if (isOverlayVisible()) {
 			copyCursorSurface16(screenCorrection);
 		} else {
@@ -360,6 +366,8 @@ void AtariGraphicsManager::warpMouse(int x, int y) {
 
 	_mouseX = x;
 	_mouseY = y;
+
+	_cursorModified = true;
 }
 
 void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale, const Graphics::PixelFormat *format) {
@@ -413,6 +421,12 @@ void AtariGraphicsManager::handleModifiedRect(Common::Rect rect, Common::Array<C
 
 void AtariGraphicsManager::updateCursorRect() {
 	Common::Rect cursorSrcBounds(_cursorSurface.w, _cursorSurface.h);
+
+	if (cursorSrcBounds.isEmpty()) {
+		_cursorRect = Common::Rect();
+		return;
+	}
+
 	Common::Rect cursorDstBounds(
 		_mouseX - _cursorHotspotX,	// left
 		_mouseY - _cursorHotspotY,	// top
@@ -430,6 +444,9 @@ void AtariGraphicsManager::updateCursorRect() {
 	_clippedCursorSurface = _cursorSurface.getSubArea(cursorSrcBounds);
 
 	_cursorRect = cursorDstBounds;
+
+	if (!isOverlayVisible())
+		prepareCursorSurface8();
 }
 
 void AtariGraphicsManager::prepareCursorSurface8() {
