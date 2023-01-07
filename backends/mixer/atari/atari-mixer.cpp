@@ -25,9 +25,10 @@
 
 AtariMixerManager::AtariMixerManager() : MixerManager() {
 	_outputRate = 24585;
-	_samples = 8192;
-	while (_samples * 16 > _outputRate * 2)
-		_samples >>= 1;
+	//_samples = 8192;
+	//while (_samples * 16 > _outputRate * 2)
+	//	_samples >>= 1;
+	_samples = 1024;	// 50 KHz -> 2048 (freq / (1000 / 45ms))
 	_samplesBuf = new uint8[_samples * 4];
 }
 
