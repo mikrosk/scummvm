@@ -32,7 +32,7 @@ class AtariGraphicsManager : public GraphicsManager {
 public:
 	virtual ~AtariGraphicsManager();
 
-	bool hasFeature(OSystem::Feature f) const override { return false; }
+	bool hasFeature(OSystem::Feature f) const override;
 	void setFeatureState(OSystem::Feature f, bool enable) override {}
 	bool getFeatureState(OSystem::Feature f) const override { return false; }
 
@@ -71,9 +71,10 @@ public:
 	bool showMouse(bool visible) override;
 	void warpMouse(int x, int y) override;
 	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale = false, const Graphics::PixelFormat *format = NULL) override;
-	void setCursorPalette(const byte *colors, uint start, uint num) override {}
+	void setCursorPalette(const byte *colors, uint start, uint num) override;
 
-	bool isMouseOutOfScreen() const { return _mouseOutOfScreen; }
+	Common::Point getMousePosition() const { return Common::Point(_mouseX, _mouseY); }
+	void updateMousePosition(int deltaX, int deltaY);
 
 private:
 	static void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
@@ -114,6 +115,7 @@ private:
 	Common::Rect _oldCursorRect;
 
 	uint _palette[256] = {};
+	byte _overlayCursorPalette[256*3] = {};
 };
 
 #endif

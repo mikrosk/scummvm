@@ -48,6 +48,17 @@ AtariGraphicsManager::~AtariGraphicsManager() {
 	_screen = nullptr;
 }
 
+bool AtariGraphicsManager::hasFeature(OSystem::Feature f) const {
+	switch (f) {
+	case OSystem::Feature::kFeatureCursorPalette:
+		{Common::String str = Common::String::format("hasFeature(kFeatureCursorPalette): %d\n", isOverlayVisible());
+		g_system->logMessage(LogMessageType::kDebug, str.c_str());}
+		return true;
+	default:
+		return false;
+	}
+}
+
 bool AtariGraphicsManager::setGraphicsMode(int mode, uint flags) {
 	Common::String str = Common::String::format("setGraphicsMode: %d, %d\n", mode, flags);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
@@ -123,6 +134,9 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 			_screenCorrection = (480 - _height) / 2;
 		else
 			_screenCorrection = 0;
+
+		_mouseX = _width / 2;
+		_mouseY = _height / 2;
 
 		_oldWidth = _width;
 		_oldHeight = _height;
@@ -209,8 +223,8 @@ void AtariGraphicsManager::updateScreen() {
 	while (!_modifiedOverlayRects.empty()) {
 		const Common::Rect &rect = _modifiedOverlayRects.back();
 
-		if (updateCursor)
-			_cursorModified |= rect.intersects(_cursorRect);
+		if (!_cursorModified && updateCursor)
+			_cursorModified = rect.intersects(_cursorRect);
 
 		_screenSurface16.copyRectToSurface(
 			_overlaySurface.getBasePtr(rect.left, rect.top),
@@ -224,8 +238,8 @@ void AtariGraphicsManager::updateScreen() {
 	while (!_modifiedChunkyRects.empty()) {
 		const Common::Rect &rect = _modifiedChunkyRects.back();
 
-		if (updateCursor)
-			_cursorModified |= rect.intersects(_cursorRect);
+		if (!_cursorModified && updateCursor)
+			_cursorModified = rect.intersects(_cursorRect);
 
 		c2p1x1_8_falcon(
 			(char*)_chunkySurface.getBasePtr(rect.left, rect.top),
@@ -384,7 +398,7 @@ void AtariGraphicsManager::warpMouse(int x, int y) {
 }
 
 void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale, const Graphics::PixelFormat *format) {
-	//Common::String str = Common::String::format("setMouseCursor: %d, %d, %d, %d, %d, %p\n", w, h, hotspotX, hotspotY, keycolor, (const void*)format);
+	//Common::String str = Common::String::format("setMouseCursor: %d, %d, %d, %d, %d, %d\n", w, h, hotspotX, hotspotY, keycolor, format ? format->bytesPerPixel : 1);
 	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 	if (w == 0 || h == 0 || buf == nullptr) {
@@ -407,13 +421,49 @@ void AtariGraphicsManager::setMouseCursor(const void *buf, uint w, uint h, int h
 	_cursorModified = true;
 }
 
+void AtariGraphicsManager::setCursorPalette(const byte *colors, uint start, uint num) {
+	Common::String str = Common::String::format("setCursorPalette: %d, %d\n", start, num);
+	g_system->logMessage(LogMessageType::kDebug, str.c_str());
+
+	byte *pal = &_overlayCursorPalette[start];
+
+	for (uint i = 0; i < num; ++i) {
+		pal[i * 3 + 0] = colors[i * 3 + 0];
+		pal[i * 3 + 1] = colors[i * 3 + 1];
+		pal[i * 3 + 2] = colors[i * 3 + 2];
+	}
+}
+
+void AtariGraphicsManager::updateMousePosition(int deltaX, int deltaY)
+{
+	_mouseX += deltaX;
+	_mouseY += deltaY;
+
+	const int maxX = isOverlayVisible() ? getOverlayWidth() : getWidth();
+	const int maxY = isOverlayVisible() ? getOverlayHeight() : getHeight();
+
+	if (_mouseX < 0)
+		_mouseX = 0;
+	else if (_mouseX >= maxX)
+		_mouseX = maxX - 1;
+
+	if (_mouseY < 0)
+		_mouseY = 0;
+	else if (_mouseY >= maxY)
+		_mouseY = maxY - 1;
+
+	_cursorModified = true;
+}
+
 void AtariGraphicsManager::handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface)
 {
-	// align on 16px
-	rect.left &= 0xfff0;
-	rect.right = (rect.right + 15) & 0xfff0;
-	if (rect.right > surface.w)
-		rect.right = surface.w;
+	if (surface.format.bytesPerPixel == 1) {
+		// align on 16px
+		rect.left &= 0xfff0;
+		rect.right = (rect.right + 15) & 0xfff0;
+		if (rect.right > surface.w)
+			rect.right = surface.w;
+	}
 
 	if (rect.width() == surface.w && rect.height() == surface.h) {
 		Common::String str = Common::String::format("handleModifiedRect: purge\n");
@@ -500,20 +550,6 @@ void AtariGraphicsManager::prepareCursorSurface8() {
 }
 
 void AtariGraphicsManager::copyCursorSurface16() {
-	static byte palette[256*3] = {};
-	{
-		// TODO: system palette?
-		static bool paletteInitialized;
-		if (!paletteInitialized) {
-			for (int i = 0; i < 4; ++i) {
-				palette[i * 3 + 0] = (byte)(63 + i * 64);
-				palette[i * 3 + 1] = (byte)(63 + i * 64);
-				palette[i * 3 + 2] = (byte)(63 + i * 64);
-			}
-			paletteInitialized = true;
-		}
-	}
-
 	// TODO: mask out old cursor and mask in new one?
 	if (_cursorSurface.format == _screenSurface16.format) {
 		_screenSurface16.copyRectToSurfaceWithKey(
@@ -530,15 +566,22 @@ void AtariGraphicsManager::copyCursorSurface16() {
 		const byte *srcRow = (const byte *)_clippedCursorSurface.getPixels();
 		uint16 *dstRow = (uint16 *)_screenSurface16.getBasePtr(_cursorRect.left, _cursorRect.top);
 
+		const uint16 cursorKeyColor = dstFormat.RGBToColor(
+			_overlayCursorPalette[_cursorKeycolor * 3 + 0],
+			_overlayCursorPalette[_cursorKeycolor * 3 + 1],
+			_overlayCursorPalette[_cursorKeycolor * 3 + 2]);
+
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
-				byte index = *srcRow++;
-				if (index != _cursorKeycolor) {
-					byte r = palette[index * 3];
-					byte g = palette[index * 3 + 1];
-					byte b = palette[index * 3 + 2];
+				const byte index = *srcRow++;
 
-					*dstRow++ = dstFormat.RGBToColor(r, g, b);
+				uint16 pixel = dstFormat.RGBToColor(
+					_overlayCursorPalette[index * 3 + 0],
+					_overlayCursorPalette[index * 3 + 1],
+					_overlayCursorPalette[index * 3 + 2]);
+
+				if (pixel != cursorKeyColor) {
+					*dstRow++ = pixel;
 				} else {
 					dstRow++;
 				}

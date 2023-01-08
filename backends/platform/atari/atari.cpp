@@ -88,8 +88,6 @@ private:
 	bool _video_initialized = false;
 	bool _ikbd_initialized = false;
 
-	int _mouseX = -1;
-	int _mouseY = -1;
 	bool _oldLmbDown = false;
 	bool _oldRmbDown = false;
 
@@ -368,43 +366,30 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 	((DefaultTimerManager *)_timerManager)->checkTimers();
 	((AtariMixerManager *)_mixerManager)->update();
 
-	if (_mouseX == -1 || _mouseY == -1 || _atariGraphicsManager->isMouseOutOfScreen()) {
-		if (isOverlayVisible()) {
-			_mouseX = getOverlayWidth() / 2;
-			_mouseY = getOverlayHeight() / 2;
-		} else {
-			_mouseX = getWidth() / 2;
-			_mouseY = getHeight() / 2;
-		}
-
-		// TODO: can't use this->warpMouse()
-		_atariGraphicsManager->warpMouse(_mouseX, _mouseY);
-	}
-
 	if ((g_atari_ikbd_mouse_buttons_state & 0x01) && !_oldRmbDown) {
 		event.type = Common::EVENT_RBUTTONDOWN;
-		event.mouse = Common::Point(_mouseX, _mouseY);
+		event.mouse = _atariGraphicsManager->getMousePosition();
 		_oldRmbDown = true;
 		return true;
 	}
 
 	if (!(g_atari_ikbd_mouse_buttons_state & 0x01) && _oldRmbDown) {
 		event.type = Common::EVENT_RBUTTONUP;
-		event.mouse = Common::Point(_mouseX, _mouseY);
+		event.mouse = _atariGraphicsManager->getMousePosition();
 		_oldRmbDown = false;
 		return true;
 	}
 
 	if ((g_atari_ikbd_mouse_buttons_state & 0x02) && !_oldLmbDown) {
 		event.type = Common::EVENT_LBUTTONDOWN;
-		event.mouse = Common::Point(_mouseX, _mouseY);
+		event.mouse = _atariGraphicsManager->getMousePosition();
 		_oldLmbDown = true;
 		return true;
 	}
 
 	if (!(g_atari_ikbd_mouse_buttons_state & 0x02) && _oldLmbDown) {
 		event.type = Common::EVENT_LBUTTONUP;
-		event.mouse = Common::Point(_mouseX, _mouseY);
+		event.mouse = _atariGraphicsManager->getMousePosition();
 		_oldLmbDown = false;
 		return true;
 	}
@@ -415,28 +400,11 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 
 		g_atari_ikbd_mouse_delta_x = g_atari_ikbd_mouse_delta_y = 0;
 
-		_mouseX += deltaX;
-		_mouseY += deltaY;
-
-		const int maxX = isOverlayVisible() ? getOverlayWidth() : getWidth();
-		const int maxY = isOverlayVisible() ? getOverlayHeight() : getHeight();
-
-		if (_mouseX < 0)
-			_mouseX = 0;
-		else if (_mouseX >= maxX)
-			_mouseX = maxX - 1;
-
-		if (_mouseY < 0)
-			_mouseY = 0;
-		else if (_mouseY >= maxY)
-			_mouseY = maxY - 1;
+		_atariGraphicsManager->updateMousePosition(deltaX, deltaY);
 
 		event.type = Common::EVENT_MOUSEMOVE;
-		event.mouse = Common::Point(_mouseX, _mouseY);
+		event.mouse = _atariGraphicsManager->getMousePosition();
 		event.relMouse = Common::Point(deltaX, deltaY);
-
-		warpMouse(_mouseX, _mouseY);
-
 		return true;
 	}
 
@@ -465,14 +433,14 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		// Eiffel only
 		if (scancode == 0x59) {
 			event.type = Common::EVENT_WHEELUP;
-			event.mouse = Common::Point(_mouseX, _mouseY);
+			event.mouse = _atariGraphicsManager->getMousePosition();
 			return true;
 		}
 
 		// Eiffel only
 		if (scancode == 0x5a) {
 			event.type = Common::EVENT_WHEELDOWN;
-			event.mouse = Common::Point(_mouseX, _mouseY);
+			event.mouse = _atariGraphicsManager->getMousePosition();
 			return true;
 		}
 
