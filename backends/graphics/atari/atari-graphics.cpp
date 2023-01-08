@@ -21,11 +21,22 @@
 
 #include "backends/graphics/atari/atari-graphics.h"
 
+#include <mint/falcon.h>
 #include <mint/osbind.h>
 
+#include "backends/graphics/atari/320x200x8_rgb.h"
+#include "backends/graphics/atari/320x200x8_rgb60.h"
+#include "backends/graphics/atari/320x200x8_vga.h"
+#include "backends/graphics/atari/320x240x8_rgb.h"
 #include "backends/graphics/atari/320x240x8_vga.h"
+#include "backends/graphics/atari/320x240x16_rgb.h"
 #include "backends/graphics/atari/320x240x16_vga.h"
+#include "backends/graphics/atari/640x400x8_rgb.h"
+#include "backends/graphics/atari/640x400x8_rgb60.h"
+#include "backends/graphics/atari/640x400x8_vga.h"
+#include "backends/graphics/atari/640x480x8_rgb.h"
 #include "backends/graphics/atari/640x480x8_vga.h"
+
 #include "backends/graphics/atari/atari_c2p-asm.h"
 #include "backends/graphics/atari/atari-graphics-asm.h"
 #include "common/foreach.h"
@@ -39,6 +50,10 @@
 #define SCREEN_HEIGHT	480
 
 #define SCREEN_ACTIVE
+
+AtariGraphicsManager::AtariGraphicsManager() {
+	_vgaMonitor = VgetMonitor() == MON_VGA;
+}
 
 AtariGraphicsManager::~AtariGraphicsManager() {
 	Mfree(_chunkyBuffer);
@@ -54,6 +69,34 @@ bool AtariGraphicsManager::hasFeature(OSystem::Feature f) const {
 		{Common::String str = Common::String::format("hasFeature(kFeatureCursorPalette): %d\n", isOverlayVisible());
 		g_system->logMessage(LogMessageType::kDebug, str.c_str());}
 		return true;
+	case OSystem::Feature::kFeatureAspectRatioCorrection:
+		{Common::String str = Common::String::format("hasFeature(kFeatureAspectRatioCorrection): %d\n", !_vgaMonitor);
+		g_system->logMessage(LogMessageType::kDebug, str.c_str());}
+		return !_vgaMonitor;
+	default:
+		return false;
+	}
+}
+
+void AtariGraphicsManager::setFeatureState(OSystem::Feature f, bool enable) {
+	switch (f) {
+	case OSystem::Feature::kFeatureAspectRatioCorrection:
+		{Common::String str = Common::String::format("setFeatureState(kFeatureAspectRatioCorrection): %d\n", enable);
+		g_system->logMessage(LogMessageType::kDebug, str.c_str());}
+		_oldAspectRatioCorrection = _aspectRatioCorrection;
+		_aspectRatioCorrection = enable;
+		break;
+	default:
+		[[fallthrough]];
+	}
+}
+
+bool AtariGraphicsManager::getFeatureState(OSystem::Feature f) const {
+	switch (f) {
+	case OSystem::Feature::kFeatureCursorPalette:
+		return true;
+	case OSystem::Feature::kFeatureAspectRatioCorrection:
+		return _aspectRatioCorrection;
 	default:
 		return false;
 	}
@@ -92,6 +135,8 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 		return OSystem::TransactionError::kTransactionSizeChangeFailed;
 
 	if (_oldWidth != _width || _oldHeight != _height) {
+		bool videoRamChanged = false;
+
 		if (_screen == nullptr) {
 			// no need to realloc each time
 
@@ -115,26 +160,19 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 
 			_overlaySurface.create(getOverlayWidth(), getOverlayHeight(), getOverlayFormat());
 			_screenSurface16.init(_overlaySurface.w, _overlaySurface.h, _overlaySurface.pitch, screenAligned, _overlaySurface.format);
+
+			videoRamChanged = true;
 		} else {
 			_chunkySurface.init(_width, _height, _width, _chunkySurface.getPixels(), _format);
 			_screenSurface8.init(_width, _height, _width, _screenSurface8.getPixels(), _format);
 		}
 
 #ifdef SCREEN_ACTIVE
-		if (_width == 320)
-			asm_screen_set_scp_res(scp_320x240x8_vga, false);
-		else
-			asm_screen_set_scp_res(scp_640x480x8_vga, false);
-
-		asm_screen_set_vram(_screenSurface8.getPixels());
+		setVidelResolution(false);
+		if (videoRamChanged)
+			asm_screen_set_vram(_screenSurface8.getPixels());
+		_oldAspectRatioCorrection = _aspectRatioCorrection;
 #endif
-		if (_height == 200)
-			_screenCorrection = (240 - _height) / 2;
-		else if (_height == 400)
-			_screenCorrection = (480 - _height) / 2;
-		else
-			_screenCorrection = 0;
-
 		_mouseX = _width / 2;
 		_mouseY = _height / 2;
 
@@ -209,6 +247,13 @@ void AtariGraphicsManager::updateScreen() {
 	//Common::String str = Common::String::format("updateScreen\n");
 	//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
+	if (_oldAspectRatioCorrection != _aspectRatioCorrection) {
+		if (!isOverlayVisible()) {
+			setVidelResolution(true);
+		}
+		_oldAspectRatioCorrection = _aspectRatioCorrection;
+	}
+
 	// prepare _cursorRect first
 	if (_mouseVisible) {
 		updateCursorRect();
@@ -246,7 +291,7 @@ void AtariGraphicsManager::updateScreen() {
 			(char*)_chunkySurface.getBasePtr(rect.right, rect.bottom),
 			rect.width(),
 			_chunkySurface.pitch,
-			(char*)_screenSurface8.getBasePtr(rect.left, rect.top + _screenCorrection),
+			(char*)_screenSurface8.getBasePtr(rect.left, rect.top),
 			_screenSurface8.pitch);
 
 		_modifiedChunkyRects.pop_back();
@@ -269,7 +314,7 @@ void AtariGraphicsManager::updateScreen() {
 					(char*)_chunkySurface.getBasePtr(_oldCursorRect.right, _oldCursorRect.bottom),
 					_oldCursorRect.width(),
 					_chunkySurface.w,
-					(char*)_screenSurface8.getBasePtr(_oldCursorRect.left, _oldCursorRect.top + _screenCorrection),
+					(char*)_screenSurface8.getBasePtr(_oldCursorRect.left, _oldCursorRect.top),
 					_screenSurface8.pitch);
 			}
 		}
@@ -290,7 +335,7 @@ void AtariGraphicsManager::updateScreen() {
 				(char*)_cursorSurface8.getBasePtr(0, _cursorSurface8.h),
 				_cursorSurface8.w,
 				_cursorSurface8.pitch,
-				(char*)_screenSurface8.getBasePtr(_cursorRect.left, _cursorRect.top + _screenCorrection),
+				(char*)_screenSurface8.getBasePtr(_cursorRect.left, _cursorRect.top),
 				_screenSurface8.pitch);
 		}
 
@@ -308,7 +353,10 @@ void AtariGraphicsManager::showOverlay() {
 #ifdef SCREEN_ACTIVE
 	memset(_screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 
-	asm_screen_set_scp_res(scp_320x240x16_vga, true);
+	if (_vgaMonitor)
+		asm_screen_set_scp_res(scp_320x240x16_vga, true);
+	else
+		asm_screen_set_scp_res(scp_320x240x16_rgb, true);
 #endif
 
 	// _cursorRect may get used if _mouseVisible = false
@@ -329,10 +377,7 @@ void AtariGraphicsManager::hideOverlay() {
 #ifdef SCREEN_ACTIVE
 	memset(_screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 
-	if (_width == 320)
-		asm_screen_set_scp_res(scp_320x240x8_vga, true);
-	else
-		asm_screen_set_scp_res(scp_640x480x8_vga, true);
+	setVidelResolution(true);
 #endif
 
 	// _cursorRect may get used if _mouseVisible = false
@@ -462,6 +507,40 @@ void AtariGraphicsManager::updateMousePosition(int deltaX, int deltaY) {
 	_cursorModified = true;
 }
 
+void AtariGraphicsManager::setVidelResolution(bool waitForVbl) const
+{
+	if (_vgaMonitor) {
+		// TODO: aspect ratio correction
+		if (_width == 320) {
+			if (_height == 200)
+				asm_screen_set_scp_res(scp_320x200x8_vga, waitForVbl);
+			else
+				asm_screen_set_scp_res(scp_320x240x8_vga, waitForVbl);
+		} else {
+			if (_height == 400)
+				asm_screen_set_scp_res(scp_640x400x8_vga, waitForVbl);
+			else
+				asm_screen_set_scp_res(scp_640x480x8_vga, waitForVbl);
+		}
+	} else {
+		if (_width == 320) {
+			if (_height == 240)
+				asm_screen_set_scp_res(scp_320x240x8_rgb, waitForVbl);
+			else if (_height == 200 && _aspectRatioCorrection)
+				asm_screen_set_scp_res(scp_320x200x8_rgb60, waitForVbl);
+			else
+				asm_screen_set_scp_res(scp_320x200x8_rgb, waitForVbl);
+		} else {
+			if (_height == 480)
+				asm_screen_set_scp_res(scp_640x480x8_rgb, waitForVbl);
+			else if (_height == 400 && _aspectRatioCorrection)
+				asm_screen_set_scp_res(scp_640x400x8_rgb60, waitForVbl);
+			else
+				asm_screen_set_scp_res(scp_640x400x8_rgb, waitForVbl);
+		}
+	}
+}
+
 void AtariGraphicsManager::handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface)
 {
 	if (surface.format.bytesPerPixel == 1) {
@@ -473,8 +552,8 @@ void AtariGraphicsManager::handleModifiedRect(Common::Rect rect, Common::Array<C
 	}
 
 	if (rect.width() == surface.w && rect.height() == surface.h) {
-		Common::String str = Common::String::format("handleModifiedRect: purge\n");
-		g_system->logMessage(LogMessageType::kDebug, str.c_str());
+		//Common::String str = Common::String::format("handleModifiedRect: purge\n");
+		//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 		rects.clear();
 		rects.push_back(rect);

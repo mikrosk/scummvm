@@ -30,11 +30,12 @@
 
 class AtariGraphicsManager : public GraphicsManager {
 public:
+	AtariGraphicsManager();
 	virtual ~AtariGraphicsManager();
 
 	bool hasFeature(OSystem::Feature f) const override;
-	void setFeatureState(OSystem::Feature f, bool enable) override {}
-	bool getFeatureState(OSystem::Feature f) const override { return false; }
+	void setFeatureState(OSystem::Feature f, bool enable) override;
+	bool getFeatureState(OSystem::Feature f) const override;
 
 	bool setGraphicsMode(int mode, uint flags = OSystem::kGfxModeNoFlags) override;
 
@@ -77,18 +78,23 @@ public:
 	void updateMousePosition(int deltaX, int deltaY);
 
 private:
+	void setVidelResolution(bool waitForVbl) const;
+
 	static void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
 
 	void updateCursorRect();
 	void prepareCursorSurface8();
 	void copyCursorSurface16();
 
+	bool _vgaMonitor = true;
+	bool _oldAspectRatioCorrection = false;
+	bool _aspectRatioCorrection = false;
+
 	uint _width = 0, _height = 0;
 	Graphics::PixelFormat _format = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
 	uint _oldWidth = 0, _oldHeight = 0;
 
 	byte *_screen = nullptr;
-	int _screenCorrection = 0;
 	Graphics::Surface _screenSurface8;
 	Graphics::Surface _screenSurface16;
 
@@ -96,7 +102,7 @@ private:
 	Graphics::Surface _chunkySurface;
 	Common::Array<Common::Rect> _modifiedChunkyRects;
 
-	bool _overlayVisible;
+	bool _overlayVisible = false;
 	Graphics::Surface _overlaySurface;
 	Common::Array<Common::Rect> _modifiedOverlayRects;
 
