@@ -588,7 +588,6 @@ void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
 }
 
 void OSystem_Atari::addSysArchivesToSearchSet(Common::SearchSet &s, int priority) {
-	s.add("gui/themes", new Common::FSDirectory("gui/themes", 4), priority);
 }
 
 OSystem *OSystem_Atari_create() {

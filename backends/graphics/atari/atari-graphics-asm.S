@@ -235,7 +235,7 @@ _asm_screen_set_vram:
 	addq.w	#1,has_pending_vram
 	rts
 
-| void asm_screen_set_scp_res(const void* pScp);
+| void asm_screen_set_scp_res(const void* pScp, int waitForVbl);
 |
 _asm_screen_set_scp_res:
 	move.l	(4,sp),a0
@@ -247,6 +247,9 @@ set_scp_res_loop:
 	dbra	d0,set_scp_res_loop
 
 	addq.w	#1,has_pending_scp
+
+	tst.l	(8,sp)
+	bne.b	wait_vbl
 	rts
 
 wait_vbl:
@@ -261,6 +264,9 @@ old_vbl:
 	dc.l	0
 vbl:
 	movem.l	d0-d1/a0-a1,-(sp)
+
+	addq.l	#1,0x0462.w			| _vbclock
+	addq.l	#1,0x0466.w			| _frclock
 
 	tst.w	has_pending_scp
 	beq.b	vbl_no_pending_scp

@@ -36,7 +36,7 @@ void asm_screen_set_tt_palette(const uint16_t pPalette[256]);
 void asm_screen_set_falcon_palette(const uint32_t pPalette[256]);
 
 void asm_screen_set_vram(const void* pScreen);
-void asm_screen_set_scp_res(const void* pScp);
+void asm_screen_set_scp_res(const void* pScp, int waitForVbl);
 
 }
 

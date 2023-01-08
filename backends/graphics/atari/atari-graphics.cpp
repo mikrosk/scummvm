@@ -122,9 +122,9 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 
 #ifdef SCREEN_ACTIVE
 		if (_width == 320)
-			asm_screen_set_scp_res(scp_320x240x8_vga);
+			asm_screen_set_scp_res(scp_320x240x8_vga, false);
 		else
-			asm_screen_set_scp_res(scp_640x480x8_vga);
+			asm_screen_set_scp_res(scp_640x480x8_vga, false);
 
 		asm_screen_set_vram(_screenSurface8.getPixels());
 #endif
@@ -306,10 +306,13 @@ void AtariGraphicsManager::showOverlay() {
 		return;
 
 #ifdef SCREEN_ACTIVE
-	asm_screen_set_scp_res(scp_320x240x16_vga);
+	memset(_screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
+
+	asm_screen_set_scp_res(scp_320x240x16_vga, true);
 #endif
 
-	_oldCursorRect = Common::Rect();
+	// _cursorRect may get used if _mouseVisible = false
+	_cursorRect = _oldCursorRect = Common::Rect();
 	_modifiedChunkyRects.clear();
 	handleModifiedRect(Common::Rect(_overlaySurface.w, _overlaySurface.h), _modifiedOverlayRects, _overlaySurface);
 
@@ -324,15 +327,16 @@ void AtariGraphicsManager::hideOverlay() {
 		return;
 
 #ifdef SCREEN_ACTIVE
-	memset(_screenSurface16.getPixels(), 0, _screenSurface16.pitch * _screenSurface16.h);
+	memset(_screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 
 	if (_width == 320)
-		asm_screen_set_scp_res(scp_320x240x8_vga);
+		asm_screen_set_scp_res(scp_320x240x8_vga, true);
 	else
-		asm_screen_set_scp_res(scp_640x480x8_vga);
+		asm_screen_set_scp_res(scp_640x480x8_vga, true);
 #endif
 
-	_oldCursorRect = Common::Rect();
+	// _cursorRect may get used if _mouseVisible = false
+	_cursorRect = _oldCursorRect = Common::Rect();
 	_modifiedOverlayRects.clear();
 	handleModifiedRect(Common::Rect(_chunkySurface.w, _chunkySurface.h), _modifiedChunkyRects, _chunkySurface);
 
@@ -343,6 +347,7 @@ void AtariGraphicsManager::clearOverlay() {
 	Common::String str = Common::String::format("clearOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
+	// called before showing a dialog, so do clear the whole background
 	memset(_overlaySurface.getPixels(), 0, _overlaySurface.pitch * _overlaySurface.h);
 }
 
@@ -350,8 +355,8 @@ void AtariGraphicsManager::grabOverlay(Graphics::Surface &surface) const {
 	Common::String str = Common::String::format("grabOverlay: %d, %d, %d\n", surface.pitch, surface.w, surface.h);
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
-	// not really needed as copyRectToOverlay() overwrites the surface again
-	//surface.copyRectToSurface(_overlaySurface, 0, 0, Common::Rect(_overlaySurface.w, _overlaySurface.h));
+	// delete immediate background for popup dialogs (visible in rounded edges for example)
+	memset(surface.getPixels(), 0, surface.pitch * surface.h);
 }
 
 void AtariGraphicsManager::copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) {
@@ -434,8 +439,10 @@ void AtariGraphicsManager::setCursorPalette(const byte *colors, uint start, uint
 	}
 }
 
-void AtariGraphicsManager::updateMousePosition(int deltaX, int deltaY)
-{
+void AtariGraphicsManager::updateMousePosition(int deltaX, int deltaY) {
+	if (!_mouseVisible)
+		return;
+
 	_mouseX += deltaX;
 	_mouseY += deltaY;
 
