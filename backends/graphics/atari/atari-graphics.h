@@ -78,13 +78,16 @@ public:
 	void updateMousePosition(int deltaX, int deltaY);
 
 private:
-	void setVidelResolution(bool vsync) const;
+	bool allocateAtariSurface(byte *&buf, Graphics::Surface &surface,
+							  int width, int height, const Graphics::PixelFormat &format, int mode,
+							  size_t forcedAllocationSize = 0);
+	void setVidelResolution() const;
 	void waitForVbl() const;
 
-	static void copySurface8ToSurface16(const Graphics::Surface &srcSurface, byte* srcPalette,
+	static void copySurface8ToSurface16(const Graphics::Surface &srcSurface, const byte *srcPalette,
 										Graphics::Surface &dstSurface, int destX, int destY,
 										const Common::Rect subRect);
-	static void copySurface8ToSurface16WithKey(const Graphics::Surface &srcSurface, byte* srcPalette,
+	static void copySurface8ToSurface16WithKey(const Graphics::Surface &srcSurface, const byte* srcPalette,
 											   Graphics::Surface &dstSurface, int destX, int destY,
 											   const Common::Rect subRect, uint32 key);
 	static void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
@@ -93,8 +96,15 @@ private:
 	void prepareCursorSurface8();
 
 	bool _vgaMonitor = true;
-	bool _oldAspectRatioCorrection = false;
 	bool _aspectRatioCorrection = false;
+	bool _oldAspectRatioCorrection = false;
+
+	enum class PendingResolutionChange {
+		None,
+		Overlay,
+		Screen
+	};
+	PendingResolutionChange _pendingResolutionChange = PendingResolutionChange::None;
 
 	uint _width = 0, _height = 0;
 	Graphics::PixelFormat _format = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -102,6 +112,7 @@ private:
 
 	byte *_screen = nullptr;
 	Graphics::Surface _screenSurface8;
+	byte *_overlay = nullptr;
 	Graphics::Surface _screenSurface16;
 
 	byte *_chunkyBuffer = nullptr;
@@ -109,12 +120,14 @@ private:
 	Common::Array<Common::Rect> _modifiedChunkyRects;
 
 	bool _overlayVisible = false;
+	byte *_overlayBuffer = nullptr;
 	Graphics::Surface _overlaySurface;
 	Common::Array<Common::Rect> _modifiedOverlayRects;
 
 	bool _mouseVisible = false;
 	bool _mouseOutOfScreen = false;
 	int _mouseX = -1, _mouseY = -1;
+	int _oldMouseX = -1, _oldMouseY = -1;
 
 	bool _cursorModified = false;
 	Graphics::Surface _cursorSurface;
