@@ -81,11 +81,16 @@ private:
 	void setVidelResolution(bool vsync) const;
 	void waitForVbl() const;
 
+	static void copySurface8ToSurface16(const Graphics::Surface &srcSurface, byte* srcPalette,
+										Graphics::Surface &dstSurface, int destX, int destY,
+										const Common::Rect subRect);
+	static void copySurface8ToSurface16WithKey(const Graphics::Surface &srcSurface, byte* srcPalette,
+											   Graphics::Surface &dstSurface, int destX, int destY,
+											   const Common::Rect subRect, uint32 key);
 	static void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
 
 	void updateCursorRect();
 	void prepareCursorSurface8();
-	void copyCursorSurface16();
 
 	bool _vgaMonitor = true;
 	bool _oldAspectRatioCorrection = false;
@@ -113,12 +118,12 @@ private:
 
 	bool _cursorModified = false;
 	Graphics::Surface _cursorSurface;
-	Graphics::Surface _clippedCursorSurface;
 	Graphics::Surface _cursorSurface8;
 	int _cursorHotspotX;
 	int _cursorHotspotY;
 	uint32 _cursorKeycolor;
-	Common::Rect _cursorRect;
+	Common::Rect _cursorSrcRect;
+	Common::Rect _cursorDstRect;
 	Common::Rect _oldCursorRect;
 
 	uint _palette[256] = {};

@@ -259,25 +259,21 @@ void AtariGraphicsManager::updateScreen() {
 	// prepare _cursorRect first
 	if (_mouseVisible) {
 		updateCursorRect();
-	} else if (!_cursorRect.isEmpty()) {
+	} else if (!_cursorDstRect.isEmpty()) {
 		// force cursor background restore
-		_oldCursorRect = _cursorRect;
-		_cursorRect = Common::Rect();
+		_oldCursorRect = _cursorDstRect;
+		_cursorDstRect = Common::Rect();
 	}
 
-	const bool updateCursor = !_mouseOutOfScreen && _mouseVisible && !_cursorRect.isEmpty();
+	const bool updateCursor = !_mouseOutOfScreen && _mouseVisible && !_cursorDstRect.isEmpty();
 
 	while (!_modifiedOverlayRects.empty()) {
 		const Common::Rect &rect = _modifiedOverlayRects.back();
 
 		if (!_cursorModified && updateCursor)
-			_cursorModified = rect.intersects(_cursorRect);
+			_cursorModified = rect.intersects(_cursorDstRect);
 
-		_screenSurface16.copyRectToSurface(
-			_overlaySurface.getBasePtr(rect.left, rect.top),
-			_overlaySurface.pitch,
-			rect.left, rect.top,
-			rect.width(), rect.height());
+		_screenSurface16.copyRectToSurface(_overlaySurface, rect.left, rect.top, rect);
 
 		_modifiedOverlayRects.pop_back();
 	}
@@ -286,7 +282,7 @@ void AtariGraphicsManager::updateScreen() {
 		const Common::Rect &rect = _modifiedChunkyRects.back();
 
 		if (!_cursorModified && updateCursor)
-			_cursorModified = rect.intersects(_cursorRect);
+			_cursorModified = rect.intersects(_cursorDstRect);
 
 		c2p1x1_8_falcon(
 			(char*)_chunkySurface.getBasePtr(rect.left, rect.top),
@@ -302,14 +298,10 @@ void AtariGraphicsManager::updateScreen() {
 	if (_mouseOutOfScreen)
 		return;
 
-	if (_oldCursorRect != _cursorRect) {
+	if (_oldCursorRect != _cursorDstRect) {
 		if (!_oldCursorRect.isEmpty()) {
 			if (isOverlayVisible()) {
-				_screenSurface16.copyRectToSurface(
-					_overlaySurface.getBasePtr(_oldCursorRect.left, _oldCursorRect.top),
-					_overlaySurface.pitch,
-					_oldCursorRect.left, _oldCursorRect.top,
-					_oldCursorRect.width(), _oldCursorRect.height());
+				_screenSurface16.copyRectToSurface(_overlaySurface, _oldCursorRect.left, _oldCursorRect.top, _oldCursorRect);
 			} else {
 				c2p1x1_8_falcon(
 					(char*)_chunkySurface.getBasePtr(_oldCursorRect.left, _oldCursorRect.top),
@@ -321,7 +313,7 @@ void AtariGraphicsManager::updateScreen() {
 			}
 		}
 
-		_oldCursorRect = _cursorRect;
+		_oldCursorRect = _cursorDstRect;
 	}
 
 	if (updateCursor && _cursorModified) {
@@ -330,14 +322,20 @@ void AtariGraphicsManager::updateScreen() {
 		//g_system->logMessage(LogMessageType::kDebug, str.c_str());
 
 		if (isOverlayVisible()) {
-			copyCursorSurface16();
+			copySurface8ToSurface16WithKey(
+				_cursorSurface,
+				_overlayCursorPalette,
+				_screenSurface16,
+				_cursorDstRect.left, _cursorDstRect.top,
+				_cursorSrcRect,
+				_cursorKeycolor);
 		} else {
 			c2p1x1_8_falcon(
 				(char*)_cursorSurface8.getPixels(),
 				(char*)_cursorSurface8.getBasePtr(0, _cursorSurface8.h),
 				_cursorSurface8.w,
 				_cursorSurface8.pitch,
-				(char*)_screenSurface8.getBasePtr(_cursorRect.left, _cursorRect.top),
+				(char*)_screenSurface8.getBasePtr(_cursorDstRect.left, _cursorDstRect.top),
 				_screenSurface8.pitch);
 		}
 
@@ -364,7 +362,7 @@ void AtariGraphicsManager::showOverlay() {
 #endif
 
 	// _cursorRect may get used if _mouseVisible = false
-	_cursorRect = _oldCursorRect = Common::Rect();
+	_cursorDstRect = _oldCursorRect = Common::Rect();
 	_modifiedChunkyRects.clear();
 	handleModifiedRect(Common::Rect(_overlaySurface.w, _overlaySurface.h), _modifiedOverlayRects, _overlaySurface);
 
@@ -385,7 +383,7 @@ void AtariGraphicsManager::hideOverlay() {
 #endif
 
 	// _cursorRect may get used if _mouseVisible = false
-	_cursorRect = _oldCursorRect = Common::Rect();
+	_cursorDstRect = _oldCursorRect = Common::Rect();
 	_modifiedOverlayRects.clear();
 	handleModifiedRect(Common::Rect(_chunkySurface.w, _chunkySurface.h), _modifiedChunkyRects, _chunkySurface);
 
@@ -557,6 +555,77 @@ void AtariGraphicsManager::waitForVbl() const
 	while (counter == vbl_counter);
 }
 
+void AtariGraphicsManager::copySurface8ToSurface16(
+		const Graphics::Surface &srcSurface, byte *srcPalette,
+		Graphics::Surface &dstSurface, int destX, int destY,
+		const Common::Rect subRect) {
+	assert(srcSurface.format.bytesPerPixel == 1);
+	assert(dstSurface.format.bytesPerPixel == 2);
+
+	// faster (no memory (re-)allocation) version of Surface::convertTo()
+	const int w = subRect.width();
+	const int h = subRect.height();
+	const Graphics::PixelFormat dstFormat = dstSurface.format;
+
+	const byte *srcRow = (const byte *)srcSurface.getBasePtr(subRect.left, subRect.top);
+	uint16 *dstRow = (uint16 *)dstSurface.getBasePtr(destX, destY);
+
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			const byte index = *srcRow++;
+
+			*dstRow++ = dstFormat.RGBToColor(
+				srcPalette[index * 3 + 0],
+				srcPalette[index * 3 + 1],
+				srcPalette[index * 3 + 2]);
+		}
+
+		srcRow += srcSurface.w - w;
+		dstRow += dstSurface.w - w;
+	}
+}
+
+void AtariGraphicsManager::copySurface8ToSurface16WithKey(
+		const Graphics::Surface &srcSurface, byte *srcPalette,
+		Graphics::Surface &dstSurface, int destX, int destY,
+		const Common::Rect subRect, uint32 key) {
+	assert(srcSurface.format.bytesPerPixel == 1);
+	assert(dstSurface.format.bytesPerPixel == 2);
+
+	// faster (no memory (re-)allocation) version of Surface::convertTo()
+	const int w = subRect.width();
+	const int h = subRect.height();
+	const Graphics::PixelFormat dstFormat = dstSurface.format;
+
+	const byte *srcRow = (const byte *)srcSurface.getBasePtr(subRect.left, subRect.top);
+	uint16 *dstRow = (uint16 *)dstSurface.getBasePtr(destX, destY);
+
+	const uint16 keyColor = dstFormat.RGBToColor(
+		srcPalette[key * 3 + 0],
+		srcPalette[key * 3 + 1],
+		srcPalette[key * 3 + 2]);
+
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			const byte index = *srcRow++;
+
+			uint16 pixel = dstFormat.RGBToColor(
+				srcPalette[index * 3 + 0],
+				srcPalette[index * 3 + 1],
+				srcPalette[index * 3 + 2]);
+
+			if (pixel != keyColor) {
+				*dstRow++ = pixel;
+			} else {
+				dstRow++;
+			}
+		}
+
+		srcRow += srcSurface.w - w;
+		dstRow += dstSurface.w - w;
+	}
+}
+
 void AtariGraphicsManager::handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface)
 {
 	if (surface.format.bytesPerPixel == 1) {
@@ -585,42 +654,38 @@ void AtariGraphicsManager::handleModifiedRect(Common::Rect rect, Common::Array<C
 }
 
 void AtariGraphicsManager::updateCursorRect() {
-	Common::Rect cursorSrcBounds(_cursorSurface.w, _cursorSurface.h);
+	_cursorSrcRect = Common::Rect(_cursorSurface.w, _cursorSurface.h);
 
-	if (cursorSrcBounds.isEmpty()) {
-		_cursorRect = Common::Rect();
+	if (_cursorSrcRect.isEmpty()) {
+		_cursorDstRect = Common::Rect();
 		return;
 	}
 
-	Common::Rect cursorDstBounds(
+	_cursorDstRect = Common::Rect(
 		_mouseX - _cursorHotspotX,	// left
 		_mouseY - _cursorHotspotY,	// top
 		_mouseX - _cursorHotspotX + _cursorSurface.w,	// right
 		_mouseY - _cursorHotspotY + _cursorSurface.h);	// bottom
 
 	if (isOverlayVisible())
-		_mouseOutOfScreen = !_screenSurface16.clip(cursorSrcBounds, cursorDstBounds);
+		_mouseOutOfScreen = !_screenSurface16.clip(_cursorSrcRect, _cursorDstRect);
 	else
-		_mouseOutOfScreen = !_screenSurface8.clip(cursorSrcBounds, cursorDstBounds);
+		_mouseOutOfScreen = !_screenSurface8.clip(_cursorSrcRect, _cursorDstRect);
 
 	if (_mouseOutOfScreen)
 		return;
-
-	_clippedCursorSurface = _cursorSurface.getSubArea(cursorSrcBounds);
-
-	_cursorRect = cursorDstBounds;
 
 	if (!isOverlayVisible())
 		prepareCursorSurface8();
 }
 
 void AtariGraphicsManager::prepareCursorSurface8() {
-	Common::Rect backgroundCursorRect = _cursorRect;
+	Common::Rect backgroundCursorRect = _cursorDstRect;
 
 	// ensure that background's left and right lie on a 16px boundary and double the width if needed
 	backgroundCursorRect.moveTo(backgroundCursorRect.left & 0xfff0, backgroundCursorRect.top);
 
-	const int cursorDeltaX = _cursorRect.left - backgroundCursorRect.left;
+	const int cursorDeltaX = _cursorDstRect.left - backgroundCursorRect.left;
 
 	backgroundCursorRect.right = (backgroundCursorRect.right + cursorDeltaX + 15) & 0xfff0;
 	if (backgroundCursorRect.right > _chunkySurface.w)
@@ -634,63 +699,9 @@ void AtariGraphicsManager::prepareCursorSurface8() {
 	}
 
 	// copy background
-	// TODO: mask out old cursor and mask in new one?
-	_cursorSurface8.copyRectToSurface(
-		_chunkySurface.getBasePtr(backgroundCursorRect.left, backgroundCursorRect.top),
-		_chunkySurface.pitch,
-		0, 0,
-		backgroundCursorRect.width(), backgroundCursorRect.height());
+	_cursorSurface8.copyRectToSurface(_chunkySurface, 0, 0, backgroundCursorRect);
+	// copy cursor
+	_cursorSurface8.copyRectToSurfaceWithKey(_cursorSurface, cursorDeltaX, 0, _cursorSrcRect, _cursorKeycolor);
 
-	_cursorSurface8.copyRectToSurfaceWithKey(
-		_clippedCursorSurface.getPixels(),
-		_clippedCursorSurface.pitch,
-		cursorDeltaX, 0,
-		_clippedCursorSurface.w, _clippedCursorSurface.h,
-		_cursorKeycolor);
-
-	_cursorRect = backgroundCursorRect;
-}
-
-void AtariGraphicsManager::copyCursorSurface16() {
-	// TODO: mask out old cursor and mask in new one?
-	if (_cursorSurface.format == _screenSurface16.format) {
-		_screenSurface16.copyRectToSurfaceWithKey(
-			_clippedCursorSurface,
-			_cursorRect.left, _cursorRect.top,
-			_cursorRect,
-			_cursorKeycolor);
-	} else {
-		// faster (no memory allocation) version of Surface::convertTo()
-		const int w = _cursorRect.width();
-		const int h = _cursorRect.height();
-		const Graphics::PixelFormat dstFormat = _screenSurface16.format;
-
-		const byte *srcRow = (const byte *)_clippedCursorSurface.getPixels();
-		uint16 *dstRow = (uint16 *)_screenSurface16.getBasePtr(_cursorRect.left, _cursorRect.top);
-
-		const uint16 cursorKeyColor = dstFormat.RGBToColor(
-			_overlayCursorPalette[_cursorKeycolor * 3 + 0],
-			_overlayCursorPalette[_cursorKeycolor * 3 + 1],
-			_overlayCursorPalette[_cursorKeycolor * 3 + 2]);
-
-		for (int y = 0; y < h; y++) {
-			for (int x = 0; x < w; x++) {
-				const byte index = *srcRow++;
-
-				uint16 pixel = dstFormat.RGBToColor(
-					_overlayCursorPalette[index * 3 + 0],
-					_overlayCursorPalette[index * 3 + 1],
-					_overlayCursorPalette[index * 3 + 2]);
-
-				if (pixel != cursorKeyColor) {
-					*dstRow++ = pixel;
-				} else {
-					dstRow++;
-				}
-			}
-
-			srcRow += _cursorSurface.w - w;
-			dstRow += _screenSurface16.w - w;
-		}
-	}
+	_cursorDstRect = backgroundCursorRect;
 }
