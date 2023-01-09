@@ -135,7 +135,7 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 		return OSystem::TransactionError::kTransactionSizeChangeFailed;
 
 	if (_oldWidth != _width || _oldHeight != _height) {
-		bool videoRamChanged = false;
+		bool firstRun = false;
 
 		if (_screen == nullptr) {
 			// no need to realloc each time
@@ -161,7 +161,7 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 			_overlaySurface.create(getOverlayWidth(), getOverlayHeight(), getOverlayFormat());
 			_screenSurface16.init(_overlaySurface.w, _overlaySurface.h, _overlaySurface.pitch, screenAligned, _overlaySurface.format);
 
-			videoRamChanged = true;
+			firstRun = true;
 		} else {
 			_chunkySurface.init(_width, _height, _width, _chunkySurface.getPixels(), _format);
 			_screenSurface8.init(_width, _height, _width, _screenSurface8.getPixels(), _format);
@@ -169,8 +169,10 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 
 #ifdef SCREEN_ACTIVE
 		setVidelResolution(false);
-		if (videoRamChanged)
+		if (firstRun) {
 			asm_screen_set_vram(_screenSurface8.getPixels());
+			asm_screen_set_falcon_palette(_palette);
+		}
 		_oldAspectRatioCorrection = _aspectRatioCorrection;
 #endif
 		_mouseX = _width / 2;
@@ -354,9 +356,11 @@ void AtariGraphicsManager::showOverlay() {
 	memset(_screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 
 	if (_vgaMonitor)
-		asm_screen_set_scp_res(scp_320x240x16_vga, true);
+		asm_screen_set_scp_res(scp_320x240x16_vga);
 	else
-		asm_screen_set_scp_res(scp_320x240x16_rgb, true);
+		asm_screen_set_scp_res(scp_320x240x16_rgb);
+
+	waitForVbl();
 #endif
 
 	// _cursorRect may get used if _mouseVisible = false
@@ -507,38 +511,50 @@ void AtariGraphicsManager::updateMousePosition(int deltaX, int deltaY) {
 	_cursorModified = true;
 }
 
-void AtariGraphicsManager::setVidelResolution(bool waitForVbl) const
+void AtariGraphicsManager::setVidelResolution(bool vsync) const
 {
 	if (_vgaMonitor) {
 		// TODO: aspect ratio correction
 		if (_width == 320) {
 			if (_height == 200)
-				asm_screen_set_scp_res(scp_320x200x8_vga, waitForVbl);
+				asm_screen_set_scp_res(scp_320x200x8_vga);
 			else
-				asm_screen_set_scp_res(scp_320x240x8_vga, waitForVbl);
+				asm_screen_set_scp_res(scp_320x240x8_vga);
 		} else {
 			if (_height == 400)
-				asm_screen_set_scp_res(scp_640x400x8_vga, waitForVbl);
+				asm_screen_set_scp_res(scp_640x400x8_vga);
 			else
-				asm_screen_set_scp_res(scp_640x480x8_vga, waitForVbl);
+				asm_screen_set_scp_res(scp_640x480x8_vga);
 		}
 	} else {
 		if (_width == 320) {
 			if (_height == 240)
-				asm_screen_set_scp_res(scp_320x240x8_rgb, waitForVbl);
+				asm_screen_set_scp_res(scp_320x240x8_rgb);
 			else if (_height == 200 && _aspectRatioCorrection)
-				asm_screen_set_scp_res(scp_320x200x8_rgb60, waitForVbl);
+				asm_screen_set_scp_res(scp_320x200x8_rgb60);
 			else
-				asm_screen_set_scp_res(scp_320x200x8_rgb, waitForVbl);
+				asm_screen_set_scp_res(scp_320x200x8_rgb);
 		} else {
 			if (_height == 480)
-				asm_screen_set_scp_res(scp_640x480x8_rgb, waitForVbl);
+				asm_screen_set_scp_res(scp_640x480x8_rgb);
 			else if (_height == 400 && _aspectRatioCorrection)
-				asm_screen_set_scp_res(scp_640x400x8_rgb60, waitForVbl);
+				asm_screen_set_scp_res(scp_640x400x8_rgb60);
 			else
-				asm_screen_set_scp_res(scp_640x400x8_rgb, waitForVbl);
+				asm_screen_set_scp_res(scp_640x400x8_rgb);
 		}
 	}
+
+	if (vsync) {
+		waitForVbl();
+	}
+}
+
+void AtariGraphicsManager::waitForVbl() const
+{
+	extern volatile uint32 vbl_counter;
+	uint32 counter = vbl_counter;
+
+	while (counter == vbl_counter);
 }
 
 void AtariGraphicsManager::handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface)

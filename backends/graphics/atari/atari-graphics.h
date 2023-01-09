@@ -78,7 +78,8 @@ public:
 	void updateMousePosition(int deltaX, int deltaY);
 
 private:
-	void setVidelResolution(bool waitForVbl) const;
+	void setVidelResolution(bool vsync) const;
+	void waitForVbl() const;
 
 	static void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
 
