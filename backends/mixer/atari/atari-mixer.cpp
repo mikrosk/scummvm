@@ -28,7 +28,9 @@ AtariMixerManager::AtariMixerManager() : MixerManager() {
 	//_samples = 8192;
 	//while (_samples * 16 > _outputRate * 2)
 	//	_samples >>= 1;
-	_samples = 1024;	// 50 KHz -> 2048 (freq / (1000 / 45ms))
+
+	// make it double, way less stuttering
+	_samples = 2*1024;	// 50 KHz -> 2048 (freq / (1000 / 45ms))
 	_samplesBuf = new uint8[_samples * 4];
 
 	g_system->getEventManager()->getEventDispatcher()->registerObserver(this, 10, false);
