@@ -565,6 +565,10 @@ void AtariGraphicsManager::updateMousePosition(int deltaX, int deltaY) {
 }
 
 bool AtariGraphicsManager::notifyEvent(const Common::Event &event) {
+	if (event.type != Common::EVENT_CUSTOM_BACKEND_ACTION_START) {
+		return false;
+	}
+
 	switch ((CustomEventAction) event.customType) {
 	case kActionToggleAspectRatioCorrection:
 		_aspectRatioCorrection = !_aspectRatioCorrection;
