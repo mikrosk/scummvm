@@ -39,8 +39,12 @@
 
 #include "backends/graphics/atari/atari_c2p-asm.h"
 #include "backends/graphics/atari/atari-graphics-asm.h"
+#include "backends/keymapper/action.h"
+#include "backends/keymapper/keymap.h"
+
 #include "common/foreach.h"
 #include "common/str.h"
+#include "common/translation.h"
 
 #define OVERLAY_WIDTH	320
 #define OVERLAY_HEIGHT	240
@@ -52,9 +56,13 @@
 
 AtariGraphicsManager::AtariGraphicsManager() {
 	_vgaMonitor = VgetMonitor() == MON_VGA;
+
+	g_system->getEventManager()->getEventDispatcher()->registerObserver(this, 10, false);
 }
 
 AtariGraphicsManager::~AtariGraphicsManager() {
+	g_system->getEventManager()->getEventDispatcher()->unregisterObserver(this);
+
 	Mfree(_chunkyBuffer);
 	_chunkyBuffer = nullptr;
 
@@ -554,6 +562,30 @@ void AtariGraphicsManager::updateMousePosition(int deltaX, int deltaY) {
 		_mouseY = maxY - 1;
 
 	_cursorModified = true;
+}
+
+bool AtariGraphicsManager::notifyEvent(const Common::Event &event) {
+	switch ((CustomEventAction) event.customType) {
+	case kActionToggleAspectRatioCorrection:
+		_aspectRatioCorrection = !_aspectRatioCorrection;
+		return true;
+	}
+
+	return false;
+}
+
+Common::Keymap *AtariGraphicsManager::getKeymap() const {
+	Common::Keymap *keymap = new Common::Keymap(Common::Keymap::kKeymapTypeGlobal, "atari-graphics", _("Graphics"));
+	Common::Action *act;
+
+	if (hasFeature(OSystem::kFeatureAspectRatioCorrection)) {
+		act = new Common::Action("ASPT", _("Toggle aspect ratio correction"));
+		act->addDefaultInputMapping("C+A+a");
+		act->setCustomBackendActionEvent(kActionToggleAspectRatioCorrection);
+		keymap->addAction(act);
+	}
+
+	return keymap;
 }
 
 bool AtariGraphicsManager::allocateAtariSurface(

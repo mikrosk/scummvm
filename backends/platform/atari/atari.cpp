@@ -72,6 +72,7 @@ public:
 	void delayMillis(uint msecs) override;
 	void getTimeAndDate(TimeDate &td, bool skipRecord = false) const override;
 
+	Common::KeymapArray getGlobalKeymaps() override;
 	Common::HardwareInputSet *getHardwareInputSet() override;
 
 	void quit() override;
@@ -101,7 +102,7 @@ private:
 	byte _shiftToAscii[128];
 	byte _capsToAscii[128];
 
-	Common::KeyCode _asciiToKeycode[128 - 32 - 1] = {
+	const Common::KeyCode _asciiToKeycode[128 - 32 - 1] = {
 		Common::KEYCODE_SPACE,
 		Common::KEYCODE_EXCLAIM,
 		Common::KEYCODE_QUOTEDBL,
@@ -553,6 +554,15 @@ void OSystem_Atari::getTimeAndDate(TimeDate &td, bool skipRecord) const {
 	td.tm_mon = t.tm_mon;
 	td.tm_year = t.tm_year;
 	td.tm_wday = t.tm_wday;
+}
+
+Common::KeymapArray OSystem_Atari::getGlobalKeymaps() {
+	Common::KeymapArray globalMaps = BaseBackend::getGlobalKeymaps();
+
+	Common::Keymap *keymap = _atariGraphicsManager->getKeymap();
+	globalMaps.push_back(keymap);
+
+	return globalMaps;
 }
 
 Common::HardwareInputSet *OSystem_Atari::getHardwareInputSet()

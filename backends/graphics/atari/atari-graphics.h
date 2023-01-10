@@ -25,10 +25,11 @@
 #include "backends/graphics/graphics.h"
 
 #include "common/array.h"
+#include "common/events.h"
 #include "common/rect.h"
 #include "graphics/surface.h"
 
-class AtariGraphicsManager : public GraphicsManager {
+class AtariGraphicsManager : public GraphicsManager, Common::EventObserver {
 public:
 	AtariGraphicsManager();
 	virtual ~AtariGraphicsManager();
@@ -77,7 +78,14 @@ public:
 	Common::Point getMousePosition() const { return Common::Point(_mouseX, _mouseY); }
 	void updateMousePosition(int deltaX, int deltaY);
 
+	bool notifyEvent(const Common::Event &event) override;
+	Common::Keymap *getKeymap() const;
+
 private:
+	enum CustomEventAction {
+		kActionToggleAspectRatioCorrection = 100,
+	};
+
 	bool allocateAtariSurface(byte *&buf, Graphics::Surface &surface,
 							  int width, int height, const Graphics::PixelFormat &format, int mode,
 							  size_t forcedAllocationSize = 0);

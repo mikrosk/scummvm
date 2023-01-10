@@ -30,9 +30,13 @@ AtariMixerManager::AtariMixerManager() : MixerManager() {
 	//	_samples >>= 1;
 	_samples = 1024;	// 50 KHz -> 2048 (freq / (1000 / 45ms))
 	_samplesBuf = new uint8[_samples * 4];
+
+	g_system->getEventManager()->getEventDispatcher()->registerObserver(this, 10, false);
 }
 
 AtariMixerManager::~AtariMixerManager() {
+	g_system->getEventManager()->getEventDispatcher()->unregisterObserver(this);
+
 	Buffoper(0x00);
 
 	Mfree(_atariSampleBuffer);
@@ -99,8 +103,24 @@ int AtariMixerManager::resumeAudio() {
 	return 0;
 }
 
+bool AtariMixerManager::notifyEvent(const Common::Event &event) {
+	switch (event.type) {
+	case Common::EVENT_QUIT:
+	case Common::EVENT_RETURN_TO_LAUNCHER:
+		memset(_atariSampleBuffer, 0, 2 * _atariSampleBufferSize);
+		return false;
+	case Common::EVENT_MUTE:
+		_muted = !_muted;
+		return false;
+	default:
+		[[fallthrough]];
+	}
+
+	return false;
+}
+
 void AtariMixerManager::update() {
-	if (_audioSuspended) {
+	if (_audioSuspended && !_muted) {
 		return;
 	}
 
