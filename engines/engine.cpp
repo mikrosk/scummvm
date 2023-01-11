@@ -225,6 +225,12 @@ void initCommonGFX() {
 
 		if (gameDomain->contains("shader"))
 			g_system->setShader(ConfMan.get("shader").c_str());
+
+		if (gameDomain->contains("gfx_mode"))
+			g_system->setGraphicsMode(ConfMan.get("gfx_mode").c_str());
+
+		if ( gameDomain->contains("vsync"))
+			g_system->setFeatureState(OSystem::kFeatureVSync, ConfMan.getBool("vsync"));
 	}
 }
 

@@ -38,9 +38,9 @@ public:
 	void setFeatureState(OSystem::Feature f, bool enable) override;
 	bool getFeatureState(OSystem::Feature f) const override;
 
-	virtual const OSystem::GraphicsMode *getSupportedGraphicsModes() const {
+	virtual const OSystem::GraphicsMode *getSupportedGraphicsModes() const override {
 		static const OSystem::GraphicsMode graphicsModes[] = {
-			{"direct", "Direct rendering", 0},
+			{"supervidel", "SuperVidel (8-bit)", 0},
 			{"single", "Single buffering", 1},
 			{"double", "Double buffering", 2},
 			{"triple", "Triple buffering", 3},
@@ -48,8 +48,9 @@ public:
 		};
 		return graphicsModes;
 	}
+	int getDefaultGraphicsMode() const override { return (int)GraphicsMode::TripleBuffering; }
 	bool setGraphicsMode(int mode, uint flags = OSystem::kGfxModeNoFlags) override;
-	int getGraphicsMode() const override { return (int)_graphicsMode; }
+	int getGraphicsMode() const override { return (int)_currentState.mode; }
 
 	void initSize(uint width, uint height, const Graphics::PixelFormat *format = NULL) override;
 
@@ -58,8 +59,8 @@ public:
 	void beginGFXTransaction() override;
 	OSystem::TransactionError endGFXTransaction() override;
 
-	int16 getHeight() const override { return _height; }
-	int16 getWidth() const override { return _width; }
+	int16 getHeight() const override { return _currentState.height; }
+	int16 getWidth() const override { return _currentState.width; }
 	void setPalette(const byte *colors, uint start, uint num) override;
 	void grabPalette(byte *colors, uint start, uint num) const override;
 	void copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h) override;
@@ -98,10 +99,14 @@ private:
 	};
 
 	bool allocateAtariSurface(byte *&buf, Graphics::Surface &surface,
-							  int width, int height, const Graphics::PixelFormat &format, int mode,
-							  size_t forcedAllocationSize = 0);
+							  int width, int height, const Graphics::PixelFormat &format, int mode);
 	void setVidelResolution() const;
 	void waitForVbl() const;
+
+	void updateOverlay(bool updateCursor);
+	void updateDirectBuffer(bool updateCursor);
+	void updateSingleBuffer(bool updateCursor);
+	void updateDoubleAndTripleBuffer(bool updateCursor);
 
 	static void copySurface8ToSurface16(const Graphics::Surface &srcSurface, const byte *srcPalette,
 										Graphics::Surface &dstSurface, int destX, int destY,
@@ -109,15 +114,17 @@ private:
 	static void copySurface8ToSurface16WithKey(const Graphics::Surface &srcSurface, const byte* srcPalette,
 											   Graphics::Surface &dstSurface, int destX, int destY,
 											   const Common::Rect subRect, uint32 key);
-	static void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
+	void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
 
 	void updateCursorRect();
-	void prepareCursorSurface8();
+	void copyCursorSurface8(const Graphics::Surface &backgroundSufrace, Graphics::Surface &screenSurface);
 
 	bool _vgaMonitor = true;
+	bool _superVidel = false;
 	bool _aspectRatioCorrection = false;
 	bool _oldAspectRatioCorrection = false;
 	bool _vsync = true;
+	bool _ignoreVsync = false;
 
 	enum class GraphicsMode : int {
 		DirectRendering,
@@ -125,7 +132,25 @@ private:
 		DoubleBuffering,
 		TripleBuffering
 	};
-	GraphicsMode _graphicsMode = (GraphicsMode)getDefaultGraphicsMode();
+
+	struct GraphicsState {
+		bool operator==(const GraphicsState &other) const {
+			return mode == other.mode
+				&& width == other.width
+				&& height == other.height
+				&& format == other.format;
+		}
+		bool operator!=(const GraphicsState &other) const {
+			return !(*this == other);
+		}
+
+		GraphicsMode mode;
+		int width;
+		int height;
+		Graphics::PixelFormat format;
+	};
+	GraphicsState _currentState = {};
+	GraphicsState _pendingState = {};
 
 	enum class PendingResolutionChange {
 		None,
@@ -134,14 +159,17 @@ private:
 	};
 	PendingResolutionChange _pendingResolutionChange = PendingResolutionChange::None;
 
-	uint _width = 0, _height = 0;
-	Graphics::PixelFormat _format = Graphics::PixelFormat(0, 0, 0, 0, 0, 0, 0, 0, 0);
-	uint _oldWidth = 0, _oldHeight = 0;
-
-	byte *_screen = nullptr;
+	bool _screenModified = false;	// double/triple buffering only
+	static const int SCREENS = 3;
+	const int FRONT_BUFFER = 0;
+	const int BACK_BUFFER1 = 1;
+	const int BACK_BUFFER2 = 2;
+	byte *_screen[SCREENS] = {};	// for Mfree() purposes only
+	byte *_screenAligned[SCREENS] = {};
 	Graphics::Surface _screenSurface8;
 	byte *_overlay = nullptr;
 	Graphics::Surface _screenSurface16;
+	Common::Rect _modifiedScreenRect;	// direct rendering only
 
 	byte *_chunkyBuffer = nullptr;
 	Graphics::Surface _chunkySurface;
@@ -167,7 +195,7 @@ private:
 	Common::Rect _cursorDstRect;
 	Common::Rect _oldCursorRect;
 
-	uint _palette[256] = {};
+	uint _palette[256];
 	byte _overlayCursorPalette[256*3] = {};
 };
 

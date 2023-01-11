@@ -651,3 +651,4 @@ test/engines/wintermute
 test/image
 test/math
 video
+backends/graphics/atari

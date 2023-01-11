@@ -354,8 +354,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 	static uint32 diffAvg;
 
 	if (counter == 60) {
-//		Common::String str = Common::String::format("avg ms per frame: %d\n", diffAvg / 60);
-//		g_system->logMessage(LogMessageType::kDebug, str.c_str());
+		//debug("avg ms per frame: %d", diffAvg / 60);
 
 		counter = 0;
 		diffAvg = 0;

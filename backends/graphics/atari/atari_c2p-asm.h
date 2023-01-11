@@ -26,7 +26,8 @@
 
 extern "C" {
 
-void c2p1x1_8_falcon(const char* pChunky, const char* pChunkyEnd, uint32_t chunkyWidth, uint32_t chunkyPitch, char* pScreen, uint32_t screenPitch);
+void asm_c2p1x1_8(const char* pChunky, const char* pChunkyEnd, char* pScreen);
+void asm_c2p1x1_8_rect(const char* pChunky, const char* pChunkyEnd, uint32_t chunkyWidth, uint32_t chunkyPitch, char* pScreen, uint32_t screenPitch);
 
 }
 

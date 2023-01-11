@@ -294,7 +294,7 @@ vbl_skip:
 	move.w	(a0)+,0xffff82c2.w
 	move.w	(a0)+,0xffff8210.w
 
-	subq.w	#1,has_pending_scp		| in case VBL is called during set_scp_res()
+	clr.w	has_pending_scp
 vbl_no_pending_scp:
 
 	tst.w	has_pending_vram
@@ -306,7 +306,7 @@ vbl_no_pending_scp:
 	move.l	d0,0xffff8200.w
 	move.b	d1,0xffff820d.w
 
-	subq.w	#1,has_pending_vram		| in case VBL is called during set_vram()
+	clr.w	has_pending_vram
 vbl_no_pending_vram:
 
 	tst.w	has_pending_palette
@@ -321,7 +321,7 @@ vbl_falcon_palette_loop:
 	move.l	(a0)+,(a1)+
 	dbra	d0,vbl_falcon_palette_loop
 
-	subq.w	#1,has_pending_palette		| in case VBL is called during set_falcon_palette()
+	clr.w	has_pending_palette
 
 vbl_no_pending_palette:
 	movem.l	(sp)+,d0-d1/a0-a1
