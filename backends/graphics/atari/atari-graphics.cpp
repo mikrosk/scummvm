@@ -381,6 +381,10 @@ void AtariGraphicsManager::updateScreen() {
 	}
 }
 
+void AtariGraphicsManager::setShakePos(int shakeXOffset, int shakeYOffset) {
+	debug("setShakePos: %d, %d", shakeXOffset, shakeYOffset);
+}
+
 void AtariGraphicsManager::showOverlay() {
 	Common::String str = Common::String::format("showOverlay\n");
 	g_system->logMessage(LogMessageType::kDebug, str.c_str());
