@@ -746,6 +746,8 @@ void OptionsDialog::apply() {
 			g_system->setFeatureState(OSystem::kFeatureFullscreenMode, ConfMan.getBool("fullscreen", _domain));
 		if (ConfMan.hasKey("filtering"))
 			g_system->setFeatureState(OSystem::kFeatureFilteringMode, ConfMan.getBool("filtering", _domain));
+		if (ConfMan.hasKey("vsync"))
+			g_system->setFeatureState(OSystem::kFeatureVSync, ConfMan.getBool("vsync", _domain));
 
 		g_system->setShader(ConfMan.get("shader", _domain).c_str());
 
@@ -1907,6 +1909,17 @@ void OptionsDialog::setupGraphicsTab() {
 		_scalerPopUp->setVisible(false);
 		_scaleFactorPopUp->setVisible(false);
 	}
+#ifdef ATARI
+	{
+		const int vSpacing = _renderModePopUp->getRelY() - (_gfxPopUp->getRelY() + _gfxPopUp->getHeight());
+		_aspectCheckbox->setPos(_aspectCheckbox->getRelX(), _renderModePopUp->getRelY() + _renderModePopUp->getHeight() + vSpacing);
+		_vsyncCheckbox->setPos(_vsyncCheckbox->getRelX(), _aspectCheckbox->getRelY() + _aspectCheckbox->getHeight() + vSpacing);
+
+		_fullscreenCheckbox->setVisible(false);
+		_rendererTypePopUpDesc->setVisible(false);
+		_rendererTypePopUp->setVisible(false);
+	}
+#endif
 }
 
 void OptionsDialog::updateScaleFactors(uint32 tag) {

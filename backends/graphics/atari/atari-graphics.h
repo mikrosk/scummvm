@@ -38,7 +38,18 @@ public:
 	void setFeatureState(OSystem::Feature f, bool enable) override;
 	bool getFeatureState(OSystem::Feature f) const override;
 
+	virtual const OSystem::GraphicsMode *getSupportedGraphicsModes() const {
+		static const OSystem::GraphicsMode graphicsModes[] = {
+			{"direct", "Direct rendering", 0},
+			{"single", "Single buffering", 1},
+			{"double", "Double buffering", 2},
+			{"triple", "Triple buffering", 3},
+			{nullptr, nullptr, 0 }
+		};
+		return graphicsModes;
+	}
 	bool setGraphicsMode(int mode, uint flags = OSystem::kGfxModeNoFlags) override;
+	int getGraphicsMode() const override { return (int)_graphicsMode; }
 
 	void initSize(uint width, uint height, const Graphics::PixelFormat *format = NULL) override;
 
@@ -106,6 +117,15 @@ private:
 	bool _vgaMonitor = true;
 	bool _aspectRatioCorrection = false;
 	bool _oldAspectRatioCorrection = false;
+	bool _vsync = true;
+
+	enum class GraphicsMode : int {
+		DirectRendering,
+		SingleBuffering,
+		DoubleBuffering,
+		TripleBuffering
+	};
+	GraphicsMode _graphicsMode = (GraphicsMode)getDefaultGraphicsMode();
 
 	enum class PendingResolutionChange {
 		None,
