@@ -43,6 +43,7 @@ public:
 	bool notifyEvent(const Common::Event &event) override;
 
 private:
+	int _clk;
 	uint32 _outputRate;
 	uint32 _samples;
 	uint8 *_samplesBuf;

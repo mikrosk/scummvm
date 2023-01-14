@@ -21,16 +21,67 @@
 
 #include "backends/mixer/atari/atari-mixer.h"
 
+#include <math.h>
+
 #include <mint/falcon.h>
 
-AtariMixerManager::AtariMixerManager() : MixerManager() {
-	_outputRate = 24585;
-	//_samples = 8192;
-	//while (_samples * 16 > _outputRate * 2)
-	//	_samples >>= 1;
+#include "common/config-manager.h"
+#include "common/debug.h"
 
-	// make it double, way less stuttering
-	_samples = 2*1024;	// 50 KHz -> 2048 (freq / (1000 / 45ms))
+#define DEFAULT_OUTPUT_RATE 24585
+
+AtariMixerManager::AtariMixerManager() : MixerManager() {
+	ConfMan.registerDefault("output_rate", DEFAULT_OUTPUT_RATE);
+
+	_outputRate = ConfMan.getInt("output_rate");
+	if (_outputRate <= 0)
+		_outputRate = DEFAULT_OUTPUT_RATE;
+
+	int diff50, diff33, diff25, diff20, diff16, diff12, diff10, diff8;
+	diff50 = abs(49170 - (int)_outputRate);
+	diff33 = abs(32780 - (int)_outputRate);
+	diff25 = abs(24585 - (int)_outputRate);
+	diff20 = abs(19668 - (int)_outputRate);
+	diff16 = abs(16390 - (int)_outputRate);
+	diff12 = abs(12292 - (int)_outputRate);
+	diff10 = abs(9834 - (int)_outputRate);
+	diff8  = abs(8195 - (int)_outputRate);
+
+	if (diff50 < diff33) {
+		_outputRate = 49170;
+		_clk = CLK50K;
+	} else if (diff33 < diff25) {
+		_outputRate = 32780;
+		_clk = CLK33K;
+	} else if (diff25 < diff20) {
+		_outputRate = 24585;
+		_clk = CLK25K;
+	} else if (diff20 < diff16) {
+		_outputRate = 19668;
+		_clk = CLK20K;
+	} else if (diff16 < diff12) {
+		_outputRate = 16390;
+		_clk = CLK16K;
+	} else if (diff12 < diff10) {
+		_outputRate = 12292;
+		_clk = CLK12K;
+	} else if (diff10 < diff8) {
+		_outputRate = 9834;
+		_clk = CLK10K;
+	} else {
+		_outputRate = 8195;
+		_clk = CLK8K;
+	}
+
+	ConfMan.setInt("output_rate", _outputRate);
+	debug("setting %d Hz mixing frequency", _outputRate);
+
+	_samples = 8192;
+	while (_samples * 16 > _outputRate * 2)
+		_samples >>= 1;
+
+	debug("sample buffer size: %d", _samples);
+
 	_samplesBuf = new uint8[_samples * 4];
 
 	g_system->getEventManager()->getEventDispatcher()->registerObserver(this, 10, false);
@@ -71,7 +122,7 @@ void AtariMixerManager::init() {
 
 	Sndstatus(SND_RESET);
 	Setmode(MODE_STEREO16);
-	Devconnect(DMAPLAY, DAC, CLK25M, CLK25K, NO_SHAKE);
+	Devconnect(DMAPLAY, DAC, CLK25M, _clk, NO_SHAKE);
 	Soundcmd(ADDERIN, MATIN);
 	Setbuffer(SR_PLAY, _atariSampleBuffer, _atariSampleBuffer + 2 * _atariSampleBufferSize);
 	Buffoper(SB_PLA_ENA | SB_PLA_RPT);
