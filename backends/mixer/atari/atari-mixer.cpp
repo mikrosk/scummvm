@@ -80,6 +80,13 @@ AtariMixerManager::AtariMixerManager() : MixerManager() {
 	while (_samples * 16 > _outputRate * 2)
 		_samples >>= 1;
 
+	ConfMan.registerDefault("output_samples", (int)_samples);
+
+	int samples = ConfMan.getInt("output_samples");
+	if (samples > 0)
+		_samples = samples;
+
+	ConfMan.setInt("output_samples", (int)_samples);
 	debug("sample buffer size: %d", _samples);
 
 	_samplesBuf = new uint8[_samples * 4];
@@ -160,6 +167,7 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	switch (event.type) {
 	case Common::EVENT_QUIT:
 	case Common::EVENT_RETURN_TO_LAUNCHER:
+		debug("silencing the mixer");
 		memset(_atariSampleBuffer, 0, 2 * _atariSampleBufferSize);
 		return false;
 	case Common::EVENT_MUTE:
