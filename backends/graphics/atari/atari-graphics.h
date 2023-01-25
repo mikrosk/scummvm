@@ -40,13 +40,13 @@ public:
 
 	virtual const OSystem::GraphicsMode *getSupportedGraphicsModes() const override {
 		static const OSystem::GraphicsMode graphicsModes[] = {
-			{"supervidel", "SuperVidel (8-bit)", 0},
+			{"supervidel", "Direct (8-bit)", 0},
 			{"single", "Single buffering", 1},
 			{"double", "Double buffering", 2},
 			{"triple", "Triple buffering", 3},
 			{nullptr, nullptr, 0 }
 		};
-		return graphicsModes;
+		return _superVidel ? &graphicsModes[0] : &graphicsModes[1];
 	}
 	int getDefaultGraphicsMode() const override { return (int)GraphicsMode::TripleBuffering; }
 	bool setGraphicsMode(int mode, uint flags = OSystem::kGfxModeNoFlags) override;
@@ -87,7 +87,7 @@ public:
 	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale = false, const Graphics::PixelFormat *format = NULL) override;
 	void setCursorPalette(const byte *colors, uint start, uint num) override;
 
-	Common::Point getMousePosition() const { return Common::Point(_mouseX, _mouseY); }
+	Common::Point getMousePosition() const { return _cursor.getPosition(); }
 	void updateMousePosition(int deltaX, int deltaY);
 
 	bool notifyEvent(const Common::Event &event) override;
@@ -103,10 +103,10 @@ private:
 	void setVidelResolution() const;
 	void waitForVbl() const;
 
-	void updateOverlay(bool updateCursor);
-	void updateDirectBuffer(bool updateCursor);
-	void updateSingleBuffer(bool updateCursor);
-	void updateDoubleAndTripleBuffer(bool updateCursor);
+	void updateOverlay();
+	void updateDirectBuffer();
+	void updateSingleBuffer();
+	void updateDoubleAndTripleBuffer();
 
 	static void copySurface8ToSurface16(const Graphics::Surface &srcSurface, const byte *srcPalette,
 										Graphics::Surface &dstSurface, int destX, int destY,
@@ -180,19 +180,65 @@ private:
 	Graphics::Surface _overlaySurface;
 	Common::Array<Common::Rect> _modifiedOverlayRects;
 
-	bool _mouseVisible = false;
-	bool _mouseOutOfScreen = false;
-	int _mouseX = -1, _mouseY = -1;
-	int _oldMouseX = -1, _oldMouseY = -1;
+	struct Cursor {
+		void update(const Graphics::Surface &screen);
 
-	bool _cursorModified = false;
-	Graphics::Surface _cursorSurface;
+		bool isModified() const {
+			return surfaceChanged || positionChanged;
+		}
+
+		bool visible = false;
+
+		// position
+		Common::Point getPosition() const {
+			return Common::Point(x, y);
+		}
+		void setPosition(int _x, int _y, bool override = false) {
+			if (x == _x && y == _y)
+				return;
+
+			if (!visible && !override)
+				return;
+
+			x = _x;
+			y = _y;
+			positionChanged = true;
+		}
+		void updatePosition(int deltaX, int deltaY, const Graphics::Surface &screen);
+		bool positionChanged = false;
+		void swap() {
+			const int tmpX = oldX;
+			const int tmpY = oldY;
+
+			oldX = x;
+			oldY = y;
+
+			x = tmpX;
+			y = tmpY;
+
+			positionChanged = false;
+		}
+
+		// surface
+		void setSurface(const void *buf, int w, int h, int _hotspotX, int _hotspotY, uint32 _keycolor, const Graphics::PixelFormat *format);
+		bool surfaceChanged = false;
+		Graphics::Surface surface;
+		uint32 keycolor;
+
+		// rects (valid only if !outOfScreen)
+		bool outOfScreen = true;
+		Common::Rect srcRect;
+		Common::Rect dstRect;
+
+	private:
+		int x = -1, y = -1;
+		int oldX = -1, oldY = -1;
+
+		int hotspotX;
+		int hotspotY;
+	} _cursor;
+
 	Graphics::Surface _cursorSurface8;
-	int _cursorHotspotX;
-	int _cursorHotspotY;
-	uint32 _cursorKeycolor;
-	Common::Rect _cursorSrcRect;
-	Common::Rect _cursorDstRect;
 	Common::Rect _oldCursorRect;
 
 	uint _palette[256];
