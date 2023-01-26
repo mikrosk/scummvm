@@ -172,6 +172,7 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 		return false;
 	case Common::EVENT_MUTE:
 		_muted = !_muted;
+		debug("audio %s", _muted ? "off" : "on");
 		return false;
 	default:
 		[[fallthrough]];
