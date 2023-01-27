@@ -431,6 +431,7 @@ backends/graphics/atari/320x240x8_vga.h
 backends/graphics/atari/640x400x8_rgb.h
 backends/graphics/atari/640x400x8_rgb60.h
 backends/graphics/atari/640x400x8_vga.h
+backends/graphics/atari/640x480x16_rgb.h
 backends/graphics/atari/640x480x8_rgb.h
 backends/graphics/atari/640x480x8_vga.h
 backends/graphics/atari/atari-graphics-asm.h

@@ -37,6 +37,7 @@
 #include "backends/graphics/atari/640x400x8_vga.h"
 #include "backends/graphics/atari/640x480x8_rgb.h"
 #include "backends/graphics/atari/640x480x8_vga.h"
+#include "backends/graphics/atari/640x480x16_rgb.h"
 
 #include "backends/graphics/atari/atari_c2p-asm.h"
 #include "backends/graphics/atari/atari-graphics-asm.h"
@@ -383,10 +384,21 @@ void AtariGraphicsManager::updateScreen() {
 
 	switch (_pendingResolutionChange) {
 	case PendingResolutionChange::Overlay:
-		if (_vgaMonitor)
-			asm_screen_set_scp_res(scp_320x240x16_vga);
-		else
-			asm_screen_set_scp_res(scp_320x240x16_rgb);
+		if (_vgaMonitor) {
+			if (_superVidel) {
+				int16 old_mode = VsetMode(VM_INQUIRE);
+				// 640x480
+				// VsetMode((old_mode&PAL) | (old_mode&VGA) | COL80 | BPS16);
+				// (use SVEXT to force the extended mode so when exiting from 320x200/640x400 the screen is no longer scaled)
+				VsetMode(SVEXT | SVEXT_BASERES(0) | (old_mode&PAL) | (old_mode&VGA) | COL80 | BPS16);
+				VsetScreen(SCR_NOCHANGE, _screenSurface16.getPixels(), SCR_NOCHANGE, SCR_NOCHANGE);
+			} else {
+				asm_screen_set_scp_res(scp_320x240x16_vga);
+			}
+		} else {
+			//asm_screen_set_scp_res(scp_320x240x16_rgb);
+			asm_screen_set_scp_res(scp_640x480x16_rgb);
+		}
 
 		asm_screen_set_vram(_screenSurface16.getPixels());
 
@@ -466,14 +478,31 @@ void AtariGraphicsManager::clearOverlay() {
 
 	const Graphics::Surface &sourceSurface = _superVidel ? _screenSurface8 : _chunkySurface;
 
+	int w = sourceSurface.w;
+	int h = sourceSurface.h;
 	int vOffset = 0;
-	int height = sourceSurface.h;
 
-	if (height < getOverlayHeight()) {
-		vOffset = (getOverlayHeight() - height) / 2;
-	} else if (height > getOverlayHeight()) {
-		height /= 2;
-		vOffset = (getOverlayHeight() - height) / 2;
+	if (h == 200) {
+		h = 240;
+		vOffset = (240 - 200) / 2;
+	} else if (h == 400) {
+		h = 480;
+		vOffset = (480 - 400) / 2;
+	}
+
+	ScaleMode scaleMode;
+	if (w == _overlaySurface.w && h == _overlaySurface.h) {
+		scaleMode = ScaleMode::None;
+	} else if (w / _overlaySurface.w == 2 && h / _overlaySurface.h == 2) {
+		scaleMode = ScaleMode::Downscale;
+		vOffset /= 2;
+	} else if (_overlaySurface.w / w == 2 && _overlaySurface.h / h == 2) {
+		scaleMode = ScaleMode::Upscale;
+		vOffset *= 2;
+	} else {
+		warning("Unknown overlay (%d, %d) / screen (%d, %d) ratio: ",
+			_overlaySurface.w, _overlaySurface.h, w, h);
+		return;
 	}
 
 	static byte palette[256 * 3];
@@ -485,8 +514,9 @@ void AtariGraphicsManager::clearOverlay() {
 		palette,
 		_overlaySurface,
 		0, vOffset,
-		Common::Rect(sourceSurface.w, sourceSurface.h));
-	memset(_overlaySurface.getBasePtr(0, vOffset + height), 0, _overlaySurface.pitch * vOffset);
+		Common::Rect(sourceSurface.w, sourceSurface.h),
+		scaleMode);
+	memset(_overlaySurface.getBasePtr(0, _overlaySurface.h - vOffset), 0, _overlaySurface.pitch * vOffset);
 
 	handleModifiedRect(Common::Rect(_overlaySurface.w, _overlaySurface.h), _modifiedOverlayRects, _overlaySurface);
 }
@@ -506,11 +536,11 @@ void AtariGraphicsManager::copyRectToOverlay(const void *buf, int pitch, int x, 
 }
 
 int16 AtariGraphicsManager::getOverlayHeight() const {
-	return OVERLAY_HEIGHT;
+	return _superVidel || !_vgaMonitor ? OVERLAY_HEIGHT * 2 : OVERLAY_HEIGHT;
 }
 
 int16 AtariGraphicsManager::getOverlayWidth() const {
-	return OVERLAY_WIDTH;
+	return _superVidel || !_vgaMonitor ? OVERLAY_WIDTH * 2 : OVERLAY_WIDTH;
 }
 
 bool AtariGraphicsManager::showMouse(bool visible) {
@@ -641,7 +671,6 @@ void AtariGraphicsManager::waitForVbl() const
 }
 
 void AtariGraphicsManager::updateOverlay() {
-	// TODO: avoid _overlaySurface, offer higher resolution on SuperVidel?
 	bool drawCursor = _cursor.isModified();
 
 	while (!_modifiedOverlayRects.empty()) {
@@ -875,7 +904,7 @@ void AtariGraphicsManager::updateDoubleAndTripleBuffer()
 void AtariGraphicsManager::copySurface8ToSurface16(
 		const Graphics::Surface &srcSurface, const byte *srcPalette,
 		Graphics::Surface &dstSurface, int destX, int destY,
-		const Common::Rect subRect) {
+		const Common::Rect subRect, ScaleMode scaleMode) {
 	assert(srcSurface.format.bytesPerPixel == 1);
 	assert(dstSurface.format.bytesPerPixel == 2);
 
@@ -884,36 +913,59 @@ void AtariGraphicsManager::copySurface8ToSurface16(
 	const int h = subRect.height();
 	const Graphics::PixelFormat dstFormat = dstSurface.format;
 
-	int hzScale = 1;
-	int scaledWidth = w;
-	if (srcSurface.w > dstSurface.w) {
-		hzScale = 2;
-		scaledWidth /= 2;
-	}
+	const int srcScale = scaleMode == ScaleMode::Downscale ? 2 : 1;
+	const byte *srcRow = (const byte*)srcSurface.getBasePtr(subRect.left * srcScale, subRect.top * srcScale);
+	uint16 *dstRow = (uint16*)dstSurface.getBasePtr(destX, destY);	// already upscaled if needed
 
-	int vScale = 1;
-	int scaledHeight = h;
-	if (srcSurface.h > dstSurface.h) {
-		vScale = 2;
-		scaledHeight /= 2;
-	}
+	// optimized paths for each case...
+	if (scaleMode == ScaleMode::None) {
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				const byte index = *srcRow++;
 
-	const byte *srcRow = (const byte *)srcSurface.getBasePtr(subRect.left * hzScale, subRect.top * vScale);
-	uint16 *dstRow = (uint16 *)dstSurface.getBasePtr(destX, destY);
+				*dstRow++ = dstFormat.RGBToColor(
+					srcPalette[index * 3 + 0],
+					srcPalette[index * 3 + 1],
+					srcPalette[index * 3 + 2]);
+			}
 
-	for (int y = 0; y < scaledHeight; y++) {
-		for (int x = 0; x < scaledWidth; x++) {
-			const byte index = *srcRow;
-			srcRow += hzScale;
-
-			*dstRow++ = dstFormat.RGBToColor(
-				srcPalette[index * 3 + 0],
-				srcPalette[index * 3 + 1],
-				srcPalette[index * 3 + 2]);
+			srcRow += srcSurface.w - w;
+			dstRow += dstSurface.w - w;
 		}
+	} else if (scaleMode == ScaleMode::Downscale) {
+		for (int y = 0; y < h / 2; y++) {
+			for (int x = 0; x < w / 2; x++) {
+				const byte index = *srcRow;
+				srcRow += 2;
 
-		srcRow += (srcSurface.w - w) + (vScale - 1) * srcSurface.w;
-		dstRow += dstSurface.w - scaledWidth;
+				*dstRow++ = dstFormat.RGBToColor(
+					srcPalette[index * 3 + 0],
+					srcPalette[index * 3 + 1],
+					srcPalette[index * 3 + 2]);
+			}
+
+			srcRow += srcSurface.w - w + srcSurface.w;
+			dstRow += dstSurface.w - w / 2;
+		}
+	} else if (scaleMode == ScaleMode::Upscale) {
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				const byte index = *srcRow++;
+
+				const uint16 pixel = dstFormat.RGBToColor(
+					srcPalette[index * 3 + 0],
+					srcPalette[index * 3 + 1],
+					srcPalette[index * 3 + 2]);
+
+				*(dstRow + dstSurface.w) = pixel;
+				*dstRow++ = pixel;
+				*(dstRow + dstSurface.w) = pixel;
+				*dstRow++ = pixel;
+			}
+
+			srcRow += srcSurface.w - w;
+			dstRow += dstSurface.w - w * 2 + dstSurface.w;
+		}
 	}
 }
 

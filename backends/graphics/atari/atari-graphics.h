@@ -108,9 +108,14 @@ private:
 	void updateSingleBuffer();
 	void updateDoubleAndTripleBuffer();
 
+	enum class ScaleMode {
+		None,
+		Upscale,
+		Downscale
+	};
 	static void copySurface8ToSurface16(const Graphics::Surface &srcSurface, const byte *srcPalette,
 										Graphics::Surface &dstSurface, int destX, int destY,
-										const Common::Rect subRect);
+										const Common::Rect subRect, ScaleMode scaleMode);
 	static void copySurface8ToSurface16WithKey(const Graphics::Surface &srcSurface, const byte* srcPalette,
 											   Graphics::Surface &dstSurface, int destX, int destY,
 											   const Common::Rect subRect, uint32 key);
