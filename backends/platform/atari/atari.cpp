@@ -597,6 +597,14 @@ void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
 }
 
 void OSystem_Atari::addSysArchivesToSearchSet(Common::SearchSet &s, int priority) {
+#ifdef DATA_PATH
+	// Add the global DATA_PATH to the directory search list
+	// See also OSystem_SDL::addSysArchivesToSearchSet()
+	Common::FSNode dataNode(DATA_PATH);
+	if (dataNode.exists() && dataNode.isDirectory()) {
+		s.add(DATA_PATH, new Common::FSDirectory(dataNode, 4), priority);
+	}
+#endif
 }
 
 OSystem *OSystem_Atari_create() {

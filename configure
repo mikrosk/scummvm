@@ -3448,11 +3448,13 @@ if test -n "$_host"; then
 			_timidity=no
 			;;
 		m68k-atari-mint)
+			# auto -> yes
 			if test "$_debug_build" = "no"; then
 				# --disable-debug 
 				append_var LDFLAGS "-s"
 			fi
-		
+
+			# auto -> no
 			if test "$_optimizations" = "yes"; then
 				# --enable-release, --enable-optimizations
 				append_var CXXFLAGS "-fomit-frame-pointer"
