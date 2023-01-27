@@ -38,6 +38,7 @@
 #include "backends/graphics/atari/640x480x8_rgb.h"
 #include "backends/graphics/atari/640x480x8_vga.h"
 #include "backends/graphics/atari/640x480x16_rgb.h"
+#include "backends/graphics/atari/640x480x16_vga.h"
 
 #include "backends/graphics/atari/atari_c2p-asm.h"
 #include "backends/graphics/atari/atari-graphics-asm.h"
@@ -385,16 +386,10 @@ void AtariGraphicsManager::updateScreen() {
 	switch (_pendingResolutionChange) {
 	case PendingResolutionChange::Overlay:
 		if (_vgaMonitor) {
-			if (_superVidel) {
-				int16 old_mode = VsetMode(VM_INQUIRE);
-				// 640x480
-				// VsetMode((old_mode&PAL) | (old_mode&VGA) | COL80 | BPS16);
-				// (use SVEXT to force the extended mode so when exiting from 320x200/640x400 the screen is no longer scaled)
-				VsetMode(SVEXT | SVEXT_BASERES(0) | (old_mode&PAL) | (old_mode&VGA) | COL80 | BPS16);
-				VsetScreen(SCR_NOCHANGE, _screenSurface16.getPixels(), SCR_NOCHANGE, SCR_NOCHANGE);
-			} else {
+			if (_superVidel)
+				asm_screen_set_scp_res(scp_640x480x16_vga);
+			else
 				asm_screen_set_scp_res(scp_320x240x16_vga);
-			}
 		} else {
 			//asm_screen_set_scp_res(scp_320x240x16_rgb);
 			asm_screen_set_scp_res(scp_640x480x16_rgb);
