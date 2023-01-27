@@ -283,7 +283,7 @@ const ThemeEngine::Renderer ThemeEngine::_rendererModes[] = {
 const uint ThemeEngine::_rendererModesSize = ARRAYSIZE(ThemeEngine::_rendererModes);
 
 const ThemeEngine::GraphicsMode ThemeEngine::_defaultRendererMode =
-#ifndef DISABLE_FANCY_THEMES
+#if !defined(DISABLE_FANCY_THEMES) && !defined(ATARI)
 	ThemeEngine::kGfxAntialias;
 #else
 	ThemeEngine::kGfxStandard;
