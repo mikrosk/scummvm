@@ -29,6 +29,14 @@
 #include "common/rect.h"
 #include "graphics/surface.h"
 
+// don't waste time and space with that enum operator nonsense...
+namespace PendingScreenChange {
+	constexpr uint16 None		= 0;
+	constexpr uint16 Overlay	= 1<<0;
+	constexpr uint16 Screen		= 1<<1;
+	constexpr uint16 Palette	= 1<<2;
+}
+
 class AtariGraphicsManager : public GraphicsManager, Common::EventObserver {
 public:
 	AtariGraphicsManager();
@@ -40,7 +48,7 @@ public:
 
 	virtual const OSystem::GraphicsMode *getSupportedGraphicsModes() const override {
 		static const OSystem::GraphicsMode graphicsModes[] = {
-			{"supervidel", "Direct (8-bit)", 0},
+			{"direct", "Direct rendering", 0},
 			{"single", "Single buffering", 1},
 			{"double", "Double buffering", 2},
 			{"triple", "Triple buffering", 3},
@@ -98,6 +106,9 @@ private:
 		kActionToggleAspectRatioCorrection = 100,
 	};
 
+	const Graphics::PixelFormat PIXELFORMAT8 = Graphics::PixelFormat::createFormatCLUT8();
+	const Graphics::PixelFormat PIXELFORMAT16 = getOverlayFormat();
+
 	bool allocateAtariSurface(byte *&buf, Graphics::Surface &surface,
 							  int width, int height, const Graphics::PixelFormat &format, int mode);
 	void setVidelResolution() const;
@@ -129,7 +140,6 @@ private:
 	bool _aspectRatioCorrection = false;
 	bool _oldAspectRatioCorrection = false;
 	bool _vsync = true;
-	bool _ignoreVsync = false;
 
 	enum class GraphicsMode : int {
 		DirectRendering,
@@ -156,13 +166,7 @@ private:
 	};
 	GraphicsState _currentState = {};
 	GraphicsState _pendingState = {};
-
-	enum class PendingResolutionChange {
-		None,
-		Overlay,
-		Screen
-	};
-	PendingResolutionChange _pendingResolutionChange = PendingResolutionChange::None;
+	int _pendingScreenChange = PendingScreenChange::None;
 
 	bool _screenModified = false;	// double/triple buffering only
 	static const int SCREENS = 3;
@@ -171,9 +175,9 @@ private:
 	const int BACK_BUFFER2 = 2;
 	byte *_screen[SCREENS] = {};	// for Mfree() purposes only
 	byte *_screenAligned[SCREENS] = {};
-	Graphics::Surface _screenSurface8;
+	Graphics::Surface _screenSurface;
 	byte *_overlay = nullptr;
-	Graphics::Surface _screenSurface16;
+	Graphics::Surface _screenOverlaySurface;
 	Common::Rect _modifiedScreenRect;	// direct rendering only
 
 	byte *_chunkyBuffer = nullptr;
@@ -225,7 +229,7 @@ private:
 		}
 
 		// surface
-		void setSurface(const void *buf, int w, int h, int _hotspotX, int _hotspotY, uint32 _keycolor, const Graphics::PixelFormat *format);
+		void setSurface(const void *buf, int w, int h, int _hotspotX, int _hotspotY, uint32 _keycolor, const Graphics::PixelFormat &format);
 		bool surfaceChanged = false;
 		Graphics::Surface surface;
 		uint32 keycolor;
@@ -234,6 +238,9 @@ private:
 		bool outOfScreen = true;
 		Common::Rect srcRect;
 		Common::Rect dstRect;
+
+		// palette (only used for 16bpp screen surfaces)
+		byte palette[256*3] = {};
 
 	private:
 		int x = -1, y = -1;
@@ -246,8 +253,7 @@ private:
 	Graphics::Surface _cursorSurface8;
 	Common::Rect _oldCursorRect;
 
-	uint _palette[256];
-	byte _overlayCursorPalette[256*3] = {};
+	byte _palette[256*3] = {};
 };
 
 #endif
