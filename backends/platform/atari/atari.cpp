@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include <mint/cookie.h>
+#include <mint/falcon.h>
 #include <mint/osbind.h>
 
 // We use some stdio.h functionality here thus we need to allow some
@@ -50,6 +51,8 @@
 #include "backends/events/default/default-events.h"
 #include "backends/mixer/atari/atari-mixer.h"
 #include "backends/graphics/atari/atari-graphics.h"
+#include "backends/graphics/atari/atari-graphics-supervidel.h"
+#include "backends/graphics/atari/atari-graphics-videl.h"
 #include "common/hashmap.h"
 #include "gui/debugger.h"
 
@@ -305,10 +308,15 @@ void OSystem_Atari::initBackend() {
 
 	_startTime = clock();
 
+	bool superVidel = VgetMonitor() == MON_VGA && Getcookie(C_SupV, NULL) == C_FOUND;
+
 	_timerManager = new DefaultTimerManager();
 	_eventManager = new DefaultEventManager(this);
 	_savefileManager = new DefaultSaveFileManager();
-	_atariGraphicsManager = new AtariGraphicsManager();
+	if (superVidel)
+        _atariGraphicsManager = new AtariSuperVidelManager();
+	else
+		_atariGraphicsManager = new AtariVidelManager();
 	_graphicsManager = _atariGraphicsManager;
 	_mixerManager = new AtariMixerManager();
 	// Setup and start mixer

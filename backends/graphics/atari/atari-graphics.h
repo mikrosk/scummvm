@@ -29,6 +29,14 @@
 #include "common/rect.h"
 #include "graphics/surface.h"
 
+// maximum screen dimensions
+constexpr int SCREEN_WIDTH = 640;
+constexpr int SCREEN_HEIGHT = 480;
+
+// minimum overlay dimensions
+constexpr int OVERLAY_WIDTH = 320;
+constexpr int OVERLAY_HEIGHT = 240;
+
 // don't waste time and space with that enum operator nonsense...
 namespace PendingScreenChange {
 	constexpr uint16 None		= 0;
@@ -46,16 +54,6 @@ public:
 	void setFeatureState(OSystem::Feature f, bool enable) override;
 	bool getFeatureState(OSystem::Feature f) const override;
 
-	virtual const OSystem::GraphicsMode *getSupportedGraphicsModes() const override {
-		static const OSystem::GraphicsMode graphicsModes[] = {
-			{"direct", "Direct rendering", 0},
-			{"single", "Single buffering", 1},
-			{"double", "Double buffering", 2},
-			{"triple", "Triple buffering", 3},
-			{nullptr, nullptr, 0 }
-		};
-		return _superVidel ? &graphicsModes[0] : &graphicsModes[1];
-	}
 	int getDefaultGraphicsMode() const override { return (int)GraphicsMode::TripleBuffering; }
 	bool setGraphicsMode(int mode, uint flags = OSystem::kGfxModeNoFlags) override;
 	int getGraphicsMode() const override { return (int)_currentState.mode; }
@@ -87,8 +85,6 @@ public:
 	void clearOverlay() override;
 	void grabOverlay(Graphics::Surface &surface) const override;
 	void copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) override;
-	int16 getOverlayHeight() const override;
-	int16 getOverlayWidth() const override;
 
 	bool showMouse(bool visible) override;
 	void warpMouse(int x, int y) override;
@@ -101,45 +97,15 @@ public:
 	bool notifyEvent(const Common::Event &event) override;
 	Common::Keymap *getKeymap() const;
 
-private:
-	enum CustomEventAction {
-		kActionToggleAspectRatioCorrection = 100,
-	};
-
+protected:
 	const Graphics::PixelFormat PIXELFORMAT8 = Graphics::PixelFormat::createFormatCLUT8();
 	const Graphics::PixelFormat PIXELFORMAT16 = getOverlayFormat();
 
 	bool allocateAtariSurface(byte *&buf, Graphics::Surface &surface,
-							  int width, int height, const Graphics::PixelFormat &format, int mode);
-	void setVidelResolution() const;
-	void waitForVbl() const;
-
-	void updateOverlay();
-	void updateDirectBuffer();
-	void updateSingleBuffer();
-	void updateDoubleAndTripleBuffer();
-
-	enum class ScaleMode {
-		None,
-		Upscale,
-		Downscale
-	};
-	static void copySurface8ToSurface16(const Graphics::Surface &srcSurface, const byte *srcPalette,
-										Graphics::Surface &dstSurface, int destX, int destY,
-										const Common::Rect subRect, ScaleMode scaleMode);
-	static void copySurface8ToSurface16WithKey(const Graphics::Surface &srcSurface, const byte* srcPalette,
-											   Graphics::Surface &dstSurface, int destX, int destY,
-											   const Common::Rect subRect, uint32 key);
-	void handleModifiedRect(Common::Rect rect, Common::Array<Common::Rect> &rects, const Graphics::Surface &surface);
-
-	void updateCursorRect();
-	void copyCursorSurface8(const Graphics::Surface &backgroundSufrace, Graphics::Surface &screenSurface);
+							  int width, int height, const Graphics::PixelFormat &format,
+							  int mode, uintptr mask = 0x00000000);
 
 	bool _vgaMonitor = true;
-	bool _superVidel = false;
-	bool _aspectRatioCorrection = false;
-	bool _oldAspectRatioCorrection = false;
-	bool _vsync = true;
 
 	enum class GraphicsMode : int {
 		DirectRendering,
@@ -164,29 +130,76 @@ private:
 		int height;
 		Graphics::PixelFormat format;
 	};
-	GraphicsState _currentState = {};
 	GraphicsState _pendingState = {};
-	int _pendingScreenChange = PendingScreenChange::None;
 
-	bool _screenModified = false;	// double/triple buffering only
 	static const int SCREENS = 3;
-	const int FRONT_BUFFER = 0;
-	const int BACK_BUFFER1 = 1;
-	const int BACK_BUFFER2 = 2;
+	static const int FRONT_BUFFER = 0;
+	static const int BACK_BUFFER1 = 1;
+	static const int BACK_BUFFER2 = 2;
 	byte *_screen[SCREENS] = {};	// for Mfree() purposes only
 	byte *_screenAligned[SCREENS] = {};
 	Graphics::Surface _screenSurface;
-	byte *_overlay = nullptr;
+
+	byte *_chunkyBuffer = nullptr;	// for Mfree() purposes only
+	Graphics::Surface _chunkySurface;
+
+	byte *_overlayScreen = nullptr;	// for Mfree() purposes only
 	Graphics::Surface _screenOverlaySurface;
+
+	byte *_overlayBuffer = nullptr;	// for Mfree() purposes only
+	Graphics::Surface _overlaySurface;
+
+private:
+	enum CustomEventAction {
+		kActionToggleAspectRatioCorrection = 100,
+	};
+
+	void setVidelResolution() const;
+	void waitForVbl() const;
+
+	void updateOverlay();
+	void updateDirectBuffer();
+	void updateSingleBuffer();
+	void updateDoubleAndTripleBuffer();
+
+	virtual void* allocFast(size_t bytes) const = 0;
+
+	virtual void copySurfaceToSurface(const Graphics::Surface &srcSurface, Graphics::Surface &dstSurface) const = 0;
+	virtual void copyRectToSurface(const Graphics::Surface &srcSurface, int destX, int destY,
+								   Graphics::Surface &dstSurface, const Common::Rect &subRect) const = 0;
+	virtual void copyRectToSurfaceWithKey(const Graphics::Surface &srcSurface, int destX, int destY,
+										  Graphics::Surface &dstSurface, const Common::Rect &subRect, uint32 key) const = 0;
+	virtual void alignRect(const Graphics::Surface &srcSurface, Common::Rect &rect) const {}
+
+	enum class ScaleMode {
+		None,
+		Upscale,
+		Downscale
+	};
+	void copySurface8ToSurface16(const Graphics::Surface &srcSurface, const byte *srcPalette,
+								 Graphics::Surface &dstSurface, int destX, int destY,
+								 const Common::Rect subRect, ScaleMode scaleMode) const;
+	void copySurface8ToSurface16WithKey(const Graphics::Surface &srcSurface, const byte* srcPalette,
+										Graphics::Surface &dstSurface, int destX, int destY,
+										const Common::Rect subRect, uint32 key) const;
+
+	void handleModifiedRect(const Graphics::Surface &surface, Common::Rect rect, Common::Array<Common::Rect> &rects) const;
+
+	void updateCursorRect();
+
+	bool _aspectRatioCorrection = false;
+	bool _oldAspectRatioCorrection = false;
+	bool _vsync = true;
+
+	GraphicsState _currentState = {};
+	int _pendingScreenChange = PendingScreenChange::None;
+
+	bool _screenModified = false;	// double/triple buffering only
 	Common::Rect _modifiedScreenRect;	// direct rendering only
 
-	byte *_chunkyBuffer = nullptr;
-	Graphics::Surface _chunkySurface;
 	Common::Array<Common::Rect> _modifiedChunkyRects;
 
 	bool _overlayVisible = false;
-	byte *_overlayBuffer = nullptr;
-	Graphics::Surface _overlaySurface;
 	Common::Array<Common::Rect> _modifiedOverlayRects;
 
 	struct Cursor {
@@ -250,7 +263,6 @@ private:
 		int hotspotY;
 	} _cursor;
 
-	Graphics::Surface _cursorSurface8;
 	Common::Rect _oldCursorRect;
 
 	byte _palette[256*3] = {};
