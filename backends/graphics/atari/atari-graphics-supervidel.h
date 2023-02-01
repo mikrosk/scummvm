@@ -28,15 +28,33 @@
 
 #include <cstring>
 #include <mint/osbind.h>
+
 #ifdef USE_SV_BLITTER
 #define ct60_vm(mode, value) (long)trap_14_wwl((short)0xc60e, (short)(mode), (long)(value))
 #define ct60_vmalloc(value) ct60_vm(0, value)
 #define ct60_vmfree(value)  ct60_vm(1, value)
 
-#define SV_BLITTER_SRC1  (volatile long*)0x80010058
-#define SV_BLITTER_SRC2  (volatile long*)0x8001005C
-#define SV_BLITTER_DST   (volatile long*)0x80010060
-#define SV_BLITTER_COUNT (volatile long*)0x80010064
+// bits 26:0
+#define SV_BLITTER_SRC1           ((volatile long*)0x80010058)
+#define SV_BLITTER_SRC2           ((volatile long*)0x8001005C)
+#define SV_BLITTER_DST            ((volatile long*)0x80010060)
+// The amount of bytes that are to be copied in a horizontal line, minus 1
+#define SV_BLITTER_COUNT          ((volatile long*)0x80010064)
+// The amount of bytes that are to be added to the line start adress after a line has been copied, in order to reach the next one
+#define SV_BLITTER_SRC1_OFFSET    ((volatile long*)0x80010068)
+#define SV_BLITTER_SRC2_OFFSET    ((volatile long*)0x8001006C)
+#define SV_BLITTER_DST_OFFSET     ((volatile long*)0x80010070)
+// bits 11:0 - The amount of horizontal lines to do
+#define SV_BLITTER_MASK_AND_LINES ((volatile long*)0x80010074)
+// bit    0 - busy / start
+// bits 4:1 - blit mode
+#define SV_BLITTER_CONTROL        ((volatile long*)0x80010078)
+// bits 9:0
+#define SV_VERSION                ((volatile long*)0x8001007C)
+// bit 0 - empty (read only)
+// bit 1 - full (read only)
+// bits 31:0 - data (write only)
+#define SV_BLITTER_FIFO           ((volatile long*)0x80010080)
 #endif
 
 #include "backends/graphics/atari/videl-resolutions.h"
@@ -46,6 +64,10 @@
 class AtariSuperVidelManager : public AtariGraphicsManager {
 public:
 	AtariSuperVidelManager() {
+		_fwVersion = *SV_VERSION & 0x01ff;
+		debug("SuperVidel FW Revision: %d, using %s", _fwVersion, _fwVersion >= 9
+			  ? "fast async FIFO" : "slower sync blitting" );
+
 		for (int i = 0; i < SCREENS; ++i) {
 			if (!allocateAtariSurface(_screen[i], _screenSurface,
 					SCREEN_WIDTH, SCREEN_HEIGHT, PIXELFORMAT8,
@@ -117,18 +139,105 @@ private:
 	}
 
 	void copySurfaceToSurface(const Graphics::Surface &srcSurface, Graphics::Surface &dstSurface) const override {
+#ifdef USE_SV_BLITTER
+		if (_fwVersion >= 9) {
+			*SV_BLITTER_FIFO = (long)srcSurface.getPixels();	// SV_BLITTER_SRC1
+			*SV_BLITTER_FIFO = 0x00000000;						// SV_BLITTER_SRC2
+			*SV_BLITTER_FIFO = (long)dstSurface.getPixels();	// SV_BLITTER_DST
+			*SV_BLITTER_FIFO = srcSurface.w - 1;				// SV_BLITTER_COUNT
+			*SV_BLITTER_FIFO = srcSurface.pitch;				// SV_BLITTER_SRC1_OFFSET
+			*SV_BLITTER_FIFO = 0x00000000;						// SV_BLITTER_SRC2_OFFSET
+			*SV_BLITTER_FIFO = dstSurface.pitch;				// SV_BLITTER_DST_OFFSET
+			*SV_BLITTER_FIFO = srcSurface.h;					// SV_BLITTER_MASK_AND_LINES
+			*SV_BLITTER_FIFO = 0x01;							// SV_BLITTER_CONTROL
+		} else {
+			sync();
+
+			*SV_BLITTER_SRC1           = (long)srcSurface.getPixels();
+			*SV_BLITTER_SRC2           = 0x00000000;
+			*SV_BLITTER_DST            = (long)dstSurface.getPixels();
+			*SV_BLITTER_COUNT          = srcSurface.w - 1;
+			*SV_BLITTER_SRC1_OFFSET    = srcSurface.pitch;
+			*SV_BLITTER_SRC2_OFFSET    = 0x00000000;
+			*SV_BLITTER_DST_OFFSET     = dstSurface.pitch;
+			*SV_BLITTER_MASK_AND_LINES = srcSurface.h;
+			*SV_BLITTER_CONTROL        = 0x01;
+		}
+#else
 		memcpy(dstSurface.getPixels(), srcSurface.getPixels(), srcSurface.h * srcSurface.pitch);
+#endif
 	}
 
 	void copyRectToSurface(const Graphics::Surface &srcSurface, int destX, int destY, Graphics::Surface &dstSurface,
 						   const Common::Rect &subRect) const override {
+#ifdef USE_SV_BLITTER
+		if (_fwVersion >= 9) {
+			*SV_BLITTER_FIFO = (long)srcSurface.getBasePtr(subRect.left, subRect.top);	// SV_BLITTER_SRC1
+			*SV_BLITTER_FIFO = 0x00000000;												// SV_BLITTER_SRC2
+			*SV_BLITTER_FIFO = (long)dstSurface.getBasePtr(destX, destY);				// SV_BLITTER_DST
+			*SV_BLITTER_FIFO = subRect.width() - 1;										// SV_BLITTER_COUNT
+			*SV_BLITTER_FIFO = srcSurface.pitch;										// SV_BLITTER_SRC1_OFFSET
+			*SV_BLITTER_FIFO = 0x00000000;												// SV_BLITTER_SRC2_OFFSET
+			*SV_BLITTER_FIFO = dstSurface.pitch;										// SV_BLITTER_DST_OFFSET
+			*SV_BLITTER_FIFO = subRect.height();										// SV_BLITTER_MASK_AND_LINES
+			*SV_BLITTER_FIFO = 0x01;													// SV_BLITTER_CONTROL
+		} else {
+			sync();
+
+			*SV_BLITTER_SRC1           = (long)srcSurface.getBasePtr(subRect.left, subRect.top);
+			*SV_BLITTER_SRC2           = 0x00000000;
+			*SV_BLITTER_DST            = (long)dstSurface.getBasePtr(destX, destY);
+			*SV_BLITTER_COUNT          = subRect.width() - 1;
+			*SV_BLITTER_SRC1_OFFSET    = srcSurface.pitch;
+			*SV_BLITTER_SRC2_OFFSET    = 0x00000000;
+			*SV_BLITTER_DST_OFFSET     = dstSurface.pitch;
+			*SV_BLITTER_MASK_AND_LINES = subRect.height();
+			*SV_BLITTER_CONTROL        = 0x01;
+		}
+#else
 		dstSurface.copyRectToSurface(srcSurface, destX, destY, subRect);
+#endif
 	}
 
 	void copyRectToSurfaceWithKey(const Graphics::Surface &srcSurface, int destX, int destY, Graphics::Surface &dstSurface,
 								  const Common::Rect &subRect, uint32 key) const override {
+#if 0	//def USE_SV_BLITTER
+		// TODO...
+		if (_fwVersion >= 9) {
+			*SV_BLITTER_FIFO = (long)srcSurface.getBasePtr(subRect.left, subRect.top);	// SV_BLITTER_SRC1
+			*SV_BLITTER_FIFO = (long)srcSurface.getBasePtr(subRect.left, subRect.top);	// SV_BLITTER_SRC2
+			*SV_BLITTER_FIFO = (long)dstSurface.getBasePtr(destX, destY);				// SV_BLITTER_DST
+			*SV_BLITTER_FIFO = subRect.width() - 1;										// SV_BLITTER_COUNT
+			*SV_BLITTER_FIFO = srcSurface.pitch;										// SV_BLITTER_SRC1_OFFSET
+			*SV_BLITTER_FIFO = srcSurface.pitch;										// SV_BLITTER_SRC2_OFFSET
+			*SV_BLITTER_FIFO = dstSurface.pitch;										// SV_BLITTER_DST_OFFSET
+			*SV_BLITTER_FIFO = subRect.height();										// SV_BLITTER_MASK_AND_LINES
+			*SV_BLITTER_FIFO = (0x01<<1) | 0x01;										// SV_BLITTER_CONTROL
+		} else {
+			sync();
+
+			*SV_BLITTER_SRC1           = (long)srcSurface.getBasePtr(subRect.left, subRect.top);
+			*SV_BLITTER_SRC2           = (long)srcSurface.getBasePtr(subRect.left, subRect.top);
+			*SV_BLITTER_DST            = (long)dstSurface.getBasePtr(destX, destY);
+			*SV_BLITTER_COUNT          = subRect.width() - 1;
+			*SV_BLITTER_SRC1_OFFSET    = srcSurface.pitch;
+			*SV_BLITTER_SRC2_OFFSET    = srcSurface.pitch;
+			*SV_BLITTER_DST_OFFSET     = dstSurface.pitch;
+			*SV_BLITTER_MASK_AND_LINES = subRect.height();
+			*SV_BLITTER_CONTROL        = (0x01<<1) | 0x01;
+		}
+#else
+		sync();
 		dstSurface.copyRectToSurfaceWithKey(srcSurface, destX, destY, subRect, key);
+#endif
 	}
+
+	virtual void sync() const override {
+		// while busy blitting...
+		while (*SV_BLITTER_CONTROL & 1);
+	}
+
+	int _fwVersion = 0;
 };
 
 #endif

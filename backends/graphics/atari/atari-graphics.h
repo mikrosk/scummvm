@@ -170,6 +170,7 @@ private:
 	virtual void copyRectToSurfaceWithKey(const Graphics::Surface &srcSurface, int destX, int destY,
 										  Graphics::Surface &dstSurface, const Common::Rect &subRect, uint32 key) const = 0;
 	virtual void alignRect(const Graphics::Surface &srcSurface, Common::Rect &rect) const {}
+	virtual void sync() const {}
 
 	enum class ScaleMode {
 		None,

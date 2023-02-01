@@ -268,6 +268,8 @@ void AtariGraphicsManager::updateScreen() {
 	bool vsync = _vsync;
 
 	if (_screenModified) {
+		sync();
+
 		if (_currentState.mode == GraphicsMode::DoubleBuffering) {
 			byte *tmp = _screenAligned[FRONT_BUFFER];
 			_screenAligned[FRONT_BUFFER] = _screenAligned[BACK_BUFFER1];
