@@ -549,6 +549,7 @@ void AtariGraphicsManager::setVidelResolution() const
 {
 	if (_vgaMonitor) {
 		// TODO: aspect ratio correction
+		// TODO: supervidel 320x240...
 		if (_screenSurface.w == 320) {
 			if (_screenSurface.h == 200)
 				asm_screen_set_scp_res(scp_320x200x8_vga);
@@ -710,6 +711,7 @@ bool AtariGraphicsManager::updateSingleBuffer() {
 		if (!drawCursor && !_cursor.outOfScreen && _cursor.visible)
 			drawCursor = rect.intersects(_cursor.dstRect);
 
+		// TODO: fullscreen => surface to surface
 		copyRectToSurface(_chunkySurface, rect.left, rect.top, _screenSurface, rect);
 
 		_modifiedChunkyRects.pop_back();

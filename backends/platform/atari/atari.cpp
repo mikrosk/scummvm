@@ -308,6 +308,9 @@ void OSystem_Atari::initBackend() {
 
 	_startTime = clock();
 
+	// TODO: pozriet ten preloading, chcelo by to menej nacitavanie (snad to nezavisi od toho samples buffera...)
+	// TODO: pozriet ten single buffer so SV blitterom?
+
 	bool superVidel = VgetMonitor() == MON_VGA && Getcookie(C_SupV, NULL) == C_FOUND;
 
 	_timerManager = new DefaultTimerManager();

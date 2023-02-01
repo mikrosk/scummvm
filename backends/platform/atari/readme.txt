@@ -1,0 +1,369 @@
+ScummVM 2.6.1
+=============
+
+This is a new port of ScummVM (https://www.scummvm.org), a program which allows
+you to run certain classic graphical adventure and role-playing games, provided
+you already have their data files.
+
+You can find a full list with details on which games are supported and how well
+on the compatibility page: https://www.scummvm.org/compatibility.
+
+
+Yet another port?
+-----------------
+
+Yes, I am aware of the official Atari/FreeMiNT port done by KeithS over the
+years (https://docs.scummvm.org/en/v2.6.1/other_platforms/atari.html). It is
+even updated every release and put on the official ScummVM website. That port
+is basically just a recompiled SDL backend for our platform - that has some
+advantages (works in GEM, can be easily compiled for the FireBee etc) but also
+a few disadvantages, like:
+
+- It's huge, massively huge, about 51 MiB. It contains about every engine,
+every library which is available to link on our platform. Most of that stuff
+is not needed, see my next point.
+
+- Its features makes it a bloatware and what is worse, a good half of them are
+basically useless on our platform (like hi-res 16bpp graphics, software
+synthesizers, scalers, real-time software MP3/OGG/FLAC playback etc) ... there's
+basically no horsepower left for such perks!
+
+- It's SDL based. That is good for the advantages listed above but it has its
+prize: for one, it makes the whole thing even slower because SDL is yet another
+layer of abstraction. And what is worse, the way the SDL backend is used on
+higher-end platforms doesn't have to be exactly optimal on ours (where every
+additional copying between buffers, every additional redraw, hurts). Also,
+sometimes our SDL port tries to emulate certain features (i.e. audio threads) in
+a way which can easily crash (e.g. putting them in a timer callback which has
+only limited time for running).
+
+- It's sparsely tested. Due to the 'features' listed above, not many people use
+it. And then from time to time someone discovers that something is not working
+and there is basically no way to report it or discuss it because, well, nobody
+is using this port.
+
+After I had seen how snappy NovaCoder's ScummVM on the Amiga is (who coded
+his own backend), I decided to do the same and see whether I could do better.
+And I could!
+
+
+Main features
+-------------
+
+- Optimized for the Atari Falcon (ideally with the CT60/CT63/CT60e but for the
+less hungry games even a CT2/DFB@50 MHz or the AfterBurner040 could be enough).
+
+- Full support for the SuperVidel, incl. the SuperBlitter (!)
+
+- Removed every useless feature I could find; the most visible change is
+exclusion of the 16bpp games (those are mostly hi-res anyway) but games in
+640x480@8bpp work nicely.
+
+- Direct rendering and single/double/triple buffering support.
+
+- Custom (and optimal) drawing routines (especially for the cursor).
+
+- Custom (Super)Videl resolutions for the best possible performance and visual
+experience (320x240 in RGB, chunky modes with SuperVidel, 640x480@16bpp for
+the overlay in RGB/SuperVidel, ...)
+
+- Custom (hardware based) aspect ratio correction (!)
+
+- Support for PC keys (page up, page down, pause, F11/F12, ...) and mouse wheel
+  (Eiffel/Aranym only)
+
+- Still without any assembly optimizations...
+
+Thanks to this new backend, many games which are virtually unplayable on the
+SDL port (e.g. The Curse of Monkey Island) are perfectly playable with (WAV)
+music and sound on this port. Also, AdLib emulation works nicely with many
+games without noticeable slow downs.
+
+
+Platform-specific features outside the GUI
+------------------------------------------
+
+Keyboard shortcut "CONTROL+u": immediate mute on/off toggle (disables also
+sample mixing, contrary to what "Mute all" in the options does!)
+
+Keyboard shortcut "CONTROL+ALT+a": immediate aspect ratio correction on/off
+toggle.
+
+"output_rate" in scummvm.ini: sample rate for mixing, can be 49170, 32780,
+24585, 19668, 16390, 12292, 9834, 8195 (the lower the value, the faster the
+mixing but also in worse quality). Default is 24585 Hz (16-bit, stereo).
+
+"output_samples" in scummvm.ini: number of samples to preload. Default is 2048
+which equals to about 83ms of audio lag and seems to be about right for most
+games on my CT60@66 MHz.
+
+If you want to play with those two values, the rule of thumb is: (lag in ms) =
+(output_samples / output_rate) * 1000. But it's totally OK just to double the
+samples value to get rid of stuttering in a heavier game.
+
+
+Graphics modes
+--------------
+
+This topic is more complex than it looks. ScummVM renders game graphics using
+rectangles and this port offers following options to render them:
+
+Direct rendering (vsync on/off) - present only with the SuperVidel
+Single buffering (vsync on/off)
+Double buffering (vsync always on, the checkbox is ignored)
+Triple buffering (vsync always off, the checkbox just selects a different kind)
+
+Direct rendering:
+~~~~~~~~~~~~~~~~~
+
+This is direct writing of the pixels into (SuperVidel's) screen buffer. Since
+the updates are supplied as rectangles and not the whole screen there's no way
+to implement direct writing *and* double/triple buffering. Vsync() only
+synchronizes the point when the rendering process begins - if it takes more
+than the time reserved for the vertical blank interrupt (what happens
+with most of the games), you'll see screen tearing.
+
+Pros:
+
+- fastest possible rendering (especially in 640x480 with a lot of small
+  rectangle updates where the buffer copying drags performance down)
+
+Cons:
+
+- screen tearing in most cases
+
+- SuperVidel only (there's no way to use C2P because C2P requires data aligned
+  on a 16px boundary and ScummVM supplies arbitrarily-sized rectangles)
+
+SuperBlitter used: no (it can blit only between rectangles present in its VRAM
+what is not the case of generic ScummVM entities).
+
+Single buffering:
+~~~~~~~~~~~~~~~~~
+
+This is very similar to the previous mode with the difference that the engine
+uses an intermediate buffer for storing the rectangles but yet it remembers
+which ones they were. It works also on plain Videl and applies the chunky to
+planar process to each one of the rectangles separately, avoiding fullscreen
+updates (but if such is needed, there is an optimized code path for it). Vsync()
+is used the same way as in the previous mode, i.e. screen tearing is still
+possible.
+
+Pros:
+
+- second fastest possible rendering
+
+- doesn't update the whole screen (works best with a moderate amount of
+  rectangles to update)
+
+Cons:
+
+- screen tearing in most cases
+
+- if there are too many smaller rectangles, it can be less efficient than
+  updating the whole buffer at once
+
+SuperBlitter used: yes, for rectangle blitting and cursor restoration.
+
+Double buffering:
+~~~~~~~~~~~~~~~~~
+
+The most common rendering mode. It extends the idea of single buffering - it
+renders into two buffers, one is visible while the other one is used for
+updating. At the end of the update process the two buffers are swapped, so the
+newly updated one is displayed. By definition, Vsync() must be always enabled
+(the buffers are swapped in the vertical blank handler) otherwise you'd see
+screen tearing.
+
+Pros:
+
+- stable frame rate, leading to fixed e.g. 30 FPS rendering for the whole time
+  if game takes, say, 1.7 - 1.9 frames per update
+
+- no screen tearing in any situation
+
+Cons:
+
+- since two buffers are present, the buffer is always blitted into the screen
+  surface as whole, even if only one tiny little rectangle is changed (excluding
+  the cursor)
+
+- frame rate is set to 60/30/15/etc FPS so you can see big irregular jumps
+  between 30 and 15 FPS for example; this is happening when screen updates take
+  variable amount of time but since Vsync() is always called, the rendering
+  pipeline has to wait until the next frame even if only 1% of the frame time
+  has been used.
+
+SuperBlitter used: yes, for rectangle blitting and cursor restoration.
+
+Triple buffering:
+~~~~~~~~~~~~~~~~~
+
+Best of both worlds - screen tearing is avoided thanks to using of multiple
+buffer and the rendering pipeline doesn't have to wait until Vsync(). The vsync
+flag is used only to differentiate between two (very similar) modes of
+operation:
+
+1. "True triple buffering" as described in
+https://en.wikipedia.org/wiki/Multiple_buffering#Triple_buffering (vsync on)
+
+2. "Swap chain" as described in https://en.wikipedia.org/wiki/Swap_chain (vsync
+off)
+
+Pros:
+
+- best compromise between performance and visual experience
+
+- works well with both higher and lower frame rates
+
+Cons:
+
+- since three buffers are present, the buffer is always blitted into the screen
+  surface as whole, even if only one tiny little rectangle is changed (excluding
+  the cursor)
+
+- slightly irregular frame rate (depends solely on the game's complexity)
+
+- in case of extremely fast rendering in 1.), one or more buffers are
+  dropped in favor of showing only the most recent one (unlikely)
+
+- in case of extremely fast rendering in 2.), screen tearing is possible
+  because the rendering pipeline starts overwriting the buffer which is
+  currently displayed (unlikely)
+
+SuperBlitter used: yes, for rectangle blitting and cursor restoration.
+
+Triple buffering with vsync on is the default mode for this port.
+
+
+SuperVidel and SuperBlitter
+---------------------------
+
+As mentioned, this port uses SuperVidel and its SuperBlitter heavily. That
+means that if the SuperVidel is detected, it does the following:
+
+- patches all 8bpp VGA resolutions to chunky ones, rendering all C2P routines
+  useless
+
+- patches all screen surface addresses with OR'ing 0xA0000000, i.e. using SV
+  RAM instead of slow ST RAM
+
+- allocates the chunky buffer in SV RAM using ct60_vmalloc() so the SuperBlitter
+  can use it as a source
+
+- when SuperVidel FW version >= 9 is detected, the async FIFO buffer is used
+  instead of the slower sync blitting (where one has to wait for every
+  rectangle blit to finish). This sometimes leads to nearly zero-cost rendering
+  and makes a *huge* difference for 640x480 fullscreen updates.
+
+
+Performance considerations/pitfalls
+-----------------------------------
+
+It's important to understand what affects performance on our limited platform
+to avoid unpleasant playing experiences.
+
+Badly written game engines
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The typical example from this category is the Gobliins engine (and its
+sequels). At first it looks like our machine / backend is doing something
+terribly wrong but the truth is it is the engine itself which is doing a lot of
+unnecessary redraws and updates, sometimes even before reaching the backend.
+The only real solution is to profile and fix the engine.
+
+Too many fullscreen updates
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Somewhat related to the previous point - sometimes the engine authors were lazy
+and instead of updating only the rectangles that really had changed, they ask
+for a full screen update. Not a problem on a >1 GHz machine but very visible on
+Atari! Also, this is (by definition) the case of animated intros, especially
+those in 640x480.
+
+MIDI vs. AdLib vs. sampled music
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+It could seem that sample music replay must be the most demanding one but on the
+contrary! _Always_ choose a CD version of a game (with *.wav tracks) to any
+other version. With one exception: if you have a native MIDI device able to
+replay the given game's MIDI notes (using the STMIDI plugin). MIDI emulation
+(synthesis) can easily take down as many as 10 FPS.
+
+"Mute" vs. "Mute all" in GUI vs. "No music" in GUI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Not the same thing. "Mute" (available only via the shortcut CONTROL+u) generates
+an event to which the sample mixer can react (i.e. stop mixing the silence...).
+
+"Mute all" doesn't generate anything, it basically just lowers the volume of the
+music to zero.
+
+"No music" means using the null audio plugin which prevents generating any MIDI
+music (and therefore avoiding the expensive synthesis emulation) but beware, it
+doesn't affect CD (*.wav) playback at all!
+
+So for the best performance, always choose "No music" in the GUI options when
+the game contains MIDI tracks and "Mute" when the game contains a sampled
+soundtrack.
+
+Please note that it is not that bad, you surely can play The Secret of Monkey
+Island with AdLib enabled (but the CD/talkie versions sound better and
+are cheaper to play ;)).
+
+Vsync in GUI
+~~~~~~~~~~~~
+
+Carefully with the vsync option. It can easily cripple direct/single buffer
+rendering by 10-15 FPS if not used with caution. That happens if a game takes,
+say, 1.2 frames per update (so causing screen tearing anyway and rendering the
+option useless) but Vsync() forces it to wait 2 full frames instead.
+
+By the way, the vsync flag in Global Options affects also the overlay rendering
+(with all the pitfalls which apply to the single buffering mode)
+
+Slow GUI
+~~~~~~~~
+
+Themes handling is quite slow - each theme must be depacked, each one contains
+quite a few XML files to parse and quite a few images to load/convert. Best is
+to use the built-in one. A compromise solution is to depack the theme in an
+equally named directory. It will be loaded, too but without the depacking
+overhead.
+
+
+Known issues
+------------
+
+- aspect ratio correction works on RGB only (yet)
+
+- SuperVidel's DVI output is sometimes stretched when 320x200 or 640x400 is
+  used in the direct rendering mode; while this looks like aspect ratio
+  correction for free, my LCD monitor can't restore from this state
+  afterwards... I've fixed it for single/double/triple buffering but it is not
+  so easy for direct rendering so put on hold for now...
+
+- adding a game in TOS and loading it in FreeMiNT (and vice versa) generates
+  incompatible paths. Either use only one system or edit scummvm.ini and set
+  there only relative paths (mintlib bug/limitation).
+
+- the default theme ("ScummVM Modern Theme Remastered") is not loaded
+  automatically on plain 8+3 filesystem. If you want to use it nevertheless,
+  choose it again in the Misc/Theme option (but you can't have the theme
+  depacked as a directory; many xml/image files use long filenames).
+
+- the talkie version of MI1 needs to be merged from two sources: first generate
+  the DOS version and then additionally also the flac version. Then convert all
+  *.flac files into *.wav and replace monkey.sof (flac) with monster.sou (DOS).
+  And of course, don't forget to set the extra path in Game options to the
+  folder where *.wav files are located! For MI2 just use the DOS version,
+  there are no CD tracks available. :(
+
+Closing words
+—------------
+
+I plan to open a pull request with all of my code so who knows, maybe ScummVM
+2.7.0 for Atari will be already present on the official website. :-)
+
+
+MiKRO / Mystic Bytes, XX.XX.2023
+Kosice / Slovakia
+miro.kropacek@gmail.com
+http://mikro.atari.org

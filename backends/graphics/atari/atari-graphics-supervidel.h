@@ -132,6 +132,7 @@ public:
 	int16 getOverlayWidth() const override { return 2 * OVERLAY_WIDTH; }
 
 private:
+	// TODO: this is useless for the overlay surface...
 	virtual void* allocFast(size_t bytes) const override {
 #ifdef USE_SV_BLITTER
 		return (void*)ct60_vmalloc(bytes);
