@@ -211,6 +211,7 @@ void AtariGraphicsManager::copyRectToScreen(const void *buf, int pitch, int x, i
 		_modifiedScreenRect = Common::Rect(x, y, x + w, y + h);
 
 		bool vsync = _vsync;
+		_vsync = false;
 		updateScreen();
 		_vsync = vsync;
 	}
@@ -245,19 +246,21 @@ void AtariGraphicsManager::updateScreen() {
 	// updates outOfScreen OR srcRect/dstRect (only if visible/needed)
 	_cursor.update(isOverlayVisible() ? _screenOverlaySurface : _screenSurface);
 
+	bool screenUpdated = false;
+
 	if (isOverlayVisible()) {
-		updateOverlay();
+		screenUpdated = updateOverlay();
 	} else {
 		switch(_currentState.mode) {
 		case GraphicsMode::DirectRendering:
-			updateDirectBuffer();
+			screenUpdated = updateDirectBuffer();
 			break;
 		case GraphicsMode::SingleBuffering:
-			updateSingleBuffer();
+			screenUpdated = updateSingleBuffer();
 			break;
 		case GraphicsMode::DoubleBuffering:
 		case GraphicsMode::TripleBuffering:
-			updateDoubleAndTripleBuffer();
+			screenUpdated = updateDoubleAndTripleBuffer();
 			break;
 		}
 	}
@@ -303,6 +306,9 @@ void AtariGraphicsManager::updateScreen() {
 		_screenSurface.setPixels(_screenAligned[BACK_BUFFER1]);
 		_screenModified = false;
 	}
+
+	// everything below this line is done in VBL so don't wait if nothing has been updated!
+	vsync &= screenUpdated;
 
 #ifdef SCREEN_ACTIVE
 	bool resolutionChanged = false;
@@ -581,7 +587,8 @@ void AtariGraphicsManager::waitForVbl() const
 	while (counter == vbl_counter);
 }
 
-void AtariGraphicsManager::updateOverlay() {
+bool AtariGraphicsManager::updateOverlay() {
+	bool updated = false;
 	bool drawCursor = _cursor.isModified();
 
 	while (!_modifiedOverlayRects.empty()) {
@@ -593,14 +600,18 @@ void AtariGraphicsManager::updateOverlay() {
 		_screenOverlaySurface.copyRectToSurface(_overlaySurface, rect.left, rect.top, rect);
 
 		_modifiedOverlayRects.pop_back();
+
+		updated = true;
 	}
 
 	if (_cursor.outOfScreen)
-		return;
+		return updated;
 
 	if ((_cursor.positionChanged || !_cursor.visible) && !_oldCursorRect.isEmpty()) {
 		_screenOverlaySurface.copyRectToSurface(_overlaySurface, _oldCursorRect.left, _oldCursorRect.top, _oldCursorRect);
 		_oldCursorRect = Common::Rect();
+
+		updated = true;
 	}
 
 	if (drawCursor && _cursor.visible) {
@@ -616,13 +627,19 @@ void AtariGraphicsManager::updateOverlay() {
 
 		_cursor.positionChanged = _cursor.surfaceChanged = false;
 		_oldCursorRect = _cursor.dstRect;
+
+		updated = true;
 	}
+
+	return updated;
 }
 
-void AtariGraphicsManager::updateDirectBuffer()
+bool AtariGraphicsManager::updateDirectBuffer()
 {
+	bool updated = false;
+
 	if (_cursor.outOfScreen)
-		return;
+		return updated;
 
 	bool drawCursor = _cursor.isModified();
 
@@ -653,6 +670,8 @@ void AtariGraphicsManager::updateDirectBuffer()
 			Common::Rect(_oldCursorRect.width(), _oldCursorRect.height()));
 
 		_oldCursorRect = Common::Rect();
+
+		updated = true;
 	}
 
 	if (drawCursor && _cursor.visible) {
@@ -674,10 +693,15 @@ void AtariGraphicsManager::updateDirectBuffer()
 
 		_cursor.positionChanged = _cursor.surfaceChanged = false;
 		_oldCursorRect = _cursor.dstRect;
+
+		updated = true;
 	}
+
+	return updated;
 }
 
-void AtariGraphicsManager::updateSingleBuffer() {
+bool AtariGraphicsManager::updateSingleBuffer() {
+	bool updated = false;
 	bool drawCursor = _cursor.isModified();
 
 	while (!_modifiedChunkyRects.empty()) {
@@ -689,10 +713,12 @@ void AtariGraphicsManager::updateSingleBuffer() {
 		copyRectToSurface(_chunkySurface, rect.left, rect.top, _screenSurface, rect);
 
 		_modifiedChunkyRects.pop_back();
+
+		updated = true;
 	}
 
 	if (_cursor.outOfScreen)
-		return;
+		return updated;
 
 	if ((_cursor.positionChanged || !_cursor.visible) && !_oldCursorRect.isEmpty()) {
 		alignRect(_chunkySurface, _oldCursorRect);
@@ -700,6 +726,8 @@ void AtariGraphicsManager::updateSingleBuffer() {
 			_screenSurface, _oldCursorRect);
 
 		_oldCursorRect = Common::Rect();
+
+		updated = true;
 	}
 
 	if (drawCursor && _cursor.visible) {
@@ -709,11 +737,16 @@ void AtariGraphicsManager::updateSingleBuffer() {
 
 		_cursor.positionChanged = _cursor.surfaceChanged = false;
 		_oldCursorRect = _cursor.dstRect;
+
+		updated = true;
 	}
+
+	return updated;
 }
 
-void AtariGraphicsManager::updateDoubleAndTripleBuffer()
+bool AtariGraphicsManager::updateDoubleAndTripleBuffer()
 {
+	bool updated = false;
 	bool drawCursor = _cursor.isModified();
 
 	if (_screenModified) {
@@ -723,10 +756,11 @@ void AtariGraphicsManager::updateDoubleAndTripleBuffer()
 
 		// updated in screen swapping
 		//_screenModified = false;
+		updated = true;
 	}
 
 	if (_cursor.outOfScreen)
-		return;
+		return updated;
 
 	// render directly to the screen to be swapped (so we don't have to refresh full screen when only cursor moves)
 	Graphics::Surface frontBufferScreenSurface;
@@ -739,6 +773,8 @@ void AtariGraphicsManager::updateDoubleAndTripleBuffer()
 			frontBufferScreenSurface, _oldCursorRect);
 
 		_oldCursorRect = Common::Rect();
+
+		updated = true;
 	}
 
 	if (drawCursor && _cursor.visible) {
@@ -749,7 +785,11 @@ void AtariGraphicsManager::updateDoubleAndTripleBuffer()
 
 		_cursor.positionChanged = _cursor.surfaceChanged = false;
 		_oldCursorRect = _cursor.dstRect;
+
+		updated = true;
 	}
+
+	return updated;
 }
 
 void AtariGraphicsManager::copySurface8ToSurface16(

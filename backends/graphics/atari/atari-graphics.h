@@ -157,10 +157,10 @@ private:
 	void setVidelResolution() const;
 	void waitForVbl() const;
 
-	void updateOverlay();
-	void updateDirectBuffer();
-	void updateSingleBuffer();
-	void updateDoubleAndTripleBuffer();
+	bool updateOverlay();
+	bool updateDirectBuffer();
+	bool updateSingleBuffer();
+	bool updateDoubleAndTripleBuffer();
 
 	virtual void* allocFast(size_t bytes) const = 0;
 

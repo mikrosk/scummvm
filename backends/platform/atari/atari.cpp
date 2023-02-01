@@ -352,23 +352,27 @@ volatile uint16	g_atari_ikbb_scancodes_head = 0;
 static uint16	g_atari_ikbb_scancodes_tail = 0;
 
 bool OSystem_Atari::pollEvent(Common::Event &event) {
-	static uint32 oldMillis = getMillis();
-	uint32 curMillis = getMillis();
+	{
+		static uint32 oldMillis = getMillis();
+		uint32 curMillis = getMillis();
 
-	uint32 diff = curMillis - oldMillis;
-	oldMillis = curMillis;
+		uint32 diff = curMillis - oldMillis;
+		oldMillis = curMillis;
 
-	static int counter;
-	static uint32 diffAvg;
+		if (diff > 0) {
+			static float avgFpsSum;
+			static int avgFpsCount;
+			static float lastAvgFps;
 
-	if (counter == 60) {
-		//debug("avg ms per frame: %d", diffAvg / 60);
+			avgFpsSum += 1000.0f / diff;
+			avgFpsCount++;
 
-		counter = 0;
-		diffAvg = 0;
-	} else {
-		counter++;
-		diffAvg += diff;
+			float avgFps = avgFpsSum / avgFpsCount;
+			if ((int)avgFps != (int)lastAvgFps) {
+				debug("*** Average FPS: %f ***", avgFps);
+				lastAvgFps = avgFps;
+			}
+		}
 	}
 
 	((DefaultTimerManager *)_timerManager)->checkTimers();

@@ -64,9 +64,11 @@
 class AtariSuperVidelManager : public AtariGraphicsManager {
 public:
 	AtariSuperVidelManager() {
+#ifdef USE_SV_BLITTER
 		_fwVersion = *SV_VERSION & 0x01ff;
 		debug("SuperVidel FW Revision: %d, using %s", _fwVersion, _fwVersion >= 9
 			  ? "fast async FIFO" : "slower sync blitting" );
+#endif
 
 		for (int i = 0; i < SCREENS; ++i) {
 			if (!allocateAtariSurface(_screen[i], _screenSurface,
@@ -233,11 +235,15 @@ private:
 	}
 
 	virtual void sync() const override {
+#ifdef USE_SV_BLITTER
 		// while busy blitting...
 		while (*SV_BLITTER_CONTROL & 1);
+#endif
 	}
 
+#ifdef USE_SV_BLITTER
 	int _fwVersion = 0;
+#endif
 };
 
 #endif
