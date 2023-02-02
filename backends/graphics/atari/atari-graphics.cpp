@@ -174,6 +174,10 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 		firstRun = false;
 	}
 
+	// reinitialize old cursor position, there's no use for it anymore and it's dangerous
+	//  to let it set to possibly bigger values then the upcoming resolution
+	_oldCursorRect = Common::Rect();
+
 	warpMouse(_pendingState.width / 2, _pendingState.height / 2);
 
 	_currentState = _pendingState;
@@ -377,6 +381,7 @@ void AtariGraphicsManager::showOverlay() {
 	_cursor.swap();
 	if (_currentState.mode == GraphicsMode::DirectRendering) {
 		// make sure that _oldCursorRect is used to restore the original game graphics
+		// (but only if resolution hasn't changed, see endGFXTransaction())
 		bool wasVisible = showMouse(false);
 		updateDirectBuffer();
 		showMouse(wasVisible);
@@ -711,8 +716,10 @@ bool AtariGraphicsManager::updateSingleBuffer() {
 		if (!drawCursor && !_cursor.outOfScreen && _cursor.visible)
 			drawCursor = rect.intersects(_cursor.dstRect);
 
-		// TODO: fullscreen => surface to surface
-		copyRectToSurface(_chunkySurface, rect.left, rect.top, _screenSurface, rect);
+		if (rect.width() == _screenSurface.w && rect.height() == _screenSurface.h)
+			copySurfaceToSurface(_chunkySurface, _screenSurface);
+		else
+			copyRectToSurface(_chunkySurface, rect.left, rect.top, _screenSurface, rect);
 
 		_modifiedChunkyRects.pop_back();
 

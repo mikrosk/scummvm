@@ -102,6 +102,8 @@ AtariMixerManager::~AtariMixerManager() {
 	Mfree(_atariSampleBuffer);
 	_atariSampleBuffer = _atariPhysicalSampleBuffer = _atariLogicalSampleBuffer = nullptr;
 
+	Sndstatus(SND_RESET);
+
 	Unlocksnd();
 
 	_atariInitialized = false;

@@ -237,6 +237,9 @@ private:
 
 	virtual void sync() const override {
 #ifdef USE_SV_BLITTER
+		// while FIFO not empty...
+		if (_fwVersion >= 9)
+			while (!(*SV_BLITTER_FIFO & 1));
 		// while busy blitting...
 		while (*SV_BLITTER_CONTROL & 1);
 #endif

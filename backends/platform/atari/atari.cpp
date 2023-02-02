@@ -214,7 +214,6 @@ extern void nf_print(const char* msg);
 OSystem_Atari::OSystem_Atari() {
 	_fsFactory = new POSIXFilesystemFactory();
 
-	// TODO: initializer list?
 	_scancodeToKeycode[0x01] = Common::KEYCODE_ESCAPE;
 	_scancodeToKeycode[0x0e] = Common::KEYCODE_BACKSPACE;
 	_scancodeToKeycode[0x0f] = Common::KEYCODE_TAB;
@@ -280,6 +279,11 @@ OSystem_Atari::~OSystem_Atari() {
 	}
 }
 
+static void ikbd_and_video_restore() {
+	Supexec(asm_screen_falcon_restore);
+	Supexec(atari_ikbd_shutdown);
+}
+
 void OSystem_Atari::initBackend() {
 	enum {
 		MCH_ST = 0,
@@ -308,9 +312,6 @@ void OSystem_Atari::initBackend() {
 
 	_startTime = clock();
 
-	// TODO: pozriet ten preloading, chcelo by to menej nacitavanie (snad to nezavisi od toho samples buffera...)
-	// TODO: pozriet ten single buffer so SV blitterom?
-
 	bool superVidel = VgetMonitor() == MON_VGA && Getcookie(C_SupV, NULL) == C_FOUND;
 
 	_timerManager = new DefaultTimerManager();
@@ -331,13 +332,13 @@ void OSystem_Atari::initBackend() {
 	memcpy(_shiftToAscii, pKeyTables->shift, 128);
 	memcpy(_capsToAscii, pKeyTables->caps, 128);
 
-	// TODO: etv_term exit vector
-
 	Supexec(atari_ikbd_init);
 	_ikbd_initialized = true;
 
 	Supexec(asm_screen_falcon_save);
 	_video_initialized = true;
+
+	Setexc(VEC_PROCTERM, ikbd_and_video_restore);
 
 	BaseBackend::initBackend();
 }

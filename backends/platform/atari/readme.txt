@@ -75,9 +75,9 @@ the overlay in RGB/SuperVidel, ...)
 - Still without any assembly optimizations...
 
 Thanks to this new backend, many games which are virtually unplayable on the
-SDL port (e.g. The Curse of Monkey Island) are perfectly playable with (WAV)
-music and sound on this port. Also, AdLib emulation works nicely with many
-games without noticeable slow downs.
+SDL port (e.g. The Curse of Monkey Island) are perfectly playable (on
+SuperVidel nearly always also with (WAV) music and sound) on this port. Also,
+AdLib emulation works nicely with many games without noticeable slow downs.
 
 
 Platform-specific features outside the GUI
@@ -133,7 +133,11 @@ Cons:
 - screen tearing in most cases
 
 - SuperVidel only (there's no way to use C2P because C2P requires data aligned
-  on a 16px boundary and ScummVM supplies arbitrarily-sized rectangles)
+  on a 16px boundary and ScummVM supplies arbitrarily-sized rectangles). In
+  theory I could implement direct rendering for the Falcon hicolor
+  (320x240@16bpp) but this creates another set of issues like when palette
+  would be updated but not the whole screen - so some rectangles would be
+  rendered in old palette and some in new.
 
 SuperBlitter used: no (it can blit only between rectangles present in its VRAM
 what is not the case of generic ScummVM entities).
@@ -274,6 +278,7 @@ The only real solution is to profile and fix the engine.
 
 Too many fullscreen updates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Somewhat related to the previous point - sometimes the engine authors were lazy
 and instead of updating only the rectangles that really had changed, they ask
 for a full screen update. Not a problem on a >1 GHz machine but very visible on
@@ -282,14 +287,28 @@ those in 640x480.
 
 MIDI vs. AdLib vs. sampled music
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 It could seem that sample music replay must be the most demanding one but on the
 contrary! _Always_ choose a CD version of a game (with *.wav tracks) to any
 other version. With one exception: if you have a native MIDI device able to
 replay the given game's MIDI notes (using the STMIDI plugin). MIDI emulation
 (synthesis) can easily take down as many as 10 FPS.
 
+CD music slows everything down
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some games use separate audio *and* video streams (files). Even if the CPU is
+able to handle both, the bottleneck becomes ... disk access. This is visible in
+The Curse Of Monkey Island for example -- there's audible stuttering during the
+intro sequence (and during the game as well). Increasing "output_samples" makes
+the rendering literally crawling! Why? Because disk I/O is busy with loading
+even *more* sample data so there's less time for video loading and rendering.
+Try to put "musdisk1.bun" and "musdisk2.bun" into a ramdisk (i.e. u:/ram in
+FreeMiNT), you'll be pleasantly surprised with the performance boost gained.
+
 "Mute" vs. "Mute all" in GUI vs. "No music" in GUI
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Not the same thing. "Mute" (available only via the shortcut CONTROL+u) generates
 an event to which the sample mixer can react (i.e. stop mixing the silence...).
 
@@ -334,11 +353,8 @@ Known issues
 
 - aspect ratio correction works on RGB only (yet)
 
-- SuperVidel's DVI output is sometimes stretched when 320x200 or 640x400 is
-  used in the direct rendering mode; while this looks like aspect ratio
-  correction for free, my LCD monitor can't restore from this state
-  afterwards... I've fixed it for single/double/triple buffering but it is not
-  so easy for direct rendering so put on hold for now...
+- SuperVidel's DVI output is stretched when in 320x200 or 640x400; I'll  wait
+  for other people's experiences, maybe only my LCD is so lame.
 
 - adding a game in TOS and loading it in FreeMiNT (and vice versa) generates
   incompatible paths. Either use only one system or edit scummvm.ini and set
@@ -355,6 +371,29 @@ Known issues
   And of course, don't forget to set the extra path in Game options to the
   folder where *.wav files are located! For MI2 just use the DOS version,
   there are no CD tracks available. :(
+
+
+Future plans
+------------
+
+- aspect ratio correction for VGA/SuperVidel
+
+- unified file paths in scummvm.ini
+
+- 8bpp overlay (and get rid of all that 16bpp GUI crap)
+
+- profiling :)
+
+- DSP-based sample mixer
+
+- avoid loading music/speech files (and thus slowing down everything) if muted
+
+- assembly copy routines for screen/chunky surfaces (even with SuperVidel
+  present it is not possible to use the SuperBlitter for every surface)
+
+- cached audio/video streams (i.e. don't load only "output_samples" number of
+  samples but cache, say, 1 second so disk i/o wont be so stressed)
+
 
 Closing words
 —------------
