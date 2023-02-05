@@ -1,5 +1,5 @@
-ScummVM 2.6.1
-=============
+ScummVM
+=======
 
 This is a new port of ScummVM (https://www.scummvm.org), a program which allows
 you to run certain classic graphical adventure and role-playing games, provided
@@ -132,15 +132,18 @@ Cons:
 
 - screen tearing in most cases
 
-- SuperVidel only (there's no way to use C2P because C2P requires data aligned
-  on a 16px boundary and ScummVM supplies arbitrarily-sized rectangles). In
-  theory I could implement direct rendering for the Falcon hicolor
-  (320x240@16bpp) but this creates another set of issues like when palette
-  would be updated but not the whole screen - so some rectangles would be
-  rendered in old palette and some in new.
+- SuperVidel only: using C2P would be not only suboptimal (every rectangle
+  would be C2P'ed instead of just copy and C2P of the final screen) but poses an
+  additional problem as C2P requires data aligned on a 16px boundary and
+  ScummVM supplies arbitrarily-sized rectangles (this is solvable by custom
+  Surface allocation but it's not bullet-proof). In theory I could implement
+  direct rendering for the Falcon hicolor (320x240@16bpp) but this creates
+  another set of issues like when palette would be updated but not the whole
+  screen - so some rectangles would be rendered in old palette and some in new.
 
-SuperBlitter used: no (it can blit only between rectangles present in its VRAM
-what is not the case of generic ScummVM entities).
+SuperBlitter used: sometimes (when ScummVM allocates surface via its create()
+function; custom/small buffers originating in the engine code are still copied
+using the CPU).
 
 Single buffering:
 ~~~~~~~~~~~~~~~~~
@@ -167,7 +170,8 @@ Cons:
 - if there are too many smaller rectangles, it can be less efficient than
   updating the whole buffer at once
 
-SuperBlitter used: yes, for rectangle blitting and cursor restoration.
+SuperBlitter used: yes, for rectangle blitting to screen and cursor restoration.
+Sometimes also for generic copying between buffers (see above).
 
 Double buffering:
 ~~~~~~~~~~~~~~~~~
@@ -198,13 +202,14 @@ Cons:
   pipeline has to wait until the next frame even if only 1% of the frame time
   has been used.
 
-SuperBlitter used: yes, for rectangle blitting and cursor restoration.
+SuperBlitter used: yes, for rectangle blitting to screen and cursor restoration.
+Sometimes also for generic copying between buffers (see above).
 
 Triple buffering:
 ~~~~~~~~~~~~~~~~~
 
 Best of both worlds - screen tearing is avoided thanks to using of multiple
-buffer and the rendering pipeline doesn't have to wait until Vsync(). The vsync
+buffers and the rendering pipeline doesn't have to wait until Vsync(). The vsync
 flag is used only to differentiate between two (very similar) modes of
 operation:
 
@@ -235,7 +240,8 @@ Cons:
   because the rendering pipeline starts overwriting the buffer which is
   currently displayed (unlikely)
 
-SuperBlitter used: yes, for rectangle blitting and cursor restoration.
+SuperBlitter used: yes, for rectangle blitting to screen and cursor restoration.
+Sometimes also for generic copying between buffers (see above).
 
 Triple buffering with vsync on is the default mode for this port.
 
@@ -249,15 +255,15 @@ means that if the SuperVidel is detected, it does the following:
 - patches all 8bpp VGA resolutions to chunky ones, rendering all C2P routines
   useless
 
-- patches all screen surface addresses with OR'ing 0xA0000000, i.e. using SV
-  RAM instead of slow ST RAM
-
-- allocates the chunky buffer in SV RAM using ct60_vmalloc() so the SuperBlitter
-  can use it as a source
+- patches all surface addresses with OR'ing 0xA0000000, i.e. using SV RAM
+  instead of slow ST RAM (and even instead of TT RAM for allowing pure
+  SuperBlitter copying)
 
 - when SuperVidel FW version >= 9 is detected, the async FIFO buffer is used
   instead of the slower sync blitting (where one has to wait for every
-  rectangle blit to finish). This sometimes leads to nearly zero-cost rendering
+  rectangle blit to finish). This applies only for chunky buffer -> screen
+  surfaces copy (as the generic surface copy can't rely on this behavior) but
+  despite this limitation it sometimes leads to nearly zero-cost rendering
   and makes a *huge* difference for 640x480 fullscreen updates.
 
 

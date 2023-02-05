@@ -19,6 +19,11 @@
  *
  */
 
+#ifdef ATARI
+#include <mint/cookie.h>
+#include <mint/falcon.h>
+#include "backends/graphics/atari/atari-graphics-superblitter.h"
+#endif
 #include "common/algorithm.h"
 #include "common/endian.h"
 #include "common/util.h"
@@ -72,12 +77,22 @@ void Surface::create(int16 width, int16 height, const PixelFormat &f) {
 	pitch = w * format.bytesPerPixel;
 
 	if (width && height) {
+#ifdef ATARI
+		if (VgetMonitor() == MON_VGA && Getcookie(C_SupV, NULL) == C_FOUND)
+			pixels = (void*)ct60_vmalloc(width * height * format.bytesPerPixel);
+		else
+#endif
 		pixels = calloc(width * height, format.bytesPerPixel);
 		assert(pixels);
 	}
 }
 
 void Surface::free() {
+#ifdef ATARI
+		if (((uintptr)pixels & 0xFF000000) >= 0xA0000000)
+			ct60_vmfree(pixels);
+		else
+#endif
 	::free(pixels);
 	pixels = 0;
 	w = h = pitch = 0;
@@ -94,6 +109,25 @@ void Surface::init(int16 width, int16 height, int16 newPitch, void *newPixels, c
 
 void Surface::copyFrom(const Surface &surf) {
 	create(surf.w, surf.h, surf.format);
+#ifdef ATARI
+	if (((uintptr)surf.pixels & 0xFF000000) >= 0xA0000000 && ((uintptr)pixels & 0xFF000000) >= 0xA0000000) {
+		// while busy blitting...
+		while (*SV_BLITTER_CONTROL & 1);
+
+		*SV_BLITTER_SRC1           = (long)surf.pixels;
+		*SV_BLITTER_SRC2           = 0x00000000;
+		*SV_BLITTER_DST            = (long)pixels;
+		*SV_BLITTER_COUNT          = w * format.bytesPerPixel - 1;
+		*SV_BLITTER_SRC1_OFFSET    = surf.pitch;
+		*SV_BLITTER_SRC2_OFFSET    = 0x00000000;
+		*SV_BLITTER_DST_OFFSET     = pitch;
+		*SV_BLITTER_MASK_AND_LINES = h;
+		*SV_BLITTER_CONTROL        = 0x01;
+
+		// wait until we finish otherwise we may overwrite pixels written manually afterwards
+		while (*SV_BLITTER_CONTROL & 1);
+	} else
+#endif
 	if (surf.pitch == pitch) {
 		memcpy(pixels, surf.pixels, h * pitch);
 	} else {
@@ -172,13 +206,34 @@ void Surface::copyRectToSurface(const void *buffer, int srcPitch, int destX, int
 	assert(height > 0 && destY + height <= h);
 	assert(width > 0 && destX + width <= w);
 
-	// Copy buffer data to internal buffer
-	const byte *src = (const byte *)buffer;
-	byte *dst = (byte *)getBasePtr(destX, destY);
-	for (int i = 0; i < height; i++) {
-		memcpy(dst, src, width * format.bytesPerPixel);
-		src += srcPitch;
-		dst += pitch;
+#ifdef ATARI
+	if (((uintptr)buffer & 0xFF000000) >= 0xA0000000 && ((uintptr)pixels & 0xFF000000) >= 0xA0000000) {
+		// while busy blitting...
+		while (*SV_BLITTER_CONTROL & 1);
+
+		*SV_BLITTER_SRC1           = (long)buffer;
+		*SV_BLITTER_SRC2           = 0x00000000;
+		*SV_BLITTER_DST            = (long)getBasePtr(destX, destY);
+		*SV_BLITTER_COUNT          = width * format.bytesPerPixel - 1;
+		*SV_BLITTER_SRC1_OFFSET    = srcPitch;
+		*SV_BLITTER_SRC2_OFFSET    = 0x00000000;
+		*SV_BLITTER_DST_OFFSET     = pitch;
+		*SV_BLITTER_MASK_AND_LINES = height;
+		*SV_BLITTER_CONTROL        = 0x01;
+
+		// wait until we finish otherwise we may overwrite pixels written manually afterwards
+		while (*SV_BLITTER_CONTROL & 1);
+	} else
+#endif
+	{
+		// Copy buffer data to internal buffer
+		const byte *src = (const byte *)buffer;
+		byte *dst = (byte *)getBasePtr(destX, destY);
+		for (int i = 0; i < height; i++) {
+			memcpy(dst, src, width * format.bytesPerPixel);
+			src += srcPitch;
+			dst += pitch;
+		}
 	}
 }
 

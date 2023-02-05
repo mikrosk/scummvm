@@ -428,6 +428,7 @@ backends/graphics/atari/atari-graphics.cpp
 backends/graphics/atari/atari-graphics.h
 backends/graphics/atari/atari-graphics-asm.h
 backends/graphics/atari/atari-graphics-asm.S
+backends/graphics/atari/atari-graphics-superblitter.h
 backends/graphics/atari/atari-graphics-supervidel.h
 backends/graphics/atari/atari-graphics-videl.h
 backends/graphics/atari/atari-graphics.h
