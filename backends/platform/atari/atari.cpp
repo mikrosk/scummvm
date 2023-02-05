@@ -357,6 +357,7 @@ static uint16	g_atari_ikbb_scancodes_tail = 0;
 
 bool OSystem_Atari::pollEvent(Common::Event &event) {
 	{
+		static uint32 startMillis = getMillis();
 		static uint32 oldMillis = getMillis();
 		uint32 curMillis = getMillis();
 
@@ -366,15 +367,16 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		if (diff > 0) {
 			static float avgFpsSum;
 			static int avgFpsCount;
-			static float lastAvgFps;
 
 			avgFpsSum += 1000.0f / diff;
 			avgFpsCount++;
 
-			float avgFps = avgFpsSum / avgFpsCount;
-			if ((int)avgFps != (int)lastAvgFps) {
-				debug("*** Average FPS: %f ***", avgFps);
-				lastAvgFps = avgFps;
+			if (curMillis - startMillis >= 1000) {
+				float avgFps = avgFpsSum / avgFpsCount;
+				debug("*** Average FPS in 1s: %f ***", avgFps);
+				startMillis = curMillis;
+				avgFpsSum = 0;
+				avgFpsCount = 0;
 			}
 		}
 	}
