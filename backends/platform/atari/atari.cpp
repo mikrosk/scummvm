@@ -19,8 +19,8 @@
  *
  */
 
-#include <time.h>
 #include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <mint/cookie.h>
@@ -36,6 +36,7 @@
 #define FORBIDDEN_SYMBOL_EXCEPTION_fputs
 #define FORBIDDEN_SYMBOL_EXCEPTION_exit
 #define FORBIDDEN_SYMBOL_EXCEPTION_time_h
+#define FORBIDDEN_SYMBOL_EXCEPTION_getenv
 
 #include "common/scummsys.h"
 
@@ -83,6 +84,7 @@ public:
 	void logMessage(LogMessageType::Type type, const char *message) override;
 
 	void addSysArchivesToSearchSet(Common::SearchSet &s, int priority) override;
+	Common::String getDefaultConfigFileName() override;
 
 private:
 	AtariGraphicsManager *_atariGraphicsManager;
@@ -426,7 +428,7 @@ bool OSystem_Atari::pollEvent(Common::Event &event) {
 		return true;
 	}
 
-	if (g_atari_ikbb_scancodes_head != g_atari_ikbb_scancodes_tail ) {
+	if (g_atari_ikbb_scancodes_head != g_atari_ikbb_scancodes_tail) {
 		byte scancode = g_atari_ikbd_scancodes[g_atari_ikbb_scancodes_tail++];
 		g_atari_ikbb_scancodes_tail &= SCANCODES_SIZE-1;
 
@@ -624,6 +626,24 @@ void OSystem_Atari::addSysArchivesToSearchSet(Common::SearchSet &s, int priority
 		s.add(DATA_PATH, new Common::FSDirectory(dataNode, 4), priority);
 	}
 #endif
+}
+
+Common::String OSystem_Atari::getDefaultConfigFileName() {
+	const Common::String baseConfigName = OSystem::getDefaultConfigFileName();
+
+	Common::String configFile;
+
+	const char *envVar = getenv("HOME");
+	if (envVar && *envVar) {
+		configFile = envVar;
+		configFile += '/';
+		configFile += baseConfigName;
+
+		if (configFile.size() < MAXPATHLEN)
+			return configFile;
+	}
+
+	return baseConfigName;
 }
 
 OSystem *OSystem_Atari_create() {
