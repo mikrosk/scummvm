@@ -315,7 +315,7 @@ void OSystem_Atari::initBackend() {
 	bool superVidel = VgetMonitor() == MON_VGA && Getcookie(C_SupV, NULL) == C_FOUND;
 
 	_timerManager = new DefaultTimerManager();
-	_eventManager = new DefaultEventManager(this);
+	_eventManager = new DefaultEventManager(makeKeyboardRepeatingEventSource(this));
 	_savefileManager = new DefaultSaveFileManager();
 	if (superVidel)
         _atariGraphicsManager = new AtariSuperVidelManager();
@@ -559,6 +559,7 @@ void OSystem_Atari::delayMillis(uint msecs) {
 }
 
 void OSystem_Atari::getTimeAndDate(TimeDate &td, bool skipRecord) const {
+	debug("getTimeAndDate");
 	time_t curTime = time(0);
 	// TODO: if too slow (e.g. when calling RandomSource::RandomSource()), rewrite
 	struct tm t = *localtime(&curTime);
