@@ -318,7 +318,7 @@ void OSystem_Atari::initBackend() {
 
 	_timerManager = new DefaultTimerManager();
 	_eventManager = new DefaultEventManager(makeKeyboardRepeatingEventSource(this));
-	_savefileManager = new DefaultSaveFileManager();
+	_savefileManager = new DefaultSaveFileManager("saves");
 	if (superVidel)
         _atariGraphicsManager = new AtariSuperVidelManager();
 	else
@@ -358,6 +358,7 @@ volatile uint16	g_atari_ikbb_scancodes_head = 0;
 static uint16	g_atari_ikbb_scancodes_tail = 0;
 
 bool OSystem_Atari::pollEvent(Common::Event &event) {
+	if (false)
 	{
 		static uint32 startMillis = getMillis();
 		static uint32 oldMillis = getMillis();
