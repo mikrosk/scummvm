@@ -273,10 +273,10 @@ Performance considerations/pitfalls
 It's important to understand what affects performance on our limited platform
 to avoid unpleasant playing experiences.
 
-Badly written game engines
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Game engines with unexpected performance hit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The typical example from this category is the Gobliins engine (and its
+A typical example from this category is the Gobliins engine (and its
 sequels). At first it looks like our machine / backend is doing something
 terribly wrong but the truth is it is the engine itself which is doing a lot of
 unnecessary redraws and updates, sometimes even before reaching the backend.
@@ -285,11 +285,11 @@ The only real solution is to profile and fix the engine.
 Too many fullscreen updates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Somewhat related to the previous point - sometimes the engine authors were lazy
-and instead of updating only the rectangles that really had changed, they ask
-for a full screen update. Not a problem on a >1 GHz machine but very visible on
-Atari! Also, this is (by definition) the case of animated intros, especially
-those in 640x480.
+Somewhat related to the previous point - sometimes the engine authors didn't
+realize the impact of every update on the overall performance and instead of
+updating only the rectangles that really had changed, they ask for a full screen
+update. Not a problem on a >1 GHz machine but very visible on Atari! Also, this
+is (by definition) the case of animated intros, especially those in 640x480.
 
 MIDI vs. AdLib vs. sampled music
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -388,7 +388,7 @@ Future plans
 
 - 8bpp overlay (and get rid of all that 16bpp GUI crap)
 
-- profiling :)
+- profiling :) (see also https://github.com/scummvm/scummvm/pull/2382)
 
 - DSP-based sample mixer
 
@@ -400,12 +400,18 @@ Future plans
 - cached audio/video streams (i.e. don't load only "output_samples" number of
   samples but cache, say, 1 second so disk i/o wont be so stressed)
 
+- using LDG or Thorsten Otto's sharedlibs: https://tho-otto.de/sharedlibs.php
+  for game engine plugins to relieve the huge binary size
+
+- reuse modified rects in double/triple buffer in the next frame - that way we
+  wouldn't need to refresh the whole screen in every case
+
 
 Closing words
 —------------
 
 I plan to open a pull request with all of my code so who knows, maybe ScummVM
-2.7.0 for Atari will be already present on the official website. :-)
+2.8.0 for Atari will be already present on the official website. :-)
 
 
 MiKRO / Mystic Bytes, XX.XX.2023
