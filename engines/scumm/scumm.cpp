@@ -1324,6 +1324,7 @@ void ScummEngine::setupScumm(const Common::String &macResourceFile) {
 		_bootParam = -1;
 	}
 
+#ifndef ATARI
 	int maxHeapThreshold = -1;
 
 	if (_game.features & GF_16BIT_COLOR) {
@@ -1338,6 +1339,10 @@ void ScummEngine::setupScumm(const Common::String &macResourceFile) {
 	}
 
 	_res->setHeapThreshold(400000, maxHeapThreshold);
+#else
+	// RAM is cheap... helps with retaining the resources in CMI and similar
+	_res->setHeapThreshold(16 * 1024 * 1024, 32 * 1024 * 1024);
+#endif
 
 	free(_compositeBuf);
 	_compositeBuf = (byte *)malloc(_screenWidth * _textSurfaceMultiplier * _screenHeight * _textSurfaceMultiplier * _outputPixelFormat.bytesPerPixel);
