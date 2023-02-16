@@ -622,9 +622,15 @@ void OSystem_Atari::addSysArchivesToSearchSet(Common::SearchSet &s, int priority
 #ifdef DATA_PATH
 	// Add the global DATA_PATH to the directory search list
 	// See also OSystem_SDL::addSysArchivesToSearchSet()
-	Common::FSNode dataNode(DATA_PATH);
+	// work around bug #14174 (two identical relative 'data' folders)
+	Common::String dataPath = _fsFactory->makeCurrentDirectoryFileNode()->getPath();
+	dataPath += "/";
+	dataPath += DATA_PATH;
+	dataPath = Common::normalizePath(dataPath, '/');
+
+	Common::FSNode dataNode(dataPath);
 	if (dataNode.exists() && dataNode.isDirectory()) {
-		s.add(DATA_PATH, new Common::FSDirectory(dataNode, 4), priority);
+		s.add(dataPath, new Common::FSDirectory(dataNode, 4), priority);
 	}
 #endif
 }
