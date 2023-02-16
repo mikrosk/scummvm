@@ -61,7 +61,7 @@ bool AtariGraphicsManager::hasFeature(OSystem::Feature f) const {
 		return !_vgaMonitor;
 	case OSystem::Feature::kFeatureCursorPalette:
 		debug("hasFeature(kFeatureCursorPalette): %d", isOverlayVisible());
-		return true;
+		return isOverlayVisible();
 	case OSystem::Feature::kFeatureVSync:
 		debug("hasFeature(kFeatureVSync): %d", _vsync);
 		return true;
@@ -224,7 +224,23 @@ void AtariGraphicsManager::copyRectToScreen(const void *buf, int pitch, int x, i
 Graphics::Surface *AtariGraphicsManager::lockScreen() {
 	//debug("lockScreen");
 
-	return &_chunkySurface;
+	return _currentState.mode != GraphicsMode::DirectRendering ? &_chunkySurface : &_screenSurface;
+}
+
+void AtariGraphicsManager::unlockScreen() {
+	if (_currentState.mode != GraphicsMode::DirectRendering) {
+		if (_currentState.mode == GraphicsMode::SingleBuffering)
+			handleModifiedRect(_chunkySurface, Common::Rect(_chunkySurface.w, _chunkySurface.h), _modifiedChunkyRects);
+		else
+			_screenModified = true;
+	} else {
+		_modifiedScreenRect = Common::Rect(_screenSurface.w, _screenSurface.h);
+
+		bool vsync = _vsync;
+		_vsync = false;
+		updateScreen();
+		_vsync = vsync;
+	}
 }
 
 void AtariGraphicsManager::fillScreen(uint32 col) {

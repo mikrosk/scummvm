@@ -71,7 +71,7 @@ public:
 	void grabPalette(byte *colors, uint start, uint num) const override;
 	void copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h) override;
 	Graphics::Surface *lockScreen() override;
-	void unlockScreen() override {}
+	void unlockScreen() override;
 	void fillScreen(uint32 col) override;
 	void updateScreen() override;
 	void setShakePos(int shakeXOffset, int shakeYOffset) override;
