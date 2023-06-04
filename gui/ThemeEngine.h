@@ -53,6 +53,7 @@ class Dialog;
 class GuiObject;
 class ThemeEval;
 class ThemeParser;
+class Tooltip;
 
 /**
  * DrawData sets enumeration.
@@ -212,6 +213,7 @@ protected:
 
 	friend class GUI::Dialog;
 	friend class GUI::GuiObject;
+	friend class GUI::Tooltip;
 
 public:
 	/// Vertical alignment of the text.
@@ -492,7 +494,7 @@ public:
 
 	void drawLineSeparator(const Common::Rect &r);
 
-	void drawDialogBackground(const Common::Rect &r, DialogBackground type);
+	void drawDialogBackground(const Common::Rect &r, DialogBackground type, Common::Rect *bgRect = nullptr);
 
 	void drawText(const Common::Rect &r, const Common::U32String &str, WidgetStateInfo state = kStateEnabled,
 	              Graphics::TextAlign align = Graphics::kTextAlignCenter,
@@ -712,7 +714,7 @@ protected:
 	 *
 	 * These functions are called from all the Widget drawing methods.
 	 */
-	void drawDD(DrawData type, const Common::Rect &r, uint32 dynamic = 0, bool forceRestore = false);
+	void drawDD(DrawData type, const Common::Rect &r, uint32 dynamic = 0, bool forceRestore = false, Common::Rect *bgRect = nullptr);
 	void drawDDText(TextData type, TextColor color, const Common::Rect &r, const Common::U32String &text, bool restoreBg,
 	                bool elipsis, Graphics::TextAlign alignH = Graphics::kTextAlignLeft,
 	                TextAlignVertical alignV = kTextAlignVTop, int deltax = 0,

@@ -23,6 +23,7 @@
 #include "gui/widget.h"
 #include "gui/dialog.h"
 #include "gui/gui-manager.h"
+#include "graphics/VectorRenderer.h"
 
 #include "gui/Tooltip.h"
 #include "gui/ThemeEval.h"
@@ -31,7 +32,7 @@ namespace GUI {
 
 
 Tooltip::Tooltip() :
-	Dialog(-1, -1, -1, -1), _maxWidth(-1), _parent(nullptr), _xdelta(0), _ydelta(0), _xpadding(0), _ypadding(0) {
+	Dialog(-1, -1, -1, -1), _maxWidth(-1), _parent(nullptr), _xdelta(0), _ydelta(0), _xpadding(0), _ypadding(0), _firstDraw(true) {
 
 	_backgroundType = GUI::ThemeEngine::kDialogBackgroundTooltip;
 }
@@ -74,7 +75,40 @@ void Tooltip::drawDialog(DrawLayer layerToDraw) {
 	int num = 0;
 	int h = g_gui.theme()->getFontHeight(ThemeEngine::kFontStyleTooltip) + 2;
 
-	Dialog::drawDialog(layerToDraw);
+	// 	Dialog::drawDialog(layerToDraw)
+	if (!isVisible())
+		return;
+
+	g_gui.theme()->disableClipRect();
+	g_gui.theme()->_layerToDraw = layerToDraw;
+
+	if (_firstDraw) {
+		ThemeEngine *theme = g_gui.theme();
+
+		// store backgrounds from Backbuffer and Screen
+		theme->drawDialogBackground(Common::Rect(_x, _y, _x + _w, _y + _h), _backgroundType, &_bgRect);
+
+		theme->drawToBackbuffer();
+		_bgBackbufferSurf.create(_bgRect.width(), _bgRect.height(), theme->renderer()->getActiveSurface()->format);
+		_bgBackbufferSurf.copyRectToSurface(*theme->renderer()->getActiveSurface(), 0, 0, _bgRect);
+
+		theme->drawToScreen();
+		_bgScreenSurf.create(_bgRect.width(), _bgRect.height(), theme->renderer()->getActiveSurface()->format);
+		_bgScreenSurf.copyRectToSurface(*theme->renderer()->getActiveSurface(), 0, 0, _bgRect);
+
+		theme->drawToBackbuffer();
+		_firstDraw = false;
+	}
+
+	g_gui.theme()->drawDialogBackground(Common::Rect(_x, _y, _x + _w, _y + _h), _backgroundType);
+
+	markWidgetsAsDirty();
+
+#ifdef LAYOUT_DEBUG_DIALOG
+	return;
+#endif
+	drawWidgets();
+	// end of Dialog::drawDialog(layerToDraw)
 
 	int16 textX = g_gui.useRTL() ? _x - 1 - _xpadding : _x + 1 + _xpadding;
 	int16 textY = _y + 1 + _ypadding;
@@ -94,6 +128,34 @@ void Tooltip::drawDialog(DrawLayer layerToDraw) {
 			ThemeEngine::kFontColorNormal,
 			false
 		);
+	}
+}
+
+void Tooltip::open() {
+	Dialog::open();
+	g_gui._redrawStatus = GuiManager::kRedrawOpenTooltip;
+}
+
+void Tooltip::close() {
+	Dialog::close();
+	g_gui._redrawStatus = GuiManager::kRedrawDisabled;
+
+	if (!_bgRect.isEmpty()) {
+		ThemeEngine *theme = g_gui.theme();
+
+		theme->drawToBackbuffer();
+		theme->renderer()->getActiveSurface()->copyRectToSurface(
+			_bgBackbufferSurf, _bgRect.left, _bgRect.top, Common::Rect(_bgRect.width(), _bgRect.height()));
+
+		theme->drawToScreen();
+		theme->renderer()->getActiveSurface()->copyRectToSurface(
+			_bgScreenSurf, _bgRect.left, _bgRect.top, Common::Rect(_bgRect.width(), _bgRect.height()));
+
+		theme->addDirtyRect(_bgRect);
+
+		_bgRect = Common::Rect();
+		_bgBackbufferSurf.free();
+		_bgScreenSurf.free();
 	}
 }
 
