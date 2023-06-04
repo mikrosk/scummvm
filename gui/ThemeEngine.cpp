@@ -920,7 +920,7 @@ bool ThemeEngine::loadThemeXML(const Common::String &themeId) {
 /**********************************************************
  * Draw Date descriptors drawing functions
  *********************************************************/
-void ThemeEngine::drawDD(DrawData type, const Common::Rect &r, uint32 dynamic, bool forceRestore) {
+void ThemeEngine::drawDD(DrawData type, const Common::Rect &r, uint32 dynamic, bool forceRestore, Common::Rect *bgRect) {
 	WidgetDrawData *drawData = _widgets[type];
 
 	if (!drawData)
@@ -945,6 +945,9 @@ void ThemeEngine::drawDD(DrawData type, const Common::Rect &r, uint32 dynamic, b
 
 	// Cull the elements not in the clip rect
 	if (extendedRect.isEmpty()) {
+		return;
+	} else if (bgRect) {
+		*bgRect = extendedRect;
 		return;
 	}
 
@@ -1181,7 +1184,7 @@ void ThemeEngine::drawScrollbar(const Common::Rect &r, int sliderY, int sliderHe
 	drawDD(scrollState == kScrollbarStateSlider ? kDDScrollbarHandleHover : kDDScrollbarHandleIdle, r2);
 }
 
-void ThemeEngine::drawDialogBackground(const Common::Rect &r, DialogBackground bgtype) {
+void ThemeEngine::drawDialogBackground(const Common::Rect &r, DialogBackground bgtype, Common::Rect *bgRect) {
 	if (!ready())
 		return;
 
@@ -1199,7 +1202,7 @@ void ThemeEngine::drawDialogBackground(const Common::Rect &r, DialogBackground b
 		break;
 
 	case kDialogBackgroundTooltip:
-		drawDD(kDDTooltipBackground, r);
+		drawDD(kDDTooltipBackground, r, 0, false, bgRect);
 		break;
 
 	case kDialogBackgroundDefault:

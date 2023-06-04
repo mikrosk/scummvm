@@ -23,7 +23,9 @@
 #define GUI_TOOLTIP_H
 
 #include "common/keyboard.h"
+#include "common/rect.h"
 #include "common/str-array.h"
+#include "graphics/surface.h"
 #include "gui/dialog.h"
 
 namespace GUI {
@@ -43,6 +45,9 @@ public:
 
 	void receivedFocus(int x = -1, int y = -1) override {}
 protected:
+	void open() override;
+	void close() override;
+
 	void handleMouseDown(int x, int y, int button, int clickCount) override {
 		close();
 		_parent->handleMouseDown(x + (getAbsX() - _parent->getAbsX()), y + (getAbsY() - _parent->getAbsY()), button, clickCount);
@@ -72,6 +77,11 @@ protected:
 	int _xpadding, _ypadding;
 
 	Common::U32StringArray _wrappedLines;
+
+	bool _firstDraw;
+	Common::Rect _bgRect;
+	Graphics::Surface _bgBackbufferSurf;
+	Graphics::Surface _bgScreenSurf;
 };
 
 } // End of namespace GUI
