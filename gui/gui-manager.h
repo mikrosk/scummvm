@@ -63,6 +63,7 @@ enum {
 
 class Dialog;
 class ThemeEval;
+class Tooltip;
 class GuiObject;
 
 #define g_gui	(GUI::GuiManager::instance())
@@ -83,6 +84,7 @@ typedef Common::FixedStack<Dialog *> DialogStack;
  */
 class GuiManager : public Common::Singleton<GuiManager>, public CommandSender {
 	friend class Dialog;
+	friend class Tooltip;
 	friend class Common::Singleton<SingletonBaseType>;
 	GuiManager();
 	~GuiManager() override;
@@ -164,6 +166,7 @@ protected:
 	enum RedrawStatus {
 		kRedrawDisabled = 0,
 		kRedrawOpenDialog,
+		kRedrawOpenTooltip,
 		kRedrawCloseDialog,
 		kRedrawTopDialog,
 		kRedrawFull
