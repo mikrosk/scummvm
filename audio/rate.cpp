@@ -30,6 +30,8 @@
 #include "audio/audiostream.h"
 #include "audio/rate.h"
 #include "audio/mixer.h"
+#include "backends/platform/atari/atari-debug.h"
+#include "common/config-manager.h"
 #include "common/util.h"
 
 namespace Audio {
@@ -80,6 +82,20 @@ private:
 	int simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
 	int interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
 
+	void printConvertType(const Common::String &name) {
+		const Common::ConfigManager::Domain *activeDomain = ConfMan.getActiveDomain();
+		if (activeDomain && ConfMan.getBool("print_rate")) {
+			static st_rate_t previousInRate, previousOutRate;
+			if (previousInRate != _inRate || previousOutRate != _outRate) {
+				previousInRate = _inRate;
+				previousOutRate = _outRate;
+				atari_debug("RateConverter_Impl::%s[%s]: inRate %d Hz (%s) => outRate %d Hz (%s)",
+					  name.c_str(), activeDomain->getValOrDefault("gameid").c_str(),
+					  _inRate, inStereo ? "stereo" : "mono", _outRate, outStereo ? "stereo" : "mono");
+			}
+		}
+	}
+
 public:
 	RateConverter_Impl(st_rate_t inputRate, st_rate_t outputRate);
 	virtual ~RateConverter_Impl() {}
@@ -98,6 +114,8 @@ public:
 template<bool inStereo, bool outStereo, bool reverseStereo>
 int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
 	st_sample_t *outStart, *outEnd;
+
+	printConvertType("copyConvert");
 
 	outStart = outBuffer;
 	outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
@@ -147,6 +165,8 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
 	frac_t outPos_inc = _inRate / _outRate;
 
 	st_sample_t *outStart, *outEnd;
+
+	printConvertType("simpleConvert");
 
 	outStart = outBuffer;
 	outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
@@ -208,6 +228,8 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(A
 	st_sample_t *outStart, *outEnd;
 	outStart = outBuffer;
 	outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
+
+	printConvertType("interpolateConvert");
 
 	while (outBuffer < outEnd) {
 		// Read enough input samples so that _outPosFrac < 0
