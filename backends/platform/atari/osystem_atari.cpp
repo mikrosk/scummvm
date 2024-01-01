@@ -47,6 +47,7 @@
 #include "backends/events/atari/atari-events.h"
 #include "backends/events/default/default-events.h"
 #include "backends/graphics/atari/atari-graphics-asm.h"
+#include "backends/graphics/atari/atari-graphics-ctpci.h"
 #include "backends/graphics/atari/atari-graphics-superblitter.h"
 #include "backends/graphics/atari/atari-graphics-supervidel.h"
 #include "backends/graphics/atari/atari-graphics-videl.h"
@@ -296,6 +297,11 @@ void OSystem_Atari::initBackend() {
 #ifdef USE_SUPERVIDEL
 	if (hasSuperVidel())
 		atariGraphicsManager = new AtariSuperVidelManager();
+	else
+#endif
+#ifdef USE_CTPCI
+	if (Getcookie(C_CT60, NULL) == 0 && Getcookie(C__PCI, NULL) == 0)
+		atariGraphicsManager = new AtariCtpciManager();
 	else
 #endif
 		atariGraphicsManager = new AtariVidelManager();

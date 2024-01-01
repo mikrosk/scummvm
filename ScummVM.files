@@ -450,6 +450,7 @@ backends/graphics/android/android-graphics.cpp
 backends/graphics/android/android-graphics.h
 backends/graphics/atari/atari-graphics-asm.S
 backends/graphics/atari/atari-graphics-asm.h
+backends/graphics/atari/atari-graphics-ctpci.h
 backends/graphics/atari/atari-graphics-superblitter.h
 backends/graphics/atari/atari-graphics-supervidel.h
 backends/graphics/atari/atari-graphics-videl.h

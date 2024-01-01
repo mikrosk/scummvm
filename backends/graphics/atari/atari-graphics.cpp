@@ -52,6 +52,7 @@ static const Graphics::PixelFormat PIXELFORMAT_RGB332 = Graphics::PixelFormat(1,
 static const Graphics::PixelFormat PIXELFORMAT_RGB121 = Graphics::PixelFormat(1, 1, 2, 1, 0, 3, 1, 0, 0);
 
 static bool s_tt;
+static bool s_ctpci;
 static int s_shakeXOffset;
 static int s_shakeYOffset;
 
@@ -184,10 +185,10 @@ AtariGraphicsManager::AtariGraphicsManager() {
 	Getcookie(C__VDO, &vdo);
 	vdo >>= 16;
 
-	_tt = (vdo == VDO_TT);
-	s_tt = _tt;
+	s_tt = _tt = (vdo == VDO_TT);
+	s_ctpci = _ctpci = (vdo == VDO_FALCON && Getcookie(C_CT60, NULL) == 0 && Getcookie(C__PCI, NULL) == 0);
 
-	if (!_tt)
+	if (!_tt && !_ctpci)
 		_vgaMonitor = VgetMonitor() == MON_VGA;
 
 	// no BDF scaling please
@@ -237,7 +238,7 @@ AtariGraphicsManager::AtariGraphicsManager() {
 	}
 	s_oldPhysbase = Physbase();
 
-	if (!Supexec(InstallVblHandler)) {
+	if (!_ctpci && !Supexec(InstallVblHandler)) {
 		error("VBL handler was not installed");
 	}
 
@@ -256,7 +257,7 @@ bool AtariGraphicsManager::hasFeature(OSystem::Feature f) const {
 	switch (f) {
 	case OSystem::Feature::kFeatureAspectRatioCorrection:
 		//debug("hasFeature(kFeatureAspectRatioCorrection): %d", !_vgaMonitor);
-		return !_tt;
+		return !_tt && !_ctpci;
 	case OSystem::Feature::kFeatureCursorPalette:
 		// FIXME: pretend to have cursor palette at all times, this function
 		// can get (and it is) called any time, before and after showOverlay()
@@ -620,7 +621,7 @@ void AtariGraphicsManager::updateScreen() {
 					mode |= PAL;
 				}
 				VsetMode(mode);
-			} else if (hasSuperVidel() || !_tt) {
+			} else if (hasSuperVidel() || (!_tt && !_ctpci)) {
 				if (_aspectRatioCorrection) {
 					for (int screenId : { FRONT_BUFFER, BACK_BUFFER1, BACK_BUFFER2 }) {
 						Screen *screen = _screen[screenId];
@@ -707,6 +708,9 @@ void AtariGraphicsManager::updateScreen() {
 
 void AtariGraphicsManager::setShakePos(int shakeXOffset, int shakeYOffset) {
 	//debug("setShakePos: %d, %d", shakeXOffset, shakeYOffset);
+
+	if (_ctpci)
+		return;
 
 	if (_tt) {
 		// as TT can't horizontally shake anything, do it at least vertically
@@ -976,7 +980,7 @@ void AtariGraphicsManager::allocateSurfaces() {
 
 void AtariGraphicsManager::freeSurfaces() {
 	for (int i : { FRONT_BUFFER, BACK_BUFFER1, BACK_BUFFER2, OVERLAY_BUFFER }) {
-		delete _screen[i];
+		//delete _screen[i];
 		_screen[i] = nullptr;
 	}
 	_workScreen = nullptr;
@@ -1132,15 +1136,21 @@ bool AtariGraphicsManager::isOverlayDirectRendering() const {
 }
 
 AtariGraphicsManager::Screen::Screen(AtariGraphicsManager *manager, int width, int height, const Graphics::PixelFormat &format, const Palette *palette_)
-	: _manager(manager) {
-	const AtariMemAlloc &allocFunc = _manager->getStRamAllocFunc();
+	: _manager(manager)
+	, palette(palette_) {
+	const int bitsPerPixel = _manager->getBitsPerPixel(format);
 
-	palette = palette_;
+	if (_manager->_ctpci) {
+		surf.init(width, height, width * bitsPerPixel / 8, Physbase(), format);
+		memset(surf.getPixels(), 0, surf.h * surf.pitch);
+		_offsettedSurf = surf;
+		return;
+	}
+
+	const AtariMemAlloc &allocFunc = _manager->getStRamAllocFunc();
 
 	width += (_manager->_tt ? 0 : 2 * MAX_HZ_SHAKE);
 	height += 2 * MAX_V_SHAKE;
-
-	const int bitsPerPixel = _manager->getBitsPerPixel(format);
 
 	surf.init(width, height, width * bitsPerPixel / 8, nullptr, format);
 
@@ -1160,6 +1170,9 @@ AtariGraphicsManager::Screen::Screen(AtariGraphicsManager *manager, int width, i
 }
 
 AtariGraphicsManager::Screen::~Screen() {
+	if (_manager->_ctpci)
+		return;
+
 	const AtariMemFree &freeFunc = _manager->getStRamFreeFunc();
 
 	freeFunc((void *)*((uintptr *)surf.getPixels() - 1));
@@ -1193,9 +1206,10 @@ void AtariGraphicsManager::Screen::reset(int width, int height, int bitsPerPixel
 		mode = VsetMode(VM_INQUIRE) & PAL;
 
 		if (_manager->_vgaMonitor) {
-			mode |= VGA | (bitsPerPixel == 4 ? BPS4 : (hasSuperVidel() ? BPS8C : BPS8));
+			mode |= VGA | (hasSuperVidel() ? BPS8C : BPS8);
 
-			if (width <= 320 && height <= 240) {
+			// CTPCI doesn't know 320x240, unfortunately :-/
+			if (!_manager->_ctpci && width <= 320 && height <= 240) {
 				surf.w = 320;
 				surf.h = 240;
 				mode |= VERTFLAG | COL40;
@@ -1226,8 +1240,11 @@ void AtariGraphicsManager::Screen::reset(int width, int height, int bitsPerPixel
 			}
 		}
 
-		surf.w += 2 * MAX_HZ_SHAKE;
-		surf.h += 2 * MAX_V_SHAKE;
+		// no shaking for CTPCI (yet, in the future perhaps using the blit functions)
+		if (!_manager->_ctpci) {
+			surf.w += 2 * MAX_HZ_SHAKE;
+			surf.h += 2 * MAX_V_SHAKE;
+		}
 		surf.pitch = surf.w * bitsPerPixel / 8;
 	}
 

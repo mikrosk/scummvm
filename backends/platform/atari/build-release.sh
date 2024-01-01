@@ -9,7 +9,7 @@ cd build-release
 PLATFORM=m68k-atari-mintelf
 
 export ASFLAGS="-m68020-60"
-export CXXFLAGS="-m68020-60 -DUSE_MOVE16 -DUSE_SUPERVIDEL -DUSE_SV_BLITTER"
+export CXXFLAGS="-m68020-60 -DUSE_MOVE16 -DUSE_SUPERVIDEL -DUSE_SV_BLITTER -DUSE_CTPCI"
 export LDFLAGS="-m68020-60"
 export PKG_CONFIG_LIBDIR="$(${PLATFORM}-gcc -print-sysroot)/usr/lib/m68020-60/pkgconfig"
 

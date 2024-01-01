@@ -53,15 +53,24 @@ public:
 	bool getFeatureState(OSystem::Feature f) const override;
 
 	const OSystem::GraphicsMode *getSupportedGraphicsModes() const override {
-		static const OSystem::GraphicsMode graphicsModes[] = {
-			{ "direct", "Direct rendering", (int)GraphicsMode::DirectRendering },
-			{ "single", "Single buffering", (int)GraphicsMode::SingleBuffering },
-			{ "triple", "Triple buffering", (int)GraphicsMode::TripleBuffering },
-			{ nullptr, nullptr, 0 }
-		};
-		return graphicsModes;
+		if (_ctpci) {
+			static const OSystem::GraphicsMode graphicsModes[] = {
+				{ "direct", "Direct rendering", (int)GraphicsMode::DirectRendering },
+				{ "single", "Single buffering", (int)GraphicsMode::SingleBuffering },
+				{ nullptr, nullptr, 0 }
+			};
+			return graphicsModes;
+		} else {
+			static const OSystem::GraphicsMode graphicsModes[] = {
+				{ "direct", "Direct rendering", (int)GraphicsMode::DirectRendering },
+				{ "single", "Single buffering", (int)GraphicsMode::SingleBuffering },
+				{ "triple", "Triple buffering", (int)GraphicsMode::TripleBuffering },
+				{ nullptr, nullptr, 0 }
+			};
+			return graphicsModes;
+		}
 	}
-	int getDefaultGraphicsMode() const override { return (int)GraphicsMode::TripleBuffering; }
+	int getDefaultGraphicsMode() const override { return _ctpci ? (int)GraphicsMode::SingleBuffering : (int)GraphicsMode::TripleBuffering; }
 	bool setGraphicsMode(int mode, uint flags = OSystem::kGfxModeNoFlags) override;
 	int getGraphicsMode() const override { return (int)_currentState.mode; }
 
@@ -231,6 +240,7 @@ private:
 
 	bool _vgaMonitor = true;
 	bool _tt = false;
+	bool _ctpci = false;
 	bool _aspectRatioCorrection = false;
 	bool _oldAspectRatioCorrection = false;
 	bool _checkUnalignedPitch = false;
