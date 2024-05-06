@@ -17,7 +17,7 @@ export PKG_CONFIG_LIBDIR="$(${PLATFORM}-gcc -print-sysroot)/usr/lib/m68020-60/pk
 if [ ! -f config.log ]
 then
 ../configure \
-	--backend=atari \
+	--backend=sdl \
 	--host=${PLATFORM} \
 	--enable-release \
 	--disable-png \
@@ -43,11 +43,12 @@ rm -rf dist-generic
 make dist-generic
 
 # make memory protection friendly
-${PLATFORM}-flags -S dist-generic/scummvm/scummvm.ttp
+${PLATFORM}-flags -S dist-generic/scummvm/scummvm.gtp
 
 # create symbol file and strip
-${PLATFORM}-nm -C dist-generic/scummvm/scummvm.ttp | grep -vF ' .L' | grep ' [TtWV] ' | ${PLATFORM}-c++filt | sort -u > dist-generic/scummvm/scummvm.sym
-${PLATFORM}-strip -s dist-generic/scummvm/scummvm.ttp
+${PLATFORM}-nm -C dist-generic/scummvm/scummvm.gtp | grep -vF ' .L' | grep ' [TtWV] ' | ${PLATFORM}-c++filt | sort -u > dist-generic/scummvm/scummvm.sym
+${PLATFORM}-strip -s dist-generic/scummvm/scummvm.gtp
+${PLATFORM}-stack --fix=512k dist-generic/scummvm/scummvm.gtp
 
 # remove unused files; absent gui-icons.dat massively speeds up startup time (used for the grid mode)
 rm dist-generic/scummvm/data/{achievements,encoding,gui-icons,macgui,shaders}.dat
