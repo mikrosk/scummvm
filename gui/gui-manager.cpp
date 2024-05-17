@@ -455,6 +455,9 @@ void GuiManager::redrawInternal() {
 				_theme->applyScreenShading(shading);
 			}
 
+			// fall through
+
+		case kRedrawOpenTooltip:
 			// Finally, draw the top dialog background
 			_dialogStack.top()->drawDialog(kDrawLayerBackground);
 
@@ -762,8 +765,6 @@ void GuiManager::closeTopDialog() {
 
 	if (_redrawStatus != kRedrawFull)
 		_redrawStatus = kRedrawCloseDialog;
-
-	redraw();
 }
 
 void GuiManager::setupCursor() {
