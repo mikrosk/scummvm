@@ -683,7 +683,6 @@ backends/platform/android/portdefs.h
 backends/platform/android/snprintf.cpp
 backends/platform/android/touchcontrols.cpp
 backends/platform/android/touchcontrols.h
-backends/platform/atari/atari_200hz.S
 backends/platform/atari/atari_ikbd.S
 backends/platform/atari/dlmalloc.cpp
 backends/platform/atari/dlmalloc.h

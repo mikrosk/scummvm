@@ -70,9 +70,7 @@ typedef void (*KBDVEC)(void *);
 extern "C" KBDVEC atari_old_kbdvec;
 extern "C" KBDVEC atari_old_mousevec;
 
-extern "C" void atari_200hz_init();
-extern "C" void atari_200hz_shutdown();
-extern "C" volatile uint32 counter_200hz;
+static volatile uint32 counter_200hz;
 
 extern void nf_init(void);
 extern void nf_print(const char* msg);
@@ -81,6 +79,78 @@ static bool s_tt = false;
 static int s_app_id = -1;
 
 static bool exit_already_called = false;
+
+static long atari_200hz_init(void)
+{
+	__asm__ __volatile__(
+	"\tmove    %%sr,%%d0\n"
+	"\tmove    %%d0,%%d1\n"
+#ifdef __mcoldfire__
+	"\tor.l    #0x700,%%d1\n"
+#else
+	"\tor.w    #0x700,%%d1\n"
+#endif
+	"\tmove    %%d1,%%sr\n"
+
+	"\tlea	   my_200hz-4(%%pc),%%a0\n"
+	"\tmove.l  0x114.w,(%%a0)\n"
+	"\taddq.l  #4,%%a0\n"
+	"\tmove.l  %%a0,0x114.w\n"
+
+	"\tmove    %%d0,%%sr\n"
+	"\tjbra 1f\n"
+
+	"\t.dc.l  0x58425241\n" /* "XBRA" */
+	"\t.dc.l  0x5343554d\n" /* "SCUM" */
+	"\t.dc.l  0\n"
+"my_200hz:\n"
+	"\taddq.l  #1,%0\n"
+
+	"\tmove.l  my_200hz-4(%%pc),-(%%sp)\n"
+	"\trts\n"
+"1:\n"
+	: /* output */
+	: "m"(counter_200hz) /* inputs */
+	: "d0", "d1", "a0", "memory", "cc");
+	return 0;
+}
+
+static long atari_200hz_shutdown(void)
+{
+	__asm__ __volatile__(
+	"\tmove    %%sr,%%d0\n"
+	"\tmove    %%d0,%%d1\n"
+#ifdef __mcoldfire__
+	"\tor.l    #0x700,%%d1\n"
+#else
+	"\tor.w    #0x700,%%d1\n"
+#endif
+	"\tmove    %%d1,%%sr\n"
+
+	"\tlea	   my_200hz-4(%%pc),%%a0\n"
+	"\tmove.l  (%%a0),0x114.w\n"
+
+	"\tmove    %%d0,%%sr\n"
+	: /* output */
+	: /* inputs */
+	: "d0", "d1", "a0", "memory", "cc");
+	return 0;
+}
+
+
+/*
+ * replace also mintlib function
+ */
+clock_t clock(void)
+{
+    return counter_200hz;
+}
+
+/* This next bit of nonsense is temporary...clock() should be fixed! */
+__typeof__(clock) _clock;
+
+clock_t _clock(void) __attribute__ ((alias ("clock")));
+
 
 static void critical_restore() {
 	extern void AtariAudioShutdown();
