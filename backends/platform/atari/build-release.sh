@@ -8,9 +8,10 @@ cd build-release
 
 PLATFORM=m68k-atari-mintelf
 
-export ASFLAGS="-m68020-60"
-export CXXFLAGS="-m68020-60 -DUSE_MOVE16 -DUSE_SUPERVIDEL -DUSE_SV_BLITTER"
-export LDFLAGS="-m68020-60"
+export PATH=/home/mikro/gnu-tools-mfastcall/bin:/usr/bin
+export ASFLAGS="-m68020-60 -mfastcall"
+export CXXFLAGS="-m68020-60 -DUSE_MOVE16 -DUSE_SUPERVIDEL -DUSE_SV_BLITTER -mfastcall"
+export LDFLAGS="-m68020-60 -mfastcall"
 export PKG_CONFIG_LIBDIR="$(${PLATFORM}-gcc -print-sysroot)/usr/lib/m68020-60/pkgconfig"
 
 if [ ! -f config.log ]
