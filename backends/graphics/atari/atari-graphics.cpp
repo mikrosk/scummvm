@@ -170,6 +170,7 @@ void AtariGraphicsShutdown() {
 		EsetPalette(0, s_oldPalette.entries, s_oldPalette.tt);
 	} else if (s_oldMode != -1) {
 		static _RGB black[256];
+		// this may fail if exiting from 16col overlay
 		VsetRGB(0, 256, black);
 
 		VsetScreen(SCR_NOCHANGE, s_oldPhysbase, SCR_NOCHANGE, SCR_NOCHANGE);
@@ -715,12 +716,12 @@ void AtariGraphicsManager::updateScreen() {
 			// strictly speaking, this is necessary only if kScreenAddress is set but makes code easier
 			static uint16 black[256];
 			// Vsync();	// done by Setscreen() above
-			EsetPalette(0, isOverlayVisible() ? 16 : 256, black);
+			EsetPalette(0, isOverlayVisible() ? getOverlayPaletteSize() : 256, black);
 		} else if (_workScreen->mode != -1) {
 			// VsetMode() must be called first: it resets all hz/v, scrolling and line width registers
 			// so even if kScreenAddress wasn't scheduled, we have to set new s_screenSurf to refresh them
 			static _RGB black[256];
-			VsetRGB(0, 256, black);
+			VsetRGB(0, isOverlayVisible() ? getOverlayPaletteSize() : 256, black);
 			// Vsync();	// done by (either) VsetMode() below
 
 			if (doSuperVidelReset) {
@@ -739,8 +740,15 @@ void AtariGraphicsManager::updateScreen() {
 		s_screenSurf = isOverlayVisible() ? &_screen[OVERLAY_BUFFER]->surf : &_screen[FRONT_BUFFER]->surf;
 		s_shrinkVidelVisibleArea = doShrinkVidelVisibleArea;
 
-		// keep kVideoMode for resetting the palette later
-		_pendingState.change &= ~(GraphicsState::kScreenAddress | GraphicsState::kShakeScreen);
+		if (!_tt) {
+			// takes effect in the nearest VBL interrupt
+			VsetRGB(0, isOverlayVisible() ? getOverlayPaletteSize() : 256, _workScreen->palette->falcon);
+		} else {
+			// takes effect immediatelly (i.e. still while in the vertical sync interrupt)
+			EsetPalette(0, isOverlayVisible() ? getOverlayPaletteSize() : 256, _workScreen->palette->tt);
+		}
+
+		_pendingState.change &= ~(GraphicsState::kVideoMode | GraphicsState::kScreenAddress | GraphicsState::kShakeScreen | GraphicsState::kPalette);
 	}
 
 	if (_pendingState.change & GraphicsState::kScreenAddress) {
@@ -759,16 +767,18 @@ void AtariGraphicsManager::updateScreen() {
 		_pendingState.change &= ~GraphicsState::kShakeScreen;
 	}
 
-	if (_pendingState.change & (GraphicsState::kVideoMode | GraphicsState::kPalette)) {
+	if (_pendingState.change & GraphicsState::kPalette) {
 		if (!_tt) {
 			// takes effect in the nearest VBL interrupt
 			VsetRGB(0, isOverlayVisible() ? getOverlayPaletteSize() : 256, _workScreen->palette->falcon);
+			// make sure that colors are right after end of updateScreen()
+			Vsync();
 		} else {
-			// takes effect immediatelly (it's possible that Vsync() hasn't been called: that's expected,
-			// don't cripple framerate only for a palette change)
+			Vsync();
+			// takes effect immediatelly
 			EsetPalette(0, isOverlayVisible() ? getOverlayPaletteSize() : 256, _workScreen->palette->tt);
 		}
-		_pendingState.change &= ~(GraphicsState::kVideoMode | GraphicsState::kPalette);
+		_pendingState.change &= ~GraphicsState::kPalette;
 	}
 #endif
 
