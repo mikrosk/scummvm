@@ -423,7 +423,10 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 	if (_pendingState.width > 0 && _pendingState.height > 0) {
 		if (_pendingState.width > getMaximumScreenWidth() || _pendingState.height > getMaximumScreenHeight()) {
 			error |= OSystem::TransactionError::kTransactionSizeChangeFailed;
-		} else if (_pendingState.width % 16 != 0 && !hasSuperVidel()) {
+		} else if (((hasPendingGraphicsMode && _pendingState.mode == kDirectRendering)
+				|| (!hasPendingGraphicsMode && _currentState.mode == kDirectRendering))
+			&& _pendingState.width % 16 != 0
+			&& !hasSuperVidel()) {
 			atari_warning("Requested width not divisible by 16, please report");
 			error |= OSystem::TransactionError::kTransactionSizeChangeFailed;
 		} else if (_overlayState == kOverlayIgnoredHide || _currentState.width != _pendingState.width || _currentState.height != _pendingState.height) {
@@ -452,13 +455,20 @@ OSystem::TransactionError AtariGraphicsManager::endGFXTransaction() {
 	}
 
 	if ((hasPendingGraphicsMode || hasPendingSize) && _currentState.isValid()) {
-		_chunkySurface.init(_currentState.width, _currentState.height, _currentState.width,
+		int c2pWidth = _currentState.width;
+
+		if (!hasSuperVidel()) {
+			// make sure that c2p width is always divisible by 16
+			c2pWidth = (c2pWidth + 15) & -16;
+		}
+
+		_chunkySurface.init(_currentState.width, _currentState.height, c2pWidth,
 			_chunkySurface.getPixels(), _currentState.format);
 
-		_screen[kFrontBuffer]->reset(_currentState.width, _currentState.height, 8, true);
+		_screen[kFrontBuffer]->reset(c2pWidth, _currentState.height, 8, true);
 		if (_currentState.mode > kSingleBuffering) {
-			_screen[kBackBuffer1]->reset(_currentState.width, _currentState.height, 8, true);
-			_screen[kBackBuffer2]->reset(_currentState.width, _currentState.height, 8, true);
+			_screen[kBackBuffer1]->reset(c2pWidth, _currentState.height, 8, true);
+			_screen[kBackBuffer2]->reset(c2pWidth, _currentState.height, 8, true);
 		}
 
 		if (hasPendingSize)
