@@ -32,7 +32,7 @@
 #include "atari-screen.h"
 #include "atari-supervidel.h"
 
-#define MAX_HZ_SHAKE 16 // Falcon only
+#define MAX_HZ_SHAKE 0 // Falcon only
 #define MAX_V_SHAKE  16
 
 class AtariGraphicsManager final : public GraphicsManager, Common::EventObserver {
