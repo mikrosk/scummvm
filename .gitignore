@@ -308,3 +308,5 @@ __pycache__/
 
 #Ignore vcpkg generated files
 /vcpkg_installed/
+
+devtools/create_prince
