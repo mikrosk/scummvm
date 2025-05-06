@@ -305,3 +305,5 @@ scummvm.prg
 
 #Ignore Python generated files
 __pycache__/
+
+devtools/create_prince
