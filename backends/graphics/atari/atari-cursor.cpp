@@ -121,7 +121,7 @@ void Cursor::setPalette(const byte *colors, uint start, uint num) {
 }
 
 void Cursor::convertSurfaceTo(const Graphics::PixelFormat &format) {
-	const int cursorWidth = (_width + 15) & (-16);
+	const int cursorWidth = g_hasSuperVidel ? _width : ((_width + 15) & (-16));
 	const int cursorHeight = _height;
 	const bool isCLUT8 = format.isCLUT8();
 
@@ -139,7 +139,10 @@ void Cursor::convertSurfaceTo(const Graphics::PixelFormat &format) {
 		_surface.create(cursorWidth, cursorHeight, format);
 		assert(_surface.pitch == _surface.w);
 
-		_surfaceMask.create(_surface.w / 8, _surface.h, format);	// 1 bpl
+		// TODO:
+		// - supervidel surface (ok) / st ram surface (nok)
+		// - create g_blitmask
+		_surfaceMask.create(g_hasSuperVidel ? _surface.w : _surface.w / 8, _surface.h, format);	// 1 bpl
 		assert(_surfaceMask.pitch == _surfaceMask.w);
 	}
 
@@ -254,12 +257,13 @@ void Cursor::draw() {
 		}
 	}
 
-	// don't use _srcRect.right as 'x2' as this must be aligned first
-	// (_surface.w is recalculated thanks to convertSurfaceTo())
 	dstSurface.drawMaskedSprite(
 		_surface, _surfaceMask,
 		_dstRect.left + _xOffset, _dstRect.top,
-		Common::Rect(0, _srcRect.top, _surface.w, _srcRect.bottom));
+		g_hasSuperVidel
+			? _srcRect
+			// TODO: _srcRect and add clipping to AtariSurface::drawMaskedSprite
+			: Common::Rect(0, _srcRect.top, _surface.w, _srcRect.bottom));
 
 	_visibilityChanged = _positionChanged = _surfaceChanged = false;
 }
