@@ -45,7 +45,7 @@ struct Cursor {
 		_surfaceChanged = true;
 		_visibilityChanged = false;
 
-		_savedRect = _previousSrcRect = _alignedDstRect = Common::Rect();
+		_savedRect = _alignedDstRect = Common::Rect();
 	}
 
 	// updates outOfScreen OR srcRect/dstRect (only if visible/needed)
@@ -86,7 +86,6 @@ struct Cursor {
 	// surface
 	void setSurface(const void *buf, int w, int h, int hotspotX, int hotspotY, uint32 keycolor);
 	void setPalette(const byte *colors, uint start, uint num);
-	void convertSurfaceTo(const Graphics::PixelFormat &format);
 
 	bool isVisible() const {
 		return !_outOfScreen && _visible;
@@ -100,6 +99,7 @@ struct Cursor {
 	void draw();
 
 private:
+	void convertSurfaceTo(const Graphics::PixelFormat &format);
 	void restoreBackground();
 
 	static byte _palette[256*3];
@@ -122,7 +122,6 @@ private:
 
 	Graphics::Surface _savedBackground;
 	Common::Rect _savedRect;
-	Common::Rect _previousSrcRect;
 	Common::Rect _alignedDstRect;
 
 	// related to 'surface'

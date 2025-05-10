@@ -121,7 +121,7 @@ void Cursor::setPalette(const byte *colors, uint start, uint num) {
 }
 
 void Cursor::convertSurfaceTo(const Graphics::PixelFormat &format) {
-	const int cursorWidth = (_srcRect.width() + 15) & (-16);
+	const int cursorWidth = (_width + 15) & (-16);
 	const int cursorHeight = _height;
 	const bool isCLUT8 = format.isCLUT8();
 
@@ -137,19 +137,19 @@ void Cursor::convertSurfaceTo(const Graphics::PixelFormat &format) {
 		}
 
 		_surface.create(cursorWidth, cursorHeight, format);
+		assert(_surface.pitch == _surface.w);
+
 		_surfaceMask.create(_surface.w / 8, _surface.h, format);	// 1 bpl
+		assert(_surfaceMask.pitch == _surfaceMask.w);
 	}
 
-	const int srcRectWidth = _srcRect.width();
-
-	const byte *src = _buf + _srcRect.left;
+	const byte *src = _buf;
 	byte *dst = (byte *)_surface.getPixels();
 	uint16 *dstMask = (uint16 *)_surfaceMask.getPixels();
-	const int srcPadding = _width - srcRectWidth;
-	const int dstPadding = _surface.w - srcRectWidth;
+	const int dstPadding = _surface.w - _width;
 
-	for (int j = 0; j < cursorHeight; ++j) {
-		for (int i = 0; i < srcRectWidth; ++i) {
+	for (int j = 0; j < _height; ++j) {
+		for (int i = 0; i < _width; ++i) {
 			const uint32 color = *src++;
 			const uint16 bit = 1 << (15 - (i % 16));
 
@@ -176,9 +176,8 @@ void Cursor::convertSurfaceTo(const Graphics::PixelFormat &format) {
 				dstMask++;
 		}
 
-		src += srcPadding;
-
 		if (dstPadding) {
+			// this is at most 15 pixels
 			memset(dst, 0x00, dstPadding);
 			dst += dstPadding;
 
@@ -236,9 +235,7 @@ void Cursor::draw() {
 
 	//atari_debug("Cursor::draw: %d %d %d %d", _dstRect.left, _dstRect.top, _dstRect.width(), _dstRect.height());
 
-	if (_surfaceChanged || _srcRect.width() != _previousSrcRect.width()) {
-		_previousSrcRect = _srcRect;
-
+	if (_surfaceChanged) {
 		convertSurfaceTo(dstSurface.format);
 
 		if (!g_hasSuperVidel) {
