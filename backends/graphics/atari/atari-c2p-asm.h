@@ -61,6 +61,15 @@ void asm_c2p1x1_8_tt(const byte *pChunky, const byte *pChunkyEnd, byte *pScreen,
 void asm_c2p1x1_8_rect(const byte *pChunky, const byte *pChunkyEnd, uint32 chunkyWidth, uint32 chunkyPitch, byte *pScreen, uint32 screenPitch);
 
 /**
+ * Chunky to planar conversion routine. Converts a chunky (byte) buffer into eight bitplanes.
+ * Optimized for 16 pixels only.
+ *
+ * @param pChunky chunky buffer start
+ * @param pScreen bitplane screen start
+ */
+void asm_c2p1x1_8_pix16(const byte *pChunky, byte *pScreen);
+
+/**
  * Chunky to planar conversion routine. Converts a chunky (byte) buffer into four bitplanes.
  * Optimized for surface-to-surface copy with the same pitch.
  *
@@ -82,6 +91,15 @@ void asm_c2p1x1_4(const byte *pChunky, const byte *pChunkyEnd, byte *pScreen);
  * @param screenPitch bitplane screen width (in bytes)
  */
 void asm_c2p1x1_4_rect(const byte *pChunky, const byte *pChunkyEnd, uint32 chunkyWidth, uint32 chunkyPitch, byte *pScreen, uint32 screenPitch);
+
+/**
+ * Chunky to planar conversion routine. Converts a chunky (byte) buffer into four bitplanes.
+ * Optimized for 16 pixels only.
+ *
+ * @param pChunky chunky buffer start
+ * @param pScreen bitplane screen start
+ */
+void asm_c2p1x1_4_pix16(const byte *pChunky, byte *pScreen);
 
 }
 
