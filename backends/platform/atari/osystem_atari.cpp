@@ -60,7 +60,7 @@
 /*
  * Include header files needed for the getFilesystemFactory() method.
  */
-#include "backends/fs/posix/posix-fs-factory.h"
+#include "backends/fs/atari/atari-fs-factory.h"
 
 bool g_gameEngineActive = false;
 
@@ -169,7 +169,7 @@ static void exit_restore() {
 }
 
 OSystem_Atari::OSystem_Atari() {
-	_fsFactory = new POSIXFilesystemFactory();
+	_fsFactory = new AtariFilesystemFactory();
 
 	nf_init();
 
