@@ -67,9 +67,7 @@ void Screen::reset(int width, int height, const Graphics::Surface &boundingSurf,
 	_xOffset = xOffset;
 
 	clearDirtyRects();
-	cursor.reset(&boundingSurf, xOffset);
-	if (resetCursorPosition)
-		cursor.setPosition(boundingSurf.w / 2, boundingSurf.h / 2);
+
 	rez = -1;
 	mode = -1;
 
@@ -139,6 +137,10 @@ void Screen::reset(int width, int height, const Graphics::Surface &boundingSurf,
 				(surf->w - width) / 2,		// left
 				(surf->h - height) / 2),	// top
 			width, height));
+
+	cursor.reset(_offsettedSurf.get(), &boundingSurf, xOffset);
+	if (resetCursorPosition)
+		cursor.setPosition(boundingSurf.w / 2, boundingSurf.h / 2);
 }
 
 void Screen::addDirtyRect(const Graphics::Surface &srcSurface, int x, int y, int w, int h, bool directRendering) {

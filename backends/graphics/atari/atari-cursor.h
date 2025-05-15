@@ -22,7 +22,8 @@
 #ifndef BACKENDS_GRAPHICS_ATARI_CURSOR_H
 #define BACKENDS_GRAPHICS_ATARI_CURSOR_H
 
-#include "graphics/surface.h"
+#include "backends/graphics/atari/atari-surface.h"
+#include "common/ptr.h"
 
 class AtariGraphicsManager;
 struct Screen;
@@ -34,19 +35,10 @@ struct Screen;
 // These always get updates by ScummVM, no need to differentiate between engines and the overlay.
 
 struct Cursor {
-	Cursor(const AtariGraphicsManager *manager, const Screen *screen);
+	Cursor(const AtariGraphicsManager *manager);
 	~Cursor();
 
-	void reset(const Graphics::Surface *boundingSurf, int xOffset) {
-		_boundingSurf = boundingSurf;
-		_xOffset = xOffset;
-
-		_positionChanged = true;
-		_surfaceChanged = true;
-		_visibilityChanged = false;
-
-		_savedRect = _alignedDstRect = Common::Rect();
-	}
+	void reset(AtariSurface* screenSurf, const Graphics::Surface *boundingSurf, int xOffset);
 
 	// updates outOfScreen OR srcRect/dstRect (only if visible/needed)
 	void update();
@@ -106,7 +98,7 @@ private:
 	void restoreBackground();
 
 	const AtariGraphicsManager *_manager;
-	const Screen *_parentScreen;
+	AtariSurface *_screenSurf;
 	const Graphics::Surface *_boundingSurf = nullptr;
 	int _xOffset = 0;
 
@@ -137,8 +129,8 @@ private:
 	static int _hotspotY;
 	static uint32 _keycolor;
 
-	static Graphics::Surface _surface;
-	static Graphics::Surface _surfaceMask;
+	static Common::ScopedPtr<AtariSurface> _surface;
+	static Common::ScopedPtr<AtariSurface> _surfaceMask;
 };
 
 #endif // BACKENDS_GRAPHICS_ATARI_CURSOR_H

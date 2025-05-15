@@ -38,12 +38,11 @@ int Cursor::_hotspotX;
 int Cursor::_hotspotY;
 uint32 Cursor::_keycolor;
 
-Graphics::Surface Cursor::_surface;
-Graphics::Surface Cursor::_surfaceMask;
+Common::ScopedPtr<AtariSurface> Cursor::_surface;
+Common::ScopedPtr<AtariSurface> Cursor::_surfaceMask;
 
-Cursor::Cursor(const AtariGraphicsManager *manager, const Screen *screen)
-		: _manager(manager)
-		, _parentScreen(screen) {
+Cursor::Cursor(const AtariGraphicsManager *manager)
+		: _manager(manager) {
 }
 
 Cursor::~Cursor() {
@@ -52,6 +51,30 @@ Cursor::~Cursor() {
 	// AtariSurfaceDeinit() is called)
 	_surface.free();
 	_surfaceMask.free();
+}
+
+void Cursor::reset(AtariSurface *screenSurf, const Graphics::Surface *boundingSurf, int xOffset) {
+	_screenSurf = screenSurf;
+	_boundingSurf = boundingSurf;
+	_xOffset = xOffset;
+
+	_positionChanged = true;
+	_surfaceChanged = true;
+	_visibilityChanged = false;
+
+	_savedRect = _alignedDstRect = Common::Rect();
+
+	// ok ten static som nedomyslel, resp ten c-tor: convertTo spravne detekuje zmenu format (aj bitsPerPixel teda),
+	// ale my to chceme mat vopred, kvoli create(), ktore sa prave vola v convertTo... preco sakra nema AtariSurface
+	// staticku metodu getBitsPerPixel?! mozno ten format nemusi byt v atari-graphics...
+
+	if (!_surface) {
+
+	}
+
+	if (!_surfaceMask) {
+
+	}
 }
 
 void Cursor::update() {
@@ -161,6 +184,7 @@ void Cursor::updatePosition(int deltaX, int deltaY) {
 		}
 
 		// allocated either in ST RAM or SuperVidel VRAM
+		// TODO WTF sak toto nie je AtariSurface!!!!!!!!
 		_surface.create(cursorWidth, cursorHeight, format);	// keep it 8bpl even if bitsPerPixel == 4...
 		_surfaceMask.create(g_hasSuperVidel ? _surface.w : _surface.w / 8, _surface.h, format);	// 1 bpl
 	}

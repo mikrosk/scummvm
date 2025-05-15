@@ -217,8 +217,48 @@ void AtariSurface::drawMaskedSprite(
 	assert(subRect.width() % 16 == 0);
 	assert(subRect.width() == srcSurface.w);
 	assert(srcSurface.format == format);
+	assert(((uintptr)srcSurface.getPixels() & 0xFF000000) == 0);
+	assert(((uintptr)srcMask.getPixels() & 0xFF000000) == 0);
 
 	if (_bitsPerPixel == 4) {
+		long oldssp = Super(0L);
+
+		#define BLITTER_HALFTONE ((volatile uint16 *)0xFFFF8A00)
+		#define BLITTER_SRC_XINC ((volatile uint16 *)0xFFFF8A20)	// word aligned
+		#define BLITTER_SRC_YINC ((volatile uint16 *)0xFFFF8A22)	// word aligned
+		#define BLITTER_SRC_ADDR ((volatile uint16 *)0xFFFF8A24)	// 24-bit, word aligned
+		#define BLITTER_ENDMASK1 ((volatile uint16 *)0xFFFF8A28)
+		#define BLITTER_ENDMASK2 ((volatile uint16 *)0xFFFF8A2A)
+		#define BLITTER_ENDMASK3 ((volatile uint16 *)0xFFFF8A2C)
+		#define BLITTER_DST_XINC ((volatile uint16 *)0xFFFF8A2E)	// word aligned
+		#define BLITTER_DST_YINC ((volatile uint16 *)0xFFFF8A30)	// word aligned
+		#define BLITTER_DST_ADDR ((volatile uint16 *)0xFFFF8A32)	// 24-bit, word aligned
+		#define BLITTER_X_COUNT  ((volatile uint16 *)0xFFFF8A36)
+		#define BLITTER_Y_COUNT  ((volatile uint16 *)0xFFFF8A38)
+		#define BLITTER_HOP      ((volatile uint8  *)0xFFFF8A3A)
+		#define BLITTER_OP       ((volatile uint8  *)0xFFFF8A3B)
+		#define BLITTER_LINE_NUM ((volatile uint8  *)0xFFFF8A3C)
+		#define BLITTER_SKEW     ((volatile uint8  *)0xFFFF8A3D)
+
+		// All bits taken from halftone patterns
+		#define BLITTER_HOP_HALFTONE	(1<<0)
+		// All bits taken from source
+		#define BLITTER_HOP_SOURCE		(1<<1)
+
+		// Smudge Mode (Write: Smudge/Clean mode: Read Status)
+		#define BLITTER_LINE_SMUDGE		(1<<5)
+		// HOG Mode (Write: HOG/BLiT mode, Read: Status)
+		#define BLITTER_LINE_HOG		(1<<6)
+		// BUSY Bit (Write: Start/Stop, Read: Status Busy/Idle)
+		#define BLITTER_LINE_BUSY		(1<<7)
+
+		// No Final Source Read (NFSR)
+		#define BLITTER_SKEW_NFSR		(1<<6)
+		// Force eXtra Source Read
+		#define BLITTER_SKEW_FXSR		(1<<7)
+
+		SuperToUser(oldssp);
+
 		asm_draw_4bpl_sprite(
 			(uint16 *)getPixels(), (const uint16 *)srcSurface.getBasePtr(subRect.left, subRect.top),
 			(const uint16 *)srcMask.getBasePtr(subRect.left, subRect.top),
@@ -318,3 +358,177 @@ void AtariSurfaceDeinit() {
 	}
 #endif
 }
+
+/*
+ * 	;used when demosequencer is disabled
+txt_bitplanes=4
+txt_screenx=320
+txt_oneplane=6
+		include	"debugbp.asm"
+SPRX=128
+SPRY=139
+
+key_left=$4b
+key_right=$4d
+key_up=$48
+key_down=$50
+
+copyscreen:
+		lea	backpic+34,a0
+		move.l	screen_buf2,a1
+		move.w	#1000-1,d7
+.lp:
+		movem.l	(a0)+,d0-d6/a2
+		movem.l	d0-d6/a2,(a1)
+		lea	32(a1),a1
+		dbra	d7,.lp
+		rts
+
+initfx:
+		movem.l	spritepal,d0-d7
+		movem.l	d0-d7,io_pal_st.w
+		bsr	copyscreen
+		bsr	switchdbl
+		bsr	copyscreen
+
+		lea	spritepic,a0
+		lea	spritemsk,a1
+		move.w	#((spritepicend-spritepic)/4)-1,d7
+.msklp:
+		move.w	(a0)+,d0
+		or.w	(a0)+,d0
+		or.w	(a0)+,d0
+		or.w	(a0)+,d0
+		move.w	d0,(a1)+
+		move.w	d0,(a1)+
+		move.w	d0,(a1)+
+		move.w	d0,(a1)+
+		dbra	d7,.msklp
+
+		move.w	#192,sprposx
+		rts
+
+mainfx:
+		bsr	switchdbl
+	ifne	showcpu
+		eor.w	#$421,io_pal_st.w
+	endc
+		cmp.b	#key_left,io_kbd_data.w
+		bne	.skipl
+		sub.w	#1,sprposx
+		bsr	copyscreen
+		bsr	switchdbl
+		bsr	copyscreen
+.skipl:
+		cmp.b	#key_right,io_kbd_data.w
+		bne	.skipr
+		add.w	#1,sprposx
+		bsr	copyscreen
+		bsr	switchdbl
+		bsr	copyscreen
+.skipr:
+
+.skipkey:
+	ifne	showcpu
+		eor.w	#$421,io_pal_st.w
+	endc
+		move.w	sprposx,d0	; in pixels!
+		bsr	blit_spritemsk
+
+		move.l	screen_buf2,a0
+		move.w	sprposx,d0
+		ext.l	d0
+		bsr	debugwd
+		rts
+
+blit_spritemsk:
+;11223344
+;012345678
+		lea	spritemsk,a0
+		lea	spritepic,a1
+
+		move.l	screen_buf2,a3
+		add.l	#(200-SPRY)*160,a3
+
+		move.l	#$00080008,d3 ;src inc
+		move.l	#$00080008,d4 ;dst inc
+		move.w	d0,d5
+		and.w	#15,d5
+		move.w	#SPRX,d1
+		and.w	#$1f0,d0
+		cmp.w	#320-SPRX,d0
+		bls	.skipcrop
+		move.w	#320,d1
+		sub.w	d0,d1
+		bgt	.skipcrop
+		rts
+.skipcrop:
+		move.w	#320,d7
+		sub.w	d1,d7
+		lsr.w	#1,d7
+		add.w	d7,d4				;dstinc+=((320-SPRX)/2)
+
+		move.w	#SPRX,d7
+		sub.w	d1,d7
+		lsr.w	#1,d7
+		add.w	d7,d3				;srcinc+=((SPRXMAX-SPRX)/2)
+
+		move.l	#SPRY<<16,d2			;count x y
+		move.w	d1,d2
+		lsr.w	#4,d2
+		swap	d2				;countx=planes*sprx/16
+
+		lsr.w	#1,d0				;pixels -> bytes
+		add.w	d0,a3
+		moveq	#-1,d7
+
+		lea.l   io_blit_endmsk1.w,a2
+		move.l	d3,-8(a2)			;source increment
+;ffff=0
+;7fff=1
+		moveq.l	#-1,d7
+		lsr.w	d5,d7
+		move.w	d7,(a2)+	;endmask 1
+		moveq.l	#-1,d7
+		move.l	d7,(a2)+			;endmask 2+3
+		move.l	d4,(a2)+			;dest increment
+
+		move.l	#$0204c000,d6
+		or.w	d5,d6
+
+		move.w	#3,d7
+.clearlp:
+; m_waitblit	macro
+; .\@lp	tst.b	io_blit_mode.w
+;	bmi.s	.\@lp
+;	endm
+		m_waitblit
+		lea	io_blit_dstaddr.w,a2
+		move.l	a0,-14(a2)			; io_blit_srcaddr
+		move.l	a3,(a2)+			; io_blit_dstaddr
+		move.l	d2,(a2)+			; io_blit_count
+		move.l	d6,(a2)
+		addq.l	#2,a0
+		addq.l	#2,a3
+
+		dbra	d7,.clearlp
+
+		lea	-8(a3),a3
+
+		move.w	#3,d7
+		or.l	#$00070000,d6
+.blitlp:
+		lea	io_blit_dstaddr.w,a2
+		move.l	a1,-14(a2)			; io_blit_srcaddr
+		move.l	a3,(a2)+			; io_blit_dstaddr
+		move.l	d2,(a2)+			; io_blit_count
+		move.l	d6,(a2)
+		addq.l	#2,a1
+		addq.l	#2,a3
+
+		dbra	d7,.blitlp
+
+		rts
+
+tmpl:		dc.l	$00020062
+*/
