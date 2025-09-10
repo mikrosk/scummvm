@@ -1039,6 +1039,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "sachabenteuer",		"Toggolino Sachabenteuer" },
 	{ "schulerhilfemath1",	"Schülerhilfe Mathe: Klasse 1." },
 	{ "schulerhilfemath2",	"Schülerhilfe Mathe: Klasse 2." },
+	{ "secretnumber",		"Secret Number" },
 	{ "shine",				"Shine: Die Angst hat einen Namen" },
 	{ "suderhof",			"Geschichten vom Süderhof" },
 	{ "technicus",			"Technicus: Ten Hours Left" },
@@ -3215,7 +3216,8 @@ static const DirectorGameDescription gameDescriptions[] = {
 	MACDEMO1("sculpt4d",   "Vol.5 Demo", "Sculpt Demo Vol.5", "f54ac20d51c496911f9144ee595ade60", 1456309, 300),
 	MACDEMO1("sculpt4d",   "Using Demo", "UsingSculpt1.0",    "2ce360c9ea2da80a2c6d1040b0ad92dd", 383380, 313),
 
-	WINGAME1("selfish", "", "selfish.exe", "t:260d50f7d51adba057a06bbcb6da3d43", 371037, 300),
+	MACGAME1("selfish", "", "Click for Story! (8mb)", "r:7f443f2e63fd497a9ad85b10dc880a91", 384549, 310),
+	WINGAME1("selfish", "", "SELFISH/SELFISH.EXE", "t:260d50f7d51adba057a06bbcb6da3d43", 371037, 310),
 
 	MACGAME1("sfk", "D3", "More SFK Products!", "r:1ae45c23586b41997ba52e2e7c771c4c", 377667, 310),
 
@@ -4188,6 +4190,8 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME1("elroybug", "", "BUGZERK.EXE", "t:3be9fa389257a608ff21e09074355fa5", 1593811, 400),
 	MACGAME1("elroybug", "1.0", "Elroy Goes Bugzerk", "r:cbce20666bfe47a9533331c6be1e6039", 321438, 404),
 	WINGAME1("elroybug", "1.0", "BUGZERK.EXE", "t:7fcb09d5dcc8096cd7ffa1fd618e5500", 1561075, 404),
+	MACGAME1_l("elroybug", "1.0", "xn--Elroy jagt den Technokfer-6ec", "r:bcd3c718db258701496b3c5bcb827ef2", 520582, Common::DE_DEU, 404),
+	WINGAME1_l("elroybug", "1.0", "BUGZERK.EXE", "t:ce2739427840ffc3bdc1d59d38f3c80d", 1521691, Common::DE_DEU, 404),
 	MACDEMO1("elroybug", "Demo", "Elroy Goes Bugzerk Demo", "bcd3c718db258701496b3c5bcb827ef2", 498394, 404),
 	WINDEMO1("elroybug", "Demo", "ELRYDEMO.EXE", "cb2d86ea52d81d12d1fe8eadfb4a118c", 2438763, 404),
 
@@ -7705,6 +7709,11 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME2("secretmind", "Disc 2", "Install Secrets of the Mind/Mind.exe", "t:e9cfac3e743c99605893a1b5e90a821d", 1412092,
 									 "XBITEMOV/BLDE01.DIR",	 "f:e137bdd5e7afe3b68ad8309e78edeb43", 87132, 500),
 
+	// Secret Number - Ein spannender Mathe-Krimi für Kinder ab 7
+	// Published by Cornelsen Verlag GmbH (1996)
+	// TRAC #16161
+	WINGAME1_l("secretnumber", "", "SECRET31.EXE", "t:e621031f37a28f79fc5e9e7c3a32db67", 970389, Common::DE_DEU, 501),
+
 	// Both versions require installation
 	MACGAME1("secretpaths1", "", "Secret Paths in the Forest",	   "r:4f0fb528e9c495fd2822ad400178e7a8",  716771, 501),
 	WINGAME1("secretpaths1", "", "Secret Paths in the Forest.exe", "t:76d15b10a75287527d6affed91675c01", 1425465, 501),
@@ -7857,8 +7866,6 @@ static const DirectorGameDescription gameDescriptions[] = {
 	// Found on Revolutionary War Picture CD from Holiday Digital Pictures
 	MACGAME1("ssrevwar", "", "Revolutionary War Screen Saver", "r:43234754a346ed7ac25b581f6d106866", 217838, 500),
 
-	WINGAME1("trekchair", "", "Cap_win.exe", "a28313a078c0cd3cebdf505af1d63d88", 1399089, 400),
-
 	// Mac version requires installation, Install Star Warped, VISE
 	// Preview is from X-Fools disc
 	// Win/Mac previews from Microshaft Winblows are D6
@@ -7934,8 +7941,8 @@ static const DirectorGameDescription gameDescriptions[] = {
 	MACGAME1("treasuresamnh", "", "Treasures of the AMNH/Treasures", "r:d17d1380e3d87863c406e012bd5d8078", 718945, 501),
 	WINGAME1("treasuresamnh", "", "TAMNH/TAMNH.EXE", "t:b8417ced47c60179e0ca1cf59bfc209b", 1641329, 501),
 
-	MACGAME1("trekchair", "", "xn--Star Trek Captain's Chair-tl1p/Captain's Chair Player", "d8bad538d97edf5990c451699e429db3", 764476, 501),
-	WINGAME1t("trekchair", "", "CAP_WIN.EXE", "6c3c66dd2a5a91257fd2691e3888d47d", 1399089, 500),
+	MACGAME1("trekchair", "1.0", "xn--Star Trek Captain's Chair-tl1p/Captain's Chair Player", "r:d8bad538d97edf5990c451699e429db3", 764476, 501),
+	WINGAME1("trekchair", "1.0", "SOURCE/CAP_WIN.EXE", "t:6c3c66dd2a5a91257fd2691e3888d47d", 1399089, 500),
 
 	MACGAME1("troubleshoot101", "Basic", "Troubleshooting 101 IA",		   "r:62e979424add2428daa835610fb83864", 719005, 501),
 	MACGAME1("troubleshoot101", "Music", "Troubleshooting 101 IA w MUSIC", "r:222fbd020a3910ef748724945145771c", 719005, 501),

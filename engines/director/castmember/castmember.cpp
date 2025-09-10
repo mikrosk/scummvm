@@ -30,6 +30,25 @@
 
 namespace Director {
 
+void EditInfo::read(Common::ReadStreamEndian *stream) {
+	rect = Movie::readRect(*stream);
+	selStart = stream->readUint32();
+	selEnd = stream->readUint32();
+	version = stream->readByte();
+	rulerFlag = stream->readByte();
+	// We're ignoring 2 bytes here
+	valid = true;
+	debugC(3, kDebugLoading, "  EditInfo: rect: [%s],  selStart: %d,  selEnd: %d,  version: %d,  rulerFlag: %d", rect.toString().c_str(), selStart, selEnd, version, rulerFlag);
+}
+
+void EditInfo::write(Common::WriteStream *stream) {
+	Movie::writeRect(stream, rect);
+	stream->writeUint32BE(selStart);
+	stream->writeUint32BE(selEnd);
+	stream->writeByte(version);
+	stream->writeByte(rulerFlag);
+}
+
 CastMember::CastMember(Cast *cast, uint16 castId, Common::SeekableReadStreamEndian &stream) : Object<CastMember>("CastMember") {
 	_type = kCastTypeNull;
 	_cast = cast;
@@ -111,14 +130,14 @@ Datum CastMember::getProp(const Common::String &propName) {
 	return Datum();
 }
 
-bool CastMember::setProp(const Common::String &propName, const Datum &value, bool force) {
+void CastMember::setProp(const Common::String &propName, const Datum &value, bool force) {
 	Common::String fieldName = Common::String::format("%d%s", kTheCast, propName.c_str());
 	if (g_lingo->_theEntityFields.contains(fieldName)) {
-		return setField(g_lingo->_theEntityFields[fieldName]->field, value);
+		setField(g_lingo->_theEntityFields[fieldName]->field, value);
+		return;
 	}
 
 	warning("CastMember::setProp: unknown property '%s'", propName.c_str());
-	return false;
 }
 
 bool CastMember::hasField(int field) {
@@ -136,6 +155,7 @@ bool CastMember::hasField(int field) {
 	case kTheName:
 	case kTheNumber:
 	case kTheRect:
+	case kThePreLoad:
 	case kThePurgePriority:
 	case kTheScriptText:
 	case kTheSize:
@@ -208,6 +228,15 @@ Datum CastMember::getField(int field) {
 		// not sure get the initial rect would be fine to castmember
 		d = Datum(_cast->getCastMember(_castId)->_initialRect);
 		break;
+	/*
+	ScummVM does not do preloading so we will always return false here.
+
+	simpsonscartoonstudio checks this flag and if set to true does an updateStage
+	in a loop which causes performance issues loading cartoons.
+	*/
+	case kThePreLoad:
+		d = 0;
+		break;
 	case kThePurgePriority:
 		d = _purgePriority;
 		break;
@@ -229,65 +258,68 @@ Datum CastMember::getField(int field) {
 	return d;
 }
 
-bool CastMember::setField(int field, const Datum &d) {
+void CastMember::setField(int field, const Datum &d) {
 	CastMemberInfo *castInfo = _cast->getCastMemberInfo(_castId);
 
 	switch (field) {
 	case kTheBackColor:
 		_cast->getCastMember(_castId)->setBackColor(d.asInt());
-		return true;
+		return;
 	case kTheCastType:
 	case kTheType:
 		warning("BUILDBOT: CastMember::setField(): Attempt to set read-only field %s of cast %d", g_lingo->entity2str(field), _castId);
-		return false;
+		return;
 	case kTheFileName:
 		if (!castInfo) {
 			warning("CastMember::setField(): CastMember info for %d not found", _castId);
-			return false;
+			return;
 		}
 		castInfo->fileName = d.asString();
 		_needsReload = true;
-		return true;
+		return;
 	case kTheForeColor:
 		_cast->getCastMember(_castId)->setForeColor(d.asInt());
-		return true;
+		return;
 	case kTheHeight:
 		warning("BUILDBOT: CastMember::setField(): Attempt to set read-only field \"%s\" of cast %d", g_lingo->field2str(field), _castId);
-		return false;
+		return;
 	case kTheHilite:
 		_hilite = (bool)d.asInt();
 		_modified = true;
-		return true;
+		return;
 	case kTheName:
 		if (!castInfo) {
 			warning("CastMember::setField(): CastMember info for %d not found", _castId);
-			return false;
+			return;
 		}
 		castInfo->name = d.asString();
 		_cast->rebuildCastNameCache();
-		return true;
+		return;
 	case kTheRect:
 		warning("CastMember::setField(): Attempt to set read-only field \"%s\" of cast %d", g_lingo->field2str(field), _castId);
-		return false;
+		return;
+	/*
+	ScummVM does not do preloading so we will make this a no-op.
+	*/
+	case kThePreLoad:
+		return;
 	case kThePurgePriority:
 		_purgePriority = CLIP<int>(d.asInt(), 0, 3);
-		return true;
+		return;
 	case kTheScriptText:
 		if (!castInfo) {
 			warning("CastMember::setField(): CastMember info for %d not found", _castId);
-			return false;
+			return;
 		}
 		_cast->_lingoArchive->replaceCode(*d.u.s, kCastScript, _castId);
 		castInfo->script = d.asString();
-		return true;
+		return;
 	case kTheWidth:
 		warning("BUILDBOT: CastMember::setField(): Attempt to set read-only field \"%s\" of cast %d", g_lingo->field2str(field), _castId);
-		return false;
+		return;
 	default:
 		warning("CastMember::setField(): Unprocessed setting field \"%s\" of cast %d", g_lingo->field2str(field), _castId);
 	}
-
-	return false;
 }
 
 CastMemberInfo *CastMember::getInfo() {

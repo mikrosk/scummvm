@@ -186,6 +186,10 @@ bool DigitalVideoCastMember::loadVideoFromCast() {
 bool DigitalVideoCastMember::loadVideo(Common::String path) {
 	// TODO: detect file type (AVI, QuickTime, FLIC) based on magic number,
 	// insert the right video decoder
+	if (_filename == path) {
+		// we've already loaded this video, or not. no point trying again.
+		return _video ? true : false;
+	}
 
 	if (_video) {
 		delete _video;
@@ -357,21 +361,16 @@ Graphics::MacWidget *DigitalVideoCastMember::createWidget(Common::Rect &bbox, Ch
 	if (_emptyFile)
 		return nullptr;
 
+	if (!_video || !_video->isVideoLoaded()) {
+		// try and load the video if not already
+		if (!loadVideoFromCast()) {
+			return nullptr;
+		}
+	}
+
 	Graphics::MacWidget *widget = new Graphics::MacWidget(g_director->getCurrentWindow(), bbox.left, bbox.top, bbox.width(), bbox.height(), g_director->_wm, false);
 
 	_channel = channel;
-
-	if (!_video || !_video->isVideoLoaded()) {
-		// try and load the video if not already
-		loadVideoFromCast();
-	}
-
-	if (!_video || !_video->isVideoLoaded()) {
-		warning("DigitalVideoCastMember::createWidget: No video decoder");
-		delete widget;
-
-		return nullptr;
-	}
 
 	// Do not render stopped videos
 	if (_channel->_movieRate == 0.0 && !_getFirstFrame && _lastFrame) {
@@ -601,56 +600,56 @@ Datum DigitalVideoCastMember::getField(int field) {
 	return d;
 }
 
-bool DigitalVideoCastMember::setField(int field, const Datum &d) {
+void DigitalVideoCastMember::setField(int field, const Datum &d) {
 	switch (field) {
 	case kTheCenter:
 		_center = (bool)d.asInt();
-		return true;
+		return;
 	case kTheController:
 		_showControls = (bool)d.asInt();
-		return true;
+		return;
 	case kTheCrop:
 		_crop = (bool)d.asInt();
-		return true;
+		return;
 	case kTheDigitalVideoType:
 		warning("DigitalVideoCastMember::setField(): Attempt to set read-only field %s of cast %d", g_lingo->entity2str(field), _castId);
-		return false;
+		return;
 	case kTheDirectToStage:
 		_directToStage = (bool)d.asInt();
-		return true;
+		return;
 	case kTheDuration:
 		warning("DigitalVideoCastMember::setField(): Attempt to set read-only field %s of cast %d", g_lingo->entity2str(field), _castId);
-		return false;
+		return;
 	case kTheFrameRate:
 		_frameRate = d.asInt();
 		setFrameRate(d.asInt());
-		return true;
+		return;
 	case kTheLoop:
 		_looping = (bool)d.asInt();
 		if (_looping && _channel && _channel->_movieRate == 0.0) {
 			setMovieRate(1.0);
 		}
-		return true;
+		return;
 	case kThePausedAtStart:
 		_pausedAtStart = (bool)d.asInt();
-		return true;
+		return;
 	case kThePreLoad:
 		_preload = (bool)d.asInt();
-		return true;
+		return;
 	case kTheSound:
 		_enableSound = (bool)d.asInt();
-		return true;
+		return;
 	case kTheTimeScale:
 		warning("DigitalVideoCastMember::setField(): Attempt to set read-only field %s of cast %d", g_lingo->entity2str(field), _castId);
-		return false;
+		return;
 	case kTheVideo:
 		_enableVideo = (bool)d.asInt();
-		return true;
+		return;
 	default:
 		break;
 	}
 
-	return CastMember::setField(field, d);
+	CastMember::setField(field, d);
 }
 
 uint32 DigitalVideoCastMember::getCastDataSize() {

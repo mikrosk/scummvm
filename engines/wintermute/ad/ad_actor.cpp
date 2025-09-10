@@ -44,6 +44,8 @@
 #include "engines/wintermute/base/scriptables/script_stack.h"
 #include "engines/wintermute/base/particles/part_emitter.h"
 #include "engines/wintermute/base/base_engine.h"
+#include "engines/wintermute/utils/utils.h"
+#include "engines/wintermute/dcgf.h"
 
 namespace Wintermute {
 
@@ -52,7 +54,7 @@ IMPLEMENT_PERSISTENT(AdActor, false)
 
 //////////////////////////////////////////////////////////////////////////
 AdActor::AdActor(BaseGame *inGame) : AdTalkHolder(inGame) {
-	_path = new AdPath(_gameRef);
+	_path = new AdPath(_game);
 
 	_type = OBJECT_ACTOR;
 	_dir = DI_LEFT;
@@ -72,29 +74,33 @@ AdActor::AdActor(BaseGame *inGame) : AdTalkHolder(inGame) {
 
 //////////////////////////////////////////////////////////////////////////
 bool AdActor::setDefaultAnimNames() {
-	_talkAnimName = "talk";
-	_idleAnimName = "idle";
-	_walkAnimName = "walk";
-	_turnLeftAnimName = "turnleft";
-	_turnRightAnimName = "turnright";
+	_talkAnimName = nullptr;
+	BaseUtils::setString(&_talkAnimName, "talk");
+
+	_idleAnimName = nullptr;
+	BaseUtils::setString(&_idleAnimName, "idle");
+
+	_walkAnimName = nullptr;
+	BaseUtils::setString(&_walkAnimName, "walk");
+
+	_turnLeftAnimName = nullptr;
+	BaseUtils::setString(&_turnLeftAnimName, "turnleft");
+
+	_turnRightAnimName = nullptr;
+	BaseUtils::setString(&_turnRightAnimName, "turnright");
+
 	return STATUS_OK;
 }
 
 //////////////////////////////////////////////////////////////////////////
 AdActor::~AdActor() {
-	delete _path;
-	_path = nullptr;
-	delete _targetPoint;
-	_targetPoint = nullptr;
+	SAFE_DELETE(_path);
+	SAFE_DELETE(_targetPoint);
 
-	delete _walkSprite;
-	_walkSprite = nullptr;
-	delete _standSprite;
-	_standSprite = nullptr;
-	delete _turnLeftSprite;
-	_turnLeftSprite = nullptr;
-	delete _turnRightSprite;
-	_turnRightSprite = nullptr;
+	SAFE_DELETE(_walkSprite);
+	SAFE_DELETE(_standSprite);
+	SAFE_DELETE(_turnLeftSprite);
+	SAFE_DELETE(_turnRightSprite);
 
 	_animSprite2 = nullptr; // ref only
 
@@ -108,9 +114,14 @@ AdActor::~AdActor() {
 	}
 	_talkSpritesEx.removeAll();
 
+	SAFE_DELETE_ARRAY(_talkAnimName);
+	SAFE_DELETE_ARRAY(_idleAnimName);
+	SAFE_DELETE_ARRAY(_walkAnimName);
+	SAFE_DELETE_ARRAY(_turnLeftAnimName);
+	SAFE_DELETE_ARRAY(_turnRightAnimName);
+
 	for (int32 i = 0; i < _anims.getSize(); i++) {
-		delete _anims[i];
-		_anims[i] = nullptr;
+		SAFE_DELETE(_anims[i]);
 	}
 	_anims.removeAll();
 }
@@ -120,7 +131,7 @@ AdActor::~AdActor() {
 bool AdActor::loadFile(const char *filename) {
 	char *buffer = (char *)BaseFileManager::getEngineInstance()->readWholeFile(filename);
 	if (buffer == nullptr) {
-		_gameRef->LOG(0, "AdActor::LoadFile failed for file '%s'", filename);
+		_game->LOG(0, "AdActor::loadFile failed for file '%s'", filename);
 		return STATUS_FAILED;
 	}
 
@@ -129,7 +140,7 @@ bool AdActor::loadFile(const char *filename) {
 	setFilename(filename);
 
 	if (DID_FAIL(ret = loadBuffer(buffer, true))) {
-		_gameRef->LOG(0, "Error parsing ACTOR file '%s'", filename);
+		_game->LOG(0, "Error parsing ACTOR file '%s'", filename);
 	}
 
 
@@ -220,17 +231,17 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 
 	char *params;
 	int cmd;
-	BaseParser parser;
+	BaseParser parser(_game);
 
 	if (complete) {
 		if (parser.getCommand(&buffer, commands, &params) != TOKEN_ACTOR) {
-			_gameRef->LOG(0, "'ACTOR' keyword expected.");
+			_game->LOG(0, "'ACTOR' keyword expected.");
 			return STATUS_FAILED;
 		}
 		buffer = params;
 	}
 
-	AdGame *adGame = (AdGame *)_gameRef;
+	AdGame *adGame = (AdGame *)_game;
 	AdSpriteSet *spr = nullptr;
 	int ar = 0, ag = 0, ab = 0, alpha = 0;
 	while ((cmd = parser.getCommand(&buffer, commands, &params)) > 0) {
@@ -285,9 +296,8 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_WALK:
-			delete _walkSprite;
-			_walkSprite = nullptr;
-			spr = new AdSpriteSet(_gameRef, this);
+			SAFE_DELETE(_walkSprite);
+			spr = new AdSpriteSet(_game, this);
 			if (!spr || DID_FAIL(spr->loadBuffer(params, true, adGame->_texWalkLifeTime, CACHE_HALF))) {
 				cmd = PARSERR_GENERIC;
 			} else {
@@ -296,7 +306,7 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_TALK:
-			spr = new AdSpriteSet(_gameRef, this);
+			spr = new AdSpriteSet(_game, this);
 			if (!spr || DID_FAIL(spr->loadBuffer(params, true, adGame->_texTalkLifeTime))) {
 				cmd = PARSERR_GENERIC;
 			} else {
@@ -305,7 +315,7 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_TALK_SPECIAL:
-			spr = new AdSpriteSet(_gameRef, this);
+			spr = new AdSpriteSet(_game, this);
 			if (!spr || DID_FAIL(spr->loadBuffer(params, true, adGame->_texTalkLifeTime))) {
 				cmd = PARSERR_GENERIC;
 			} else {
@@ -314,9 +324,8 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_STAND:
-			delete _standSprite;
-			_standSprite = nullptr;
-			spr = new AdSpriteSet(_gameRef, this);
+			SAFE_DELETE(_standSprite);
+			spr = new AdSpriteSet(_game, this);
 			if (!spr || DID_FAIL(spr->loadBuffer(params, true, adGame->_texStandLifeTime))) {
 				cmd = PARSERR_GENERIC;
 			} else {
@@ -325,9 +334,8 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_TURN_LEFT:
-			delete _turnLeftSprite;
-			_turnLeftSprite = nullptr;
-			spr = new AdSpriteSet(_gameRef, this);
+			SAFE_DELETE(_turnLeftSprite);
+			spr = new AdSpriteSet(_game, this);
 			if (!spr || DID_FAIL(spr->loadBuffer(params, true))) {
 				cmd = PARSERR_GENERIC;
 			} else {
@@ -336,9 +344,8 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_TURN_RIGHT:
-			delete _turnRightSprite;
-			_turnRightSprite = nullptr;
-			spr = new AdSpriteSet(_gameRef, this);
+			SAFE_DELETE(_turnRightSprite);
+			spr = new AdSpriteSet(_game, this);
 			if (!spr || DID_FAIL(spr->loadBuffer(params, true))) {
 				cmd = PARSERR_GENERIC;
 			} else {
@@ -351,11 +358,10 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_CURSOR:
-			delete _cursor;
-			_cursor = new BaseSprite(_gameRef);
+			SAFE_DELETE(_cursor);
+			_cursor = new BaseSprite(_game);
 			if (!_cursor || DID_FAIL(_cursor->loadFile(params))) {
-				delete _cursor;
-				_cursor = nullptr;
+				SAFE_DELETE(_cursor);
 				cmd = PARSERR_GENERIC;
 			}
 			break;
@@ -389,17 +395,13 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_BLOCKED_REGION: {
-			delete _blockRegion;
-			_blockRegion = nullptr;
-			delete _currentBlockRegion;
-			_currentBlockRegion = nullptr;
-			BaseRegion *rgn = new BaseRegion(_gameRef);
-			BaseRegion *crgn = new BaseRegion(_gameRef);
+			SAFE_DELETE(_blockRegion);
+			SAFE_DELETE(_currentBlockRegion);
+			BaseRegion *rgn = new BaseRegion(_game);
+			BaseRegion *crgn = new BaseRegion(_game);
 			if (!rgn || !crgn || DID_FAIL(rgn->loadBuffer(params, false))) {
-				delete _blockRegion;
-				_blockRegion = nullptr;
-				delete _currentBlockRegion;
-				_currentBlockRegion = nullptr;
+				SAFE_DELETE(_blockRegion);
+				SAFE_DELETE(_currentBlockRegion);
 				cmd = PARSERR_GENERIC;
 			} else {
 				_blockRegion = rgn;
@@ -410,17 +412,13 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 		break;
 
 		case TOKEN_WAYPOINTS: {
-			delete _wptGroup;
-			_wptGroup = nullptr;
-			delete _currentWptGroup;
-			_currentWptGroup = nullptr;
-			AdWaypointGroup *wpt = new AdWaypointGroup(_gameRef);
-			AdWaypointGroup *cwpt = new AdWaypointGroup(_gameRef);
+			SAFE_DELETE(_wptGroup);
+			SAFE_DELETE(_currentWptGroup);
+			AdWaypointGroup *wpt = new AdWaypointGroup(_game);
+			AdWaypointGroup *cwpt = new AdWaypointGroup(_game);
 			if (!wpt || !cwpt || DID_FAIL(wpt->loadBuffer(params, false))) {
-				delete _wptGroup;
-				_wptGroup = nullptr;
-				delete _currentWptGroup;
-				_currentWptGroup = nullptr;
+				SAFE_DELETE(_wptGroup);
+				SAFE_DELETE(_currentWptGroup);
 				cmd = PARSERR_GENERIC;
 			} else {
 				_wptGroup = wpt;
@@ -447,7 +445,7 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_ANIMATION: {
-			AdSpriteSet *anim = new AdSpriteSet(_gameRef, this);
+			AdSpriteSet *anim = new AdSpriteSet(_game, this);
 			if (!anim || DID_FAIL(anim->loadBuffer(params, false))) {
 				cmd = PARSERR_GENERIC;
 			} else {
@@ -461,14 +459,14 @@ bool AdActor::loadBuffer(char *buffer, bool complete) {
 		}
 	}
 	if (cmd == PARSERR_TOKENNOTFOUND) {
-		_gameRef->LOG(0, "Syntax error in ACTOR definition");
+		_game->LOG(0, "Syntax error in ACTOR definition");
 		return STATUS_FAILED;
 	}
 	if (cmd == PARSERR_GENERIC) {
 		if (spr) {
 			delete spr;
 		}
-		_gameRef->LOG(0, "Error loading ACTOR definition");
+		_game->LOG(0, "Error loading ACTOR definition");
 		return STATUS_FAILED;
 	}
 
@@ -523,7 +521,7 @@ void AdActor::goTo(int x, int y, TDirection afterWalkDir) {
 	_targetPoint->x = x;
 	_targetPoint->y = y;
 
-	((AdGame *)_gameRef)->_scene->correctTargetPoint(_posX, _posY, &_targetPoint->x, &_targetPoint->y, true, this);
+	((AdGame *)_game)->_scene->correctTargetPoint(_posX, _posY, &_targetPoint->x, &_targetPoint->y, true, this);
 
 	_state = STATE_SEARCHING_PATH;
 
@@ -540,7 +538,7 @@ bool AdActor::display() {
 	if (_alphaColor != 0) {
 		alpha = _alphaColor;
 	} else {
-		alpha = _shadowable ? ((AdGame *)_gameRef)->_scene->getAlphaAt(_posX, _posY, true) : 0xFFFFFFFF;
+		alpha = _shadowable ? ((AdGame *)_game)->_scene->getAlphaAt(_posX, _posY, true) : 0xFFFFFFFF;
 	}
 
 	float scaleX, scaleY;
@@ -552,7 +550,7 @@ bool AdActor::display() {
 		if (_rotateValid) {
 			rotate = _rotate;
 		} else {
-			rotate = ((AdGame *)_gameRef)->_scene->getRotationAt(_posX, _posY) + _relativeRotate;
+			rotate = ((AdGame *)_game)->_scene->getRotationAt(_posX, _posY) + _relativeRotate;
 		}
 	} else {
 		rotate = 0.0f;
@@ -564,7 +562,7 @@ bool AdActor::display() {
 
 	if (_currentSprite && _active) {
 		bool reg = _registrable;
-		if (_ignoreItems && ((AdGame *)_gameRef)->_selectedItem) {
+		if (_ignoreItems && ((AdGame *)_game)->_selectedItem) {
 			reg = false;
 		}
 
@@ -609,8 +607,7 @@ bool AdActor::update() {
 
 	if (_state == STATE_READY) {
 		if (_animSprite) {
-			delete _animSprite;
-			_animSprite = nullptr;
+			SAFE_DELETE(_animSprite);
 		}
 		if (_animSprite2) {
 			_animSprite2 = nullptr;
@@ -618,13 +615,13 @@ bool AdActor::update() {
 	}
 
 	// finished playing animation?
-	if (_state == STATE_PLAYING_ANIM && _animSprite != nullptr && _animSprite->isFinished()) {
+	if (_state == STATE_PLAYING_ANIM && _animSprite != nullptr && _animSprite->_finished) {
 		_state = _nextState;
 		_nextState = STATE_READY;
 		_currentSprite = _animSprite;
 	}
 
-	if (_state == STATE_PLAYING_ANIM_SET && _animSprite2 != nullptr && _animSprite2->isFinished()) {
+	if (_state == STATE_PLAYING_ANIM_SET && _animSprite2 != nullptr && _animSprite2->_finished) {
 		_state = _nextState;
 		_nextState = STATE_READY;
 		_currentSprite = _animSprite2;
@@ -673,12 +670,11 @@ bool AdActor::update() {
 
 		//////////////////////////////////////////////////////////////////////////
 	case STATE_TURNING_LEFT:
-		if (_tempSprite2 == nullptr || _tempSprite2->isFinished()) {
-			if (_dir > 0) {
+		if (_tempSprite2 == nullptr || _tempSprite2->_finished) {
+			if (_dir > 0)
 				_dir = (TDirection)(_dir - 1);
-			} else {
+			else
 				_dir = (TDirection)(NUM_DIRECTIONS - 1);
-			}
 
 			if (_dir == _targetDir) {
 				_tempSprite2 = nullptr;
@@ -710,7 +706,7 @@ bool AdActor::update() {
 
 		//////////////////////////////////////////////////////////////////////////
 	case STATE_TURNING_RIGHT:
-		if (_tempSprite2 == nullptr || _tempSprite2->isFinished()) {
+		if (_tempSprite2 == nullptr || _tempSprite2->_finished) {
 			_dir = (TDirection)(_dir + 1);
 
 			if ((int)_dir >= (int)NUM_DIRECTIONS) {
@@ -748,7 +744,7 @@ bool AdActor::update() {
 		//////////////////////////////////////////////////////////////////////////
 	case STATE_SEARCHING_PATH:
 		// keep asking scene for the path
-		if (((AdGame *)_gameRef)->_scene->getPath(BasePoint(_posX, _posY), *_targetPoint, _path, this)) {
+		if (((AdGame *)_game)->_scene->getPath(BasePoint(_posX, _posY), *_targetPoint, _path, this)) {
 			_state = STATE_WAITING_PATH;
 		}
 		break;
@@ -776,8 +772,8 @@ bool AdActor::update() {
 			_tempSprite2 = _sentence->_currentSprite;
 		}
 
-		bool timeIsUp = (_sentence->_sound && _sentence->_soundStarted && (!_sentence->_sound->isPlaying() && !_sentence->_sound->isPaused())) || (!_sentence->_sound && _sentence->_duration <= _gameRef->getTimer()->getTime() - _sentence->_startTime);
-		if (_tempSprite2 == nullptr || _tempSprite2->isFinished() || (/*_tempSprite2->_looping &&*/ timeIsUp)) {
+		bool timeIsUp = (_sentence->_sound && _sentence->_soundStarted && (!_sentence->_sound->isPlaying() && !_sentence->_sound->isPaused())) || (!_sentence->_sound && _sentence->_duration <= _game->_timer - _sentence->_startTime);
+		if (_tempSprite2 == nullptr || _tempSprite2->_finished || (/*_tempSprite2->_looping &&*/ timeIsUp)) {
 			if (timeIsUp) {
 				_sentence->finish();
 				_tempSprite2 = nullptr;
@@ -788,12 +784,12 @@ bool AdActor::update() {
 				if (_tempSprite2) {
 					_tempSprite2->reset();
 					_currentSprite = _tempSprite2;
-					((AdGame *)_gameRef)->addSentence(_sentence);
+					((AdGame *)_game)->addSentence(_sentence);
 				}
 			}
 		} else {
 			_currentSprite = _tempSprite2;
-			((AdGame *)_gameRef)->addSentence(_sentence);
+			((AdGame *)_game)->addSentence(_sentence);
 		}
 	}
 	break;
@@ -844,15 +840,15 @@ bool AdActor::update() {
 	}
 
 	if (_currentSprite && !already_moved) {
-		_currentSprite->getCurrentFrame(_zoomable ? ((AdGame *)_gameRef)->_scene->getZoomAt(_posX, _posY) : 100, _zoomable ? ((AdGame *)_gameRef)->_scene->getZoomAt(_posX, _posY) : 100);
-		if (_currentSprite->isChanged()) {
+		_currentSprite->getCurrentFrame(_zoomable ? ((AdGame *)_game)->_scene->getZoomAt(_posX, _posY) : 100, _zoomable ? ((AdGame *)_game)->_scene->getZoomAt(_posX, _posY) : 100);
+		if (_currentSprite->_changed) {
 			_posX += _currentSprite->_moveX;
 			_posY += _currentSprite->_moveY;
 			afterMove();
 		}
 	}
 
-	//_gameRef->QuickMessageForm("%s", _currentSprite->_filename);
+	//_game->QuickMessageForm("%s", _currentSprite->_filename);
 
 	updateBlockRegion();
 	_ready = (_state == STATE_READY);
@@ -904,8 +900,8 @@ void AdActor::getNextStep() {
 		return;
 	}
 
-	_currentSprite->getCurrentFrame(_zoomable ? ((AdGame *)_gameRef)->_scene->getZoomAt(_posX, _posY) : 100, _zoomable ? ((AdGame *)_gameRef)->_scene->getZoomAt(_posX, _posY) : 100);
-	if (!_currentSprite->isChanged()) {
+	_currentSprite->getCurrentFrame(_zoomable ? ((AdGame *)_game)->_scene->getZoomAt(_posX, _posY) : 100, _zoomable ? ((AdGame *)_game)->_scene->getZoomAt(_posX, _posY) : 100);
+	if (!_currentSprite->_changed) {
 		return;
 	}
 
@@ -925,7 +921,7 @@ void AdActor::getNextStep() {
 		maxStepX--;
 	}
 
-	if (((AdGame *)_gameRef)->_scene->isBlockedAt((int)_pFX, (int)_pFY, true, this)) {
+	if (((AdGame *)_game)->_scene->isBlockedAt((int)_pFX, (int)_pFY, true, this)) {
 		if (_pFCount == 0) {
 			_state = _nextState;
 			_nextState = STATE_READY;
@@ -1037,7 +1033,7 @@ bool AdActor::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack,
 		ScValue *val = stack->pop();
 
 		// turn to object?
-		if (val->isNative() && _gameRef->validObject((BaseObject *)val->getNative())) {
+		if (val->isNative() && _game->validObject((BaseObject *)val->getNative())) {
 			BaseObject *obj = (BaseObject *)val->getNative();
 			int angle = (int)(atan2((double)(obj->_posY - _posY), (double)(obj->_posX - _posX)) * (180 / 3.14));
 			dir = (int)angleToDirection(angle);
@@ -1145,8 +1141,7 @@ bool AdActor::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack,
 					_animSprite2 = nullptr;
 				}
 
-				delete _anims[i];
-				_anims[i] = nullptr;
+				SAFE_DELETE(_anims[i]);
 				_anims.removeAt(i);
 				i--;
 				found = true;
@@ -1171,27 +1166,27 @@ bool AdActor::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack,
 
 
 //////////////////////////////////////////////////////////////////////////
-ScValue *AdActor::scGetProperty(const Common::String &name) {
+ScValue *AdActor::scGetProperty(const char *name) {
 	_scValue->setNULL();
 
 	//////////////////////////////////////////////////////////////////////////
 	// Direction
 	//////////////////////////////////////////////////////////////////////////
-	if (name == "Direction") {
+	if (strcmp(name, "Direction") == 0) {
 		_scValue->setInt(_dir);
 		return _scValue;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	// Type
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Type") {
+	else if (strcmp(name, "Type") == 0) {
 		_scValue->setString("actor");
 		return _scValue;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	// TalkAnimName
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "TalkAnimName") {
+	else if (strcmp(name, "TalkAnimName") == 0) {
 		_scValue->setString(_talkAnimName);
 		return _scValue;
 	}
@@ -1199,7 +1194,7 @@ ScValue *AdActor::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// WalkAnimName
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "WalkAnimName") {
+	else if (strcmp(name, "WalkAnimName") == 0) {
 		_scValue->setString(_walkAnimName);
 		return _scValue;
 	}
@@ -1207,7 +1202,7 @@ ScValue *AdActor::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// IdleAnimName
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "IdleAnimName") {
+	else if (strcmp(name, "IdleAnimName") == 0) {
 		_scValue->setString(_idleAnimName);
 		return _scValue;
 	}
@@ -1215,7 +1210,7 @@ ScValue *AdActor::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// TurnLeftAnimName
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "TurnLeftAnimName") {
+	else if (strcmp(name, "TurnLeftAnimName") == 0) {
 		_scValue->setString(_turnLeftAnimName);
 		return _scValue;
 	}
@@ -1223,7 +1218,7 @@ ScValue *AdActor::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// TurnRightAnimName
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "TurnRightAnimName") {
+	else if (strcmp(name, "TurnRightAnimName") == 0) {
 		_scValue->setString(_turnRightAnimName);
 		return _scValue;
 	} else {
@@ -1250,9 +1245,9 @@ bool AdActor::scSetProperty(const char *name, ScValue *value) {
 	//////////////////////////////////////////////////////////////////////////
 	else if (strcmp(name, "TalkAnimName") == 0) {
 		if (value->isNULL()) {
-			_talkAnimName = "talk";
+			BaseUtils::setString(&_talkAnimName, "talk");
 		} else {
-			_talkAnimName = value->getString();
+			BaseUtils::setString(&_talkAnimName, value->getString());
 		}
 		return STATUS_OK;
 	}
@@ -1262,9 +1257,9 @@ bool AdActor::scSetProperty(const char *name, ScValue *value) {
 	//////////////////////////////////////////////////////////////////////////
 	else if (strcmp(name, "WalkAnimName") == 0) {
 		if (value->isNULL()) {
-			_walkAnimName = "walk";
+			BaseUtils::setString(&_walkAnimName, "walk");
 		} else {
-			_walkAnimName = value->getString();
+			BaseUtils::setString(&_walkAnimName, value->getString());
 		}
 		return STATUS_OK;
 	}
@@ -1274,9 +1269,9 @@ bool AdActor::scSetProperty(const char *name, ScValue *value) {
 	//////////////////////////////////////////////////////////////////////////
 	else if (strcmp(name, "IdleAnimName") == 0) {
 		if (value->isNULL()) {
-			_idleAnimName = "idle";
+			BaseUtils::setString(&_idleAnimName, "idle");
 		} else {
-			_idleAnimName = value->getString();
+			BaseUtils::setString(&_idleAnimName, value->getString());
 		}
 		return STATUS_OK;
 	}
@@ -1286,9 +1281,9 @@ bool AdActor::scSetProperty(const char *name, ScValue *value) {
 	//////////////////////////////////////////////////////////////////////////
 	else if (strcmp(name, "TurnLeftAnimName") == 0) {
 		if (value->isNULL()) {
-			_turnLeftAnimName = "turnleft";
+			BaseUtils::setString(&_turnLeftAnimName, "turnleft");
 		} else {
-			_turnLeftAnimName = value->getString();
+			BaseUtils::setString(&_turnLeftAnimName, value->getString());
 		}
 		return STATUS_OK;
 	}
@@ -1298,9 +1293,9 @@ bool AdActor::scSetProperty(const char *name, ScValue *value) {
 	//////////////////////////////////////////////////////////////////////////
 	else if (strcmp(name, "TurnRightAnimName") == 0) {
 		if (value->isNULL()) {
-			_turnRightAnimName = "turnright";
+			BaseUtils::setString(&_turnRightAnimName, "turnright");
 		} else {
-			_turnRightAnimName = value->getString();
+			BaseUtils::setString(&_turnRightAnimName, value->getString());
 		}
 		return STATUS_OK;
 	} else {
@@ -1320,14 +1315,13 @@ BaseSprite *AdActor::getTalkStance(const char *stance) {
 	// forced stance?
 	if (_forcedTalkAnimName && !_forcedTalkAnimUsed) {
 		_forcedTalkAnimUsed = true;
-		delete _animSprite;
-		_animSprite = new BaseSprite(_gameRef, this);
+		SAFE_DELETE(_animSprite);
+		_animSprite = new BaseSprite(_game, this);
 		if (_animSprite) {
 			bool res = _animSprite->loadFile(_forcedTalkAnimName);
 			if (DID_FAIL(res)) {
-				_gameRef->LOG(res, "AdActor::GetTalkStance: error loading talk sprite (object:\"%s\" sprite:\"%s\")", _name, _forcedTalkAnimName);
-				delete _animSprite;
-				_animSprite = nullptr;
+				_game->LOG(res, "AdActor::GetTalkStance: error loading talk sprite (object:\"%s\" sprite:\"%s\")", _name, _forcedTalkAnimName);
+				SAFE_DELETE(_animSprite);
 			} else {
 				return _animSprite;
 			}
@@ -1352,7 +1346,7 @@ BaseSprite *AdActor::getTalkStance(const char *stance) {
 	if (!ret) {
 		BaseArray<AdSpriteSet *> talkAnims;
 		for (int32 i = 0; i < _anims.getSize(); i++) {
-			if (_talkAnimName.compareToIgnoreCase(_anims[i]->_name) == 0) {
+			if (scumm_stricmp(_anims[i]->_name, _talkAnimName) == 0) {
 				talkAnims.add(_anims[i]);
 			}
 		}
@@ -1433,11 +1427,11 @@ bool AdActor::persist(BasePersistenceManager *persistMgr) {
 	persistMgr->transferPtr(TMEMBER_PTR(_walkSprite));
 
 	persistMgr->transferPtr(TMEMBER_PTR(_animSprite2));
-	persistMgr->transferString(TMEMBER(_talkAnimName));
-	persistMgr->transferString(TMEMBER(_idleAnimName));
-	persistMgr->transferString(TMEMBER(_walkAnimName));
-	persistMgr->transferString(TMEMBER(_turnLeftAnimName));
-	persistMgr->transferString(TMEMBER(_turnRightAnimName));
+	persistMgr->transferCharPtr(TMEMBER(_talkAnimName));
+	persistMgr->transferCharPtr(TMEMBER(_idleAnimName));
+	persistMgr->transferCharPtr(TMEMBER(_walkAnimName));
+	persistMgr->transferCharPtr(TMEMBER(_turnLeftAnimName));
+	persistMgr->transferCharPtr(TMEMBER(_turnRightAnimName));
 
 	_anims.persist(persistMgr);
 
@@ -1490,14 +1484,13 @@ int32 AdActor::getHeight() {
 
 
 //////////////////////////////////////////////////////////////////////////
-AdSpriteSet *AdActor::getAnimByName(const Common::String &animName) {
-	if (animName.empty())
+AdSpriteSet *AdActor::getAnimByName(const char *animName) {
+	if (!animName)
 		return nullptr;
 
 	for (int32 i = 0; i < _anims.getSize(); i++) {
-		if (animName.compareToIgnoreCase(_anims[i]->_name) == 0) {
+		if (scumm_stricmp(_anims[i]->_name, animName) == 0)
 			return _anims[i];
-		}
 	}
 	return nullptr;
 }
@@ -1511,21 +1504,21 @@ bool AdActor::mergeAnims(const char *animsFilename) {
 
 	char *fileBuffer = (char *)BaseFileManager::getEngineInstance()->readWholeFile(animsFilename);
 	if (fileBuffer == nullptr) {
-		_gameRef->LOG(0, "AdActor::MergeAnims failed for file '%s'", animsFilename);
+		_game->LOG(0, "AdActor::MergeAnims failed for file '%s'", animsFilename);
 		return STATUS_FAILED;
 	}
 
 	char *buffer = fileBuffer;
 	char *params;
 	int cmd;
-	BaseParser parser;
+	BaseParser parser(_game);
 
 	bool ret = STATUS_OK;
 
 	while ((cmd = parser.getCommand(&buffer, commands, &params)) > 0) {
 		switch (cmd) {
 		case TOKEN_ANIMATION: {
-			AdSpriteSet *anim = new AdSpriteSet(_gameRef, this);
+			AdSpriteSet *anim = new AdSpriteSet(_game, this);
 			if (!anim || DID_FAIL(anim->loadBuffer(params, false))) {
 				cmd = PARSERR_GENERIC;
 				ret = STATUS_FAILED;

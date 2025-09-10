@@ -52,7 +52,7 @@ extern int parse(const char *);
 PrivateEngine::PrivateEngine(OSystem *syst, const ADGameDescription *gd)
 	: Engine(syst), _gameDescription(gd), _image(nullptr), _videoDecoder(nullptr),
 	  _compositeSurface(nullptr), _transparentColor(0), _frameImage(nullptr),
-	  _framePalette(nullptr), _maxNumberClicks(0), _sirenWarning(0), _subtitles(nullptr),
+	  _framePalette(nullptr), _maxNumberClicks(0), _sirenWarning(0), _subtitles(nullptr), _sfxSubtitles(false),
 	  _screenW(640), _screenH(480) {
 	_rnd = new Common::RandomSource("private");
 
@@ -203,10 +203,15 @@ Common::Error PrivateEngine::run() {
 	// Only enable if subtitles are available
 	bool useSubtitles = false;
 	if (!Common::parseBool(ConfMan.get("subtitles"), useSubtitles))
-		error("Failed to parse bool from cheats options");
+		warning("Failed to parse bool from subtitles options");
+
+	if (!Common::parseBool(ConfMan.get("sfxSubtitles"), _sfxSubtitles))
+		warning("Failed to parse bool from sfxSubtitles options");
 
 	if (useSubtitles) {
 		g_system->showOverlay(false);
+	} else if (_sfxSubtitles) {
+		warning("SFX subtitles are enabled, but no subtitles will be shown");
 	}
 
 	_language = Common::parseLanguage(ConfMan.get("language"));
@@ -290,12 +295,15 @@ Common::Error PrivateEngine::run() {
 			mousePos = g_system->getEventManager()->getMousePos();
 			// Events
 			switch (event.type) {
-			case Common::EVENT_KEYDOWN:
-				if (event.kbd.keycode == Common::KEYCODE_ESCAPE && _videoDecoder) {
+			case Common::EVENT_CUSTOM_ENGINE_ACTION_START:
+				if (event.customType == kActionSkip && _videoDecoder) {
 					skipVideo();
 				}
 				break;
 
+			case Common::EVENT_SCREEN_CHANGED:
+				adjustSubtitleSize();
+				break;
 			case Common::EVENT_QUIT:
 			case Common::EVENT_RETURN_TO_LAUNCHER:
 				break;
@@ -415,7 +423,7 @@ Common::Error PrivateEngine::run() {
 		g_system->delayMillis(10);
 		if (_subtitles) {
 			if (_mixer->isSoundHandleActive(_fgSoundHandle)) {
-				_subtitles->drawSubtitle(_mixer->getElapsedTime(_fgSoundHandle).msecs(), false);
+				_subtitles->drawSubtitle(_mixer->getElapsedTime(_fgSoundHandle).msecs(), false, _sfxSubtitles);
 			} else {
 				delete _subtitles;
 				_subtitles = nullptr;
@@ -1482,6 +1490,27 @@ bool PrivateEngine::isSoundActive() {
 	return _mixer->isSoundIDActive(-1);
 }
 
+void PrivateEngine::adjustSubtitleSize() {
+	debugC(1, kPrivateDebugFunction, "%s()", __FUNCTION__);
+	if (_subtitles) {
+		int16 h = g_system->getOverlayHeight();
+		int16 w = g_system->getOverlayWidth();
+		float scale = h / 2160.f;
+		// If we are in the main menu, we need to adjust the position of the subtitles
+		if (_mode == 0) {
+			_subtitles->setBBox(Common::Rect(20, h - 200 * scale, w - 20, h - 20));
+		} else if (_mode == -1) {
+			_subtitles->setBBox(Common::Rect(20, h - 220 * scale, w - 20, h - 20));
+		} else {
+			_subtitles->setBBox(Common::Rect(20, h - 160 * scale, w - 20, h - 20));
+		}
+		int fontSize = MAX(8, int(50 * scale));
+		_subtitles->setColor(0xff, 0xff, 0x80);
+		_subtitles->setFont("NotoSerif-Regular.ttf", fontSize, "regular");
+		_subtitles->setFont("NotoSerif-Italic.ttf", fontSize, "italic");
+	}
+}
+
 void PrivateEngine::loadSubtitles(const Common::Path &path) {
 	debugC(1, kPrivateDebugFunction, "%s(%s)", __FUNCTION__, path.toString().c_str());
 	Common::String subPathStr = path.toString() + ".srt";
@@ -1499,18 +1528,7 @@ void PrivateEngine::loadSubtitles(const Common::Path &path) {
 		_subtitles = new Video::Subtitles();
 		_subtitles->loadSRTFile(subPath);
 		g_system->showOverlay(false);
-		int16 h = g_system->getOverlayHeight();
-
-		// If we are in the main menu, we need to adjust the position of the subtitles
-		if (_currentSetting == getMainDesktopSetting()) {
-			_subtitles->setBBox(Common::Rect(20, h - 100, g_system->getOverlayWidth() - 20, h - 20));
-		} else {
-			_subtitles->setBBox(Common::Rect(20, h - 160, g_system->getOverlayWidth() - 20, h - 20));
-		}
-
-		_subtitles->setColor(0xff, 0xff, 0x80);
-		_subtitles->setFont("LiberationSans-Regular.ttf", 50);
-
+		adjustSubtitleSize();
 	} else {
 		delete _subtitles;
 		_subtitles = nullptr;
@@ -1721,7 +1739,7 @@ void PrivateEngine::drawScreen() {
 	}
 
 	if (_subtitles && _videoDecoder && !_videoDecoder->isPaused())
-		_subtitles->drawSubtitle(_videoDecoder->getTime(), false);
+		_subtitles->drawSubtitle(_videoDecoder->getTime(), false, _sfxSubtitles);
 	g_system->updateScreen();
 }
 

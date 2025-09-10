@@ -258,7 +258,7 @@ bool Movie::loadArchive() {
 		} else if (_version < kFileVer600) {
 			r = new Common::MemoryReadStreamEndian(kBlankScoreD4, sizeof(kBlankScoreD4), true);
 		} else {
-			error("Movie::loadArchive(): score format not yet supported for version %d", _version);
+			error("Movie::loadArchive(): score format not yet supported for version v%d (%d)", humanVersion(_version), _version);
 		}
 	}
 
@@ -284,7 +284,7 @@ Common::Rect Movie::readRect(Common::ReadStreamEndian &stream) {
 	return rect;
 }
 
-void Movie::writeRect(Common::SeekableWriteStream *writeStream, Common::Rect rect) {
+void Movie::writeRect(Common::WriteStream *writeStream, Common::Rect rect) {
 	writeStream->writeSint16BE(rect.top);
 	writeStream->writeSint16BE(rect.left);
 	writeStream->writeSint16BE(rect.bottom);
@@ -306,7 +306,7 @@ InfoEntries Movie::loadInfoEntries(Common::SeekableReadStreamEndian &stream, uin
 	stream.seek(offset);
 	uint16 count = stream.readUint16();
 
-	debugC(3, kDebugLoading, "Movie::loadInfoEntries(): InfoEntry: %d entries", count);
+	debugC(3, kDebugLoading, "Movie::loadInfoEntries(): InfoEntry: %d entries, unk1: 0x%08x, unk2: 0x%08x flags: 0x%08x", count, res.unk1, res.unk2, res.flags);
 
 	if (count == 0)
 		return res;
@@ -323,7 +323,7 @@ InfoEntries Movie::loadInfoEntries(Common::SeekableReadStreamEndian &stream, uin
 		res.strings[i].data = (byte *)malloc(res.strings[i].len);
 		stream.read(res.strings[i].data, res.strings[i].len);
 
-		debugC(6, kDebugLoading, "InfoEntry %d: %d bytes", i, res.strings[i].len);
+		debugC(6, kDebugLoading, "    InfoEntry %d: %d bytes", i, res.strings[i].len);
 	}
 
 	free(entries);
@@ -483,6 +483,8 @@ bool Movie::loadCastLibFrom(uint16 libId, Common::Path &filename) {
 CastMember *Movie::getCastMember(CastMemberID memberID) {
 	CastMember *result = nullptr;
 	if (_casts.contains(memberID.castLib)) {
+		if (memberID.member == 0)
+			return nullptr;
 		result = _casts.getVal(memberID.castLib)->getCastMember(memberID.member);
 		if (result == nullptr && _sharedCast) {
 			result = _sharedCast->getCastMember(memberID.member);

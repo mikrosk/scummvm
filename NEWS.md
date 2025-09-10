@@ -1,7 +1,7 @@
 For a more comprehensive changelog of the latest experimental code, see:
         https://github.com/scummvm/scummvm/commits/
 
-#### 2.10.0 (XXXX-XX-XX)
+#### 3.0.0 (XXXX-XX-XX)
 
  New games:
    - Added support for Dark Seed.
@@ -24,11 +24,16 @@ For a more comprehensive changelog of the latest experimental code, see:
      The Secret of Tremendous Corporation, Robin's Rescue and
      others, 12 titles so far.
    - Added support for Adibou 2: Nature & Sciences.
+   - Added support for WAGE-based game. More than 160 titles so far.
+   - Added support for Penumbra: Overture.
 
  Access:
    - Added keymapper support.
 
  ADL:
+   - Added Text-to-Speech support.
+
+ AGI:
    - Added Text-to-Speech support.
 
  Buried:
@@ -46,19 +51,34 @@ For a more comprehensive changelog of the latest experimental code, see:
  Drascula:
    - Fixed displaying accented characters.
    - Added Text-to-Speech support.
+   - Added keymapper support.
 
  EFH:
    - Fixed giving and dropping unequippable items.
    - Fixed being unable to replace 3rd party member.
    - Fixed quitting in status menu.
    - Added Text-to-Speech support.
+   - Added keymapper support.
 
  Freescape:
    - Added roll rotation to Driller and Dark Side.
 
+ Gob:
+   - Added Text-to-Speech support.
+
+ Hugo:
+   - Added Text-to-Speech support.
+   - Fixed closing the top menu.
+
+ Hypno:
+   - Added keymapper support.
+
  Kyra:
    - Reduce CPU usage in the LoL main menu.
    - Reduce CPU usage in EoB 1 and 2.
+
+ Lab:
+   - Added keymapper support.
 
  Lure:
    - Added Russian version support to lure.dat.
@@ -69,6 +89,9 @@ For a more comprehensive changelog of the latest experimental code, see:
  MM:
    - Fixed protection from elements spell.
    - Added Text-to-Speech support.
+
+ Mohawk:
+   - Fixed popping noise in speech in some game releases (bug in the original).
 
  NANCY:
    - Added support for ScummVM's save/load screens.
@@ -87,11 +110,20 @@ For a more comprehensive changelog of the latest experimental code, see:
  Parallaction:
    - Added Text-to-Speech support.
 
+ Petka:
+   - Added keymapper support.
+
  Pink:
    - Added keymapper support.
 
  Prince:
    - Added Text-to-Speech support.
+   - Added keymapper support.
+
+ Private:
+   - Added keymapper support.
+
+ Queen:
    - Added keymapper support.
 
  SCI:
@@ -115,6 +147,10 @@ For a more comprehensive changelog of the latest experimental code, see:
    - Fixed game detection for the Macintosh version of MI1 from the first
      first LucasArts Mac CD Game Pack. Previously you had to make sure to
      only copy the data fork, not the (empty) resource fork.
+   - Added Text-to-Speech support.
+
+ Sherlock:
+   - Added keymapper support.
 
  Supernova:
    - Added keymapper support.
@@ -133,6 +169,9 @@ For a more comprehensive changelog of the latest experimental code, see:
    - Added keymapper support.
 
  Titanic:
+   - Added keymapper support.
+
+ Toltecs:
    - Added keymapper support.
 
  TwinE:

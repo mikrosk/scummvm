@@ -80,7 +80,7 @@ void SoundCastMember::load() {
 			sndId = (uint16)(_castId + _cast->_castIDoffset);
 		}
 	} else {
-		warning("STUB: SoundCastMember::SoundCastMember(): Sounds not yet supported for version %d", _cast->_version);
+		warning("STUB: SoundCastMember::SoundCastMember(): Sounds not yet supported for version v%d (%d)", humanVersion(_cast->_version), _cast->_version);
 	}
 
 	Common::SeekableReadStreamEndian *sndData = _cast->getResource(tag, sndId);
@@ -185,18 +185,18 @@ Datum SoundCastMember::getField(int field) {
 	return d;
 }
 
-bool SoundCastMember::setField(int field, const Datum &d) {
+void SoundCastMember::setField(int field, const Datum &d) {
 	switch (field) {
 	case kTheChannelCount:
 	case kTheSampleRate:
 	case kTheSampleSize:
 		warning("SoundCastMember::setField(): Attempt to set read-only field %s of cast %d", g_lingo->field2str(field), _castId);
-		return false;
+		return;
 	default:
 		break;
 	}
 
-	return CastMember::setField(field, d);
+	CastMember::setField(field, d);
 }
 
 // Similar to PaletteCastMember, SoundCastMember has no data in the 'CASt' resource or is ignored

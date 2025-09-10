@@ -35,6 +35,7 @@
 #include "engines/wintermute/base/base_file_manager.h"
 #include "engines/wintermute/platform_osystem.h"
 #include "engines/wintermute/base/scriptables/script_ext_file.h"
+#include "engines/wintermute/dcgf.h"
 
 // Note: This code is completely untested, as I have yet to find a game that uses SXFile.
 
@@ -71,8 +72,7 @@ SXFile::~SXFile() {
 
 //////////////////////////////////////////////////////////////////////////
 void SXFile::cleanup() {
-	delete[] _filename;
-	_filename = nullptr;
+	SAFE_DELETE_ARRAY(_filename);
 	close();
 }
 
@@ -85,8 +85,7 @@ void SXFile::close() {
 	}
 	if (_writeFile) {
 		_writeFile->finalize();
-		delete _writeFile;
-		_writeFile = nullptr;
+		SAFE_DELETE(_writeFile);
 	}
 	_mode = 0;
 	_textMode = false;
@@ -637,13 +636,13 @@ bool SXFile::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack, 
 
 
 //////////////////////////////////////////////////////////////////////////
-ScValue *SXFile::scGetProperty(const Common::String &name) {
+ScValue *SXFile::scGetProperty(const char *name) {
 	_scValue->setNULL();
 
 	//////////////////////////////////////////////////////////////////////////
 	// Type (RO)
 	//////////////////////////////////////////////////////////////////////////
-	if (name == "Type") {
+	if (strcmp(name, "Type") == 0) {
 		_scValue->setString("file");
 		return _scValue;
 	}
@@ -651,7 +650,7 @@ ScValue *SXFile::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Filename (RO)
 	//////////////////////////////////////////////////////////////////////////
-	if (name == "Filename") {
+	if (strcmp(name, "Filename") == 0) {
 		_scValue->setString(_filename);
 		return _scValue;
 	}
@@ -659,7 +658,7 @@ ScValue *SXFile::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Position (RO)
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Position") {
+	else if (strcmp(name, "Position") == 0) {
 		_scValue->setInt(getPos());
 		return _scValue;
 	}
@@ -667,7 +666,7 @@ ScValue *SXFile::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Length (RO)
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Length") {
+	else if (strcmp(name, "Length") == 0) {
 		_scValue->setInt(getLength());
 		return _scValue;
 	}
@@ -675,7 +674,7 @@ ScValue *SXFile::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// TextMode (RO)
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "TextMode") {
+	else if (strcmp(name, "TextMode") == 0) {
 		_scValue->setBool(_textMode);
 		return _scValue;
 	}
@@ -683,7 +682,7 @@ ScValue *SXFile::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// AccessMode (RO)
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "AccessMode") {
+	else if (strcmp(name, "AccessMode") == 0) {
 		_scValue->setInt(_mode);
 		return _scValue;
 	} else {
@@ -747,12 +746,12 @@ uint32 SXFile::getLength() {
 	} else if ((_mode == 2 || _mode == 3) && _writeFile) {
 		error("SXFile - reading length for WriteFile not supported");
 		return 0;
-		/*
-		        uint32 currentPos = ftell((FILE *)_writeFile);
-		        fseek((FILE *)_writeFile, 0, SEEK_END);
-		        int ret = ftell((FILE *)_writeFile);
-		        fseek((FILE *)_writeFile, CurrentPos, SEEK_SET);
-		        return Ret;*/
+/*
+		uint32 currentPos = ftell((FILE *)_writeFile);
+		fseek((FILE *)_writeFile, 0, SEEK_END);
+		int ret = ftell((FILE *)_writeFile);
+		fseek((FILE *)_writeFile, CurrentPos, SEEK_SET);
+		return Ret;*/
 	} else {
 		return 0;
 	}

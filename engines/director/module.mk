@@ -129,12 +129,14 @@ MODULE_OBJS = \
 	lingo/xlibs/movemousexobj.o \
 	lingo/xlibs/movieidxxobj.o \
 	lingo/xlibs/movutils.o \
+	lingo/xlibs/msfile.o \
 	lingo/xlibs/mystisle.o \
 	lingo/xlibs/openbleedwindowxcmd.o \
 	lingo/xlibs/orthoplayxobj.o \
 	lingo/xlibs/paco.o \
 	lingo/xlibs/palxobj.o \
 	lingo/xlibs/panel.o \
+	lingo/xlibs/pharaohs.o \
 	lingo/xlibs/popupmenuxobj.o \
 	lingo/xlibs/porta.o \
 	lingo/xlibs/prefpath.o \
@@ -167,6 +169,7 @@ MODULE_OBJS = \
 	lingo/xlibs/xcmdglue.o \
 	lingo/xlibs/xio.o \
 	lingo/xlibs/xplayanim.o \
+	lingo/xlibs/xplaypacoxfcn.o \
 	lingo/xlibs/xsoundxfcn.o \
 	lingo/xlibs/xwin.o \
 	lingo/xlibs/yasix.o \
@@ -188,6 +191,7 @@ MODULE_OBJS += \
 	debugger/dt-cast.o \
 	debugger/dt-controlpanel.o \
 	debugger/dt-lists.o \
+	debugger/dt-save-state.o \
 	debugger/dt-score.o \
 	debugger/dt-script-d2.o \
 	debugger/dt-script-d4.o \

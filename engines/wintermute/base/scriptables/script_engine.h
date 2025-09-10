@@ -50,19 +50,23 @@ public:
 				memcpy(_buffer, buffer, size);
 			}
 			_size = size;
-			_filename = filename;
+			size_t filenameSize = strlen(filename) + 1;
+			_filename = new char[filenameSize];
+			Common::strcpy_s(_filename, filenameSize, filename);
 		};
 
 		~CScCachedScript() {
 			if (_buffer) {
 				delete[] _buffer;
 			}
+			if (_filename)
+				delete[] _filename;
 		};
 
 		uint32 _timestamp;
 		byte *_buffer;
 		uint32 _size;
-		Common::String _filename;
+		char *_filename;
 	};
 
 public:
@@ -75,7 +79,7 @@ public:
 	bool resumeAll();
 	bool pauseAll();
 	void editorCleanup();
-	bool resetObject(BaseObject *Object);
+	bool resetObject(BaseObject *object);
 	bool resetScript(ScScript *script);
 	bool emptyScriptCache();
 	byte *getCompiledScript(const char *filename, uint32 *outSize, bool ignoreCache = false);
@@ -102,7 +106,7 @@ public:
 		return _isProfiling;
 	}
 
-	void addScriptTime(const char *filename, uint32 Time);
+	void addScriptTime(const char *filename, uint32 time);
 	void dumpStats();
 
 private:

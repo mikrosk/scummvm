@@ -71,10 +71,17 @@ void Sprite::reset() {
 	_backColor = g_director->_wm->_colorWhite;
 	_foreColor = g_director->_wm->_colorWhite;
 
-	_blend = 0;
-
 	_volume = 0;
 	_stretch = false;
+
+	_spriteListIdx = 0; // D6+
+
+	// D7+
+	_flags = 0;
+	_fgColorG = _fgColorB = 0;
+	_bgColorG = _bgColorB = 0;
+	_angleRot = 0;
+	_angleSkew = 0;
 }
 
 Sprite& Sprite::operator=(const Sprite &sprite) {
@@ -117,12 +124,34 @@ Sprite& Sprite::operator=(const Sprite &sprite) {
 	_backColor = sprite._backColor;
 	_foreColor = sprite._foreColor;
 
-	_blend = sprite._blend;
-
 	_volume = sprite._volume;
 	_stretch = sprite._stretch;
 
+	_spriteListIdx = sprite._spriteListIdx;
+
+	_flags = sprite._flags;
+	_fgColorG = sprite._fgColorG;
+	_fgColorB = sprite._fgColorB;
+	_bgColorG = sprite._bgColorG;
+	_bgColorB = sprite._bgColorB;
+	_angleRot = sprite._angleRot;
+	_angleSkew = sprite._angleSkew;
+
 	return *this;
+}
+
+bool Sprite::operator==(const Sprite &sprite) {
+	return _spriteType == sprite._spriteType &&
+		_castId == sprite._castId &&
+		_startPoint == sprite._startPoint &&
+		_width == sprite._width &&
+		_height == sprite._height &&
+		_ink == sprite._ink &&
+		_foreColor == sprite._foreColor &&
+		_backColor == sprite._backColor &&
+		_blendAmount == sprite._blendAmount &&
+		_ink == sprite._ink &&
+		(_thickness | kTTweened) == (sprite._thickness | kTTweened);
 }
 
 Sprite::Sprite(const Sprite &sprite) {
@@ -220,7 +249,7 @@ MacShape *Sprite::getShape() {
 	shape->spriteType = _spriteType;
 	shape->foreColor = _foreColor;
 	shape->backColor = _backColor;
-	shape->lineSize = _thickness & 0x3;
+	shape->lineSize = _thickness & kTThickness;
 	shape->pattern = getPattern();
 	shape->tile = nullptr;
 	shape->tileRect = nullptr;

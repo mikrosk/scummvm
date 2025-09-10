@@ -61,7 +61,7 @@ BaseSurfaceOSystem::BaseSurfaceOSystem(BaseGame *inGame) : BaseSurface(inGame) {
 BaseSurfaceOSystem::~BaseSurfaceOSystem() {
 	if (_surface) {
 		if (_valid)
-			_gameRef->addMem(-_width * _height * 4);
+			_game->addMem(-_width * _height * 4);
 		_surface->free();
 		delete _surface;
 		_surface = nullptr;
@@ -73,7 +73,7 @@ BaseSurfaceOSystem::~BaseSurfaceOSystem() {
 		_alphaMask = nullptr;
 	}
 
-	BaseRenderOSystem *renderer = static_cast<BaseRenderOSystem *>(_gameRef->_renderer);
+	BaseRenderOSystem *renderer = static_cast<BaseRenderOSystem *>(_game->_renderer);
 	renderer->invalidateTicketsFromSurface(this);
 }
 
@@ -113,7 +113,7 @@ bool BaseSurfaceOSystem::finishLoad() {
 
 	if (_surface) {
 		if (_valid)
-			_gameRef->addMem(-_width * _height * 4);
+			_game->addMem(-_width * _height * 4);
 		_surface->free();
 		delete _surface;
 		_surface = nullptr;
@@ -136,7 +136,7 @@ bool BaseSurfaceOSystem::finishLoad() {
 		_surface->copyFrom(*image->getSurface());
 	}
 
-	_gameRef->addMem(_width * _height * 4);
+	_game->addMem(_width * _height * 4);
 
 	if (_filename.matchString("savegame:*g", true)) {
 		uint8 r, g, b, a;
@@ -148,7 +148,7 @@ bool BaseSurfaceOSystem::finishLoad() {
 			}
 		}
 	}
-	
+
 	if (_filename.hasSuffix(".bmp")) {
 		// Ignores alpha channel for BMPs
 		needsColorKey = true;
@@ -211,14 +211,14 @@ bool BaseSurfaceOSystem::finishLoad() {
 //////////////////////////////////////////////////////////////////////////
 bool BaseSurfaceOSystem::create(int width, int height) {
 	if (_valid)
-		_gameRef->addMem(-_width * _height * 4);
+		_game->addMem(-_width * _height * 4);
 	_surface->free();
 
 	_width = width;
 	_height = height;
 
 	_surface->create(_width, _height, g_system->getScreenFormat());
-	_gameRef->addMem(_width * _height * 4);
+	_game->addMem(_width * _height * 4);
 
 	_valid = true;
 
@@ -232,7 +232,7 @@ bool BaseSurfaceOSystem::invalidate() {
 	}
 
 	if (_valid) {
-		_gameRef->addMem(-_width * _height * 4);
+		_game->addMem(-_width * _height * 4);
 		_surface->free();
 		_valid = false;
 	}
@@ -273,10 +273,10 @@ bool BaseSurfaceOSystem::startPixelOp() {
 
 //////////////////////////////////////////////////////////////////////////
 bool BaseSurfaceOSystem::endPixelOp() {
-	_lastUsedTime = _gameRef->getLiveTimer()->getTime();
+	_lastUsedTime = _game->_liveTimer;
 	_pixelOpReady = false;
 	if (_surfaceModified) {
-		BaseRenderOSystem *renderer = static_cast<BaseRenderOSystem *>(_gameRef->_renderer);
+		BaseRenderOSystem *renderer = static_cast<BaseRenderOSystem *>(_game->_renderer);
 		renderer->invalidateTicketsFromSurface(this);
 		_surfaceModified = false;
 	}
@@ -284,29 +284,30 @@ bool BaseSurfaceOSystem::endPixelOp() {
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool BaseSurfaceOSystem::display(int x, int y, Rect32 rect, Graphics::TSpriteBlendMode blendMode, bool mirrorX, bool mirrorY) {
+bool BaseSurfaceOSystem::display(int x, int y, Common::Rect32 rect, Graphics::TSpriteBlendMode blendMode, bool mirrorX, bool mirrorY) {
 	_rotation = 0;
 	return drawSprite(x, y, &rect, nullptr, Graphics::TransformStruct(Graphics::kDefaultZoomX, Graphics::kDefaultZoomY,  mirrorX, mirrorY));
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool BaseSurfaceOSystem::displayTrans(int x, int y, Rect32 rect, uint32 alpha, Graphics::TSpriteBlendMode blendMode, bool mirrorX, bool mirrorY, int offsetX, int offsetY) {
+bool BaseSurfaceOSystem::displayTrans(int x, int y, Common::Rect32 rect, uint32 alpha, Graphics::TSpriteBlendMode blendMode, bool mirrorX, bool mirrorY, int offsetX, int offsetY) {
 	_rotation = 0;
 	return drawSprite(x, y, &rect, nullptr,  Graphics::TransformStruct(Graphics::kDefaultZoomX, Graphics::kDefaultZoomY, Graphics::kDefaultAngle, Graphics::kDefaultHotspotX, Graphics::kDefaultHotspotY, blendMode, TS_COLOR(alpha), mirrorX, mirrorY, offsetX, offsetY));
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool BaseSurfaceOSystem::displayTransZoom(int x, int y, Rect32 rect, float zoomX, float zoomY, uint32 alpha, Graphics::TSpriteBlendMode blendMode, bool mirrorX, bool mirrorY) {
+bool BaseSurfaceOSystem::displayTransZoom(int x, int y, Common::Rect32 rect, float zoomX, float zoomY, uint32 alpha, Graphics::TSpriteBlendMode blendMode, bool mirrorX, bool mirrorY) {
 	_rotation = 0;
 	return drawSprite(x, y, &rect, nullptr, Graphics::TransformStruct((int32)zoomX, (int32)zoomY, blendMode, TS_COLOR(alpha), mirrorX, mirrorY));
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool BaseSurfaceOSystem::displayTransRotate(int x, int y, float rotate, int32 hotspotX, int32 hotspotY, Rect32 rect, float zoomX, float zoomY, uint32 alpha, Graphics::TSpriteBlendMode blendMode, bool mirrorX, bool mirrorY) {
+bool BaseSurfaceOSystem::displayTransRotate(int x, int y, float rotate, int32 hotspotX, int32 hotspotY, Common::Rect32 rect, float zoomX, float zoomY, uint32 alpha, Graphics::TSpriteBlendMode blendMode, bool mirrorX, bool mirrorY) {
 	Common::Point newHotspot;
 	Common::Rect oldRect(rect.left, rect.top, rect.right, rect.bottom);
 	Graphics::TransformStruct transform = Graphics::TransformStruct(zoomX, zoomY, rotate, hotspotX, hotspotY, blendMode, TS_COLOR(alpha), mirrorX, mirrorY, 0, 0);
-	Rect32 newRect = Graphics::TransformTools::newRect(oldRect, transform, &newHotspot);
+	Common::Rect newRect = Graphics::TransformTools::newRect(oldRect, transform, &newHotspot);
+	Common::Rect32 newRect32(newRect.left, newRect.top, newRect.right, newRect.bottom);
 
 	x -= newHotspot.x;
 	y -= newHotspot.y;
@@ -317,21 +318,21 @@ bool BaseSurfaceOSystem::displayTransRotate(int x, int y, float rotate, int32 ho
 		_rotation = 360.0f + transform._angle;
 		warning("Negative post rotation: %d %d", (int32)transform._angle, (int32)_rotation);
 	}
-	return drawSprite(x, y, &rect, &newRect, transform);
+	return drawSprite(x, y, &rect, &newRect32, transform);
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool BaseSurfaceOSystem::displayTiled(int x, int y, Rect32 rect, int numTimesX, int numTimesY) {
+bool BaseSurfaceOSystem::displayTiled(int x, int y, Common::Rect32 rect, int numTimesX, int numTimesY) {
 	assert(numTimesX > 0 && numTimesY > 0);
 	Graphics::TransformStruct transform(numTimesX, numTimesY);
 	return drawSprite(x, y, &rect, nullptr, transform);
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool BaseSurfaceOSystem::drawSprite(int x, int y, Rect32 *rect, Rect32 *newRect, Graphics::TransformStruct transform) {
-	BaseRenderOSystem *renderer = static_cast<BaseRenderOSystem *>(_gameRef->_renderer);
+bool BaseSurfaceOSystem::drawSprite(int x, int y, Common::Rect32 *rect, Common::Rect32 *newRect, Graphics::TransformStruct transform) {
+	BaseRenderOSystem *renderer = static_cast<BaseRenderOSystem *>(_game->_renderer);
 
-	_lastUsedTime = _gameRef->getLiveTimer()->getTime();
+	_lastUsedTime = _game->_liveTimer;
 
 	// TODO: Skip this check if we can reuse an existing ticket?
 	if (!_valid) {
@@ -397,7 +398,7 @@ bool BaseSurfaceOSystem::putSurface(const Graphics::Surface &surface, bool hasAl
 	} else {
 		_alphaType = _alphaMaskType;
 	}
-	BaseRenderOSystem *renderer = static_cast<BaseRenderOSystem *>(_gameRef->_renderer);
+	BaseRenderOSystem *renderer = static_cast<BaseRenderOSystem *>(_game->_renderer);
 	renderer->invalidateTicketsFromSurface(this);
 
 	return STATUS_OK;

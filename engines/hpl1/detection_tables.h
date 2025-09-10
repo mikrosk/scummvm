@@ -36,7 +36,7 @@ const ADGameDescription GAME_DESCRIPTIONS[] = {
 		AD_ENTRY1s("Penumbra.exe", "43c33c142b18268c9e98d4c5a6d911b7", 2727936),
 		Common::Language::EN_ANY,
 		Common::Platform::kPlatformWindows,
-		ADGF_UNSTABLE,
+		ADGF_TESTING,
 		GUIO0()
 	},
 
@@ -47,7 +47,7 @@ const ADGameDescription GAME_DESCRIPTIONS[] = {
 		AD_ENTRY1s("Penumbra.exe", "f840b972ee889200ba501ee3a465317e", 2744320),
 		Common::Language::EN_ANY,
 		Common::Platform::kPlatformWindows,
-		ADGF_UNSTABLE,
+		ADGF_TESTING,
 		GUIO0()
 	},
 
@@ -59,18 +59,29 @@ const ADGameDescription GAME_DESCRIPTIONS[] = {
 		AD_ENTRY1s("Penumbra.exe", "202990aa064ae67a675e2b187384036a", 2736128),
 		Common::Language::EN_ANY,
 		Common::kPlatformWindows,
-		ADGF_UNSTABLE,
+		ADGF_TESTING,
 		GUIO0()
 	},
 
-	// Penumbra: Overture (Steam)
+	// Penumbra: Overture (Steam - Windows)
 	{
 		"penumbraoverture",
 		nullptr,
 		AD_ENTRY1s("Penumbra.exe", "384e33ddc55f51debca07b6538087e75", 3104768),
 		Common::Language::EN_ANY,
 		Common::kPlatformWindows,
-		ADGF_UNSTABLE,
+		ADGF_TESTING,
+		GUIO0()
+	},
+
+	// Penumbra: Overture (Steam - Linux)
+	{
+		"penumbraoverture",
+		nullptr,
+		AD_ENTRY1s("penumbra.bin", "41950a7597b7d9976f77a73a43e8871d", 6301460),
+		Common::Language::EN_ANY,
+		Common::kPlatformLinux,
+		ADGF_TESTING,
 		GUIO0()
 	},
 
@@ -81,7 +92,7 @@ const ADGameDescription GAME_DESCRIPTIONS[] = {
 		AD_ENTRY1s("Penumbra.exe", "a066f7284e063ac3e5d7409102b7a497", 2985984),
 		Common::Language::EN_ANY,
 		Common::kPlatformWindows,
-		ADGF_UNSTABLE,
+		ADGF_UNSUPPORTED,
 		GUIO0()
 	},
 
@@ -92,7 +103,7 @@ const ADGameDescription GAME_DESCRIPTIONS[] = {
 		AD_ENTRY1s("Penumbra.exe", "be48f62ecd16975e31083989129eafd3", 8159232),
 		Common::Language::EN_ANY,
 		Common::kPlatformWindows,
-		ADGF_UNSTABLE,
+		ADGF_UNSUPPORTED,
 		GUIO0()
 	},
 

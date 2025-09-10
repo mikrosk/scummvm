@@ -98,12 +98,14 @@
 #include "director/lingo/xlibs/movemousexobj.h"
 #include "director/lingo/xlibs/movieidxxobj.h"
 #include "director/lingo/xlibs/movutils.h"
+#include "director/lingo/xlibs/msfile.h"
 #include "director/lingo/xlibs/mystisle.h"
 #include "director/lingo/xlibs/openbleedwindowxcmd.h"
 #include "director/lingo/xlibs/orthoplayxobj.h"
 #include "director/lingo/xlibs/paco.h"
 #include "director/lingo/xlibs/palxobj.h"
 #include "director/lingo/xlibs/panel.h"
+#include "director/lingo/xlibs/pharaohs.h"
 #include "director/lingo/xlibs/popupmenuxobj.h"
 #include "director/lingo/xlibs/porta.h"
 #include "director/lingo/xlibs/prefpath.h"
@@ -136,6 +138,7 @@
 #include "director/lingo/xlibs/xcmdglue.h"
 #include "director/lingo/xlibs/xio.h"
 #include "director/lingo/xlibs/xplayanim.h"
+#include "director/lingo/xlibs/xplaypacoxfcn.h"
 #include "director/lingo/xlibs/xsoundxfcn.h"
 #include "director/lingo/xlibs/xwin.h"
 #include "director/lingo/xlibs/yasix.h"
@@ -295,6 +298,7 @@ static const struct XLibProto {
 	XLIBDEF(MoveMouseXObj,		kXObj,			400),	// D4
 	XLIBDEF(MovieIdxXObj,		kXObj,			400),	// D4
 	XLIBDEF(MovUtilsXObj,		kXObj,			400),	// D4
+	XLIBDEF(MSFile,             kXObj,          400),   // D4
 	XLIBDEF(MystIsleXObj,			kXObj,					400),	// D4
 	XLIBDEF(OpenBleedWindowXCMD,kXObj,			300),	// D3
 	XLIBDEF(OpenURLXtra,			kXtraObj,					500),	// D5
@@ -302,6 +306,7 @@ static const struct XLibProto {
 	XLIBDEF(PACoXObj,			kXObj,			300),	// D3
 	XLIBDEF(PalXObj,			kXObj,			400),	// D4
 	XLIBDEF(PanelXObj,			kXObj,			200),	// D2
+	XLIBDEF(PharaohsXObj,			kXObj,					400),	// D4
 	XLIBDEF(PopUpMenuXObj,		kXObj,			200),	// D2
 	XLIBDEF(Porta,				kXObj,			300),	// D3
 	XLIBDEF(PrefPath,			kXObj,			400),	// D4
@@ -336,6 +341,7 @@ static const struct XLibProto {
 	XLIBDEF(WidgetXObj, 		kXObj,			400),	// D4
 	XLIBDEF(WindowXObj,			kXObj,			200),	// D2
 	XLIBDEF(XCMDGlueXObj,		kXObj,			200),	// D2
+	XLIBDEF(XPlayPACoXFCN,			kXObj,					300),	// D3
 	XLIBDEF(XSoundXFCN,			kXObj,			400),	// D4
 	XLIBDEF(XWINXObj,			kXObj,			300),	// D3
 	XLIBDEF(XioXObj,			kXObj,			400),	// D3
@@ -444,7 +450,10 @@ void Lingo::closeXLib(Common::String name) {
 
 void Lingo::closeOpenXLibs() {
 	for (auto &it : _openXLibs) {
-		closeXLib(it._key);
+		// does not affect Xtras
+		if (it._value == kXObj) {
+			closeXLib(it._key);
+		}
 	}
 }
 
@@ -471,8 +480,8 @@ void LM::m_dispose(int nargs) {
 
 /* ScriptContext */
 
-ScriptContext::ScriptContext(Common::String name, ScriptType type, int id, uint16 castLibHint)
-	: Object<ScriptContext>(name), _scriptType(type), _id(id), _castLibHint(castLibHint) {
+ScriptContext::ScriptContext(Common::String name, ScriptType type, int id, uint16 castLibHint, uint16 parentNumber, int scriptId)
+	: Object<ScriptContext>(name), _scriptType(type), _id(id), _castLibHint(castLibHint), _parentNumber(parentNumber), _scriptId(scriptId) {
 	_objType = kScriptObj;
 }
 
@@ -490,6 +499,8 @@ ScriptContext::ScriptContext(const ScriptContext &sc) : Object<ScriptContext>(sc
 	_constants = sc._constants;
 	_properties = sc._properties;
 	_propertyNames = sc._propertyNames;
+	_parentNumber = sc._parentNumber;
+	_scriptId = sc._scriptId;
 
 	_id = sc._id;
 	_castLibHint = sc._castLibHint;
@@ -601,32 +612,29 @@ uint32 ScriptContext::getPropCount() {
 	return _propertyNames.size();
 }
 
-bool ScriptContext::setProp(const Common::String &propName, const Datum &value, bool force) {
+void ScriptContext::setProp(const Common::String &propName, const Datum &value, bool force) {
 	if (_disposed) {
 		error("Property '%s' accessed on disposed object <%s>", propName.c_str(), Datum(this).asString(true).c_str());
 	}
 	if (_properties.contains(propName)) {
 		_properties[propName] = value;
-		return true;
+		return;
 	}
 	if (force) {
 		// used by e.g. the script compiler to add properties
 		_propertyNames.push_back(propName);
 		_properties[propName] = value;
-		return true;
 	} else if (_objType == kScriptObj) {
 		if (_properties.contains("ancestor") && _properties["ancestor"].type == OBJECT
 				&& (_properties["ancestor"].u.obj->getObjType() & (kScriptObj | kXtraObj))) {
 			debugC(3, kDebugLingoExec, "Getting prop '%s' from ancestor: <%s>", propName.c_str(), _properties["ancestor"].asString(true).c_str());
-			return _properties["ancestor"].u.obj->setProp(propName, value, force);
+			_properties["ancestor"].u.obj->setProp(propName, value, force);
 		}
 	} else if (_objType == kFactoryObj) {
 		// D3 style anonymous objects/factories, set whatever properties you like
 		_propertyNames.push_back(propName);
 		_properties[propName] = value;
-		return true;
 	}
-	return false;
 }
 
 Common::String ScriptContext::formatFunctionList(const char *prefix) {
@@ -742,14 +750,14 @@ Datum Window::getProp(const Common::String &propName) {
 	return Datum();
 }
 
-bool Window::setProp(const Common::String &propName, const Datum &value, bool force) {
+void Window::setProp(const Common::String &propName, const Datum &value, bool force) {
 	Common::String fieldName = Common::String::format("%d%s", kTheWindow, propName.c_str());
 	if (g_lingo->_theEntityFields.contains(fieldName)) {
-		return setField(g_lingo->_theEntityFields[fieldName]->field, value);
+		setField(g_lingo->_theEntityFields[fieldName]->field, value);
+		return;
 	}
 
 	warning("Window::setProp: unknown property '%s'", propName.c_str());
-	return false;
 }
 
 bool Window::hasField(int field) {
@@ -787,6 +795,11 @@ Datum Window::getField(int field) {
 	case kTheFileName:
 		return getFileName();
 	case kTheDrawRect:
+		warning("Window::getField: poorly handled getting field 'drawRect'");
+		ensureMovieIsLoaded();
+
+		// TODO: This should allow stretching or panning
+		return getStageRect();
 	case kTheSourceRect:
 	// case kTheImage:
 	// case kThePicture::
@@ -798,31 +811,35 @@ Datum Window::getField(int field) {
 	}
 }
 
-bool Window::setField(int field, const Datum &value) {
+void Window::setField(int field, const Datum &value) {
 	switch (field) {
 	case kTheTitle:
 		setTitle(value.asString());
-		return true;
+		break;
 	case kTheTitleVisible:
 		setTitleVisible((bool)value.asInt());
-		return true;
+		break;
 	case kTheVisible:
 		setVisible((bool)value.asInt());
-		return true;
+		break;
 	case kTheWindowType:
 		setWindowType(value.asInt());
-		return true;
+		break;
+	case kTheDrawRect:
+		warning("Window::setField: poorly handled setting field 'drawRect'");
+		// fallthrough
 	case kTheRect:
-		return setStageRect(value);
+		setStageRect(value);
+		break;
 	case kTheModal:
 		setModal((bool)value.asInt());
-		return true;
+		break;
 	case kTheFileName:
 		setFileName(value.asString());
-		return true;
+		break;
 	default:
 		warning("Window::setField: unhandled field '%s'", g_lingo->field2str(field));
-		return false;
+		break;
 	}
 }
 

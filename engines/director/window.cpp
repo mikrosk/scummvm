@@ -292,18 +292,16 @@ Datum Window::getStageRect() {
 	return d;
 }
 
-bool Window::setStageRect(Datum datum) {
+void Window::setStageRect(Datum datum) {
 	if (datum.type != RECT) {
 		warning("Window::setStageRect(): bad argument passed to rect field");
-		return false;
+		return;
 	}
 
 	// Unpack rect from datum
 	Common::Rect rect = Common::Rect(datum.u.farr->arr[0].asInt(), datum.u.farr->arr[1].asInt(), datum.u.farr->arr[2].asInt(), datum.u.farr->arr[3].asInt());
 
 	setInnerDimensions(rect);
-
-	return true;
 }
 
 void Window::setModal(bool modal) {
@@ -645,13 +643,18 @@ bool Window::step() {
 Common::Path Window::getSharedCastPath() {
 	Common::Array<Common::String> namesToTry;
 	if (_vm->getVersion() < 400) {
-		if (g_director->getPlatform() == Common::kPlatformWindows) {
+		if (!_sharedCastFilenameHint.empty()) {
+			namesToTry.push_back(_sharedCastFilenameHint);
+		} else if (g_director->getPlatform() == Common::kPlatformWindows) {
 			namesToTry.push_back("SHARDCST.MMM");
 		} else {
 			namesToTry.push_back("Shared Cast");
 		}
 	} else if (_vm->getVersion() < 500) {
 		namesToTry.push_back("Shared.dir");
+		if (!_sharedCastFilenameHint.empty()) {
+			namesToTry.push_back(_sharedCastFilenameHint);
+		}
 	}
 
 	Common::Path result;

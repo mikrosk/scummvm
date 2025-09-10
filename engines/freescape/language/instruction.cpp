@@ -332,9 +332,6 @@ void FreescapeEngine::executeRedraw(FCLInstruction &instruction) {
 		delay = delay * 10;
 
 	waitInLoop(delay);
-	if (_syncSound) {
-		waitForSounds();
-	}
 }
 
 void FreescapeEngine::executeExecute(FCLInstruction &instruction, bool shot, bool collided, bool activated) {
@@ -355,13 +352,12 @@ void FreescapeEngine::executeExecute(FCLInstruction &instruction, bool shot, boo
 }
 
 void FreescapeEngine::executeSound(FCLInstruction &instruction) {
-	if (_firstSound)
-		stopAllSounds();
+	stopAllSounds(_movementSoundHandle);
 	_firstSound = false;
 	uint16 index = instruction._source;
 	bool sync = instruction._additional;
 	debugC(1, kFreescapeDebugCode, "Playing sound %d", index);
-	playSound(index, sync);
+	playSound(index, sync, _soundFxHandle);
 }
 
 void FreescapeEngine::executeDelay(FCLInstruction &instruction) {

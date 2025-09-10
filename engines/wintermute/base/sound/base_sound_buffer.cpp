@@ -30,6 +30,8 @@
 #include "engines/wintermute/base/sound/base_sound_buffer.h"
 #include "engines/wintermute/base/base_file_manager.h"
 #include "engines/wintermute/wintermute.h"
+#include "engines/wintermute/dcgf.h"
+
 #include "audio/audiostream.h"
 #include "audio/mixer.h"
 #ifdef USE_VORBIS
@@ -76,11 +78,9 @@ BaseSoundBuffer::~BaseSoundBuffer() {
 
 	if (_handle) {
 		g_system->getMixer()->stopHandle(*_handle);
-		delete _handle;
-		_handle = nullptr;
+		SAFE_DELETE(_handle);
 	}
-	delete _stream;
-	_stream = nullptr;
+	SAFE_DELETE(_stream);
 }
 
 
@@ -97,7 +97,7 @@ bool BaseSoundBuffer::loadFromFile(const Common::String &filename, bool forceRel
 	// Load a file, but avoid having the File-manager handle the disposal of it.
 	Common::SeekableReadStream *file = BaseFileManager::getEngineInstance()->openFile(filename, true, false);
 	if (!file) {
-		_gameRef->LOG(0, "Error opening sound file '%s'", filename.c_str());
+		_game->LOG(0, "Error opening sound file '%s'", filename.c_str());
 		return STATUS_FAILED;
 	}
 	Common::String strFilename(filename);
@@ -138,8 +138,7 @@ bool BaseSoundBuffer::loadFromFile(const Common::String &filename, bool forceRel
 bool BaseSoundBuffer::play(bool looping, uint32 startSample) {
 	if (_handle) {
 		g_system->getMixer()->stopHandle(*_handle);
-		delete _handle;
-		_handle = nullptr;
+		SAFE_DELETE(_handle);
 	}
 	// Store the loop-value for save-games.
 	setLooping(looping);
@@ -225,7 +224,7 @@ void BaseSoundBuffer::updateVolume() {
 
 //////////////////////////////////////////////////////////////////////////
 bool BaseSoundBuffer::setVolume(int volume) {
-	_volume = volume * _gameRef->_soundMgr->getMasterVolume() / 255;
+	_volume = volume * _game->_soundMgr->getMasterVolume() / 255;
 	if (_stream && _handle) {
 		byte vol = (byte)(_volume);
 		g_system->getMixer()->setChannelVolume(*_handle, vol);

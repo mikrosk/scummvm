@@ -19,7 +19,6 @@
  *
  */
 
-#include "common/memstream.h"
 #include "director/director.h"
 #include "director/cast.h"
 #include "director/movie.h"
@@ -40,16 +39,16 @@ TransitionCastMember::TransitionCastMember(Cast *cast, uint16 castId, Common::Se
 	if (debugChannelSet(5, kDebugLoading)) {
 		stream.hexdump(stream.size());
 	}
-	if (_cast->_version < kFileVer600) {
+	if (_cast->_version < kFileVer1100) {
 		stream.readByte();
 		_chunkSize = stream.readByte();
 		_transType = static_cast<TransitionType>(stream.readByte());
 		_flags = stream.readByte();
 		_area = !(_flags & 1);
 		_durationMillis = stream.readUint16BE();
-		debugC(5, kDebugLoading, "TransitionCastMember::TransitionCastMember(): transType: %d, durationMillis: %d, flags: %d, chunkSize: %d, area: %d", _transType, _durationMillis, _flags, _chunkSize, _area);
+		debugC(3, kDebugLoading, "  TransitionCastMember: transType: %d, durationMillis: %d, flags: %d, chunkSize: %d, area: %d", _transType, _durationMillis, _flags, _chunkSize, _area);
 	} else {
-		warning("STUB: TransitionCastMember::TransitionCastMember(): Transitions not yet supported for version %d", _cast->_version);
+		warning("STUB: TransitionCastMember::TransitionCastMember(): Transitions not yet supported for version v%d (%d)", humanVersion(_cast->_version), _cast->_version);
 	}
 }
 
@@ -101,25 +100,25 @@ Datum TransitionCastMember::getField(int field) {
 	return d;
 }
 
-bool TransitionCastMember::setField(int field, const Datum &d) {
+void TransitionCastMember::setField(int field, const Datum &d) {
 	switch (field) {
 	case kTheChangeArea:
 		_area = (bool)d.asInt();
-		break;
+		return;
 	case kTheChunkSize:
 		_chunkSize = d.asInt();
-		return true;
+		return;
 	case kTheDuration:
 		_durationMillis = d.asInt();
-		return true;
+		return;
 	case kTheTransitionType:
 		_transType = (TransitionType)d.asInt();
-		return true;
+		return;
 	default:
 		break;
 	}
 
-	return CastMember::setField(field, d);
+	CastMember::setField(field, d);
 }
 
 Common::String TransitionCastMember::formatInfo() {

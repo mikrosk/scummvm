@@ -36,6 +36,8 @@
 #include "engines/wintermute/base/gfx/base_renderer.h"
 #include "engines/wintermute/base/scriptables/script_value.h"
 #include "engines/wintermute/base/scriptables/script_stack.h"
+#include "engines/wintermute/platform_osystem.h"
+#include "engines/wintermute/dcgf.h"
 
 namespace Wintermute {
 
@@ -50,13 +52,13 @@ BaseSubFrame::BaseSubFrame(BaseGame *inGame) : BaseScriptable(inGame, true) {
 	_transparent = 0xFFFF00FF;
 
 	_wantsDefaultRect = false;
-	_rect.setEmpty();
+	BasePlatform::setRectEmpty(&_rect);
 
 	_editorSelected = false;
 
 	_surfaceFilename = nullptr;
-	_cKDefault = true;
-	_cKRed = _cKBlue = _cKGreen = 0;
+	_ckDefault = true;
+	_ckRed = _ckBlue = _ckGreen = 0;
 	_lifeTime = -1;
 	_keepLoaded = false;
 
@@ -70,10 +72,9 @@ BaseSubFrame::BaseSubFrame(BaseGame *inGame) : BaseScriptable(inGame, true) {
 //////////////////////////////////////////////////////////////////////////
 BaseSubFrame::~BaseSubFrame() {
 	if (_surface) {
-		_gameRef->_surfaceStorage->removeSurface(_surface);
+		_game->_surfaceStorage->removeSurface(_surface);
 	}
-	delete[] _surfaceFilename;
-	_surfaceFilename = nullptr;
+	SAFE_DELETE_ARRAY(_surfaceFilename);
 }
 
 
@@ -112,16 +113,15 @@ bool BaseSubFrame::loadBuffer(char *buffer, int lifeTime, bool keepLoaded) {
 
 	char *params;
 	int cmd;
-	BaseParser parser;
-	Rect32 rect;
+	BaseParser parser(_game);
+	Common::Rect32 rect;
 	int r = 255, g = 255, b = 255;
 	int ar = 255, ag = 255, ab = 255, alpha = 255;
 	bool customTrans = false;
-	rect.setEmpty();
+	BasePlatform::setRectEmpty(&rect);
 	char *surfaceFile = nullptr;
 
-	delete _surface;
-	_surface = nullptr;
+	SAFE_DELETE(_surface);
 
 	while ((cmd = parser.getCommand(&buffer, commands, &params)) > 0) {
 		switch (cmd) {
@@ -207,7 +207,7 @@ bool BaseSubFrame::loadBuffer(char *buffer, int lifeTime, bool keepLoaded) {
 	    return STATUS_FAILED;
 	}
 	*/
-	if (rect.isRectEmpty()) {
+	if (BasePlatform::isRectEmpty(&rect)) {
 		setDefaultRect();
 	} else {
 		setRect(rect);
@@ -216,21 +216,17 @@ bool BaseSubFrame::loadBuffer(char *buffer, int lifeTime, bool keepLoaded) {
 	return STATUS_OK;
 }
 
-Rect32 BaseSubFrame::getRect() {
+Common::Rect32 &BaseSubFrame::getRect() {
 	if (_wantsDefaultRect && _surface) {
-		_rect.setRect(0, 0, _surface->getWidth(), _surface->getHeight());
+		BasePlatform::setRect(&_rect, 0, 0, _surface->getWidth(), _surface->getHeight());
 		_wantsDefaultRect = false;
 	}
 	return _rect;
 }
 
-void BaseSubFrame::setRect(Rect32 rect) {
+void BaseSubFrame::setRect(Common::Rect32 rect) {
 	_wantsDefaultRect = false;
 	_rect = rect;
-}
-
-const char* BaseSubFrame::getSurfaceFilename() {
-	return _surfaceFilename;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -247,12 +243,12 @@ bool BaseSubFrame::draw(int x, int y, BaseObject *registerOwner, float zoomX, fl
 
 	if (registerOwner != nullptr && !_decoration) {
 		if (zoomX == Graphics::kDefaultZoomX && zoomY == Graphics::kDefaultZoomY) {
-			BaseEngine::getRenderer()->_rectList.add(new BaseActiveRect(_gameRef,  registerOwner, this, x - _hotspotX + getRect().left, y  - _hotspotY + getRect().top, getRect().right - getRect().left, getRect().bottom - getRect().top, zoomX, zoomY, precise));
+			BaseEngine::getRenderer()->_rectList.add(new BaseActiveRect(_game,  registerOwner, this, x - _hotspotX + getRect().left, y  - _hotspotY + getRect().top, getRect().right - getRect().left, getRect().bottom - getRect().top, zoomX, zoomY, precise));
 		} else {
-			BaseEngine::getRenderer()->_rectList.add(new BaseActiveRect(_gameRef,  registerOwner, this, (int)(x - (_hotspotX + getRect().left) * (zoomX / 100)), (int)(y - (_hotspotY + getRect().top) * (zoomY / 100)), (int)((getRect().right - getRect().left) * (zoomX / 100)), (int)((getRect().bottom - getRect().top) * (zoomY / 100)), zoomX, zoomY, precise));
+			BaseEngine::getRenderer()->_rectList.add(new BaseActiveRect(_game,  registerOwner, this, (int)(x - (_hotspotX + getRect().left) * (zoomX / 100)), (int)(y - (_hotspotY + getRect().top) * (zoomY / 100)), (int)((getRect().right - getRect().left) * (zoomX / 100)), (int)((getRect().bottom - getRect().top) * (zoomY / 100)), zoomX, zoomY, precise));
 		}
 	}
-	if (_gameRef->_suspendedRendering) {
+	if (_game->_suspendedRendering) {
 		return STATUS_OK;
 	}
 
@@ -278,7 +274,7 @@ bool BaseSubFrame::draw(int x, int y, BaseObject *registerOwner, float zoomX, fl
 
 
 //////////////////////////////////////////////////////////////////////////
-bool BaseSubFrame::getBoundingRect(Rect32 *rect, int x, int y, float scaleX, float scaleY) {
+bool BaseSubFrame::getBoundingRect(Common::Rect32 *rect, int x, int y, float scaleX, float scaleY) {
 	if (!rect) {
 		return false;
 	}
@@ -286,7 +282,8 @@ bool BaseSubFrame::getBoundingRect(Rect32 *rect, int x, int y, float scaleX, flo
 	float ratioX = scaleX / 100.0f;
 	float ratioY = scaleY / 100.0f;
 
-	rect->setRect((int)(x - _hotspotX * ratioX),
+	BasePlatform::setRect(rect,
+				  (int)(x - _hotspotX * ratioX),
 				  (int)(y - _hotspotY * ratioY),
 				  (int)(x - _hotspotX * ratioX + (getRect().right - getRect().left) * ratioX),
 				  (int)(y - _hotspotY * ratioY + (getRect().bottom - getRect().top) * ratioY));
@@ -300,20 +297,20 @@ bool BaseSubFrame::saveAsText(BaseDynamicBuffer *buffer, int indent, bool comple
 		buffer->putTextIndent(indent, "SUBFRAME {\n");
 	}
 
-	if (_surface && _surface->getFileNameStr() != "") {
-		buffer->putTextIndent(indent + 2, "IMAGE = \"%s\"\n", _surface->getFileName());
+	if (_surface && _surface->_filename != "") {
+		buffer->putTextIndent(indent + 2, "IMAGE = \"%s\"\n", _surface->_filename.c_str());
 	}
 
 	if (_transparent != 0xFFFF00FF) {
 		buffer->putTextIndent(indent + 2, "TRANSPARENT { %d,%d,%d }\n", RGBCOLGetR(_transparent), RGBCOLGetG(_transparent), RGBCOLGetB(_transparent));
 	}
 
-	Rect32 rect;
-	rect.setEmpty();
+	Common::Rect32 rect;
+	BasePlatform::setRectEmpty(&rect);
 	if (_surface) {
-		rect.setRect(0, 0, _surface->getWidth(), _surface->getHeight());
+		BasePlatform::setRect(&rect, 0, 0, _surface->getWidth(), _surface->getHeight());
 	}
-	if (!(rect == getRect())) {
+	if (!BasePlatform::equalRect(&rect, &getRect())) {
 		buffer->putTextIndent(indent + 2, "RECT { %d,%d,%d,%d }\n", getRect().left, getRect().top, getRect().right, getRect().bottom);
 	}
 
@@ -367,7 +364,7 @@ void BaseSubFrame::setDefaultRect() {
 		_wantsDefaultRect = true;
 	} else {
 		_wantsDefaultRect = false;
-		_rect.setEmpty();
+		BasePlatform::setRectEmpty(&_rect);
 	}
 }
 
@@ -388,16 +385,21 @@ bool BaseSubFrame::persist(BasePersistenceManager *persistMgr) {
 	persistMgr->transferBool(TMEMBER(_wantsDefaultRect));
 
 	persistMgr->transferCharPtr(TMEMBER(_surfaceFilename));
-	persistMgr->transferBool(TMEMBER(_cKDefault));
-	persistMgr->transferByte(TMEMBER(_cKRed));
-	persistMgr->transferByte(TMEMBER(_cKGreen));
-	persistMgr->transferByte(TMEMBER(_cKBlue));
+	persistMgr->transferBool(TMEMBER(_ckDefault));
+	persistMgr->transferByte(TMEMBER(_ckRed));
+	persistMgr->transferByte(TMEMBER(_ckGreen));
+	persistMgr->transferByte(TMEMBER(_ckBlue));
 	persistMgr->transferSint32(TMEMBER(_lifeTime));
 
 	persistMgr->transferBool(TMEMBER(_keepLoaded));
 	persistMgr->transferBool(TMEMBER(_mirrorX));
 	persistMgr->transferBool(TMEMBER(_mirrorY));
 	persistMgr->transferUint32(TMEMBER(_transparent));
+
+	// initialise to default
+	if (!persistMgr->getIsSaving()) {
+		_surface = nullptr;
+	}
 
 	return STATUS_OK;
 }
@@ -487,10 +489,9 @@ bool BaseSubFrame::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisS
 
 		if (val->isNULL()) {
 			if (_surface) {
-				_gameRef->_surfaceStorage->removeSurface(_surface);
+				_game->_surfaceStorage->removeSurface(_surface);
 			}
-			delete[] _surfaceFilename;
-			_surfaceFilename = nullptr;
+			SAFE_DELETE_ARRAY(_surfaceFilename);
 			stack->pushBool(true);
 		} else {
 			const char *filename = val->getString();
@@ -510,16 +511,16 @@ bool BaseSubFrame::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisS
 
 
 //////////////////////////////////////////////////////////////////////////
-ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
+ScValue *BaseSubFrame::scGetProperty(const char *name) {
 	if (!_scValue) {
-		_scValue = new ScValue(_gameRef);
+		_scValue = new ScValue(_game);
 	}
 	_scValue->setNULL();
 
 	//////////////////////////////////////////////////////////////////////////
 	// Type (RO)
 	//////////////////////////////////////////////////////////////////////////
-	if (name == "Type") {
+	if (strcmp(name, "Type") == 0) {
 		_scValue->setString("subframe");
 		return _scValue;
 	}
@@ -527,7 +528,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// AlphaColor
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "AlphaColor") {
+	else if (strcmp(name, "AlphaColor") == 0) {
 
 		_scValue->setInt((int)_alpha);
 		return _scValue;
@@ -536,7 +537,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// TransparentColor (RO)
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "TransparentColor") {
+	else if (strcmp(name, "TransparentColor") == 0) {
 		_scValue->setInt((int)_transparent);
 		return _scValue;
 	}
@@ -544,7 +545,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Is2DOnly
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Is2DOnly") {
+	else if (strcmp(name, "Is2DOnly") == 0) {
 		_scValue->setBool(_2DOnly);
 		return _scValue;
 	}
@@ -552,7 +553,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Is3DOnly
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Is3DOnly") {
+	else if (strcmp(name, "Is3DOnly") == 0) {
 		_scValue->setBool(_3DOnly);
 		return _scValue;
 	}
@@ -560,7 +561,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// MirrorX
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "MirrorX") {
+	else if (strcmp(name, "MirrorX") == 0) {
 		_scValue->setBool(_mirrorX);
 		return _scValue;
 	}
@@ -568,7 +569,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// MirrorY
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "MirrorY") {
+	else if (strcmp(name, "MirrorY") == 0) {
 		_scValue->setBool(_mirrorY);
 		return _scValue;
 	}
@@ -576,7 +577,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Decoration
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Decoration") {
+	else if (strcmp(name, "Decoration") == 0) {
 		_scValue->setBool(_decoration);
 		return _scValue;
 	}
@@ -584,7 +585,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// HotspotX
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "HotspotX") {
+	else if (strcmp(name, "HotspotX") == 0) {
 		_scValue->setInt(_hotspotX);
 		return _scValue;
 	}
@@ -592,7 +593,7 @@ ScValue *BaseSubFrame::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// HotspotY
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "HotspotY") {
+	else if (strcmp(name, "HotspotY") == 0) {
 		_scValue->setInt(_hotspotY);
 		return _scValue;
 	} else {
@@ -678,24 +679,24 @@ const char *BaseSubFrame::scToString() {
 
 
 //////////////////////////////////////////////////////////////////////////
-bool BaseSubFrame::setSurface(const Common::String &filename, bool defaultCK, byte ckRed, byte ckGreen, byte ckBlue, int lifeTime, bool keepLoaded) {
+bool BaseSubFrame::setSurface(const char *filename, bool defaultCK, byte ckRed, byte ckGreen, byte ckBlue, int lifeTime, bool keepLoaded) {
 	if (_surface) {
-		_gameRef->_surfaceStorage->removeSurface(_surface);
+		_game->_surfaceStorage->removeSurface(_surface);
 		_surface = nullptr;
 	}
 
-	delete[] _surfaceFilename;
-	_surfaceFilename = nullptr;
+	SAFE_DELETE_ARRAY(_surfaceFilename);
 
-	_surface = _gameRef->_surfaceStorage->addSurface(filename, defaultCK, ckRed, ckGreen, ckBlue, lifeTime, keepLoaded);
+	_surface = _game->_surfaceStorage->addSurface(filename, defaultCK, ckRed, ckGreen, ckBlue, lifeTime, keepLoaded);
 	if (_surface) {
-		_surfaceFilename = new char[filename.size() + 1];
-		Common::strcpy_s(_surfaceFilename, filename.size() + 1, filename.c_str());
+		size_t filenameSize = strlen(filename) + 1;
+		_surfaceFilename = new char[filenameSize];
+		Common::strcpy_s(_surfaceFilename, filenameSize, filename);
 
-		_cKDefault = defaultCK;
-		_cKRed = ckRed;
-		_cKGreen = ckGreen;
-		_cKBlue = ckBlue;
+		_ckDefault = defaultCK;
+		_ckRed = ckRed;
+		_ckGreen = ckGreen;
+		_ckBlue = ckBlue;
 		_lifeTime = lifeTime;
 		_keepLoaded = keepLoaded;
 
@@ -712,7 +713,7 @@ bool BaseSubFrame::setSurfaceSimple() {
 		_surface = nullptr;
 		return STATUS_OK;
 	}
-	_surface = _gameRef->_surfaceStorage->addSurface(_surfaceFilename, _cKDefault, _cKRed, _cKGreen, _cKBlue, _lifeTime, _keepLoaded);
+	_surface = _game->_surfaceStorage->addSurface(_surfaceFilename, _ckDefault, _ckRed, _ckGreen, _ckBlue, _lifeTime, _keepLoaded);
 	if (_surface) {
 		return STATUS_OK;
 	} else {

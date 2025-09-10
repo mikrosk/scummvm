@@ -30,6 +30,7 @@
 #include "engines/wintermute/base/gfx/base_image.h"
 #include "engines/wintermute/base/gfx/3dcamera.h"
 #include "engines/wintermute/base/gfx/3dlight.h"
+#include "engines/wintermute/platform_osystem.h"
 
 #include "graphics/opengl/system_headers.h"
 
@@ -119,7 +120,7 @@ bool BaseRenderOpenGL3D::initRenderer(int width, int height, bool windowed) {
 
 	_active = true;
 
-	_gameRef->_supportsRealTimeShadows = true;
+	_game->_supportsRealTimeShadows = true;
 
 	return true;
 }
@@ -162,7 +163,7 @@ bool BaseRenderOpenGL3D::flip() {
 }
 
 bool BaseRenderOpenGL3D::clear() {
-	if(!_gameRef->_editorMode) {
+	if(!_game->_editorMode) {
 		glViewport(0, _height, _width, _height);
 	}
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -244,7 +245,7 @@ bool BaseRenderOpenGL3D::setup3D(Camera3D *camera, bool force) {
 		bool fogEnabled;
 		uint32 fogColor;
 		float fogStart, fogEnd;
-		_gameRef->getFogParams(&fogEnabled, &fogColor, &fogStart, &fogEnd);
+		_game->getFogParams(&fogEnabled, &fogColor, &fogStart, &fogEnd);
 		if (fogEnabled) {
 			glEnable(GL_FOG);
 			GLfloat color[4] = { RGBCOLGetR(fogColor) / 255.0f,
@@ -278,7 +279,7 @@ void BaseRenderOpenGL3D::setAmbientLightRenderState() {
 		g = RGBCOLGetG(_ambientLightColor);
 		b = RGBCOLGetB(_ambientLightColor);
 	} else {
-		uint32 color = _gameRef->getAmbientLightColor();
+		uint32 color = _game->getAmbientLightColor();
 
 		a = RGBCOLGetA(color);
 		r = RGBCOLGetR(color);
@@ -312,9 +313,9 @@ bool BaseRenderOpenGL3D::setupLines() {
 	return true;
 }
 
-bool BaseRenderOpenGL3D::drawSpriteEx(BaseSurface *tex, const Wintermute::Rect32 &rect,
-	                              const Wintermute::Vector2 &pos, const Wintermute::Vector2 &rot,
-	                              const Wintermute::Vector2 &scale,
+bool BaseRenderOpenGL3D::drawSpriteEx(BaseSurface *tex, const Common::Rect32 &rect,
+	                              const DXVector2 &pos, const DXVector2 &rot,
+	                              const DXVector2 &scale,
 	                              float angle, uint32 color, bool alphaDisable,
 	                              Graphics::TSpriteBlendMode blendMode,
 	                              bool mirrorX, bool mirrorY) {
@@ -326,8 +327,8 @@ bool BaseRenderOpenGL3D::drawSpriteEx(BaseSurface *tex, const Wintermute::Rect32
 		color = _forceAlphaColor;
 	}
 
-	float width = (rect.right - rect.left) * scale.x;
-	float height = (rect.bottom - rect.top) * scale.y;
+	float width = (rect.right - rect.left) * scale._x;
+	float height = (rect.bottom - rect.top) * scale._y;
 
 	int texWidth = texture->getGLTextureWidth();
 	int texHeight = texture->getGLTextureHeight();
@@ -361,25 +362,25 @@ bool BaseRenderOpenGL3D::drawSpriteEx(BaseSurface *tex, const Wintermute::Rect32
 	vertices[3].v = texTop;
 
 	// position coords
-	vertices[0].x = pos.x;
-	vertices[0].y = pos.y + height;
+	vertices[0].x = pos._x;
+	vertices[0].y = pos._y + height;
 	vertices[0].z = 0.9f;
 
-	vertices[1].x = pos.x;
-	vertices[1].y = pos.y;
+	vertices[1].x = pos._x;
+	vertices[1].y = pos._y;
 	vertices[1].z = 0.9f;
 
-	vertices[2].x = pos.x + width;
-	vertices[2].y = pos.y + height;
+	vertices[2].x = pos._x + width;
+	vertices[2].y = pos._y + height;
 	vertices[2].z = 0.9f;
 
-	vertices[3].x = pos.x + width;
-	vertices[3].y = pos.y;
+	vertices[3].x = pos._x + width;
+	vertices[3].y = pos._y;
 	vertices[3].z = 0.9f;
 
 	if (angle != 0) {
 		DXVector2 sc(1.0f, 1.0f);
-		DXVector2 rotation(rot.x, rot.y);
+		DXVector2 rotation(rot._x, rot._y);
 		transformVertices(vertices, &rotation, &sc, angle);
 	}
 
@@ -506,8 +507,8 @@ bool BaseRenderOpenGL3D::setProjection() {
 	bool customViewport;
 	getProjectionParams(&resWidth, &resHeight, &layerWidth, &layerHeight, &modWidth, &modHeight, &customViewport);
 
-	Rect32 rc;
-	_gameRef->getCurrentViewportRect(&rc);
+	Common::Rect32 rc;
+	_game->getCurrentViewportRect(&rc);
 	float viewportWidth = (float)rc.right - (float)rc.left;
 	float viewportHeight = (float)rc.bottom - (float)rc.top;
 
@@ -522,8 +523,8 @@ bool BaseRenderOpenGL3D::setProjection() {
 	float scaleMod = resHeight / viewportHeight;
 	float scaleRatio = MAX(layerWidth / resWidth, layerHeight / resHeight) /** 1.05*/;
 
-	float offsetX = (float)_gameRef->_offsetX;
-	float offsetY = (float)_gameRef->_offsetY;
+	float offsetX = (float)_game->_offsetX;
+	float offsetY = (float)_game->_offsetY;
 
 	if (!customViewport) {
 		offsetX -= _drawOffsetX;
@@ -659,7 +660,7 @@ void BaseRenderOpenGL3D::displaySimpleShadow(BaseObject *object) {
 	if (object->_shadowImage) {
 		shadowImage = object->_shadowImage;
 	} else {
-		shadowImage = _gameRef->_shadowImage;
+		shadowImage = _game->_shadowImage;
 	}
 
 	if (!shadowImage) {
@@ -801,7 +802,7 @@ void BaseRenderOpenGL3D::renderSceneGeometry(const BaseArray<AdWalkplane *> &pla
 	DXMatrixIdentity(&matIdentity);
 
 	if (camera)
-		_gameRef->_renderer3D->setup3D(camera, true);
+		_game->_renderer3D->setup3D(camera, true);
 
 	setWorldTransform(matIdentity);
 
@@ -839,7 +840,7 @@ void BaseRenderOpenGL3D::renderSceneGeometry(const BaseArray<AdWalkplane *> &pla
 	}
 
 	// render waypoints
-	AdScene *scene = ((AdGame *)_gameRef)->_scene;
+	AdScene *scene = ((AdGame *)_game)->_scene;
 	AdSceneGeometry *geom = scene->_geom;
 	if (geom && geom->_wptMarker) {
 		DXMatrix viewMat, projMat, worldMat;
@@ -872,7 +873,7 @@ void BaseRenderOpenGL3D::renderShadowGeometry(const BaseArray<AdWalkplane *> &pl
 	DXMatrixIdentity(&matIdentity);
 
 	if (camera)
-		_gameRef->_renderer3D->setup3D(camera, true);
+		_game->_renderer3D->setup3D(camera, true);
 
 	setWorldTransform(matIdentity);
 
@@ -926,7 +927,7 @@ void BaseRenderOpenGL3D::disableCulling() {
 
 // implements D3D SetViewport() for 2D renderer
 bool BaseRenderOpenGL3D::setViewport(int left, int top, int right, int bottom) {
-	_viewportRect.setRect(left, top, right, bottom);
+	BasePlatform::setRect(&_viewportRect, left, top, right, bottom);
 	_viewport._x = left;
 	_viewport._y = top;
 	_viewport._width = right - left;
@@ -1127,19 +1128,19 @@ void BaseRenderOpenGL3D::postfilter() {
 }
 
 BaseSurface *BaseRenderOpenGL3D::createSurface() {
-	return new BaseSurfaceOpenGL3D(_gameRef, this);
+	return new BaseSurfaceOpenGL3D(_game, this);
 }
 
 Mesh3DS *BaseRenderOpenGL3D::createMesh3DS() {
-	return new Mesh3DSOpenGL(_gameRef);
+	return new Mesh3DSOpenGL(_game);
 }
 
 XMesh *BaseRenderOpenGL3D::createXMesh() {
-	return new XMeshOpenGL(_gameRef);
+	return new XMeshOpenGL(_game);
 }
 
 ShadowVolume *BaseRenderOpenGL3D::createShadowVolume() {
-	return new ShadowVolumeOpenGL(_gameRef);
+	return new ShadowVolumeOpenGL(_game);
 }
 
 // ScummVM specific ends <--

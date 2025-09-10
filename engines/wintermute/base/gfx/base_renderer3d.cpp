@@ -54,12 +54,12 @@ void BaseRenderer3D::initLoop() {
 	setup2D();
 }
 
-bool BaseRenderer3D::drawSprite(BaseSurface *texture, const Wintermute::Rect32 &rect,
-	                        float zoomX, float zoomY, const Wintermute::Vector2 &pos,
+bool BaseRenderer3D::drawSprite(BaseSurface *texture, const Common::Rect32 &rect,
+	                        float zoomX, float zoomY, const DXVector2 &pos,
 	                        uint32 color, bool alphaDisable, Graphics::TSpriteBlendMode blendMode,
 	                        bool mirrorX, bool mirrorY) {
-	Vector2 scale(zoomX / 100.0f, zoomY / 100.0f);
-	return drawSpriteEx(texture, rect, pos, Vector2(0.0f, 0.0f), scale, 0.0f, color, alphaDisable, blendMode, mirrorX, mirrorY);
+	DXVector2 scale(zoomX / 100.0f, zoomY / 100.0f);
+	return drawSpriteEx(texture, rect, pos, DXVector2(0.0f, 0.0f), scale, 0.0f, color, alphaDisable, blendMode, mirrorX, mirrorY);
 }
 
 bool BaseRenderer3D::getProjectionParams(float *resWidth, float *resHeight, float *layerWidth, float *layerHeight,
@@ -67,14 +67,14 @@ bool BaseRenderer3D::getProjectionParams(float *resWidth, float *resHeight, floa
 	*resWidth = _width;
 	*resHeight = _height;
 
-	if (_gameRef->_editorResolutionWidth > 0)
-		*resWidth = _gameRef->_editorResolutionWidth;
-	if (_gameRef->_editorResolutionHeight > 0)
-		*resHeight = _gameRef->_editorResolutionHeight;
+	if (_game->_editorResolutionWidth > 0)
+		*resWidth = _game->_editorResolutionWidth;
+	if (_game->_editorResolutionHeight > 0)
+		*resHeight = _game->_editorResolutionHeight;
 
 	int lWidth, lHeight;
-	Rect32 sceneViewport;
-	_gameRef->getLayerSize(&lWidth, &lHeight, &sceneViewport, customViewport);
+	Common::Rect32 sceneViewport;
+	_game->getLayerSize(&lWidth, &lHeight, &sceneViewport, customViewport);
 	*layerWidth = (float)lWidth;
 	*layerHeight = (float)lHeight;
 
@@ -141,7 +141,7 @@ bool BaseRenderer3D::flip() {
 	return true;
 }
 
-bool BaseRenderer3D::indicatorFlip() {
+bool BaseRenderer3D::indicatorFlip(int32 x, int32 y, int32 width, int32 height) {
 	flip();
 	return true;
 }

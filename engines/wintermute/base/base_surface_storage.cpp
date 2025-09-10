@@ -55,7 +55,7 @@ BaseSurfaceStorage::~BaseSurfaceStorage() {
 bool BaseSurfaceStorage::cleanup(bool warn) {
 	for (int32 i = 0; i < _surfaces.getSize(); i++) {
 		if (warn) {
-			BaseEngine::LOG(0, "BaseSurfaceStorage warning: purging surface '%s', usage:%d", _surfaces[i]->getFileName(), _surfaces[i]->_referenceCount);
+			BaseEngine::LOG(0, "BaseSurfaceStorage warning: purging surface '%s', usage:%d", _surfaces[i]->_filename.c_str(), _surfaces[i]->_referenceCount);
 		}
 		delete _surfaces[i];
 	}
@@ -67,16 +67,16 @@ bool BaseSurfaceStorage::cleanup(bool warn) {
 
 //////////////////////////////////////////////////////////////////////////
 bool BaseSurfaceStorage::initLoop() {
-	if (_gameRef->_smartCache && _gameRef->getLiveTimer()->getTime() - _lastCleanupTime >= _gameRef->_surfaceGCCycleTime) {
-		_lastCleanupTime = _gameRef->getLiveTimer()->getTime();
+	if (_game->_smartCache && _game->_liveTimer - _lastCleanupTime >= _game->_surfaceGCCycleTime) {
+		_lastCleanupTime = _game->_liveTimer;
 		sortSurfaces();
 		for (int32 i = 0; i < _surfaces.getSize(); i++) {
 			if (_surfaces[i]->_lifeTime <= 0) {
 				break;
 			}
 
-			if (_surfaces[i]->_lifeTime > 0 && _surfaces[i]->_valid && (int)(_gameRef->getLiveTimer()->getTime() - _surfaces[i]->_lastUsedTime) >= _surfaces[i]->_lifeTime) {
-				//_gameRef->QuickMessageForm("Invalidating: %s", _surfaces[i]->_filename);
+			if (_surfaces[i]->_lifeTime > 0 && _surfaces[i]->_valid && (int)(_game->_liveTimer - _surfaces[i]->_lastUsedTime) >= _surfaces[i]->_lifeTime) {
+				//_game->quickMessageForm("Invalidating: %s", _surfaces[i]->_filename);
 				_surfaces[i]->invalidate();
 			}
 		}
@@ -102,19 +102,19 @@ bool BaseSurfaceStorage::removeSurface(BaseSurface *surface) {
 
 
 //////////////////////////////////////////////////////////////////////
-BaseSurface *BaseSurfaceStorage::addSurface(const Common::String &filename, bool defaultCK, byte ckRed, byte ckGreen, byte ckBlue, int lifeTime, bool keepLoaded) {
+BaseSurface *BaseSurfaceStorage::addSurface(const char *filename, bool defaultCK, byte ckRed, byte ckGreen, byte ckBlue, int lifeTime, bool keepLoaded) {
 	for (int32 i = 0; i < _surfaces.getSize(); i++) {
-		if (scumm_stricmp(_surfaces[i]->getFileName(), filename.c_str()) == 0) {
+		if (scumm_stricmp(_surfaces[i]->_filename.c_str(), filename) == 0) {
 			_surfaces[i]->_referenceCount++;
 			return _surfaces[i];
 		}
 	}
 
 	if (!BaseFileManager::getEngineInstance()->hasFile(filename)) {
-		if (filename.size()) {
-			BaseEngine::LOG(0, "Missing image: '%s'", filename.c_str());
+		if (filename) {
+			BaseEngine::LOG(0, "Missing image: '%s'", filename);
 		}
-		if (_gameRef->_debugDebugMode) {
+		if (_game->_debugMode) {
 			return addSurface("invalid_debug.bmp", defaultCK, ckRed, ckGreen, ckBlue, lifeTime, keepLoaded);
 		} else {
 			return addSurface("invalid.bmp", defaultCK, ckRed, ckGreen, ckBlue, lifeTime, keepLoaded);
@@ -160,7 +160,7 @@ bool BaseSurfaceStorage::persist(BasePersistenceManager *persistMgr)
 
 	if (!persistMgr->getIsSaving()) cleanup(false);
 
-	persistMgr->transfer(TMEMBER(_gameRef));
+	persistMgr->transfer(TMEMBER(_game));
 
 	//_surfaces.persist(persistMgr);
 
@@ -184,25 +184,26 @@ int BaseSurfaceStorage::surfaceSortCB(const void *arg1, const void *arg2) {
 	BaseSurface *s2 = *((BaseSurface **)o2);
 
 	// sort by life time
-	if (s1->_lifeTime <= 0 && s2->_lifeTime > 0)
+	if (s1->_lifeTime <= 0 && s2->_lifeTime > 0) {
 		return 1;
-	else if (s1->_lifeTime > 0 && s2->_lifeTime <= 0)
+	} else if (s1->_lifeTime > 0 && s2->_lifeTime <= 0) {
 		return -1;
-
+	}
 
 	// sort by validity
-	if (s1->_valid && !s2->_valid)
+	if (s1->_valid && !s2->_valid) {
 		return -1;
-	else if (!s1->_valid && s2->_valid)
+	} else if (!s1->_valid && s2->_valid) {
 		return 1;
 
 	// sort by time
-	else if (s1->_lastUsedTime > s2->_lastUsedTime)
+	} else if (s1->_lastUsedTime > s2->_lastUsedTime) {
 		return 1;
-	else if (s1->_lastUsedTime < s2->_lastUsedTime)
+	} else if (s1->_lastUsedTime < s2->_lastUsedTime) {
 		return -1;
-	else
+	} else {
 		return 0;
+	}
 }
 
 } // End of namespace Wintermute

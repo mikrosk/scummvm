@@ -71,8 +71,6 @@ MODULE_OBJS := \
 	base/base_file_manager.o \
 	base/base_frame.o \
 	base/base_game.o \
-	base/base_game_music.o \
-	base/base_game_settings.o \
 	base/base_keyboard_state.o \
 	base/base_named_object.o \
 	base/base_object.o \
@@ -89,9 +87,7 @@ MODULE_OBJS := \
 	base/base_surface_storage.o \
 	base/base_transition_manager.o \
 	base/base_viewport.o \
-	base/saveload.o \
 	base/save_thumb_helper.o \
-	base/timer.o \
 	ext/dll_dlltest.o \
 	ext/dll_geturl.o \
 	ext/dll_httpconnect.o \
@@ -123,8 +119,6 @@ MODULE_OBJS := \
 	debugger/watch.o \
 	debugger/watch_instance.o \
 	math/math_util.o \
-	math/matrix4.o \
-	math/vector2.o \
 	metaengine.o \
 	platform_osystem.o \
 	system/sys_class.o \

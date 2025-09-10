@@ -192,8 +192,11 @@ const TheEntityField fields[] = {
 	{ kTheSprite,	"castNum",		kTheCastNum,	200 },// D2 p
 	{ kTheSprite,	"castLibNum",	kTheCastLibNum,	500 },//					D5 p
 	{ kTheSprite,	"constraint",	kTheConstraint, 200 },// D2 p
+	{ kTheSprite,	"currentTime",	kTheCurrentTime,600 },//							D6 p
 	{ kTheSprite,	"cursor",		kTheCursor,		200 },// D2 p
 	{ kTheSprite,	"editableText", kTheEditableText,400 },//				D4 p
+	{ kTheSprite,	"flipH",		kTheFlipH,		700 },// 								D7 p
+	{ kTheSprite,	"flipV",		kTheFlipV,		700 },// 								D7 p
 	{ kTheSprite,	"foreColor",	kTheForeColor,	200 },// D2 p
 	{ kTheSprite,	"height",		kTheHeight,		200 },// D2 p
 	{ kTheSprite,	"immediate",	kTheImmediate,	200 },// D2 p
@@ -203,17 +206,22 @@ const TheEntityField fields[] = {
 	{ kTheSprite,	"loc",			kTheLoc,		400 },//				D4 p ???
 	{ kTheSprite,	"locH",			kTheLocH,		200 },// D2 p
 	{ kTheSprite,	"locV",			kTheLocV,		200 },// D2 p
+	{ kTheSprite,	"member",		kTheMember,		500 },//					D5 p
 	{ kTheSprite,	"memberNum",	kTheMemberNum,	500 },//					D5 p
 	{ kTheSprite,	"moveableSprite",kTheMoveableSprite,400 },//			D4 p
+	{ kTheSprite,	"mostRecentCuePoint",kTheMostRecentCuePoint,600 },//				D6 p
+	{ kTheSprite,	"name",			kTheName,		600 },//							D6 p
 	{ kTheSprite,	"pattern",		kThePattern,	200 },// D2 p
 	{ kTheSprite,	"puppet",		kThePuppet,		200 },// D2 p
 	{ kTheSprite,	"rect",			kTheRect,		400 },//				D4 p ???
 	{ kTheSprite,	"right",		kTheRight,		200 },// D2 p
 	{ kTheSprite,	"scoreColor",	kTheScoreColor,	400 },//				D4 p
+	{ kTheSprite,	"scriptInstanceList",kTheScriptInstanceList,600 },//				D6 p
 	{ kTheSprite,	"scriptNum",	kTheScriptNum,	400 },//				D4 p
-	{ kTheSprite,	"stretch",		kTheStretch,		200 },// D2 p
+	{ kTheSprite,	"stretch",		kTheStretch,	200 },// D2 p
 	{ kTheSprite,	"top",			kTheTop,		200 },// D2 p
 	{ kTheSprite,	"trails",		kTheTrails,		300 },//		D3.1 p
+	{ kTheSprite,	"tweened",		kTheTweened,	600 },//							D6 p
 	{ kTheSprite,	"type",			kTheType,		200 },// D2 p
 	{ kTheSprite,	"visibility",	kTheVisibility,	300 },//		D3.1 p
 	{ kTheSprite,	"visible",		kTheVisible,	400 },//				D4 p
@@ -1531,6 +1539,12 @@ Datum Lingo::getTheSprite(Datum &id1, int field) {
 	case kTheEditableText:
 		d = sprite->_editable;
 		break;
+	case kTheFlipH: // D7
+		d = (sprite->_thickness & kTFlipH) ? 1 : 0;
+		break;
+	case kTheFlipV: // D7
+		d = (sprite->_thickness & kTFlipV) ? 1 : 0;
+		break;
 	case kTheForeColor:
 		// TODO: Provide proper reverse transform for non-indexed color
 		d = (int)g_director->transformColor(sprite->_foreColor);
@@ -1548,7 +1562,7 @@ Datum Lingo::getTheSprite(Datum &id1, int field) {
 		d = channel->getBbox().left;
 		break;
 	case kTheLineSize:
-		d = sprite->_thickness & 0x3;
+		d = (sprite->_thickness & kTThickness) - 1;
 		break;
 	case kTheLoc:
 		{
@@ -1622,6 +1636,9 @@ Datum Lingo::getTheSprite(Datum &id1, int field) {
 	case kTheType:
 		d = sprite->_spriteType;
 		break;
+	case kTheTweened:	// D6
+		d = (sprite->_thickness & kTTweened) ? 1 : 0;
+		break;
 	case kTheVisibility:
 	case kTheVisible:
 		d = (channel->_visible ? 1 : 0);
@@ -1690,8 +1707,14 @@ void Lingo::setTheSprite(Datum &id1, int field, Datum &d) {
 				channel->_dirty = true;
 			}
 
+			if (d.asInt() == 0)
+				sprite->_thickness &= ~kTHasBlend;
+			else
+				sprite->_thickness |= kTHasBlend;
+
 			// Based on Director in a Nutshell, page 15
 			sprite->setAutoPuppet(kAPBlend, true);
+			sprite->setAutoPuppet(kAPThickness, true);
 		}
 		break;
 	case kTheMember:
@@ -1779,6 +1802,22 @@ void Lingo::setTheSprite(Datum &id1, int field, Datum &d) {
 	case kTheEditableText:
 		channel->_sprite->_editable = d.asInt();
 		break;
+	case kTheFlipH: // D7
+		sprite->_thickness = (sprite->_thickness & ~kTFlipH) | ((d.asInt() ? kTFlipH : 0));
+		channel->_dirty = true;
+
+		sprite->setAutoPuppet(kAPThickness, true);
+
+		warning("STUB: Sprite flipH was set to %d", d.asInt());
+		break;
+	case kTheFlipV: // D7
+		sprite->_thickness = (sprite->_thickness & ~kTFlipV) | ((d.asInt() ? kTFlipV : 0));
+		channel->_dirty = true;
+
+		sprite->setAutoPuppet(kAPThickness, true);
+
+		warning("STUB: Sprite flipV was set to %d", d.asInt());
+		break;
 	case kTheForeColor:
 		{
 			uint32 newColor = g_director->transformColor(d.asInt());
@@ -1816,10 +1855,10 @@ void Lingo::setTheSprite(Datum &id1, int field, Datum &d) {
 
 		break;
 	case kTheLineSize:
-		if (d.asInt() != sprite->_thickness) {
-			sprite->_thickness = d.asInt();
-			channel->_dirty = true;
-		}
+		sprite->_thickness = (sprite->_thickness & ~kTThickness) | ((d.asInt() + 1) & kTThickness);
+		channel->_dirty = true;
+
+		sprite->setAutoPuppet(kAPThickness, true);
 		break;
 	case kTheLoc:
 		if (channel->getPosition() != d.asPoint()) {
@@ -1929,6 +1968,14 @@ void Lingo::setTheSprite(Datum &id1, int field, Datum &d) {
 			sprite->_spriteType = static_cast<SpriteType>(d.asInt());
 			channel->_dirty = true;
 		}
+		break;
+	case kTheTweened: // D6
+		sprite->_thickness = (sprite->_thickness & ~kTTweened) | ((d.asInt() ? kTTweened : 0));
+		channel->_dirty = true;
+
+		sprite->setAutoPuppet(kAPThickness, true);
+
+		warning("STUB: Sprite tweened was set to %d", d.asInt());
 		break;
 	case kTheVisibility:
 	case kTheVisible:

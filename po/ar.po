@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.8.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2025-08-17 16:05+0000\n"
+"POT-Creation-Date: 2025-09-03 16:43+0000\n"
 "PO-Revision-Date: 2023-03-26 11:16+0000\n"
 "Last-Translator: Malek Bellasfar <bellasfarmalek450@gmail.com>\n"
 "Language-Team: Arabic <https://translations.scummvm.org/projects/scummvm/"
@@ -71,7 +71,8 @@ msgstr "المحركات المتوفرة:"
 #: engines/saga/metaengine.cpp:374 engines/scumm/help.cpp:126
 #: engines/scumm/help.cpp:141 engines/scumm/help.cpp:166
 #: engines/scumm/help.cpp:194 engines/scumm/help.cpp:212
-#: engines/supernova/metaengine.cpp:341 engines/twp/metaengine.cpp:179
+#: engines/sherlock/metaengine.cpp:430 engines/supernova/metaengine.cpp:341
+#: engines/twp/metaengine.cpp:179
 msgid "Close"
 msgstr "إغلاق"
 
@@ -118,7 +119,7 @@ msgstr "اذهب للأعلى"
 #: engines/buried/saveload.cpp:83 engines/cine/saveload.cpp:857
 #: engines/director/lingo/xlibs/jitdraw3.cpp:123
 #: engines/drascula/saveload.cpp:51 engines/grim/inputdialog.cpp:84
-#: engines/mohawk/myst_stacks/menu.cpp:283
+#: engines/hypno/metaengine.cpp:225 engines/mohawk/myst_stacks/menu.cpp:283
 #: engines/mohawk/myst_stacks/menu.cpp:300
 #: engines/mohawk/myst_stacks/menu.cpp:318
 #: engines/mohawk/riven_stacks/aspit.cpp:349
@@ -128,7 +129,7 @@ msgstr "اذهب للأعلى"
 #: engines/scumm/dialog-createsession.cpp:47
 #: engines/scumm/dialog-sessionselector.cpp:67
 #: engines/scumm/he/moonbase/dialog-mapgenerator.cpp:138
-#: engines/sword1/control.cpp:2816 engines/wintermute/wintermute.cpp:186
+#: engines/sword1/control.cpp:2816 engines/wintermute/wintermute.cpp:178
 msgid "Cancel"
 msgstr "إلغاء"
 
@@ -330,12 +331,15 @@ msgstr "تخزين آخر يعمل الآن. هل تريد مقاطعته؟"
 #: gui/fluidsynth-dialog.cpp:210 gui/launcher.cpp:421 gui/launcher.cpp:450
 #: gui/launcher.cpp:510 gui/options.cpp:3486 gui/options.cpp:3860
 #: base/main.cpp:592 backends/events/default/default-events.cpp:193
-#: engines/buried/buried.cpp:598 engines/director/events.cpp:101
-#: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/grim/grim.cpp:366
+#: engines/buried/buried.cpp:598 engines/chamber/metaengine.cpp:91
+#: engines/director/events.cpp:101
+#: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/efh/metaengine.cpp:362
+#: engines/grim/grim.cpp:366 engines/hypno/metaengine.cpp:192
 #: engines/kyra/gui/saveload_eob.cpp:611 engines/kyra/gui/saveload_eob.cpp:644
-#: engines/parallaction/metaengine.cpp:169
-#: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4216
-#: engines/toon/toon.cpp:1550 engines/zvision/zvision.cpp:318
+#: engines/lab/metaengine.cpp:197 engines/parallaction/metaengine.cpp:169
+#: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4246
+#: engines/sherlock/metaengine.cpp:638 engines/sherlock/metaengine.cpp:1240
+#: engines/toon/toon.cpp:1550 engines/zvision/zvision.cpp:321
 msgid "Yes"
 msgstr "نعم"
 
@@ -343,12 +347,15 @@ msgstr "نعم"
 #: gui/downloaddialog.cpp:153 gui/filebrowser-dialog.cpp:135
 #: gui/fluidsynth-dialog.cpp:210 gui/launcher.cpp:421 gui/launcher.cpp:450
 #: gui/launcher.cpp:510 gui/options.cpp:3486 gui/options.cpp:3860
-#: engines/buried/buried.cpp:598 engines/director/events.cpp:101
-#: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/grim/grim.cpp:366
+#: engines/buried/buried.cpp:598 engines/chamber/metaengine.cpp:97
+#: engines/director/events.cpp:101
+#: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/efh/metaengine.cpp:368
+#: engines/grim/grim.cpp:366 engines/hypno/metaengine.cpp:198
 #: engines/kyra/gui/saveload_eob.cpp:611 engines/kyra/gui/saveload_eob.cpp:644
-#: engines/parallaction/metaengine.cpp:175
-#: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4216
-#: engines/toon/toon.cpp:1550 engines/zvision/zvision.cpp:319
+#: engines/lab/metaengine.cpp:204 engines/parallaction/metaengine.cpp:175
+#: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4246
+#: engines/sherlock/metaengine.cpp:643 engines/sherlock/metaengine.cpp:1246
+#: engines/toon/toon.cpp:1550 engines/zvision/zvision.cpp:322
 msgid "No"
 msgstr "لا"
 
@@ -373,14 +380,14 @@ msgstr ""
 #: backends/platform/wii/options.cpp:46 engines/agos/animation.cpp:577
 #: engines/agos/midi.cpp:320 engines/agos/midi.cpp:378
 #: engines/agos/midi.cpp:457 engines/buried/saveload.cpp:83
-#: engines/director/lingo/lingo-builtins.cpp:2176
+#: engines/director/lingo/lingo-builtins.cpp:2220
 #: engines/drascula/saveload.cpp:51 engines/grim/inputdialog.cpp:83
 #: engines/groovie/script.cpp:665 engines/mtropolis/mtropolis.cpp:114
 #: engines/mtropolis/mtropolis.cpp:124 engines/parallaction/saveload.cpp:270
 #: engines/saga/music.cpp:102 engines/sci/engine/kgraphics.cpp:76
 #: engines/sci/graphics/controls32.cpp:934 engines/scumm/scumm.cpp:1359
-#: engines/scumm/scumm.cpp:1784 engines/scumm/scumm.cpp:2274
-#: engines/scumm/scumm.cpp:2290 engines/sky/compact.cpp:140
+#: engines/scumm/scumm.cpp:1792 engines/scumm/scumm.cpp:2282
+#: engines/scumm/scumm.cpp:2298 engines/sky/compact.cpp:140
 #: engines/sword1/animation.cpp:566 engines/sword1/animation.cpp:574
 #: engines/sword1/control.cpp:2816 engines/sword1/logic.cpp:1738
 #: engines/sword2/animation.cpp:459 engines/sword2/animation.cpp:469
@@ -469,7 +476,7 @@ msgid "Cancel download"
 msgstr "إلغاء التحميل"
 
 #: gui/downloaddialog.cpp:67 gui/downloadpacksdialog.cpp:202
-#: gui/downloadpacksdialog.cpp:282
+#: gui/downloadpacksdialog.cpp:282 engines/efh/metaengine.cpp:524
 msgid "Hide"
 msgstr "حجب"
 
@@ -982,7 +989,7 @@ msgid "Sine"
 msgstr "شرط"
 
 #: gui/fluidsynth-dialog.cpp:137 backends/platform/sdl/ps3/ps3.cpp:43
-#: backends/platform/sdl/psp2/psp2.cpp:45 engines/dragons/metaengine.cpp:189
+#: backends/platform/sdl/psp2/psp2.cpp:45 engines/dragons/metaengine.cpp:188
 msgid "Triangle"
 msgstr "المثلث"
 
@@ -1030,7 +1037,8 @@ msgstr "الواجهة"
 
 #. I18N: Action in In Cold Blood
 #: gui/gui-manager.cpp:163 engines/hpl1/metaengine.cpp:91
-#: engines/icb/icb.cpp:95 engines/icb/icb.cpp:173 engines/mohawk/myst.cpp:572
+#: engines/icb/icb.cpp:95 engines/icb/icb.cpp:173
+#: engines/lab/metaengine.cpp:160 engines/mohawk/myst.cpp:572
 #: engines/mohawk/riven.cpp:853 engines/sludge/keymapper_tables.h:40
 #: engines/supernova/metaengine.cpp:226 engines/teenagent/metaengine.cpp:207
 #: engines/ultima/ultima4/metaengine.cpp:42
@@ -1040,11 +1048,11 @@ msgstr "التفاعل"
 
 #: gui/gui-manager.cpp:174 engines/metaengine.cpp:137
 #: engines/awe/metaengine.cpp:57 engines/crab/input/input.cpp:95
-#: engines/crab/input/input.cpp:145 engines/dragons/metaengine.cpp:159
-#: engines/freescape/movement.cpp:35 engines/got/metaengine.cpp:55
+#: engines/crab/input/input.cpp:145 engines/dragons/metaengine.cpp:158
+#: engines/freescape/movement.cpp:35 engines/got/metaengine.cpp:70
 #: engines/griffon/metaengine.cpp:121 engines/grim/grim.cpp:481
 #: engines/grim/grim.cpp:563 engines/icb/icb.cpp:68 engines/icb/icb.cpp:152
-#: engines/scumm/metaengine.cpp:1004 engines/supernova/metaengine.cpp:273
+#: engines/scumm/metaengine.cpp:1020 engines/supernova/metaengine.cpp:273
 #: engines/twine/metaengine.cpp:430 engines/twine/metaengine.cpp:497
 #: engines/twp/metaengine.cpp:154 engines/ultima/ultima4/metaengine.cpp:44
 #: engines/ultima/ultima4/metaengine.cpp:136
@@ -1059,11 +1067,11 @@ msgstr "أعلى"
 
 #: gui/gui-manager.cpp:180 engines/metaengine.cpp:143
 #: engines/awe/metaengine.cpp:58 engines/crab/input/input.cpp:101
-#: engines/crab/input/input.cpp:151 engines/dragons/metaengine.cpp:165
-#: engines/freescape/movement.cpp:42 engines/got/metaengine.cpp:56
+#: engines/crab/input/input.cpp:151 engines/dragons/metaengine.cpp:164
+#: engines/freescape/movement.cpp:42 engines/got/metaengine.cpp:71
 #: engines/griffon/metaengine.cpp:127 engines/grim/grim.cpp:486
 #: engines/grim/grim.cpp:568 engines/icb/icb.cpp:73 engines/icb/icb.cpp:157
-#: engines/scumm/metaengine.cpp:971 engines/supernova/metaengine.cpp:279
+#: engines/scumm/metaengine.cpp:987 engines/supernova/metaengine.cpp:279
 #: engines/twine/metaengine.cpp:437 engines/twine/metaengine.cpp:505
 #: engines/twp/metaengine.cpp:155 engines/ultima/ultima4/metaengine.cpp:45
 #: engines/ultima/ultima4/metaengine.cpp:137
@@ -1078,10 +1086,10 @@ msgstr "اسفل"
 
 #: gui/gui-manager.cpp:186 engines/metaengine.cpp:149
 #: engines/awe/metaengine.cpp:59 engines/crab/input/input.cpp:107
-#: engines/crab/input/input.cpp:157 engines/dragons/metaengine.cpp:171
-#: engines/got/metaengine.cpp:57 engines/griffon/metaengine.cpp:133
+#: engines/crab/input/input.cpp:157 engines/dragons/metaengine.cpp:170
+#: engines/got/metaengine.cpp:72 engines/griffon/metaengine.cpp:133
 #: engines/grim/grim.cpp:491 engines/grim/grim.cpp:573 engines/icb/icb.cpp:78
-#: engines/icb/icb.cpp:162 engines/scumm/metaengine.cpp:984
+#: engines/icb/icb.cpp:162 engines/scumm/metaengine.cpp:1000
 #: engines/twine/metaengine.cpp:452 engines/twine/metaengine.cpp:520
 #: engines/twp/metaengine.cpp:152 engines/ultima/ultima4/metaengine.cpp:46
 #: engines/ultima/ultima4/metaengine.cpp:138
@@ -1097,10 +1105,10 @@ msgstr "يسار"
 
 #: gui/gui-manager.cpp:192 engines/metaengine.cpp:155
 #: engines/awe/metaengine.cpp:60 engines/crab/input/input.cpp:113
-#: engines/crab/input/input.cpp:163 engines/dragons/metaengine.cpp:177
-#: engines/got/metaengine.cpp:58 engines/griffon/metaengine.cpp:139
+#: engines/crab/input/input.cpp:163 engines/dragons/metaengine.cpp:176
+#: engines/got/metaengine.cpp:73 engines/griffon/metaengine.cpp:139
 #: engines/grim/grim.cpp:496 engines/grim/grim.cpp:578 engines/icb/icb.cpp:83
-#: engines/icb/icb.cpp:167 engines/scumm/metaengine.cpp:991
+#: engines/icb/icb.cpp:167 engines/scumm/metaengine.cpp:1007
 #: engines/twine/metaengine.cpp:444 engines/twine/metaengine.cpp:513
 #: engines/twp/metaengine.cpp:153 engines/ultima/ultima4/metaengine.cpp:47
 #: engines/ultima/ultima4/metaengine.cpp:139
@@ -2582,7 +2590,8 @@ msgstr ""
 "والمزيد ..."
 
 #: gui/options.cpp:2967 engines/engine.cpp:655
-#: engines/drascula/metaengine.cpp:255 engines/queen/metaengine.cpp:269
+#: engines/access/metaengine.cpp:281 engines/drascula/metaengine.cpp:255
+#: engines/queen/metaengine.cpp:269 engines/sherlock/metaengine.cpp:410
 #: engines/ultima/nuvie/metaengine.cpp:71
 msgid "Move"
 msgstr "تحرك"
@@ -2995,7 +3004,7 @@ msgstr ""
 "يجب تنفيذ الخطوتين 2 و 3 مرة واحدة فقط لجميع ألعابك."
 
 #: base/main.cpp:659 base/main.cpp:684
-#: engines/director/lingo/lingo-builtins.cpp:1491
+#: engines/director/lingo/lingo-builtins.cpp:1535
 #: engines/director/lingo/xlibs/jitdraw3.cpp:123
 #: engines/director/lingo/xlibs/jitdraw3.cpp:131
 msgid "Ok"
@@ -3297,8 +3306,9 @@ msgstr ""
 #: backends/events/default/default-events.cpp:217
 #: backends/events/default/default-events.cpp:358
 #: engines/adl/metaengine.cpp:352 engines/buried/metaengine.cpp:154
-#: engines/drascula/metaengine.cpp:304 engines/hdb/metaengine.cpp:275
-#: engines/mohawk/myst_stacks/menu.cpp:317
+#: engines/chamber/metaengine.cpp:84 engines/drascula/metaengine.cpp:304
+#: engines/hdb/metaengine.cpp:275 engines/hypno/metaengine.cpp:251
+#: engines/lab/metaengine.cpp:172 engines/mohawk/myst_stacks/menu.cpp:317
 #: engines/mohawk/riven_stacks/aspit.cpp:454
 #: engines/neverhood/metaengine.cpp:200 engines/saga/metaengine.cpp:449
 #: engines/scumm/help.cpp:84 engines/scumm/help.cpp:86
@@ -3386,7 +3396,7 @@ msgstr "تبادل"
 msgid "Shift"
 msgstr "مفتاح التحول"
 
-#: dists/android.strings.xml.cpp:51 engines/dragons/metaengine.cpp:153
+#: dists/android.strings.xml.cpp:51 engines/dragons/metaengine.cpp:152
 #: engines/scumm/help.cpp:88 engines/scumm/help.cpp:91
 #: engines/ultima/ultima4/metaengine.cpp:53
 msgid "Enter"
@@ -3547,8 +3557,8 @@ msgstr "~ ال~عودة إلى المشغل"
 #: engines/nancy/state/loadsave.cpp:107 engines/neverhood/menumodule.cpp:925
 #: engines/pegasus/pegasus.cpp:407 engines/prince/saveload.cpp:54
 #: engines/sci/engine/guest_additions.cpp:746 engines/sci/engine/kfile.cpp:1104
-#: engines/sherlock/scalpel/scalpel.cpp:1248
-#: engines/sherlock/tattoo/widget_files.cpp:74 engines/startrek/saveload.cpp:42
+#: engines/sherlock/scalpel/scalpel.cpp:1250
+#: engines/sherlock/tattoo/widget_files.cpp:81 engines/startrek/saveload.cpp:42
 #: engines/toltecs/menu.cpp:308 engines/toon/toon.cpp:3820
 #: engines/trecision/saveload.cpp:67 engines/tsage/scenes.cpp:636
 #: engines/wage/saveload.cpp:763 engines/zvision/file/save_manager.cpp:47
@@ -3571,8 +3581,8 @@ msgstr "حفظ اللعبة:"
 #: engines/parallaction/saveload.cpp:208 engines/pegasus/pegasus.cpp:407
 #: engines/prince/saveload.cpp:54 engines/saga/metaengine.cpp:469
 #: engines/sci/engine/guest_additions.cpp:747 engines/sci/engine/kfile.cpp:1104
-#: engines/sherlock/scalpel/scalpel.cpp:1248
-#: engines/sherlock/tattoo/widget_files.cpp:74 engines/startrek/saveload.cpp:42
+#: engines/sherlock/scalpel/scalpel.cpp:1250
+#: engines/sherlock/tattoo/widget_files.cpp:81 engines/startrek/saveload.cpp:42
 #: engines/tinsel/metaengine.cpp:323 engines/toltecs/menu.cpp:308
 #: engines/toon/toon.cpp:3820 engines/trecision/saveload.cpp:67
 #: engines/tsage/scenes.cpp:636 engines/wage/saveload.cpp:763
@@ -3760,7 +3770,7 @@ msgstr ""
 "بإنشائها قد لا تعمل في الإصدارات المستقبلية من ScummVM."
 
 #: engines/engine.cpp:808 engines/engine.cpp:833
-#: engines/wintermute/wintermute.cpp:186
+#: engines/wintermute/wintermute.cpp:178
 msgid "Start anyway"
 msgstr "ابدأ على أي حال"
 
@@ -3852,19 +3862,19 @@ msgstr "خريطة مفاتيح اللعبة الافتراضية"
 #: engines/cge/metaengine.cpp:203 engines/cge2/metaengine.cpp:216
 #: engines/cine/metaengine.cpp:277 engines/composer/metaengine.cpp:113
 #: engines/cruise/metaengine.cpp:173 engines/draci/metaengine.cpp:200
-#: engines/efh/metaengine.cpp:234 engines/groovie/metaengine.cpp:205
-#: engines/hdb/metaengine.cpp:207 engines/hopkins/metaengine.cpp:211
-#: engines/hugo/metaengine.cpp:97 engines/illusions/metaengine.cpp:94
-#: engines/kyra/engine/eobcommon.cpp:367 engines/kyra/engine/lol.cpp:502
-#: engines/lure/metaengine.cpp:177 engines/made/metaengine.cpp:126
-#: engines/mads/metaengine.cpp:280 engines/mtropolis/metaengine.cpp:161
-#: engines/nancy/input.cpp:181 engines/parallaction/metaengine.cpp:138
-#: engines/saga/metaengine.cpp:278 engines/sludge/keymapper_tables.h:561
-#: engines/sludge/keymapper_tables.h:580 engines/stark/metaengine.cpp:189
-#: engines/sword1/metaengine.cpp:271 engines/tinsel/metaengine.cpp:246
-#: engines/toon/metaengine.cpp:86 engines/touche/metaengine.cpp:122
-#: engines/trecision/metaengine.cpp:125 engines/tsage/metaengine.cpp:178
-#: engines/tucker/metaengine.cpp:172 engines/ultima/ultima4/metaengine.cpp:224
+#: engines/groovie/metaengine.cpp:205 engines/hdb/metaengine.cpp:207
+#: engines/hopkins/metaengine.cpp:211 engines/hugo/metaengine.cpp:123
+#: engines/illusions/metaengine.cpp:94 engines/kyra/engine/eobcommon.cpp:367
+#: engines/kyra/engine/lol.cpp:502 engines/lure/metaengine.cpp:177
+#: engines/made/metaengine.cpp:126 engines/mads/metaengine.cpp:280
+#: engines/mtropolis/metaengine.cpp:161 engines/nancy/input.cpp:181
+#: engines/parallaction/metaengine.cpp:138 engines/saga/metaengine.cpp:278
+#: engines/sludge/keymapper_tables.h:561 engines/sludge/keymapper_tables.h:580
+#: engines/stark/metaengine.cpp:189 engines/sword1/metaengine.cpp:271
+#: engines/tinsel/metaengine.cpp:246 engines/toon/metaengine.cpp:86
+#: engines/touche/metaengine.cpp:122 engines/trecision/metaengine.cpp:125
+#: engines/tsage/metaengine.cpp:178 engines/tucker/metaengine.cpp:172
+#: engines/ultima/ultima4/metaengine.cpp:224
 #: engines/ultima/nuvie/metaengine.cpp:235
 #: engines/ultima/ultima8/metaengine.cpp:139 engines/vcruise/metaengine.cpp:158
 #: engines/wintermute/keymapper_tables.h:42 engines/zvision/metaengine.cpp:203
@@ -3887,19 +3897,18 @@ msgstr "النقر الأوسط"
 #: engines/cge/metaengine.cpp:209 engines/cge2/metaengine.cpp:222
 #: engines/cine/metaengine.cpp:283 engines/composer/metaengine.cpp:119
 #: engines/cruise/metaengine.cpp:179 engines/draci/metaengine.cpp:206
-#: engines/efh/metaengine.cpp:240 engines/groovie/metaengine.cpp:211
-#: engines/hopkins/metaengine.cpp:217 engines/hugo/metaengine.cpp:104
-#: engines/illusions/metaengine.cpp:101 engines/kyra/engine/eobcommon.cpp:368
-#: engines/kyra/engine/lol.cpp:503 engines/lure/metaengine.cpp:183
-#: engines/made/metaengine.cpp:133 engines/mads/metaengine.cpp:286
-#: engines/mtropolis/metaengine.cpp:167 engines/nancy/input.cpp:188
-#: engines/parallaction/metaengine.cpp:144 engines/saga/metaengine.cpp:289
-#: engines/sludge/keymapper_tables.h:567 engines/sludge/keymapper_tables.h:586
-#: engines/stark/metaengine.cpp:195 engines/sword1/metaengine.cpp:277
-#: engines/tinsel/metaengine.cpp:252 engines/toon/metaengine.cpp:92
-#: engines/touche/metaengine.cpp:128 engines/trecision/metaengine.cpp:131
-#: engines/tsage/metaengine.cpp:184 engines/tucker/metaengine.cpp:178
-#: engines/ultima/ultima4/metaengine.cpp:230
+#: engines/groovie/metaengine.cpp:211 engines/hopkins/metaengine.cpp:217
+#: engines/hugo/metaengine.cpp:130 engines/illusions/metaengine.cpp:101
+#: engines/kyra/engine/eobcommon.cpp:368 engines/kyra/engine/lol.cpp:503
+#: engines/lure/metaengine.cpp:183 engines/made/metaengine.cpp:133
+#: engines/mads/metaengine.cpp:286 engines/mtropolis/metaengine.cpp:167
+#: engines/nancy/input.cpp:188 engines/parallaction/metaengine.cpp:144
+#: engines/saga/metaengine.cpp:289 engines/sludge/keymapper_tables.h:567
+#: engines/sludge/keymapper_tables.h:586 engines/stark/metaengine.cpp:195
+#: engines/sword1/metaengine.cpp:277 engines/tinsel/metaengine.cpp:252
+#: engines/toon/metaengine.cpp:92 engines/touche/metaengine.cpp:128
+#: engines/trecision/metaengine.cpp:131 engines/tsage/metaengine.cpp:184
+#: engines/tucker/metaengine.cpp:178 engines/ultima/ultima4/metaengine.cpp:230
 #: engines/ultima/nuvie/metaengine.cpp:241
 #: engines/ultima/ultima8/metaengine.cpp:145
 #: engines/wintermute/keymapper_tables.h:48 engines/zvision/metaengine.cpp:209
@@ -3911,9 +3920,10 @@ msgstr "انقر على اليمين"
 #. I18N: Action in In Cold Blood
 #: engines/metaengine.cpp:99 engines/agos/metaengine.cpp:252
 #: engines/buried/metaengine.cpp:167 engines/crab/input/input.cpp:261
-#: engines/cruise/metaengine.cpp:217 engines/grim/grim.cpp:550
-#: engines/hdb/metaengine.cpp:258 engines/icb/icb.cpp:137
-#: engines/icb/icb.cpp:203 engines/mohawk/myst.cpp:595
+#: engines/cruise/metaengine.cpp:217 engines/dm/metaengine.cpp:180
+#: engines/grim/grim.cpp:550 engines/hdb/metaengine.cpp:258
+#: engines/hypno/metaengine.cpp:186 engines/hypno/metaengine.cpp:369
+#: engines/icb/icb.cpp:137 engines/icb/icb.cpp:203 engines/mohawk/myst.cpp:595
 #: engines/mohawk/riven.cpp:876 engines/sky/metaengine.cpp:126
 #: engines/sludge/keymapper_tables.h:52 engines/sludge/keymapper_tables.h:125
 #: engines/sludge/keymapper_tables.h:187 engines/sludge/keymapper_tables.h:243
@@ -3931,12 +3941,13 @@ msgstr "قائمة اللعبة"
 
 #. I18N: Skipping cutscene plaback
 #. I18N: Skipping cutscene playback
-#: engines/metaengine.cpp:112 engines/access/metaengine.cpp:202
+#: engines/metaengine.cpp:112 engines/access/metaengine.cpp:208
 #: engines/composer/metaengine.cpp:125 engines/drascula/metaengine.cpp:224
-#: engines/freescape/movement.cpp:87 engines/grim/grim.cpp:533
-#: engines/grim/grim.cpp:633 engines/illusions/metaengine.cpp:142
-#: engines/made/metaengine.cpp:140 engines/mohawk/myst.cpp:566
-#: engines/mohawk/riven.cpp:847 engines/prince/metaengine.cpp:269
+#: engines/efh/metaengine.cpp:379 engines/freescape/movement.cpp:87
+#: engines/grim/grim.cpp:533 engines/grim/grim.cpp:633
+#: engines/illusions/metaengine.cpp:142 engines/made/metaengine.cpp:140
+#: engines/mohawk/myst.cpp:566 engines/mohawk/riven.cpp:847
+#: engines/prince/metaengine.cpp:269 engines/sherlock/metaengine.cpp:384
 #: engines/wintermute/keymapper_tables.h:220
 #: engines/wintermute/keymapper_tables.h:1092
 #: engines/wintermute/keymapper_tables.h:1276
@@ -4807,9 +4818,11 @@ msgstr "Y"
 #: backends/platform/sdl/miyoo/miyoo.cpp:94
 #: backends/platform/sdl/opendingux/opendingux.cpp:57
 #: backends/platform/sdl/ps3/ps3.cpp:44 backends/platform/sdl/psp2/psp2.cpp:46
-#: engines/got/metaengine.cpp:61 engines/mm/mm1/metaengine.cpp:49
-#: engines/mm/mm1/metaengine.cpp:92 engines/supernova/metaengine.cpp:303
-#: engines/titanic/metaengine.cpp:233
+#: engines/efh/metaengine.cpp:397 engines/got/metaengine.cpp:76
+#: engines/hypno/metaengine.cpp:363 engines/mm/mm1/metaengine.cpp:49
+#: engines/mm/mm1/metaengine.cpp:92 engines/sherlock/metaengine.cpp:660
+#: engines/sherlock/metaengine.cpp:671 engines/sherlock/metaengine.cpp:1010
+#: engines/supernova/metaengine.cpp:303 engines/titanic/metaengine.cpp:233
 msgid "Select"
 msgstr "Select"
 
@@ -5704,7 +5717,7 @@ msgstr "تصغير"
 #. on the KIA Help Page, under Keyboard Shortcuts. In the English version it is
 #. ONLINE HELP
 #: backends/platform/sdl/macosx/appmenu_osx.mm:312
-#: engines/access/metaengine.cpp:298 engines/bladerunner/metaengine.cpp:321
+#: engines/access/metaengine.cpp:343 engines/bladerunner/metaengine.cpp:321
 #: engines/supernova/metaengine.cpp:238 engines/tucker/metaengine.cpp:215
 #: engines/zvision/metaengine.cpp:246
 msgid "Help"
@@ -5822,7 +5835,8 @@ msgstr "R2"
 
 #. I18N: Hardware key
 #: backends/platform/sdl/miyoo/miyoo.cpp:83
-#: backends/platform/sdl/miyoo/miyoo.cpp:114 engines/grim/grim.cpp:545
+#: backends/platform/sdl/miyoo/miyoo.cpp:114
+#: engines/alcachofa/metaengine.cpp:99 engines/grim/grim.cpp:545
 #: engines/grim/grim.cpp:645 engines/hdb/metaengine.cpp:264
 #: engines/made/metaengine.cpp:175 engines/toltecs/metaengine.cpp:252
 msgid "Menu"
@@ -5844,17 +5858,17 @@ msgid "R3"
 msgstr "R3"
 
 #: backends/platform/sdl/ps3/ps3.cpp:40 backends/platform/sdl/psp2/psp2.cpp:42
-#: engines/dragons/metaengine.cpp:201
+#: engines/dragons/metaengine.cpp:200
 msgid "Cross"
 msgstr "يعبر"
 
 #: backends/platform/sdl/ps3/ps3.cpp:41 backends/platform/sdl/psp2/psp2.cpp:43
-#: engines/dragons/metaengine.cpp:195
+#: engines/dragons/metaengine.cpp:194
 msgid "Circle"
 msgstr "دائرة"
 
 #: backends/platform/sdl/ps3/ps3.cpp:42 backends/platform/sdl/psp2/psp2.cpp:44
-#: engines/dragons/metaengine.cpp:183
+#: engines/dragons/metaengine.cpp:182
 msgid "Square"
 msgstr "مربع"
 
@@ -6012,15 +6026,19 @@ msgstr "منصة الإطلاق"
 msgid "Check for Updates..."
 msgstr "تحقق من وجود تحديثات..."
 
-#: engines/access/metaengine.cpp:192 engines/bbvs/metaengine.cpp:92
-#: engines/buried/metaengine.cpp:133 engines/cine/metaengine.cpp:270
-#: engines/cruise/metaengine.cpp:168 engines/draci/metaengine.cpp:195
-#: engines/drascula/metaengine.cpp:205 engines/hopkins/metaengine.cpp:206
-#: engines/hugo/metaengine.cpp:92 engines/illusions/metaengine.cpp:89
+#: engines/access/metaengine.cpp:198 engines/alcachofa/metaengine.cpp:83
+#: engines/bbvs/metaengine.cpp:92 engines/buried/metaengine.cpp:133
+#: engines/chamber/metaengine.cpp:59 engines/cine/metaengine.cpp:270
+#: engines/cruise/metaengine.cpp:168 engines/dm/metaengine.cpp:124
+#: engines/draci/metaengine.cpp:195 engines/drascula/metaengine.cpp:205
+#: engines/efh/metaengine.cpp:256 engines/hopkins/metaengine.cpp:206
+#: engines/hugo/metaengine.cpp:118 engines/hypno/metaengine.cpp:128
+#: engines/illusions/metaengine.cpp:89 engines/lab/metaengine.cpp:149
 #: engines/lure/metaengine.cpp:168 engines/made/metaengine.cpp:121
 #: engines/mads/metaengine.cpp:274 engines/neverhood/metaengine.cpp:185
 #: engines/playground3d/metaengine.cpp:51 engines/prince/metaengine.cpp:227
-#: engines/queen/metaengine.cpp:146 engines/stark/metaengine.cpp:184
+#: engines/private/metaengine.cpp:91 engines/queen/metaengine.cpp:146
+#: engines/sherlock/metaengine.cpp:313 engines/stark/metaengine.cpp:184
 #: engines/supernova/metaengine.cpp:217 engines/sword1/metaengine.cpp:266
 #: engines/sword25/metaengine.cpp:108 engines/teenagent/metaengine.cpp:197
 #: engines/tetraedge/metaengine.cpp:86 engines/tinsel/metaengine.cpp:240
@@ -6033,31 +6051,33 @@ msgstr "تحقق من وجود تحديثات..."
 msgid "Default keymappings"
 msgstr "خريطة مفاتيح اللعبة الافتراضية"
 
-#: engines/access/metaengine.cpp:196
+#: engines/access/metaengine.cpp:202
 #, fuzzy
 #| msgid "Highlight next dialogue"
 msgid "Move / Interact / Skip"
 msgstr "قم بتمييز الحوار التالي"
 
-#: engines/access/metaengine.cpp:208
+#: engines/access/metaengine.cpp:214 engines/sherlock/metaengine.cpp:483
 #, fuzzy
 #| msgid "Skip line"
 msgid "Skip movie"
 msgstr "تخطي الخط"
 
 #. I18N: Move Actor to upwards direction
-#: engines/access/metaengine.cpp:214 engines/asylum/metaengine.cpp:171
+#: engines/access/metaengine.cpp:220 engines/asylum/metaengine.cpp:171
 #: engines/asylum/metaengine.cpp:198 engines/cine/metaengine.cpp:377
-#: engines/efh/metaengine.cpp:258 engines/hdb/metaengine.cpp:213
+#: engines/efh/metaengine.cpp:286 engines/hdb/metaengine.cpp:213
+#: engines/hypno/metaengine.cpp:302 engines/hypno/metaengine.cpp:356
 #: engines/nancy/input.cpp:195 engines/tinsel/metaengine.cpp:263
 #: engines/titanic/metaengine.cpp:324 engines/ultima/ultima8/metaengine.cpp:53
 msgid "Move up"
 msgstr "تحرك"
 
 #. I18N: Move Actor to downwards direction
-#: engines/access/metaengine.cpp:221 engines/asylum/metaengine.cpp:177
+#: engines/access/metaengine.cpp:227 engines/asylum/metaengine.cpp:177
 #: engines/asylum/metaengine.cpp:205 engines/cine/metaengine.cpp:384
-#: engines/efh/metaengine.cpp:264 engines/hdb/metaengine.cpp:219
+#: engines/efh/metaengine.cpp:293 engines/hdb/metaengine.cpp:219
+#: engines/hypno/metaengine.cpp:290 engines/hypno/metaengine.cpp:342
 #: engines/nancy/input.cpp:201 engines/tinsel/metaengine.cpp:269
 #: engines/titanic/metaengine.cpp:330 engines/ultima/ultima8/metaengine.cpp:54
 msgid "Move down"
@@ -6065,9 +6085,10 @@ msgstr "تحرك لأسفل"
 
 #. I18N: Move Actor to left direction
 #. I18N: Move actor left during fight
-#: engines/access/metaengine.cpp:228 engines/asylum/metaengine.cpp:183
+#: engines/access/metaengine.cpp:234 engines/asylum/metaengine.cpp:183
 #: engines/asylum/metaengine.cpp:212 engines/cine/metaengine.cpp:391
-#: engines/efh/metaengine.cpp:270 engines/hdb/metaengine.cpp:225
+#: engines/efh/metaengine.cpp:300 engines/hdb/metaengine.cpp:225
+#: engines/hypno/metaengine.cpp:284 engines/hypno/metaengine.cpp:335
 #: engines/kyra/engine/eobcommon.cpp:371 engines/lure/metaengine.cpp:218
 #: engines/nancy/input.cpp:207 engines/tinsel/metaengine.cpp:275
 #: engines/titanic/metaengine.cpp:312 engines/titanic/metaengine.cpp:390
@@ -6077,9 +6098,10 @@ msgstr "تحرك يسارا"
 
 #. I18N: Move Actor to right direction
 #. I18N: Move actor right during fight
-#: engines/access/metaengine.cpp:235 engines/asylum/metaengine.cpp:189
+#: engines/access/metaengine.cpp:241 engines/asylum/metaengine.cpp:189
 #: engines/asylum/metaengine.cpp:219 engines/cine/metaengine.cpp:398
-#: engines/efh/metaengine.cpp:276 engines/hdb/metaengine.cpp:231
+#: engines/efh/metaengine.cpp:307 engines/hdb/metaengine.cpp:231
+#: engines/hypno/metaengine.cpp:296 engines/hypno/metaengine.cpp:349
 #: engines/kyra/engine/eobcommon.cpp:372 engines/lure/metaengine.cpp:226
 #: engines/nancy/input.cpp:213 engines/tinsel/metaengine.cpp:281
 #: engines/titanic/metaengine.cpp:318 engines/titanic/metaengine.cpp:396
@@ -6088,63 +6110,101 @@ msgid "Move right"
 msgstr "تحرك يمينا"
 
 #. I18N: Move Actor to top-left direction
-#: engines/access/metaengine.cpp:242 engines/cine/metaengine.cpp:405
-#: engines/efh/metaengine.cpp:282
+#: engines/access/metaengine.cpp:248 engines/cine/metaengine.cpp:405
+#: engines/efh/metaengine.cpp:314
 #, fuzzy
 #| msgid "Move left"
 msgid "Move up-left"
 msgstr "تحرك يسارا"
 
 #. I18N: Move Actor to top-right direction
-#: engines/access/metaengine.cpp:247 engines/cine/metaengine.cpp:411
-#: engines/efh/metaengine.cpp:287
+#: engines/access/metaengine.cpp:253 engines/cine/metaengine.cpp:411
+#: engines/efh/metaengine.cpp:320
 #, fuzzy
 #| msgid "Move right"
 msgid "Move up-right"
 msgstr "تحرك يمينا"
 
 #. I18N: Move Actor to bottom-left direction
-#: engines/access/metaengine.cpp:252 engines/cine/metaengine.cpp:417
-#: engines/efh/metaengine.cpp:292
+#: engines/access/metaengine.cpp:258 engines/cine/metaengine.cpp:417
+#: engines/efh/metaengine.cpp:326
 #, fuzzy
 #| msgid "Move down"
 msgid "Move down-left"
 msgstr "تحرك لأسفل"
 
 #. I18N: Move Actor to bottom-right direction
-#: engines/access/metaengine.cpp:257 engines/cine/metaengine.cpp:423
-#: engines/efh/metaengine.cpp:297
+#: engines/access/metaengine.cpp:263 engines/cine/metaengine.cpp:423
+#: engines/efh/metaengine.cpp:332
 #, fuzzy
 #| msgid "Move right"
 msgid "Move down-right"
 msgstr "تحرك يمينا"
 
-#: engines/access/metaengine.cpp:262 engines/bbvs/metaengine.cpp:124
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) This action is used to look at an object or npc in the game
+#: engines/access/metaengine.cpp:268 engines/bbvs/metaengine.cpp:124
 #: engines/dgds/metaengine.cpp:83 engines/drascula/metaengine.cpp:230
 #: engines/scumm/help.cpp:167 engines/scumm/help.cpp:231
-#: engines/supernova/metaengine.cpp:326 engines/tinsel/metaengine.cpp:300
-#: engines/tsage/metaengine.cpp:206 engines/ultima/nuvie/metaengine.cpp:67
+#: engines/sherlock/metaengine.cpp:405 engines/sherlock/metaengine.cpp:556
+#: engines/sherlock/metaengine.cpp:813 engines/supernova/metaengine.cpp:326
+#: engines/tinsel/metaengine.cpp:300 engines/tsage/metaengine.cpp:206
+#: engines/ultima/nuvie/metaengine.cpp:67
 msgid "Look"
 msgstr "ينظر"
 
+#: engines/access/metaengine.cpp:276 engines/drascula/metaengine.cpp:240
+#: engines/queen/metaengine.cpp:259 engines/saga/metaengine.cpp:369
+#: engines/scumm/help.cpp:125 engines/scumm/help.cpp:140
+#: engines/scumm/help.cpp:165 engines/scumm/help.cpp:193
+#: engines/scumm/help.cpp:211 engines/sherlock/metaengine.cpp:425
+#: engines/supernova/metaengine.cpp:336 engines/twp/metaengine.cpp:178
+msgid "Open"
+msgstr "يفتح"
+
+#: engines/access/metaengine.cpp:286 engines/scumm/help.cpp:128
+#: engines/ultima/nuvie/metaengine.cpp:70
+msgid "Get"
+msgstr "يحصل"
+
 #. I18N: Combat command in Might & Magic 1
-#: engines/access/metaengine.cpp:268 engines/bbvs/metaengine.cpp:136
-#: engines/cine/metaengine.cpp:342 engines/hdb/metaengine.cpp:237
-#: engines/mm/mm1/metaengine.cpp:81 engines/queen/metaengine.cpp:294
-#: engines/saga/metaengine.cpp:379 engines/scumm/help.cpp:129
-#: engines/scumm/help.cpp:153 engines/scumm/help.cpp:171
-#: engines/scumm/help.cpp:201 engines/scumm/help.cpp:216
-#: engines/scumm/help.cpp:227 engines/scumm/help.cpp:253
-#: engines/sky/metaengine.cpp:95 engines/sludge/keymapper_tables.h:333
-#: engines/supernova/metaengine.cpp:356 engines/tsage/metaengine.cpp:211
-#: engines/twp/metaengine.cpp:186 engines/ultima/ultima4/metaengine.cpp:71
+#: engines/access/metaengine.cpp:291 engines/access/metaengine.cpp:312
+#: engines/bbvs/metaengine.cpp:136 engines/cine/metaengine.cpp:342
+#: engines/efh/metaengine.cpp:462 engines/hdb/metaengine.cpp:237
+#: engines/lab/metaengine.cpp:323 engines/mm/mm1/metaengine.cpp:81
+#: engines/queen/metaengine.cpp:294 engines/saga/metaengine.cpp:379
+#: engines/scumm/help.cpp:129 engines/scumm/help.cpp:153
+#: engines/scumm/help.cpp:171 engines/scumm/help.cpp:201
+#: engines/scumm/help.cpp:216 engines/scumm/help.cpp:227
+#: engines/scumm/help.cpp:253 engines/sherlock/metaengine.cpp:440
+#: engines/sherlock/metaengine.cpp:561 engines/sky/metaengine.cpp:95
+#: engines/sludge/keymapper_tables.h:333 engines/supernova/metaengine.cpp:356
+#: engines/tsage/metaengine.cpp:211 engines/twp/metaengine.cpp:186
+#: engines/ultima/ultima4/metaengine.cpp:71
 #: engines/ultima/nuvie/metaengine.cpp:69
 #: engines/wintermute/keymapper_tables.h:140
 #: engines/wintermute/keymapper_tables.h:1552
 msgid "Use"
 msgstr "يستخدم"
 
-#: engines/access/metaengine.cpp:273 engines/cine/metaengine.cpp:332
+#: engines/access/metaengine.cpp:296
+msgid "Goto"
+msgstr ""
+
+#: engines/access/metaengine.cpp:301 engines/access/metaengine.cpp:332
+#: engines/bbvs/metaengine.cpp:130 engines/drascula/metaengine.cpp:250
+#: engines/efh/metaengine.cpp:506 engines/scumm/help.cpp:174
+#: engines/scumm/help.cpp:226 engines/sherlock/metaengine.cpp:415
+#: engines/supernova/metaengine.cpp:361 engines/tsage/metaengine.cpp:216
+#: engines/ultima/ultima4/metaengine.cpp:70
+#: engines/ultima/nuvie/metaengine.cpp:68
+msgid "Talk"
+msgstr "يتحدث"
+
+#: engines/access/metaengine.cpp:306 engines/scumm/help.cpp:175
+msgid "Travel"
+msgstr "يسافر"
+
+#: engines/access/metaengine.cpp:317 engines/cine/metaengine.cpp:332
 #: engines/saga/metaengine.cpp:394 engines/supernova/metaengine.cpp:331
 #, fuzzy
 #| msgid "Take off"
@@ -6152,44 +6212,43 @@ msgid "Take"
 msgstr "اخلع"
 
 #. I18N: Action in In Cold Blood
-#: engines/access/metaengine.cpp:278 engines/cine/metaengine.cpp:337
-#: engines/crab/input/input.cpp:251 engines/cruise/metaengine.cpp:192
-#: engines/draci/metaengine.cpp:237 engines/dragons/metaengine.cpp:148
-#: engines/drascula/metaengine.cpp:218 engines/griffon/metaengine.cpp:152
-#: engines/grim/grim.cpp:521 engines/grim/grim.cpp:621
-#: engines/hdb/metaengine.cpp:251 engines/hpl1/metaengine.cpp:94
-#: engines/icb/icb.cpp:101 engines/icb/icb.cpp:179 engines/scumm/help.cpp:228
+#: engines/access/metaengine.cpp:322 engines/alcachofa/metaengine.cpp:105
+#: engines/cine/metaengine.cpp:337 engines/crab/input/input.cpp:251
+#: engines/cruise/metaengine.cpp:192 engines/draci/metaengine.cpp:237
+#: engines/dragons/metaengine.cpp:147 engines/drascula/metaengine.cpp:218
+#: engines/griffon/metaengine.cpp:152 engines/grim/grim.cpp:521
+#: engines/grim/grim.cpp:621 engines/hdb/metaengine.cpp:251
+#: engines/hpl1/metaengine.cpp:94 engines/icb/icb.cpp:101
+#: engines/icb/icb.cpp:179 engines/scumm/help.cpp:228
 #: engines/scumm/help.cpp:237 engines/scumm/help.cpp:244
-#: engines/scumm/help.cpp:252 engines/sludge/keymapper_tables.h:58
-#: engines/sludge/keymapper_tables.h:119 engines/sludge/keymapper_tables.h:168
-#: engines/sludge/keymapper_tables.h:181 engines/sludge/keymapper_tables.h:217
-#: engines/sludge/keymapper_tables.h:256 engines/stark/metaengine.cpp:267
-#: engines/tinsel/metaengine.cpp:313 engines/titanic/metaengine.cpp:244
-#: engines/titanic/metaengine.cpp:297 engines/twine/metaengine.cpp:370
-#: engines/zvision/metaengine.cpp:252
+#: engines/scumm/help.cpp:252 engines/sherlock/metaengine.cpp:435
+#: engines/sludge/keymapper_tables.h:58 engines/sludge/keymapper_tables.h:119
+#: engines/sludge/keymapper_tables.h:168 engines/sludge/keymapper_tables.h:181
+#: engines/sludge/keymapper_tables.h:217 engines/sludge/keymapper_tables.h:256
+#: engines/stark/metaengine.cpp:267 engines/tinsel/metaengine.cpp:313
+#: engines/titanic/metaengine.cpp:244 engines/titanic/metaengine.cpp:297
+#: engines/twine/metaengine.cpp:370 engines/zvision/metaengine.cpp:252
 msgid "Inventory"
 msgstr "قائمة الجرد"
 
-#: engines/access/metaengine.cpp:283 engines/ultima/ultima4/metaengine.cpp:51
+#: engines/access/metaengine.cpp:327 engines/ultima/ultima4/metaengine.cpp:51
 msgid "Climb"
 msgstr ""
 
-#: engines/access/metaengine.cpp:288 engines/bbvs/metaengine.cpp:130
-#: engines/drascula/metaengine.cpp:250 engines/scumm/help.cpp:174
-#: engines/scumm/help.cpp:226 engines/supernova/metaengine.cpp:361
-#: engines/tsage/metaengine.cpp:216 engines/ultima/ultima4/metaengine.cpp:70
-#: engines/ultima/nuvie/metaengine.cpp:68
-msgid "Talk"
-msgstr "يتحدث"
-
-#: engines/access/metaengine.cpp:293 engines/bbvs/metaengine.cpp:142
+#: engines/access/metaengine.cpp:337 engines/bbvs/metaengine.cpp:142
 #: engines/freescape/games/castle/castle.cpp:284 engines/scumm/help.cpp:225
 #: engines/tsage/metaengine.cpp:201
 msgid "Walk"
 msgstr "يمشي"
 
+#: engines/access/metaengine.cpp:348
+#, fuzzy
+#| msgid "Go to save/load menu"
+msgid "Open save/load menu"
+msgstr "انتقل إلى حفظ / تحميل القائمة"
+
 #: engines/access/resources.cpp:43 engines/drascula/drascula.cpp:993
-#: engines/hugo/hugo.cpp:427 engines/lure/lure.cpp:57
+#: engines/hugo/hugo.cpp:442 engines/lure/lure.cpp:57
 #: engines/mortevielle/mortevielle.cpp:300 engines/sky/compact.cpp:129
 #: engines/supernova/supernova.cpp:467 engines/teenagent/resources.cpp:312
 #: engines/tony/tony.cpp:187 engines/toon/toon.cpp:5425
@@ -6199,7 +6258,7 @@ msgid "Unable to locate the '%s' engine data file."
 msgstr "غير قادر على تحديد موقع ملف بيانات المحرك '%s'."
 
 #: engines/access/resources.cpp:51 engines/drascula/drascula.cpp:1009
-#: engines/hugo/hugo.cpp:439 engines/lure/lure.cpp:66
+#: engines/hugo/hugo.cpp:454 engines/lure/lure.cpp:66
 #: engines/mortevielle/mortevielle.cpp:308 engines/supernova/supernova.cpp:472
 #: engines/teenagent/resources.cpp:329 engines/tony/tony.cpp:200
 #: engines/toon/toon.cpp:5438
@@ -6208,7 +6267,7 @@ msgid "The '%s' engine data file is corrupt."
 msgstr "ملف بيانات المحرك '%s' تالف."
 
 #: engines/access/resources.cpp:60 engines/drascula/drascula.cpp:1020
-#: engines/hugo/hugo.cpp:449 engines/lure/lure.cpp:69
+#: engines/hugo/hugo.cpp:464 engines/lure/lure.cpp:69
 #: engines/mortevielle/mortevielle.cpp:318 engines/tony/tony.cpp:211
 #: engines/toon/toon.cpp:5449
 #, c-format
@@ -6261,22 +6320,28 @@ msgstr "استخدم المؤشرات الفضية"
 msgid "Use the checkered cursor from later Apple II models"
 msgstr ""
 
-#: engines/adl/metaengine.cpp:117 engines/cge/metaengine.cpp:56
-#: engines/cine/metaengine.cpp:69 engines/cruise/metaengine.cpp:45
-#: engines/drascula/metaengine.cpp:55 engines/efh/metaengine.cpp:44
-#: engines/glk/metaengine.cpp:193 engines/griffon/metaengine.cpp:40
+#: engines/adl/metaengine.cpp:117 engines/agi/metaengine.cpp:220
+#: engines/cge/metaengine.cpp:56 engines/cine/metaengine.cpp:69
+#: engines/cruise/metaengine.cpp:45 engines/drascula/metaengine.cpp:55
+#: engines/efh/metaengine.cpp:44 engines/glk/metaengine.cpp:193
+#: engines/gob/metaengine.cpp:57 engines/got/metaengine.cpp:48
+#: engines/griffon/metaengine.cpp:40 engines/hugo/metaengine.cpp:45
 #: engines/made/metaengine.cpp:51 engines/mm/metaengine.cpp:91
 #: engines/mortevielle/metaengine.cpp:37 engines/parallaction/metaengine.cpp:52
-#: engines/sci/detection_options.h:223 engines/supernova/metaengine.cpp:53
+#: engines/sci/detection_options.h:223 engines/scumm/dialogs.cpp:1221
+#: engines/scumm/metaengine.cpp:863 engines/supernova/metaengine.cpp:53
 #: engines/wage/metaengine.cpp:51
 msgid "Enable Text to Speech"
 msgstr "تمكين تحويل النص إلى كلام"
 
-#: engines/adl/metaengine.cpp:118 engines/cge/metaengine.cpp:57
-#: engines/cine/metaengine.cpp:70 engines/cruise/metaengine.cpp:46
-#: engines/drascula/metaengine.cpp:56 engines/efh/metaengine.cpp:45
+#: engines/adl/metaengine.cpp:118 engines/agi/metaengine.cpp:221
+#: engines/cge/metaengine.cpp:57 engines/cine/metaengine.cpp:70
+#: engines/cruise/metaengine.cpp:46 engines/drascula/metaengine.cpp:56
+#: engines/efh/metaengine.cpp:45 engines/gob/metaengine.cpp:58
+#: engines/got/metaengine.cpp:49 engines/hugo/metaengine.cpp:46
 #: engines/made/metaengine.cpp:52 engines/mm/metaengine.cpp:92
-#: engines/mortevielle/metaengine.cpp:38
+#: engines/mortevielle/metaengine.cpp:38 engines/scumm/dialogs.cpp:1222
+#: engines/scumm/metaengine.cpp:864
 msgid "Use TTS to read text in the game (if TTS is available)"
 msgstr "استخدم TTS لقراءة النص في اللعبة (إذا كان TTS متاحًا)"
 
@@ -6301,7 +6366,7 @@ msgstr ""
 #: engines/got/metaengine.cpp:35 engines/groovie/metaengine.cpp:53
 #: engines/m4/metaengine.cpp:37 engines/nancy/metaengine.cpp:104
 #: engines/neverhood/dialogs.cpp:47 engines/sci/detection_options.h:107
-#: engines/sherlock/metaengine.cpp:39 engines/toltecs/metaengine.cpp:44
+#: engines/sherlock/metaengine.cpp:47 engines/toltecs/metaengine.cpp:44
 #: engines/trecision/metaengine.cpp:41 engines/ultima/metaengine.cpp:52
 #: engines/zvision/metaengine.cpp:42
 msgid "Use original save/load screens"
@@ -6314,7 +6379,7 @@ msgstr "استخدم شاشات الحفظ / التحميل الأصلية"
 #: engines/got/metaengine.cpp:36 engines/groovie/metaengine.cpp:54
 #: engines/m4/metaengine.cpp:38 engines/nancy/metaengine.cpp:105
 #: engines/neverhood/dialogs.cpp:48 engines/sci/detection_options.h:108
-#: engines/sherlock/metaengine.cpp:40 engines/toltecs/metaengine.cpp:45
+#: engines/sherlock/metaengine.cpp:48 engines/toltecs/metaengine.cpp:45
 #: engines/trecision/metaengine.cpp:42 engines/ultima/metaengine.cpp:53
 #: engines/zvision/metaengine.cpp:43
 msgid "Use the original save/load screens instead of the ScummVM ones"
@@ -6412,7 +6477,7 @@ msgid ""
 "PCjr may sound wrong."
 msgstr ""
 
-#: engines/agi/metaengine.cpp:433 engines/asylum/asylum.cpp:655
+#: engines/agi/metaengine.cpp:447 engines/asylum/asylum.cpp:655
 #: engines/buried/saveload.cpp:53 engines/mohawk/riven.cpp:759
 #: engines/petka/saveload.cpp:121
 #, fuzzy
@@ -6420,7 +6485,7 @@ msgstr ""
 msgid "This game does not support loading"
 msgstr "هذه اللعبة غير مدعومة."
 
-#: engines/agi/metaengine.cpp:456 engines/asylum/asylum.cpp:666
+#: engines/agi/metaengine.cpp:470 engines/asylum/asylum.cpp:666
 #: engines/buried/saveload.cpp:64 engines/mohawk/riven.cpp:774
 #: engines/petka/saveload.cpp:101
 #, fuzzy
@@ -6440,10 +6505,10 @@ msgstr "هذه اللعبة غير مدعومة."
 #: engines/mads/nebular/dialogs_nebular.cpp:385
 #: engines/mtropolis/saveload.cpp:120 engines/neverhood/menumodule.cpp:938
 #: engines/prince/saveload.cpp:63 engines/sci/engine/guest_additions.cpp:749
-#: engines/sci/engine/kfile.cpp:1246 engines/sherlock/scalpel/scalpel.cpp:1261
-#: engines/sherlock/tattoo/widget_files.cpp:93 engines/startrek/saveload.cpp:67
-#: engines/toltecs/menu.cpp:278 engines/toon/toon.cpp:3914
-#: engines/zvision/file/save_manager.cpp:60
+#: engines/sci/engine/kfile.cpp:1246 engines/sherlock/scalpel/scalpel.cpp:1263
+#: engines/sherlock/tattoo/widget_files.cpp:100
+#: engines/startrek/saveload.cpp:67 engines/toltecs/menu.cpp:278
+#: engines/toon/toon.cpp:3914 engines/zvision/file/save_manager.cpp:60
 msgid "Restore game:"
 msgstr "استرجاع لعبة:"
 
@@ -6460,10 +6525,11 @@ msgstr "استرجاع لعبة:"
 #: engines/mads/nebular/dialogs_nebular.cpp:385
 #: engines/mtropolis/saveload.cpp:120 engines/neverhood/menumodule.cpp:938
 #: engines/prince/saveload.cpp:63 engines/sci/engine/guest_additions.cpp:750
-#: engines/sci/engine/kfile.cpp:1246 engines/sherlock/scalpel/scalpel.cpp:1261
-#: engines/sherlock/tattoo/widget_files.cpp:93 engines/startrek/saveload.cpp:67
-#: engines/toltecs/menu.cpp:278 engines/toon/toon.cpp:3914
-#: engines/zvision/file/save_manager.cpp:60 engines/zvision/metaengine.cpp:287
+#: engines/sci/engine/kfile.cpp:1246 engines/sherlock/scalpel/scalpel.cpp:1263
+#: engines/sherlock/tattoo/widget_files.cpp:100
+#: engines/startrek/saveload.cpp:67 engines/toltecs/menu.cpp:278
+#: engines/toon/toon.cpp:3914 engines/zvision/file/save_manager.cpp:60
+#: engines/zvision/metaengine.cpp:287
 msgid "Restore"
 msgstr "استرجع"
 
@@ -6471,7 +6537,7 @@ msgstr "استرجع"
 msgid "Quick load or save game isn't supported in this location"
 msgstr "لا يتم دعم التحميل السريع أو حفظ اللعبة في هذا الموقع"
 
-#: engines/agos/saveload.cpp:160 engines/scumm/scumm.cpp:3170
+#: engines/agos/saveload.cpp:160 engines/scumm/scumm.cpp:3200
 #, c-format
 msgid ""
 "Failed to load saved game from file:\n"
@@ -6482,7 +6548,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: engines/agos/saveload.cpp:195 engines/scumm/scumm.cpp:3157
+#: engines/agos/saveload.cpp:195 engines/scumm/scumm.cpp:3187
 #, c-format
 msgid ""
 "Failed to save game to file:\n"
@@ -6493,7 +6559,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: engines/agos/saveload.cpp:203 engines/scumm/scumm.cpp:3190
+#: engines/agos/saveload.cpp:203 engines/scumm/scumm.cpp:3220
 #, c-format
 msgid ""
 "Successfully saved game in file:\n"
@@ -6562,18 +6628,20 @@ msgid "AGOS main"
 msgstr ""
 
 #: engines/agos/metaengine.cpp:228 engines/bbvs/metaengine.cpp:93
-#: engines/buried/metaengine.cpp:136 engines/cine/metaengine.cpp:271
-#: engines/cruise/metaengine.cpp:169 engines/draci/metaengine.cpp:196
-#: engines/drascula/metaengine.cpp:206 engines/efh/metaengine.cpp:230
-#: engines/hopkins/metaengine.cpp:207 engines/hugo/metaengine.cpp:93
-#: engines/illusions/metaengine.cpp:90 engines/lure/metaengine.cpp:169
-#: engines/made/metaengine.cpp:122 engines/mads/metaengine.cpp:275
-#: engines/neverhood/metaengine.cpp:186 engines/queen/metaengine.cpp:147
-#: engines/sludge/keymapper_tables.h:33 engines/stark/metaengine.cpp:185
-#: engines/sword1/metaengine.cpp:267 engines/tinsel/metaengine.cpp:241
-#: engines/toon/metaengine.cpp:82 engines/touche/metaengine.cpp:119
-#: engines/trecision/metaengine.cpp:121 engines/tsage/metaengine.cpp:170
-#: engines/tucker/metaengine.cpp:168
+#: engines/buried/metaengine.cpp:136 engines/chamber/metaengine.cpp:60
+#: engines/cine/metaengine.cpp:271 engines/cruise/metaengine.cpp:169
+#: engines/dm/metaengine.cpp:126 engines/draci/metaengine.cpp:196
+#: engines/drascula/metaengine.cpp:206 engines/hopkins/metaengine.cpp:207
+#: engines/hugo/metaengine.cpp:119 engines/hypno/metaengine.cpp:166
+#: engines/hypno/metaengine.cpp:267 engines/hypno/metaengine.cpp:311
+#: engines/illusions/metaengine.cpp:90 engines/lab/metaengine.cpp:152
+#: engines/lure/metaengine.cpp:169 engines/made/metaengine.cpp:122
+#: engines/mads/metaengine.cpp:275 engines/neverhood/metaengine.cpp:186
+#: engines/queen/metaengine.cpp:147 engines/sludge/keymapper_tables.h:33
+#: engines/stark/metaengine.cpp:185 engines/sword1/metaengine.cpp:267
+#: engines/tinsel/metaengine.cpp:241 engines/toon/metaengine.cpp:82
+#: engines/touche/metaengine.cpp:119 engines/trecision/metaengine.cpp:121
+#: engines/tsage/metaengine.cpp:170 engines/tucker/metaengine.cpp:168
 #, fuzzy
 #| msgid "Game Options"
 msgid "Game keymappings"
@@ -6621,7 +6689,7 @@ msgstr "حجم المؤثرات الصوتية الخاصة"
 msgid "Toggle fast mode on / off"
 msgstr "تبديل الوضع السريع"
 
-#: engines/agos/metaengine.cpp:290
+#: engines/agos/metaengine.cpp:290 engines/lab/metaengine.cpp:264
 msgid "Walk forward"
 msgstr "السير إلى الأمام"
 
@@ -6631,8 +6699,9 @@ msgstr "السير إلى الأمام"
 msgid "Turn backward"
 msgstr "اركض للخلف"
 
-#: engines/agos/metaengine.cpp:302 engines/kyra/engine/eobcommon.cpp:373
-#: engines/kyra/engine/lol.cpp:514 engines/mm/mm1/metaengine.cpp:97
+#: engines/agos/metaengine.cpp:302 engines/dm/metaengine.cpp:186
+#: engines/kyra/engine/eobcommon.cpp:373 engines/kyra/engine/lol.cpp:514
+#: engines/lab/metaengine.cpp:257 engines/mm/mm1/metaengine.cpp:97
 #: engines/mohawk/riven.cpp:901 engines/pegasus/pegasus.cpp:2740
 #: engines/twine/metaengine.cpp:353 engines/ultima/ultima8/metaengine.cpp:49
 #: engines/wintermute/keymapper_tables.h:161
@@ -6643,8 +6712,9 @@ msgstr "اركض للخلف"
 msgid "Turn left"
 msgstr "انعطف لليسار"
 
-#: engines/agos/metaengine.cpp:308 engines/kyra/engine/eobcommon.cpp:374
-#: engines/kyra/engine/lol.cpp:515 engines/mm/mm1/metaengine.cpp:98
+#: engines/agos/metaengine.cpp:308 engines/dm/metaengine.cpp:206
+#: engines/kyra/engine/eobcommon.cpp:374 engines/kyra/engine/lol.cpp:515
+#: engines/lab/metaengine.cpp:271 engines/mm/mm1/metaengine.cpp:98
 #: engines/mohawk/riven.cpp:907 engines/pegasus/pegasus.cpp:2747
 #: engines/twine/metaengine.cpp:346 engines/ultima/ultima8/metaengine.cpp:50
 #: engines/wintermute/keymapper_tables.h:167
@@ -6865,6 +6935,38 @@ msgid ""
 "2. Any .sav file inside the QfG2 Remake game directory"
 msgstr ""
 
+#: engines/alcachofa/metaengine.cpp:40
+msgid "High Quality"
+msgstr ""
+
+#: engines/alcachofa/metaengine.cpp:41
+#, fuzzy
+#| msgid "Special sound effects volume"
+msgid "Toggles some optional graphical effects"
+msgstr "حجم المؤثرات الصوتية الخاصة"
+
+#: engines/alcachofa/metaengine.cpp:51
+msgid "32 Bits"
+msgstr ""
+
+#: engines/alcachofa/metaengine.cpp:52
+msgid "Uses 32bit textures instead of 16bit ones (currently not implemented)"
+msgstr ""
+
+#: engines/alcachofa/metaengine.cpp:87 engines/cine/metaengine.cpp:347
+#, fuzzy
+#| msgid "Active"
+msgid "Activate"
+msgstr "المفعل"
+
+#: engines/alcachofa/metaengine.cpp:93 engines/queen/metaengine.cpp:279
+#: engines/saga/metaengine.cpp:354 engines/scumm/help.cpp:202
+#: engines/scumm/help.cpp:214 engines/twp/metaengine.cpp:182
+#: engines/wintermute/keymapper_tables.h:122
+#: engines/wintermute/keymapper_tables.h:1534
+msgid "Look at"
+msgstr "ينظر الى"
+
 #: engines/alg/metaengine.cpp:34
 msgid "Use lower quality single speed CD-ROM video"
 msgstr ""
@@ -6991,7 +7093,7 @@ msgid "Enter Level Code"
 msgstr ""
 
 #: engines/awe/metaengine.cpp:88 engines/dgds/metaengine.cpp:87
-#: engines/got/metaengine.cpp:90
+#: engines/got/metaengine.cpp:105
 #, fuzzy
 #| msgid "Game Options"
 msgid "Game Keys"
@@ -7018,8 +7120,8 @@ msgstr "خيارات اللعبة"
 
 #. I18N: ESC key
 #: engines/bbvs/metaengine.cpp:111 engines/cruise/metaengine.cpp:223
-#: engines/freescape/movement.cpp:101 engines/got/metaengine.cpp:63
-#: engines/hugo/metaengine.cpp:160 engines/lure/metaengine.cpp:209
+#: engines/freescape/movement.cpp:101 engines/got/metaengine.cpp:78
+#: engines/hugo/metaengine.cpp:186 engines/lure/metaengine.cpp:209
 #: engines/mads/metaengine.cpp:292 engines/mm/mm1/metaengine.cpp:41
 #: engines/mm/mm1/metaengine.cpp:47 engines/saga/metaengine.cpp:328
 #: engines/tinsel/metaengine.cpp:258 engines/tsage/metaengine.cpp:190
@@ -7029,7 +7131,7 @@ msgid "Escape"
 msgstr "يهرب"
 
 #: engines/bbvs/metaengine.cpp:117 engines/hopkins/metaengine.cpp:229
-#: engines/illusions/metaengine.cpp:147
+#: engines/illusions/metaengine.cpp:147 engines/sherlock/metaengine.cpp:835
 #, fuzzy
 #| msgid "Open/Close Inventory"
 msgid "Open inventory"
@@ -7189,9 +7291,10 @@ msgstr "تبديل القتال"
 
 #. I18N: This keymap allows skipping video cutscenes
 #: engines/bladerunner/metaengine.cpp:229 engines/buried/metaengine.cpp:160
-#: engines/scumm/help.cpp:79 engines/scumm/metaengine.cpp:1030
-#: engines/supernova/metaengine.cpp:309 engines/toltecs/metaengine.cpp:246
-#: engines/twp/metaengine.cpp:162 engines/zvision/metaengine.cpp:304
+#: engines/hypno/metaengine.cpp:152 engines/scumm/help.cpp:79
+#: engines/scumm/metaengine.cpp:1046 engines/supernova/metaengine.cpp:309
+#: engines/toltecs/metaengine.cpp:246 engines/twp/metaengine.cpp:162
+#: engines/zvision/metaengine.cpp:304
 msgid "Skip cutscene"
 msgstr "تخطي المشهد"
 
@@ -7241,7 +7344,11 @@ msgid "Delete selected saved game"
 msgstr "حذف اللعبة المحفوظة المختارة"
 
 #. I18N: This keymap allows scrolling texts and lists upwards
-#: engines/bladerunner/metaengine.cpp:296 engines/titanic/metaengine.cpp:218
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a map, this action is used to scroll up in the map
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has multiple widgets for various purposes (eg. inventory, save files, etc.), this action is used to scroll up in the widget
+#: engines/bladerunner/metaengine.cpp:296 engines/efh/metaengine.cpp:415
+#: engines/sherlock/metaengine.cpp:368 engines/sherlock/metaengine.cpp:995
+#: engines/sherlock/metaengine.cpp:1021 engines/titanic/metaengine.cpp:218
 #: engines/wintermute/keymapper_tables.h:670
 #: engines/wintermute/keymapper_tables.h:871
 #: engines/wintermute/keymapper_tables.h:892
@@ -7257,7 +7364,11 @@ msgid "Scroll up"
 msgstr "انتقل إلى أعلى"
 
 #. I18N: This keymap allows scrolling texts and lists downwards
-#: engines/bladerunner/metaengine.cpp:303 engines/titanic/metaengine.cpp:225
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a map, this action is used to scroll down in the map
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has multiple widgets for various purposes (eg. inventory, save files, etc.), this action is used to scroll down in the widget
+#: engines/bladerunner/metaengine.cpp:303 engines/efh/metaengine.cpp:403
+#: engines/sherlock/metaengine.cpp:374 engines/sherlock/metaengine.cpp:1003
+#: engines/sherlock/metaengine.cpp:1029 engines/titanic/metaengine.cpp:225
 #: engines/wintermute/keymapper_tables.h:677
 #: engines/wintermute/keymapper_tables.h:878
 #: engines/wintermute/keymapper_tables.h:899
@@ -7286,21 +7397,24 @@ msgstr "تبديل مفتاح الخصوصية"
 #. SAVE GAME
 #: engines/bladerunner/metaengine.cpp:330 engines/buried/metaengine.cpp:179
 #: engines/cge/metaengine.cpp:221 engines/cge2/metaengine.cpp:235
-#: engines/dgds/metaengine.cpp:75 engines/drascula/metaengine.cpp:285
-#: engines/efh/metaengine.cpp:246 engines/freescape/games/castle/castle.cpp:246
+#: engines/dgds/metaengine.cpp:75 engines/dm/metaengine.cpp:174
+#: engines/drascula/metaengine.cpp:285 engines/efh/metaengine.cpp:272
+#: engines/freescape/games/castle/castle.cpp:246
 #: engines/freescape/games/dark/dark.cpp:186
 #: engines/freescape/games/driller/driller.cpp:135
-#: engines/freescape/games/eclipse/eclipse.cpp:231
-#: engines/hopkins/metaengine.cpp:236 engines/hugo/metaengine.cpp:128
+#: engines/freescape/games/eclipse/eclipse.cpp:235
+#: engines/hopkins/metaengine.cpp:236 engines/hugo/metaengine.cpp:154
 #: engines/lure/metaengine.cpp:191 engines/made/metaengine.cpp:181
 #: engines/mads/metaengine.cpp:305 engines/pegasus/pegasus.cpp:2825
 #: engines/prince/metaengine.cpp:243 engines/saga/metaengine.cpp:442
-#: engines/sludge/keymapper_tables.h:107 engines/sludge/keymapper_tables.h:156
-#: engines/stark/metaengine.cpp:208 engines/tetraedge/metaengine.cpp:110
-#: engines/titanic/metaengine.cpp:199 engines/toltecs/metaengine.cpp:234
-#: engines/toon/metaengine.cpp:112 engines/trecision/metaengine.cpp:169
-#: engines/tsage/metaengine.cpp:242 engines/ultima/ultima8/metaengine.cpp:45
-#: engines/vcruise/metaengine.cpp:175 engines/wintermute/keymapper_tables.h:920
+#: engines/sherlock/metaengine.cpp:462 engines/sherlock/metaengine.cpp:613
+#: engines/sherlock/metaengine.cpp:819 engines/sludge/keymapper_tables.h:107
+#: engines/sludge/keymapper_tables.h:156 engines/stark/metaengine.cpp:208
+#: engines/tetraedge/metaengine.cpp:110 engines/titanic/metaengine.cpp:199
+#: engines/toltecs/metaengine.cpp:234 engines/toon/metaengine.cpp:112
+#: engines/trecision/metaengine.cpp:169 engines/tsage/metaengine.cpp:242
+#: engines/ultima/ultima8/metaengine.cpp:45 engines/vcruise/metaengine.cpp:175
+#: engines/wintermute/keymapper_tables.h:920
 msgid "Save game"
 msgstr "حفظ اللعبة"
 
@@ -7311,17 +7425,20 @@ msgstr "حفظ اللعبة"
 #: engines/bladerunner/metaengine.cpp:339 engines/buried/metaengine.cpp:184
 #: engines/cge/metaengine.cpp:227 engines/cge2/metaengine.cpp:241
 #: engines/dgds/metaengine.cpp:74 engines/drascula/metaengine.cpp:260
-#: engines/efh/metaengine.cpp:252 engines/freescape/games/castle/castle.cpp:251
+#: engines/efh/metaengine.cpp:279 engines/efh/metaengine.cpp:613
+#: engines/freescape/games/castle/castle.cpp:251
 #: engines/freescape/games/dark/dark.cpp:191
 #: engines/freescape/games/driller/driller.cpp:140
-#: engines/freescape/games/eclipse/eclipse.cpp:236
+#: engines/freescape/games/eclipse/eclipse.cpp:240
 #: engines/hopkins/metaengine.cpp:242 engines/made/metaengine.cpp:187
 #: engines/mohawk/myst_stacks/menu.cpp:283
 #: engines/mohawk/riven_stacks/aspit.cpp:349 engines/pegasus/pegasus.cpp:2831
 #: engines/prince/metaengine.cpp:249 engines/saga/metaengine.cpp:432
-#: engines/stark/metaengine.cpp:213 engines/tetraedge/metaengine.cpp:104
-#: engines/titanic/metaengine.cpp:205 engines/toltecs/metaengine.cpp:240
-#: engines/toon/metaengine.cpp:118 engines/trecision/metaengine.cpp:175
+#: engines/sherlock/metaengine.cpp:457 engines/sherlock/metaengine.cpp:608
+#: engines/sherlock/metaengine.cpp:824 engines/stark/metaengine.cpp:213
+#: engines/tetraedge/metaengine.cpp:104 engines/titanic/metaengine.cpp:205
+#: engines/toltecs/metaengine.cpp:240 engines/toon/metaengine.cpp:118
+#: engines/trecision/metaengine.cpp:175
 #: engines/ultima/ultima8/metaengine.cpp:46 engines/vcruise/metaengine.cpp:180
 #: engines/wintermute/keymapper_tables.h:925
 #: engines/wintermute/keymapper_tables.h:1265
@@ -7363,14 +7480,15 @@ msgstr "قاعدة بيانات الدليل"
 #. on the KIA Help Page, under Keyboard Shortcuts. In the English version it is
 #. QUIT GAME
 #: engines/bladerunner/metaengine.cpp:375 engines/darkseed/metaengine.cpp:93
-#: engines/dragons/metaengine.cpp:224
-#: engines/freescape/games/castle/castle.cpp:259
+#: engines/dragons/metaengine.cpp:223 engines/efh/metaengine.cpp:373
+#: engines/efh/metaengine.cpp:619 engines/freescape/games/castle/castle.cpp:259
 #: engines/freescape/games/dark/dark.cpp:196
 #: engines/freescape/games/driller/driller.cpp:145
-#: engines/freescape/games/eclipse/eclipse.cpp:241
-#: engines/saga/metaengine.cpp:437 engines/sword1/metaengine.cpp:295
-#: engines/trecision/metaengine.cpp:156 engines/tsage/metaengine.cpp:231
-#: engines/vcruise/metaengine.cpp:190
+#: engines/freescape/games/eclipse/eclipse.cpp:245
+#: engines/saga/metaengine.cpp:437 engines/sherlock/metaengine.cpp:359
+#: engines/sherlock/metaengine.cpp:618 engines/sherlock/metaengine.cpp:848
+#: engines/sword1/metaengine.cpp:295 engines/trecision/metaengine.cpp:156
+#: engines/tsage/metaengine.cpp:231 engines/vcruise/metaengine.cpp:190
 #, fuzzy
 #| msgid "Quit Game"
 msgid "Quit game"
@@ -7394,8 +7512,8 @@ msgstr "تخطي الدعم"
 msgid "Allow cutscenes to be skipped"
 msgstr "السماح بتخطي المشاهد"
 
-#: engines/buried/metaengine.cpp:134 engines/supernova/metaengine.cpp:219
-#: engines/voyeur/metaengine.cpp:185
+#: engines/buried/metaengine.cpp:134 engines/hypno/metaengine.cpp:130
+#: engines/supernova/metaengine.cpp:219 engines/voyeur/metaengine.cpp:185
 #, fuzzy
 #| msgid "Game Options"
 msgid "Cutscene keymappings"
@@ -7407,13 +7525,17 @@ msgstr "خيارات اللعبة"
 msgid "Main menu keymappings"
 msgstr "خيارات اللعبة"
 
-#: engines/buried/metaengine.cpp:137
+#: engines/buried/metaengine.cpp:137 engines/lab/metaengine.cpp:153
+#: engines/sherlock/metaengine.cpp:336 engines/sherlock/metaengine.cpp:783
 #, fuzzy
 #| msgid "Game Options"
 msgid "Inventory keymappings"
 msgstr "خيارات اللعبة"
 
-#: engines/buried/metaengine.cpp:141
+#: engines/buried/metaengine.cpp:141 engines/chamber/metaengine.cpp:65
+#: engines/chamber/metaengine.cpp:71 engines/chamber/metaengine.cpp:77
+#: engines/dm/metaengine.cpp:130 engines/private/metaengine.cpp:94
+#: engines/sherlock/metaengine.cpp:1183
 #, fuzzy
 #| msgid "Interact Mode"
 msgid "Select / Interact"
@@ -7454,10 +7576,11 @@ msgstr "ينظر الى"
 msgid "Look right"
 msgstr "ينظر الى"
 
-#: engines/buried/metaengine.cpp:218 engines/kyra/engine/eobcommon.cpp:369
-#: engines/kyra/engine/lol.cpp:510 engines/mohawk/riven.cpp:881
-#: engines/titanic/metaengine.cpp:336 engines/titanic/metaengine.cpp:378
-#: engines/twine/metaengine.cpp:332 engines/ultima/ultima8/metaengine.cpp:51
+#: engines/buried/metaengine.cpp:218 engines/dm/metaengine.cpp:196
+#: engines/kyra/engine/eobcommon.cpp:369 engines/kyra/engine/lol.cpp:510
+#: engines/mohawk/riven.cpp:881 engines/titanic/metaengine.cpp:336
+#: engines/titanic/metaengine.cpp:378 engines/twine/metaengine.cpp:332
+#: engines/ultima/ultima8/metaengine.cpp:51
 #: engines/wintermute/keymapper_tables.h:149
 #: engines/wintermute/keymapper_tables.h:731
 #: engines/wintermute/keymapper_tables.h:2116
@@ -7654,7 +7777,7 @@ msgstr "تمكين تحويل النص إلى كلام للكائنات والخ
 #: engines/dreamweb/metaengine.cpp:74 engines/griffon/metaengine.cpp:41
 #: engines/lure/metaengine.cpp:54 engines/mads/metaengine.cpp:125
 #: engines/parallaction/metaengine.cpp:53 engines/prince/metaengine.cpp:41
-#: engines/sci/detection_options.h:224 engines/sherlock/metaengine.cpp:113
+#: engines/sci/detection_options.h:224 engines/sherlock/metaengine.cpp:121
 #: engines/supernova/metaengine.cpp:54 engines/teenagent/metaengine.cpp:50
 #: engines/twine/metaengine.cpp:145 engines/wage/metaengine.cpp:52
 msgid "Use TTS to read the descriptions (if TTS is available)"
@@ -7678,6 +7801,14 @@ msgstr "استخدم TTS لقراءة الترجمة (إذا كان TTS متاح
 #| msgid "Close"
 msgid "Close the dialog box"
 msgstr "إغلاق"
+
+#: engines/chamber/metaengine.cpp:61 engines/drascula/metaengine.cpp:208
+#: engines/lab/metaengine.cpp:151 engines/sherlock/metaengine.cpp:338
+#: engines/sherlock/metaengine.cpp:786
+#, fuzzy
+#| msgid "Game Options"
+msgid "Quit dialog keymappings"
+msgstr "خيارات اللعبة"
 
 #: engines/cine/metaengine.cpp:57
 msgid "Use transparent dialog boxes in 16 color scenes"
@@ -7755,12 +7886,6 @@ msgstr "سرعة الفيلم السريع"
 msgid "Examine"
 msgstr "يفحص"
 
-#: engines/cine/metaengine.cpp:347
-#, fuzzy
-#| msgid "Active"
-msgid "Activate"
-msgstr "المفعل"
-
 #: engines/cine/metaengine.cpp:352
 msgid "Speak"
 msgstr ""
@@ -7808,8 +7933,9 @@ msgid "Talk / Interact"
 msgstr "التفاعل"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/crab/input/input.cpp:125 engines/griffon/metaengine.cpp:145
-#: engines/mm/mm1/metaengine.cpp:65 engines/scumm/metaengine.cpp:1017
+#: engines/crab/input/input.cpp:125 engines/efh/metaengine.cpp:487
+#: engines/efh/metaengine.cpp:512 engines/griffon/metaengine.cpp:145
+#: engines/mm/mm1/metaengine.cpp:65 engines/scumm/metaengine.cpp:1033
 #: engines/ultima/ultima4/metaengine.cpp:48
 #: engines/ultima/nuvie/metaengine.cpp:74
 msgid "Attack"
@@ -7879,7 +8005,7 @@ msgstr "الصفحة السابقة"
 msgid "Map"
 msgstr ""
 
-#: engines/crab/input/input.cpp:246
+#: engines/crab/input/input.cpp:246 engines/sherlock/metaengine.cpp:467
 #, fuzzy
 #| msgid "Show journal"
 msgid "Journal"
@@ -7945,12 +8071,12 @@ msgid ""
 msgstr ""
 
 #. I18N: Perform action on object where cursor points
-#: engines/darkseed/metaengine.cpp:75 engines/dragons/metaengine.cpp:136
+#: engines/darkseed/metaengine.cpp:75 engines/dragons/metaengine.cpp:135
 #: engines/tinsel/metaengine.cpp:294 engines/twp/metaengine.cpp:150
 msgid "Action"
 msgstr "فعل"
 
-#: engines/darkseed/metaengine.cpp:81 engines/dragons/metaengine.cpp:142
+#: engines/darkseed/metaengine.cpp:81 engines/dragons/metaengine.cpp:141
 #, fuzzy
 #| msgid "Change Command"
 msgid "Change command"
@@ -8035,6 +8161,78 @@ msgstr ""
 msgid "Use true color graphics mode, even if the game is not designed for it"
 msgstr "استخدم منع الحواف لرسم النص حتى لو لم تطلبه اللعبة"
 
+#: engines/dm/metaengine.cpp:125
+#, fuzzy
+#| msgid "Game Options"
+msgid "Dialog choice selection keymappings"
+msgstr "خيارات اللعبة"
+
+#. I18N: (Game name: Dungeon Master) The player has a team of 4 characters called "champions" which they choose themselves. One of them can be assigned the "leader". This action toggles the inventory screen of the leader champion.
+#: engines/dm/metaengine.cpp:137
+#, fuzzy
+#| msgid "Toggle Inventory/IQ Points display"
+msgid "Toggle leader inventory"
+msgstr "تبديل عرض الجرد / نقاط الذكاء"
+
+#. I18N: (Game name: Dungeon Master) The game has multi-choice dialogs. If there is only one choice, then this action can be used to select it.
+#: engines/dm/metaengine.cpp:144
+msgid "Select dialog choice (only works if there is a single choice)"
+msgstr ""
+
+#. I18N: (Game name: Dungeon Master) The player has a team of 4 characters called "champions" which they choose themselves. This action toggles the inventory screen of champion 1.
+#: engines/dm/metaengine.cpp:151
+#, fuzzy
+#| msgid "Toggle Inventory/IQ Points display"
+msgid "Toggle champion 1 inventory"
+msgstr "تبديل عرض الجرد / نقاط الذكاء"
+
+#. I18N: (Game name: Dungeon Master) The player has a team of 4 characters called "champions" which they choose themselves. This action toggles the inventory screen of champion 2.
+#: engines/dm/metaengine.cpp:157
+#, fuzzy
+#| msgid "Toggle Inventory/IQ Points display"
+msgid "Toggle champion 2 inventory"
+msgstr "تبديل عرض الجرد / نقاط الذكاء"
+
+#. I18N: (Game name: Dungeon Master) The player has a team of 4 characters called "champions" which they choose themselves. This action toggles the inventory screen of champion 3.
+#: engines/dm/metaengine.cpp:163
+#, fuzzy
+#| msgid "Toggle Inventory/IQ Points display"
+msgid "Toggle champion 3 inventory"
+msgstr "تبديل عرض الجرد / نقاط الذكاء"
+
+#. I18N: (Game name: Dungeon Master) The player has a team of 4 characters called "champions" which they choose themselves. This action toggles the inventory screen of champion 4.
+#: engines/dm/metaengine.cpp:169
+#, fuzzy
+#| msgid "Toggle Inventory/IQ Points display"
+msgid "Toggle champion 4 inventory"
+msgstr "تبديل عرض الجرد / نقاط الذكاء"
+
+#: engines/dm/metaengine.cpp:216 engines/hpl1/metaengine.cpp:78
+#: engines/mm/mm1/metaengine.cpp:99
+#, fuzzy
+#| msgid "Strafe Left"
+msgid "Strafe left"
+msgstr "مهاجم اليسار"
+
+#: engines/dm/metaengine.cpp:226 engines/titanic/metaengine.cpp:343
+#: engines/titanic/metaengine.cpp:384
+#, fuzzy
+#| msgid "Move backwards"
+msgid "Move backward"
+msgstr "ارجع للخلف"
+
+#: engines/dm/metaengine.cpp:236 engines/hpl1/metaengine.cpp:79
+#: engines/mm/mm1/metaengine.cpp:100
+#, fuzzy
+#| msgid "Strafe Right"
+msgid "Strafe right"
+msgstr "مهاجم الأيمن"
+
+#. I18N: (Game name: Dungeon Master) The player has a team of 4 characters called "champions" which they choose themselves. The champions can be put to sleep. This action wakes up the sleeping champion.
+#: engines/dm/metaengine.cpp:247
+msgid "Wake up champion"
+msgstr ""
+
 #: engines/draci/metaengine.cpp:68 engines/prince/metaengine.cpp:64
 #, fuzzy
 #| msgid "Enable Text to Speech for Subtitles"
@@ -8092,7 +8290,7 @@ msgstr "فتح / إغلاق الجرد"
 msgid "Next item in inventory"
 msgstr "فتح / إغلاق الجرد"
 
-#: engines/dragons/dragons.cpp:1884
+#: engines/dragons/dragons.cpp:1887
 #, c-format
 msgid ""
 "Error: The file '%s' hasn't been extracted properly.\n"
@@ -8105,7 +8303,7 @@ msgstr ""
 "%s للحصول على تفاصيل حول كيفية استخراج ملفات DTSPEECH.XA و * .STR بشكل صحيح "
 "من قرص اللعبة."
 
-#: engines/dragons/metaengine.cpp:121
+#: engines/dragons/metaengine.cpp:120
 #, c-format
 msgid ""
 "Error: It appears that the game data files were extracted incorrectly.\n"
@@ -8122,37 +8320,32 @@ msgstr ""
 "\n"
 " انظر%s"
 
-#: engines/dragons/metaengine.cpp:207
+#: engines/dragons/metaengine.cpp:206
 #, fuzzy
 #| msgid "Left Shoulder"
 msgid "Left shoulder"
 msgstr "الكتف الأيسر"
 
-#: engines/dragons/metaengine.cpp:213
+#: engines/dragons/metaengine.cpp:212
 #, fuzzy
 #| msgid "Right Shoulder"
 msgid "Right shoulder"
 msgstr "الكتف الأيمن"
 
-#: engines/dragons/metaengine.cpp:219
+#: engines/dragons/metaengine.cpp:218
 #, fuzzy
 #| msgid "Debug Graphics"
 msgid "Debug graphics"
 msgstr "تصحيح الرسومات"
 
-#: engines/drascula/metaengine.cpp:207
+#: engines/drascula/metaengine.cpp:207 engines/sherlock/metaengine.cpp:330
 #, fuzzy
 #| msgid "Game Options"
 msgid "Animation keymappings"
 msgstr "خيارات اللعبة"
 
-#: engines/drascula/metaengine.cpp:208
-#, fuzzy
-#| msgid "Game Options"
-msgid "Quit dialog keymappings"
-msgstr "خيارات اللعبة"
-
-#: engines/drascula/metaengine.cpp:212 engines/tetraedge/metaengine.cpp:92
+#: engines/drascula/metaengine.cpp:212 engines/sherlock/metaengine.cpp:343
+#: engines/tetraedge/metaengine.cpp:92
 #, fuzzy
 #| msgid "Move left"
 msgid "Move / Interact / Select"
@@ -8163,14 +8356,6 @@ msgstr "تحرك يسارا"
 #| msgid "Pick up"
 msgid "Pick"
 msgstr "يلتقط"
-
-#: engines/drascula/metaengine.cpp:240 engines/queen/metaengine.cpp:259
-#: engines/saga/metaengine.cpp:369 engines/scumm/help.cpp:125
-#: engines/scumm/help.cpp:140 engines/scumm/help.cpp:165
-#: engines/scumm/help.cpp:193 engines/scumm/help.cpp:211
-#: engines/supernova/metaengine.cpp:336 engines/twp/metaengine.cpp:178
-msgid "Open"
-msgstr "يفتح"
 
 #: engines/drascula/metaengine.cpp:266
 #, fuzzy
@@ -8243,23 +8428,386 @@ msgstr "اعرض الرسومات باستخدام لوحة الألوان ال�
 msgid "Enable Text to Speech for Objects, Options, and the Bible Quote"
 msgstr "تمكين تحويل النص إلى كلام للكائنات والخيارات واقتباس الكتاب المقدس"
 
-#: engines/efh/metaengine.cpp:302
+#: engines/efh/metaengine.cpp:235
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 1"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:236
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 2"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:237
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 3"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:238
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 4"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:239
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 5"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:240
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 6"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:241
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 7"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:242
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 8"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:243
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 9"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:244
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 10"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:245
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 11"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:246
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 12"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:247
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 13"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:248
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option 14"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:257 engines/hypno/metaengine.cpp:312
+#: engines/sludge/keymapper_tables.h:35 engines/supernova/metaengine.cpp:218
+#, fuzzy
+#| msgid "Game Options"
+msgid "Menu keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:258 engines/sherlock/metaengine.cpp:329
+#, fuzzy
+#| msgid "Game Options"
+msgid "Quit keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:259
+#, fuzzy
+#| msgid "Game Options"
+msgid "Skip video keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:260
+#, fuzzy
+#| msgid "Game Options"
+msgid "Skip song keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:261
+#, fuzzy
+#| msgid "Game Options"
+msgid "Status menu navigation keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:262
+#, fuzzy
+#| msgid "Game Options"
+msgid "Status menu keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:263
+#, fuzzy
+#| msgid "Game Options"
+msgid "Status menu submenu keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:264
+#, fuzzy
+#| msgid "Game Options"
+msgid "Interaction keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:265
+#, fuzzy
+#| msgid "Game Options"
+msgid "Fight keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:266
+#, fuzzy
+#| msgid "Game Options"
+msgid "Character selection keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:267
+#, fuzzy
+#| msgid "Game Options"
+msgid "Enemy selection keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/efh/metaengine.cpp:268
+#, fuzzy
+#| msgid "Game Options"
+msgid "Death menu keymappings"
+msgstr "خيارات اللعبة"
+
+#. I18N: (Game name: Escape from hell) Character is a hero in-game
+#: engines/efh/metaengine.cpp:339
 #, fuzzy
 #| msgid "Show character portraits"
 msgid "Character 1 status"
 msgstr "اعرض صور الشخصيات"
 
-#: engines/efh/metaengine.cpp:307
+#. I18N: (Game name: Escape from hell) Character is a hero in-game
+#: engines/efh/metaengine.cpp:347
 #, fuzzy
 #| msgid "Show character portraits"
 msgid "Character 2 status"
 msgstr "اعرض صور الشخصيات"
 
-#: engines/efh/metaengine.cpp:312
+#. I18N: (Game name: Escape from hell) Character is a hero in-game
+#: engines/efh/metaengine.cpp:355
 #, fuzzy
 #| msgid "Show character portraits"
 msgid "Character 3 status"
 msgstr "اعرض صور الشخصيات"
+
+#: engines/efh/metaengine.cpp:385
+#, fuzzy
+#| msgid "Skip cutscene"
+msgid "Skip song"
+msgstr "تخطي المشهد"
+
+#: engines/efh/metaengine.cpp:391
+#, fuzzy
+#| msgid "Skip line"
+msgid "Skip song and intro"
+msgstr "تخطي الخط"
+
+#: engines/efh/metaengine.cpp:427
+#, fuzzy
+#| msgid "Active"
+msgid "Active skills"
+msgstr "المفعل"
+
+#. I18N: It's a Tetris game clone, this action drops current tetris item
+#: engines/efh/metaengine.cpp:432 engines/ultima/nuvie/metaengine.cpp:72
+#: engines/wintermute/keymapper_tables.h:2035
+msgid "Drop"
+msgstr "يسقط"
+
+#: engines/efh/metaengine.cpp:437
+msgid "Equip"
+msgstr ""
+
+#: engines/efh/metaengine.cpp:442 engines/queen/metaengine.cpp:274
+#: engines/saga/metaengine.cpp:384 engines/scumm/help.cpp:124
+#: engines/scumm/help.cpp:139 engines/scumm/help.cpp:164
+#: engines/scumm/help.cpp:200 engines/scumm/help.cpp:210
+#: engines/sherlock/metaengine.cpp:445 engines/sherlock/metaengine.cpp:566
+#: engines/supernova/metaengine.cpp:366 engines/twp/metaengine.cpp:180
+msgid "Give"
+msgstr "يعطي"
+
+#: engines/efh/metaengine.cpp:447
+#, fuzzy
+#| msgid "Menu"
+msgid "Info"
+msgstr "القائمة"
+
+#: engines/efh/metaengine.cpp:452
+msgid "Passive skills"
+msgstr ""
+
+#: engines/efh/metaengine.cpp:457
+msgid "Trade"
+msgstr ""
+
+#: engines/efh/metaengine.cpp:467
+#, fuzzy
+#| msgid "Quit Game"
+msgid "Exit status menu"
+msgstr "قم بإنهاء اللعبة"
+
+#: engines/efh/metaengine.cpp:481
+#, fuzzy
+#| msgid "Quit Game"
+msgid "Exit submenu"
+msgstr "قم بإنهاء اللعبة"
+
+#: engines/efh/metaengine.cpp:493
+msgid "Leave"
+msgstr ""
+
+#: engines/efh/metaengine.cpp:500 engines/efh/metaengine.cpp:536
+#, fuzzy
+#| msgid "Status:"
+msgid "Status"
+msgstr "حالة:"
+
+#: engines/efh/metaengine.cpp:518
+msgid "Defend"
+msgstr ""
+
+#. I18N: Run is a movement type
+#. I18N: Action in In Cold Blood
+#: engines/efh/metaengine.cpp:530 engines/freescape/games/castle/castle.cpp:279
+#: engines/grim/grim.cpp:501 engines/grim/grim.cpp:596
+#: engines/hpl1/metaengine.cpp:82 engines/icb/icb.cpp:131
+#: engines/icb/icb.cpp:197 engines/ultima/ultima8/metaengine.cpp:57
+msgid "Run"
+msgstr "ركض"
+
+#. I18N: (Game name: Escape from hell) This action is used to view the terrain during a fight so that the player can see where they can move if they decide to run.
+#: engines/efh/metaengine.cpp:543
+#, fuzzy
+#| msgid "Next location"
+msgid "View terrain"
+msgstr "الموقع التالي"
+
+#. I18N: (Game name: Escape from hell) Character is a hero in-game
+#: engines/efh/metaengine.cpp:550
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select character 1"
+msgstr "حدد التجميع حسب"
+
+#. I18N: (Game name: Escape from hell) Character is a hero in-game
+#: engines/efh/metaengine.cpp:557
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select character 2"
+msgstr "حدد التجميع حسب"
+
+#. I18N: (Game name: Escape from hell) Character is a hero in-game
+#: engines/efh/metaengine.cpp:564
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select character 3"
+msgstr "حدد التجميع حسب"
+
+#: engines/efh/metaengine.cpp:570
+#, fuzzy
+#| msgid "Change game options"
+msgid "Cancel character selection"
+msgstr "تغيير إعدادات اللعبة"
+
+#: engines/efh/metaengine.cpp:577
+#, fuzzy
+#| msgid "Select shader"
+msgid "Select enemy 1"
+msgstr "حدد تظليل"
+
+#: engines/efh/metaengine.cpp:583
+#, fuzzy
+#| msgid "Select shader"
+msgid "Select enemy 2"
+msgstr "حدد تظليل"
+
+#: engines/efh/metaengine.cpp:589
+#, fuzzy
+#| msgid "Select shader"
+msgid "Select enemy 3"
+msgstr "حدد تظليل"
+
+#: engines/efh/metaengine.cpp:595
+#, fuzzy
+#| msgid "Select shader"
+msgid "Select enemy 4"
+msgstr "حدد تظليل"
+
+#: engines/efh/metaengine.cpp:601
+#, fuzzy
+#| msgid "Select shader"
+msgid "Select enemy 5"
+msgstr "حدد تظليل"
+
+#: engines/efh/metaengine.cpp:607
+#, fuzzy
+#| msgid "Change game options"
+msgid "Cancel enemy selection"
+msgstr "تغيير إعدادات اللعبة"
+
+#: engines/efh/metaengine.cpp:625 engines/lure/metaengine.cpp:203
+#: engines/tsage/metaengine.cpp:237
+#, fuzzy
+#| msgid "Restore game:"
+msgid "Restart game"
+msgstr "استرجاع لعبة:"
+
+#: engines/efh/metaengine.cpp:632
+#, fuzzy
+#| msgid "Play note 1: A"
+msgid "Play sound type 13"
+msgstr "تشغيل الملاحظة 1: A"
+
+#: engines/efh/metaengine.cpp:637
+#, fuzzy
+#| msgid "Play note 1: A"
+msgid "Play sound type 14"
+msgstr "تشغيل الملاحظة 1: A"
+
+#: engines/efh/metaengine.cpp:642
+#, fuzzy
+#| msgid "Play note 1: A"
+msgid "Play sound type 15"
+msgstr "تشغيل الملاحظة 1: A"
+
+#: engines/efh/metaengine.cpp:647
+#, fuzzy
+#| msgid "Play note 5: E"
+msgid "Play sound type 5"
+msgstr "تشغيل الملاحظة 5: E"
+
+#: engines/efh/metaengine.cpp:652
+#, fuzzy
+#| msgid "Play note 1: A"
+msgid "Play sound type 10"
+msgstr "تشغيل الملاحظة 1: A"
+
+#: engines/efh/metaengine.cpp:657
+msgid "Play sound type 9"
+msgstr ""
+
+#: engines/efh/metaengine.cpp:662
+#, fuzzy
+#| msgid "Play note 1: A"
+msgid "Play sound type 16"
+msgstr "تشغيل الملاحظة 1: A"
 
 #: engines/freescape/metaengine.cpp:42
 msgid "Prerecorded sounds"
@@ -8341,6 +8889,14 @@ msgstr "تمكين التخزين"
 msgid "Enable traveling using a rock shoot at start"
 msgstr ""
 
+#: engines/freescape/metaengine.cpp:141
+msgid "Smoother movement"
+msgstr ""
+
+#: engines/freescape/metaengine.cpp:142
+msgid "Use smoother movements instead of discrete steps"
+msgstr ""
+
 #: engines/freescape/movement.cpp:49
 msgid "Strafe Left"
 msgstr "مهاجم اليسار"
@@ -8400,7 +8956,7 @@ msgstr "حدد تظليل"
 #: engines/freescape/games/castle/castle.cpp:264
 #: engines/freescape/games/dark/dark.cpp:206
 #: engines/freescape/games/driller/driller.cpp:153
-#: engines/freescape/games/eclipse/eclipse.cpp:249
+#: engines/freescape/games/eclipse/eclipse.cpp:253
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle Sound"
@@ -8409,7 +8965,7 @@ msgstr "تبديل كتم الصوت"
 #: engines/freescape/games/castle/castle.cpp:269
 #: engines/freescape/games/dark/dark.cpp:212
 #: engines/freescape/games/driller/driller.cpp:159
-#: engines/freescape/games/eclipse/eclipse.cpp:254
+#: engines/freescape/games/eclipse/eclipse.cpp:258
 #, fuzzy
 #| msgid "Strafe Left"
 msgid "Rotate Left"
@@ -8418,27 +8974,18 @@ msgstr "مهاجم اليسار"
 #: engines/freescape/games/castle/castle.cpp:274
 #: engines/freescape/games/dark/dark.cpp:217
 #: engines/freescape/games/driller/driller.cpp:164
-#: engines/freescape/games/eclipse/eclipse.cpp:259
+#: engines/freescape/games/eclipse/eclipse.cpp:263
 #, fuzzy
 #| msgid "Strafe Right"
 msgid "Rotate Right"
 msgstr "مهاجم الأيمن"
-
-#. I18N: Run is a movement type
-#. I18N: Action in In Cold Blood
-#: engines/freescape/games/castle/castle.cpp:279 engines/grim/grim.cpp:501
-#: engines/grim/grim.cpp:596 engines/hpl1/metaengine.cpp:82
-#: engines/icb/icb.cpp:131 engines/icb/icb.cpp:197
-#: engines/ultima/ultima8/metaengine.cpp:57
-msgid "Run"
-msgstr "ركض"
 
 #: engines/freescape/games/castle/castle.cpp:290
 msgid "Crawl"
 msgstr ""
 
 #: engines/freescape/games/castle/castle.cpp:296
-#: engines/freescape/games/eclipse/eclipse.cpp:286
+#: engines/freescape/games/eclipse/eclipse.cpp:290
 #, fuzzy
 #| msgid "Move Forward"
 msgid "Face Forward"
@@ -8520,27 +9067,27 @@ msgid "Collect drilling rig"
 msgstr ""
 
 #. I18N: Illustrates the angle at which you turn left or right.
-#: engines/freescape/games/eclipse/eclipse.cpp:265
+#: engines/freescape/games/eclipse/eclipse.cpp:269
 #, fuzzy
 #| msgid "Change Command"
 msgid "Change Angle"
 msgstr "تغيير الأمر"
 
 #. I18N: STEP SIZE: Measures the size of one movement in the direction you are facing (1-250 standard distance units (SDUs))
-#: engines/freescape/games/eclipse/eclipse.cpp:271
+#: engines/freescape/games/eclipse/eclipse.cpp:275
 #, fuzzy
 #| msgid "Change font size"
 msgid "Change Step Size"
 msgstr "تغيير حجم الخط"
 
-#: engines/freescape/games/eclipse/eclipse.cpp:276
+#: engines/freescape/games/eclipse/eclipse.cpp:280
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle Height"
 msgstr "تبديل كتم الصوت"
 
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/freescape/games/eclipse/eclipse.cpp:281
+#: engines/freescape/games/eclipse/eclipse.cpp:285
 #: engines/kyra/engine/lol.cpp:516 engines/mm/mm1/metaengine.cpp:109
 #: engines/ultima/nuvie/metaengine.cpp:192
 #: engines/ultima/nuvie/metaengine.cpp:197
@@ -8663,20 +9210,20 @@ msgid "Failed to delete file."
 msgstr "فشل حذف الملف."
 
 #. I18N: Action in In Cold Blood
-#: engines/got/metaengine.cpp:59 engines/icb/icb.cpp:89
+#: engines/got/metaengine.cpp:74 engines/icb/icb.cpp:89
 #: engines/ultima/ultima4/metaengine.cpp:55
 msgid "Fire"
 msgstr "نار"
 
-#: engines/got/metaengine.cpp:60
+#: engines/got/metaengine.cpp:75
 msgid "Magic"
 msgstr ""
 
-#: engines/got/metaengine.cpp:64
+#: engines/got/metaengine.cpp:79
 msgid "Thor dies"
 msgstr ""
 
-#: engines/got/got.cpp:188 engines/got/got.cpp:198
+#: engines/got/got.cpp:196 engines/got/got.cpp:206
 #, fuzzy
 #| msgid "Saving game is currently unavailable"
 msgid "Savegames are not available in demo mode"
@@ -8985,18 +9532,6 @@ msgstr "إلى الأمام"
 msgid "Backward"
 msgstr "الى الوراء"
 
-#: engines/hpl1/metaengine.cpp:78 engines/mm/mm1/metaengine.cpp:99
-#, fuzzy
-#| msgid "Strafe Left"
-msgid "Strafe left"
-msgstr "مهاجم اليسار"
-
-#: engines/hpl1/metaengine.cpp:79 engines/mm/mm1/metaengine.cpp:100
-#, fuzzy
-#| msgid "Strafe Right"
-msgid "Strafe right"
-msgstr "مهاجم الأيمن"
-
 #: engines/hpl1/metaengine.cpp:80
 #, fuzzy
 #| msgid "Lean Left"
@@ -9049,37 +9584,37 @@ msgstr "مصباح يدوي"
 msgid "Glowstick"
 msgstr "عصا توهج"
 
-#: engines/hugo/metaengine.cpp:111
+#: engines/hugo/metaengine.cpp:137
 #, fuzzy
 #| msgid "User canceled"
 msgid "User help"
 msgstr "ألغى المستخدم"
 
-#: engines/hugo/metaengine.cpp:117
+#: engines/hugo/metaengine.cpp:143
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle sound"
 msgstr "تبديل كتم الصوت"
 
-#: engines/hugo/metaengine.cpp:122
+#: engines/hugo/metaengine.cpp:148
 #, fuzzy
 #| msgid "Reload last save"
 msgid "Repeat last line"
 msgstr "إعادة تحميل آخر حفظ"
 
-#: engines/hugo/metaengine.cpp:135 engines/lure/metaengine.cpp:197
+#: engines/hugo/metaengine.cpp:161 engines/lure/metaengine.cpp:197
 #: engines/mads/metaengine.cpp:311 engines/tsage/metaengine.cpp:247
 #, fuzzy
 #| msgid "Restore game:"
 msgid "Restore game"
 msgstr "استرجاع لعبة:"
 
-#: engines/hugo/metaengine.cpp:142 engines/mohawk/myst_stacks/menu.cpp:300
+#: engines/hugo/metaengine.cpp:168 engines/mohawk/myst_stacks/menu.cpp:300
 #: engines/mohawk/riven_stacks/aspit.cpp:371
 msgid "New game"
 msgstr "لعبة جديدة"
 
-#: engines/hugo/metaengine.cpp:148 engines/wintermute/keymapper_tables.h:249
+#: engines/hugo/metaengine.cpp:174 engines/wintermute/keymapper_tables.h:249
 #: engines/wintermute/keymapper_tables.h:396
 #: engines/wintermute/keymapper_tables.h:658
 #: engines/wintermute/keymapper_tables.h:864
@@ -9092,105 +9627,211 @@ msgstr "لعبة جديدة"
 msgid "Show inventory"
 msgstr "عرض المخزون"
 
-#: engines/hugo/metaengine.cpp:154
+#: engines/hugo/metaengine.cpp:180
 #, fuzzy
 #| msgid "Improved mode"
 msgid "Turbo mode"
 msgstr "الوضع المحسن"
 
 #. I18N: Move actor in the top direction
-#: engines/hugo/metaengine.cpp:167
+#: engines/hugo/metaengine.cpp:193
 #, fuzzy
 #| msgid "Move up"
 msgid "Move to top"
 msgstr "تحرك"
 
 #. I18N: Move actor in the bottom direction
-#: engines/hugo/metaengine.cpp:175
+#: engines/hugo/metaengine.cpp:201
 msgid "Move to bottom"
 msgstr ""
 
 #. I18N: Move actor in the left direction
-#: engines/hugo/metaengine.cpp:183
+#: engines/hugo/metaengine.cpp:209
 #, fuzzy
 #| msgid "Move left"
 msgid "Move to left"
 msgstr "تحرك يسارا"
 
 #. I18N: Move actor in the right direction
-#: engines/hugo/metaengine.cpp:191
+#: engines/hugo/metaengine.cpp:217
 #, fuzzy
 #| msgid "Move right"
 msgid "Move to right"
 msgstr "تحرك يمينا"
 
 #. I18N: Move actor in the top-left direction
-#: engines/hugo/metaengine.cpp:199
+#: engines/hugo/metaengine.cpp:225
 #, fuzzy
 #| msgid "Move left"
 msgid "Move to top left"
 msgstr "تحرك يسارا"
 
 #. I18N: Move actor in the top-right direction
-#: engines/hugo/metaengine.cpp:205
+#: engines/hugo/metaengine.cpp:231
 #, fuzzy
 #| msgid "Move right"
 msgid "Move to top right"
 msgstr "تحرك يمينا"
 
 #. I18N: Move actor in the bottom-left direction
-#: engines/hugo/metaengine.cpp:211
+#: engines/hugo/metaengine.cpp:237
 #, fuzzy
 #| msgid "Move left"
 msgid "Move to bottom left"
 msgstr "تحرك يسارا"
 
 #. I18N: Move actor in the bottom-right direction
-#: engines/hugo/metaengine.cpp:217
+#: engines/hugo/metaengine.cpp:243
 #, fuzzy
 #| msgid "Move right"
 msgid "Move to bottom right"
 msgstr "تحرك يمينا"
 
-#: engines/hypno/metaengine.cpp:33
+#: engines/hypno/metaengine.cpp:37
 msgid "Enable original cheats"
 msgstr "تفعيل الغش الأصلي"
 
-#: engines/hypno/metaengine.cpp:34
+#: engines/hypno/metaengine.cpp:38
 msgid "Allow cheats using the C key."
 msgstr "السماح بالغش باستخدام مفتاح C."
 
-#: engines/hypno/metaengine.cpp:44
+#: engines/hypno/metaengine.cpp:48
 msgid "Enable infinite health cheat"
 msgstr "تفعيل خداع صحي لانهائي"
 
-#: engines/hypno/metaengine.cpp:45
+#: engines/hypno/metaengine.cpp:49
 msgid "Player health will never decrease (except for game over scenes)."
 msgstr "لن تنخفض صحة اللاعب أبدًا (باستثناء اللعبة فوق المشاهد)."
 
-#: engines/hypno/metaengine.cpp:55
+#: engines/hypno/metaengine.cpp:59
 msgid "Enable infinite ammo cheat"
 msgstr "تفعيل خداع الذخيرة اللانهائي"
 
-#: engines/hypno/metaengine.cpp:56
+#: engines/hypno/metaengine.cpp:60
 msgid "Player ammo will never decrease."
 msgstr "لن تنخفض ذخيرة اللاعب أبدًا."
 
-#: engines/hypno/metaengine.cpp:66
+#: engines/hypno/metaengine.cpp:70
 msgid "Unlock all levels"
 msgstr "افتح جميع المستويات"
 
-#: engines/hypno/metaengine.cpp:67
+#: engines/hypno/metaengine.cpp:71
 msgid "All levels will be available to play."
 msgstr "ستكون جميع المستويات متاحة للعب."
 
-#: engines/hypno/metaengine.cpp:77
+#: engines/hypno/metaengine.cpp:81
 msgid "Enable restored content"
 msgstr "تمكين المحتوى المستعاد"
 
-#: engines/hypno/metaengine.cpp:78
+#: engines/hypno/metaengine.cpp:82
 msgid "Add additional content that is not enabled the original implementation."
 msgstr "أضف محتوى إضافيًا لم يتم تمكين التنفيذ الأصلي."
+
+#: engines/hypno/metaengine.cpp:129 engines/lab/metaengine.cpp:154
+#: engines/voyeur/metaengine.cpp:188
+#, fuzzy
+#| msgid "Game Options"
+msgid "Intro keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/hypno/metaengine.cpp:134
+msgid "Primary shoot"
+msgstr ""
+
+#: engines/hypno/metaengine.cpp:140
+msgid "Secondary shoot"
+msgstr ""
+
+#: engines/hypno/metaengine.cpp:146 engines/lab/metaengine.cpp:209
+#: engines/teenagent/metaengine.cpp:232 engines/toon/metaengine.cpp:98
+#: engines/voyeur/metaengine.cpp:235
+#, fuzzy
+#| msgid "Skip line"
+msgid "Skip intro"
+msgstr "تخطي الخط"
+
+#: engines/hypno/metaengine.cpp:167
+#, fuzzy
+#| msgid "Game Options"
+msgid "Exit menu keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/hypno/metaengine.cpp:168
+#, fuzzy
+#| msgid "Game Options"
+msgid "Difficulty selection menu keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/hypno/metaengine.cpp:169
+#, fuzzy
+#| msgid "Game Options"
+msgid "Retry menu keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/hypno/metaengine.cpp:172 engines/hypno/metaengine.cpp:270
+#: engines/hypno/metaengine.cpp:322
+#, fuzzy
+#| msgid "Speech"
+msgid "Skip level (cheat)"
+msgstr "خطاب"
+
+#. I18N: (Game name: Soldier Boyz) player refers to the users own character.
+#. I18N: (Game name: Marvel Comics Spider-Man: The Sinister Six) player refers to the users own character.
+#. I18N: (Game name: Wetlands) player refers to the users own character.
+#: engines/hypno/metaengine.cpp:180 engines/hypno/metaengine.cpp:278
+#: engines/hypno/metaengine.cpp:329
+msgid "Kill player"
+msgstr ""
+
+#. I18N: (Game name: Soldier Boyz) the game has 3 difficulty levels: Chump, Punk and Badass. Chump is the easy mode.
+#: engines/hypno/metaengine.cpp:205
+msgid "Chump"
+msgstr ""
+
+#. I18N: (Game name: Soldier Boyz) the game has 3 difficulty levels: Chump, Punk and Badass. Punk is the medium mode.
+#: engines/hypno/metaengine.cpp:212
+msgid "Punk"
+msgstr ""
+
+#. I18N: (Game name: Soldier Boyz) the game has 3 difficulty levels: Chump, Punk and Badass. Badass is the hard mode.
+#: engines/hypno/metaengine.cpp:219
+msgid "Badass"
+msgstr ""
+
+#. I18N: (Game name: Soldier Boyz) This makes the player restart from the last checkpoint.
+#: engines/hypno/metaengine.cpp:232
+#, fuzzy
+#| msgid "Retreat"
+msgid "Retry sector"
+msgstr "تراجع"
+
+#. I18N: (Game name: Soldier Boyz) This makes the player restart the current mission / level.
+#: engines/hypno/metaengine.cpp:239
+#, fuzzy
+#| msgid "Transitions:"
+msgid "Restart territory"
+msgstr "الانتقالات:"
+
+#: engines/hypno/metaengine.cpp:245
+msgid "Begin new mission"
+msgstr ""
+
+#: engines/hypno/metaengine.cpp:313
+#, fuzzy
+#| msgid "Game Options"
+msgid "Pause keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/hypno/metaengine.cpp:314
+#, fuzzy
+#| msgid "Game Options"
+msgid "Direction keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/hypno/metaengine.cpp:316 engines/mads/metaengine.cpp:349
+#: engines/tsage/metaengine.cpp:259
+msgid "Show credits"
+msgstr "إظهار الاعتمادات"
 
 #. I18N: Action in In Cold Blood
 #: engines/icb/icb.cpp:107
@@ -9209,25 +9850,35 @@ msgstr "Remora"
 msgid "Side step"
 msgstr "خطوة جانبية"
 
-#: engines/illusions/metaengine.cpp:108
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) cursor refers to the text cursor in the foolscap puzzle input field
+#: engines/illusions/metaengine.cpp:108 engines/sherlock/metaengine.cpp:1138
 #, fuzzy
 #| msgid "Move forward left"
 msgid "Move cursor up"
 msgstr "تحرك للأمام إلى اليسار"
 
-#: engines/illusions/metaengine.cpp:115
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) cursor refers to the text cursor in the foolscap puzzle input field
+#: engines/illusions/metaengine.cpp:115 engines/sherlock/metaengine.cpp:1146
 #, fuzzy
 #| msgid "Move forward left"
 msgid "Move cursor down"
 msgstr "تحرك للأمام إلى اليسار"
 
-#: engines/illusions/metaengine.cpp:122
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) cursor refers to the text cursor in the save file name input field
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) cursor refers to the text cursor in the foolscap puzzle input field
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) cursor refers to the text cursor in the password input field
+#: engines/illusions/metaengine.cpp:122 engines/sherlock/metaengine.cpp:1090
+#: engines/sherlock/metaengine.cpp:1154 engines/sherlock/metaengine.cpp:1195
 #, fuzzy
 #| msgid "Move forward left"
 msgid "Move cursor left"
 msgstr "تحرك للأمام إلى اليسار"
 
-#: engines/illusions/metaengine.cpp:129
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) cursor refers to the text cursor in the save file name input field
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) cursor refers to the text cursor in the foolscap puzzle input field
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) cursor refers to the text cursor in the password input field
+#: engines/illusions/metaengine.cpp:129 engines/sherlock/metaengine.cpp:1098
+#: engines/sherlock/metaengine.cpp:1162 engines/sherlock/metaengine.cpp:1203
 #, fuzzy
 #| msgid "Move forward right"
 msgid "Move cursor right"
@@ -9444,8 +10095,9 @@ msgstr "الهجوم 2"
 msgid "Attack 3"
 msgstr "الهجوم 3"
 
-#: engines/kyra/engine/lol.cpp:509 engines/mm/mm1/metaengine.cpp:103
-#: engines/mohawk/myst.cpp:606 engines/wintermute/keymapper_tables.h:1526
+#: engines/kyra/engine/lol.cpp:509 engines/lab/metaengine.cpp:278
+#: engines/mm/mm1/metaengine.cpp:103 engines/mohawk/myst.cpp:606
+#: engines/wintermute/keymapper_tables.h:1526
 #: engines/wintermute/keymapper_tables.h:1673
 #: engines/wintermute/keymapper_tables.h:1722
 #: engines/wintermute/keymapper_tables.h:1745
@@ -9585,13 +10237,173 @@ msgstr ""
 "يرجى نسخ ملفات الخط الصحيحة إلى دليل بيانات لعبة EOB II.\n"
 "\n"
 
-#: engines/lab/engine.cpp:124
+#: engines/lab/engine.cpp:126
 msgid ""
 "This is a trial Windows version of the game. To play the full version, you "
 "will need to use the original interpreter and purchase a key from Wyrmkeep"
 msgstr ""
 "هذه نسخة تجريبية من لعبة Windows. لتشغيل النسخة الكاملة ، ستحتاج إلى استخدام "
 "المترجم الفوري وشراء مفتاح من Wyrmkeep"
+
+#: engines/lab/metaengine.cpp:150 engines/sherlock/metaengine.cpp:773
+#, fuzzy
+#| msgid "Game Options"
+msgid "Exit keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/lab/metaengine.cpp:155 engines/sherlock/metaengine.cpp:339
+#: engines/sherlock/metaengine.cpp:778
+#, fuzzy
+#| msgid "Game Options"
+msgid "Map keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/lab/metaengine.cpp:156 engines/queen/metaengine.cpp:148
+#: engines/sherlock/metaengine.cpp:334 engines/sherlock/metaengine.cpp:775
+#, fuzzy
+#| msgid "Game Options"
+msgid "Journal keymappings"
+msgstr "خيارات اللعبة"
+
+#. I18N: Exits the game
+#: engines/lab/metaengine.cpp:166 engines/lab/metaengine.cpp:191
+#: engines/sherlock/metaengine.cpp:395 engines/sherlock/metaengine.cpp:494
+#: engines/sherlock/metaengine.cpp:538 engines/sherlock/metaengine.cpp:549
+#: engines/sherlock/metaengine.cpp:601 engines/sherlock/metaengine.cpp:678
+#: engines/supernova/metaengine.cpp:297 engines/supernova/metaengine.cpp:373
+#: engines/ultima/ultima4/metaengine.cpp:54 engines/voyeur/metaengine.cpp:198
+#: engines/voyeur/metaengine.cpp:229 engines/wintermute/keymapper_tables.h:720
+#: engines/wintermute/keymapper_tables.h:1849
+msgid "Exit"
+msgstr "خرج"
+
+#: engines/lab/metaengine.cpp:179
+#, fuzzy
+#| msgid "Enable the sound for the game"
+msgid "Raise the sound volume"
+msgstr "تفعيل الصوت للعبة"
+
+#: engines/lab/metaengine.cpp:185
+msgid "Lower the sound volume"
+msgstr ""
+
+#: engines/lab/metaengine.cpp:216
+msgid "Interact with object with chosen action"
+msgstr ""
+
+#: engines/lab/metaengine.cpp:221
+#, fuzzy
+#| msgid "Go to setup menu"
+msgid "Take object"
+msgstr "اذهب إلى قائمة الإعداد"
+
+#: engines/lab/metaengine.cpp:227
+#, fuzzy
+#| msgid "Go to setup menu"
+msgid "Move or manipulate object"
+msgstr "اذهب إلى قائمة الإعداد"
+
+#: engines/lab/metaengine.cpp:233
+#, fuzzy
+#| msgid "Open Holomap"
+msgid "Open door or object"
+msgstr "افتح خريطة Holo"
+
+#: engines/lab/metaengine.cpp:239
+msgid "Close door or object"
+msgstr ""
+
+#: engines/lab/metaengine.cpp:245
+msgid "Look at object close-up"
+msgstr ""
+
+#: engines/lab/metaengine.cpp:251
+#, fuzzy
+#| msgid "Open/Close Inventory"
+msgid "Switch to inventory display"
+msgstr "فتح / إغلاق الجرد"
+
+#: engines/lab/metaengine.cpp:284
+#, fuzzy
+#| msgid "Go to setup menu"
+msgid "Move focus to interactive object"
+msgstr "اذهب إلى قائمة الإعداد"
+
+#: engines/lab/metaengine.cpp:292 engines/lab/metaengine.cpp:352
+msgid "Start dropping virtual bread crumbs"
+msgstr ""
+
+#: engines/lab/metaengine.cpp:298 engines/lab/metaengine.cpp:359
+msgid "Follow virtual bread crumbs"
+msgstr ""
+
+#: engines/lab/metaengine.cpp:304 engines/lab/metaengine.cpp:366
+msgid "Run while following virtual bread crumbs"
+msgstr ""
+
+#: engines/lab/metaengine.cpp:311
+#, fuzzy
+#| msgid "Switch to Grimwall"
+msgid "Switch to main display"
+msgstr "قم بالتبديل إلى Grimwall"
+
+#: engines/lab/metaengine.cpp:317
+#, fuzzy
+#| msgid "Save / Load dialog"
+msgid "Open save / load dialog"
+msgstr "حفظ / تحميل الحوار"
+
+#: engines/lab/metaengine.cpp:329
+#, fuzzy
+#| msgid "Look at"
+msgid "Look at scene"
+msgstr "ينظر الى"
+
+#: engines/lab/metaengine.cpp:335
+#, fuzzy
+#| msgid "Inventory"
+msgid "Previous inventory item"
+msgstr "قائمة الجرد"
+
+#: engines/lab/metaengine.cpp:342
+#, fuzzy
+#| msgid "Animated inventory items"
+msgid "Next inventory item"
+msgstr "عناصر المخزون المتحركة"
+
+#: engines/lab/metaengine.cpp:373
+msgid "Exit map display"
+msgstr ""
+
+#: engines/lab/metaengine.cpp:379
+#, fuzzy
+#| msgid "Debug level:"
+msgid "Up one level"
+msgstr "مستوى التصحيح:"
+
+#: engines/lab/metaengine.cpp:385
+#, fuzzy
+#| msgid "Debug level:"
+msgid "Down one level"
+msgstr "مستوى التصحيح:"
+
+#: engines/lab/metaengine.cpp:391
+#, fuzzy
+#| msgid "Show journal"
+msgid "Go back in journal"
+msgstr "عرض المجلة"
+
+#: engines/lab/metaengine.cpp:397
+#, fuzzy
+#| msgid "Show journal"
+msgid "Exit journal"
+msgstr "عرض المجلة"
+
+#: engines/lab/metaengine.cpp:402
+#, fuzzy
+#| msgid "Show journal"
+msgid "Go forward in journal"
+msgstr "عرض المجلة"
 
 #: engines/lab/processroom.cpp:320
 msgid ""
@@ -9606,7 +10418,7 @@ msgid "This puzzle is not available in the trial version of the game"
 msgstr "هذا اللغز غير متوفر في الإصدار التجريبي من اللعبة"
 
 #: engines/lure/metaengine.cpp:53 engines/mads/metaengine.cpp:124
-#: engines/sherlock/metaengine.cpp:112 engines/twine/metaengine.cpp:144
+#: engines/sherlock/metaengine.cpp:120 engines/twine/metaengine.cpp:144
 msgid "TTS Narrator"
 msgstr "الراوي TTS"
 
@@ -9627,12 +10439,6 @@ msgstr "خيارات اللعبة"
 #| msgid "Game Options"
 msgid "Yes/No keymappings"
 msgstr "خيارات اللعبة"
-
-#: engines/lure/metaengine.cpp:203 engines/tsage/metaengine.cpp:237
-#, fuzzy
-#| msgid "Restore game:"
-msgid "Restart game"
-msgstr "استرجاع لعبة:"
 
 #. I18N: Shift Cursor during fight to top left
 #: engines/lure/metaengine.cpp:233
@@ -9798,10 +10604,6 @@ msgstr "استرجاع لعبة:"
 msgid "Show intro"
 msgstr "تلميحات المعرض"
 
-#: engines/mads/metaengine.cpp:349 engines/tsage/metaengine.cpp:259
-msgid "Show credits"
-msgstr "إظهار الاعتمادات"
-
 #: engines/mads/metaengine.cpp:355
 #, fuzzy
 #| msgid "Speech Options"
@@ -9940,7 +10742,9 @@ msgid "Reorder party"
 msgstr "إعادة ترتيب الحزب"
 
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:111 engines/ultima/ultima4/metaengine.cpp:68
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to search the journal
+#: engines/mm/mm1/metaengine.cpp:111 engines/sherlock/metaengine.cpp:514
+#: engines/sherlock/metaengine.cpp:957 engines/ultima/ultima4/metaengine.cpp:68
 msgid "Search"
 msgstr "يبحث"
 
@@ -10114,9 +10918,18 @@ msgstr "أسرع"
 msgid "Normal"
 msgstr "طبيعي"
 
-#: engines/mohawk/dialogs.cpp:367 engines/scumm/dialogs.cpp:1500
+#: engines/mohawk/dialogs.cpp:367 engines/scumm/dialogs.cpp:1551
 msgid "Best"
 msgstr "أفضل"
+
+#: engines/mohawk/dialogs.cpp:456
+msgid "Fix audio pops/clicks"
+msgstr ""
+
+#: engines/mohawk/dialogs.cpp:457
+msgid ""
+"Reduces audible pops at the end of some sound effects (Non Myst/Riven only)."
+msgstr ""
 
 #: engines/mohawk/metaengine.cpp:291
 msgid "Myst ME support not compiled in"
@@ -10760,6 +11573,36 @@ msgstr ""
 msgid "X key"
 msgstr ""
 
+#: engines/private/metaengine.cpp:37
+#, fuzzy
+#| msgid "Toggle subtitles"
+msgid "Display subtitles"
+msgstr "تبديل الترجمة"
+
+#: engines/private/metaengine.cpp:38
+#, fuzzy
+#| msgid "Toggle subtitles"
+msgid "Use subtitles."
+msgstr "تبديل الترجمة"
+
+#: engines/private/metaengine.cpp:48
+#, fuzzy
+#| msgid "Toggle subtitles"
+msgid "Display SFX subtitles"
+msgstr "تبديل الترجمة"
+
+#: engines/private/metaengine.cpp:49
+#, fuzzy
+#| msgid "Toggle subtitles"
+msgid "Use SFX subtitles."
+msgstr "تبديل الترجمة"
+
+#: engines/private/metaengine.cpp:100 engines/trecision/metaengine.cpp:137
+#, fuzzy
+#| msgid "Skip line"
+msgid "Skip video"
+msgstr "تخطي الخط"
+
 #: engines/qdengine/dialogs.cpp:32
 #, fuzzy
 #| msgid "Enable the debug mode"
@@ -10785,12 +11628,6 @@ msgstr "خط محسن"
 #: engines/queen/metaengine.cpp:53
 msgid "Use an easier to read custom font"
 msgstr "استخدام أسهل لقراءة الخط المخصص"
-
-#: engines/queen/metaengine.cpp:148
-#, fuzzy
-#| msgid "Game Options"
-msgid "Journal keymappings"
-msgstr "خيارات اللعبة"
 
 #: engines/queen/metaengine.cpp:186
 msgid "Move / Skip / Use default action with inventory item"
@@ -10856,26 +11693,12 @@ msgstr "تخطي الحوار"
 msgid "Use journal"
 msgstr "عرض المجلة"
 
-#: engines/queen/metaengine.cpp:274 engines/saga/metaengine.cpp:384
-#: engines/scumm/help.cpp:124 engines/scumm/help.cpp:139
-#: engines/scumm/help.cpp:164 engines/scumm/help.cpp:200
-#: engines/scumm/help.cpp:210 engines/supernova/metaengine.cpp:366
-#: engines/twp/metaengine.cpp:180
-msgid "Give"
-msgstr "يعطي"
-
-#: engines/queen/metaengine.cpp:279 engines/saga/metaengine.cpp:354
-#: engines/scumm/help.cpp:202 engines/scumm/help.cpp:214
-#: engines/twp/metaengine.cpp:182 engines/wintermute/keymapper_tables.h:122
-#: engines/wintermute/keymapper_tables.h:1534
-msgid "Look at"
-msgstr "ينظر الى"
-
 #: engines/queen/metaengine.cpp:284 engines/saga/metaengine.cpp:359
 #: engines/scumm/help.cpp:144 engines/scumm/help.cpp:169
 #: engines/scumm/help.cpp:198 engines/scumm/help.cpp:213
-#: engines/scumm/help.cpp:230 engines/sludge/keymapper_tables.h:318
-#: engines/twp/metaengine.cpp:181 engines/wintermute/keymapper_tables.h:134
+#: engines/scumm/help.cpp:230 engines/sherlock/metaengine.cpp:420
+#: engines/sludge/keymapper_tables.h:318 engines/twp/metaengine.cpp:181
+#: engines/wintermute/keymapper_tables.h:134
 #: engines/wintermute/keymapper_tables.h:1546
 msgid "Pick up"
 msgstr "يلتقط"
@@ -11476,7 +12299,7 @@ msgid "Your Name:"
 msgstr "الأسم:"
 
 #. I18N: Button, start hosting online multiplayer game
-#: engines/scumm/dialog-createsession.cpp:49 engines/scumm/scumm.cpp:4222
+#: engines/scumm/dialog-createsession.cpp:49 engines/scumm/scumm.cpp:4252
 msgid "Host"
 msgstr "يستضيف"
 
@@ -11486,7 +12309,7 @@ msgid "Querying games..."
 msgstr "جاري الاستعلام عن الألعاب ..."
 
 #. I18N: Join online multiplayer game
-#: engines/scumm/dialog-sessionselector.cpp:64 engines/scumm/scumm.cpp:4222
+#: engines/scumm/dialog-sessionselector.cpp:64 engines/scumm/scumm.cpp:4252
 msgid "Join"
 msgstr "ينضم"
 
@@ -11619,11 +12442,11 @@ msgid ""
 "that was intended or not."
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1312
+#: engines/scumm/dialogs.cpp:1333
 msgid "Overture Timing:"
 msgstr "توقيت الافتتاح:"
 
-#: engines/scumm/dialogs.cpp:1316
+#: engines/scumm/dialogs.cpp:1337
 msgid ""
 "When using replacement music, this adjusts the time when the Overture "
 "changes to the scene with the Lucasfilm and Loom logotypes."
@@ -11631,64 +12454,64 @@ msgstr ""
 "عند استخدام الموسيقى البديلة ، يضبط هذا الوقت عندما تتغير المقدمة إلى المشهد "
 "باستخدام شعاري Lucasfilm و Loom."
 
-#: engines/scumm/dialogs.cpp:1403
+#: engines/scumm/dialogs.cpp:1438
 msgid "Music Quality:"
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1407
+#: engines/scumm/dialogs.cpp:1442
 msgid ""
 "Select music quality. The original lets you choose this from the Game menu."
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1408
+#: engines/scumm/dialogs.cpp:1443
 msgid ""
 "Select music quality. The original determines the basic setup by hardware "
 "detection and speed tests, but also allows changes through the Game menu to "
 "some degree."
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1499 engines/scumm/dialogs.cpp:1500
+#: engines/scumm/dialogs.cpp:1550 engines/scumm/dialogs.cpp:1551
 msgid "auto"
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1499
+#: engines/scumm/dialogs.cpp:1550
 msgid "Low"
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1499
+#: engines/scumm/dialogs.cpp:1550
 #: engines/scumm/he/moonbase/dialog-mapgenerator.cpp:75
 #, fuzzy
 #| msgid "Medium"
 msgid "Medium"
 msgstr "متوسط"
 
-#: engines/scumm/dialogs.cpp:1499
+#: engines/scumm/dialogs.cpp:1550
 msgid "High"
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1500
+#: engines/scumm/dialogs.cpp:1551
 msgid "Good"
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1500
+#: engines/scumm/dialogs.cpp:1551
 msgid "Better"
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1501
+#: engines/scumm/dialogs.cpp:1552
 #, c-format
 msgid "Hardware Rating: %s   -   "
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1501
+#: engines/scumm/dialogs.cpp:1552
 #, c-format
 msgid "Quality Selection: %s"
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1515
+#: engines/scumm/dialogs.cpp:1566
 msgid "Playback Adjust:"
 msgstr "ضبط التشغيل:"
 
-#: engines/scumm/dialogs.cpp:1519
+#: engines/scumm/dialogs.cpp:1570
 msgid ""
 "When playing sound from the CD audio track, adjust the start position of the "
 "sound by this much. Use this if you often hear bits of the wrong sound."
@@ -11696,11 +12519,11 @@ msgstr ""
 "عند تشغيل الصوت من المسار الصوتي للقرص المضغوط ، اضبط موضع بدء الصوت بهذا "
 "القدر. استخدم هذا إذا كنت تسمع أجزاء صغيرة من الصوت الخطأ."
 
-#: engines/scumm/dialogs.cpp:1604
+#: engines/scumm/dialogs.cpp:1673
 msgid "Intro Adjust:"
 msgstr "ضبط المقدمة:"
 
-#: engines/scumm/dialogs.cpp:1608
+#: engines/scumm/dialogs.cpp:1677
 msgid ""
 "When playing the intro track, play from this point in it. Use this if the "
 "music gets cut off prematurely, or if you are unhappy with the way the music "
@@ -11710,11 +12533,11 @@ msgstr ""
 "الموسيقى قبل الأوان ، أو إذا كنت غير راضٍ عن الطريقة التي تتزامن بها الموسيقى "
 "مع المقدمة."
 
-#: engines/scumm/dialogs.cpp:1617
+#: engines/scumm/dialogs.cpp:1686
 msgid "Outlook Adjust:"
 msgstr "ضبط الآفاق:"
 
-#: engines/scumm/dialogs.cpp:1621
+#: engines/scumm/dialogs.cpp:1690
 msgid ""
 "The outlook music is part of the intro track. Adjust the position in the "
 "track at which it starts playing. Use this if the music is cut off, or if "
@@ -11724,26 +12547,26 @@ msgstr ""
 "عنده اللعب. استخدم هذا إذا تم قطع الموسيقى ، أو إذا سمعت جزءًا من الموسيقى "
 "السابقة."
 
-#: engines/scumm/dialogs.cpp:1734 engines/scumm/metaengine.cpp:773
+#: engines/scumm/dialogs.cpp:1813 engines/scumm/metaengine.cpp:773
 msgid "Load modded audio"
 msgstr "تحميل الصوت المعدل"
 
-#: engines/scumm/dialogs.cpp:1734 engines/scumm/metaengine.cpp:774
+#: engines/scumm/dialogs.cpp:1813 engines/scumm/metaengine.cpp:774
 msgid ""
 "Replace music, sound effects, and speech clips with modded audio files, if "
 "available."
 msgstr ""
 "استبدل الموسيقى والمؤثرات الصوتية ومقاطع الكلام بملفات صوتية معدلة ، إن وجدت."
 
-#: engines/scumm/dialogs.cpp:1736
+#: engines/scumm/dialogs.cpp:1815
 msgid "Multiplayer Server:"
 msgstr "خادم متعدد اللاعبين:"
 
-#: engines/scumm/dialogs.cpp:1742
+#: engines/scumm/dialogs.cpp:1821
 msgid "Online Server:"
 msgstr "الخادم عبر الإنترنت:"
 
-#: engines/scumm/dialogs.cpp:1743
+#: engines/scumm/dialogs.cpp:1822
 msgid ""
 "Address of the server to connect to for online play.  It must start with "
 "either \"https://\" or \"http://\" schemas."
@@ -11751,22 +12574,22 @@ msgstr ""
 "عنوان الخادم المراد الاتصال به للعب عبر الإنترنت. يجب أن يبدأ إما بمخططات "
 "\"https://\" أو \"http://\"."
 
-#: engines/scumm/dialogs.cpp:1745
+#: engines/scumm/dialogs.cpp:1824
 msgid "Enable online competitive mods"
 msgstr "تمكين التعديلات التنافسية عبر الإنترنت"
 
-#: engines/scumm/dialogs.cpp:1745
+#: engines/scumm/dialogs.cpp:1824
 #, fuzzy
 #| msgid ""
 #| "Enables custom-made modifications intented for online competitive play."
 msgid "Enables custom-made modifications intended for online competitive play."
 msgstr "تمكن من إجراء تعديلات مخصصة مصممة للعب التنافسي عبر الإنترنت."
 
-#: engines/scumm/dialogs.cpp:1749
+#: engines/scumm/dialogs.cpp:1828
 msgid "Enable connection to Multiplayer Server"
 msgstr "تمكين الاتصال بخادم متعدد اللاعبين"
 
-#: engines/scumm/dialogs.cpp:1749
+#: engines/scumm/dialogs.cpp:1828
 msgid ""
 "Toggles the connection to the server that allows hosting and joining online "
 "multiplayer games over the Internet."
@@ -11774,24 +12597,24 @@ msgstr ""
 "يبدل الاتصال بالخادم الذي يسمح باستضافة الألعاب متعددة اللاعبين عبر الإنترنت "
 "والانضمام إليها عبر الإنترنت."
 
-#: engines/scumm/dialogs.cpp:1750
+#: engines/scumm/dialogs.cpp:1829
 msgid "Host games over LAN"
 msgstr "استضف الألعاب عبر الشبكة المحلية"
 
-#: engines/scumm/dialogs.cpp:1750
+#: engines/scumm/dialogs.cpp:1829
 msgid "Allows the game sessions to be discovered over your local area network."
 msgstr "يسمح باكتشاف جلسات اللعبة عبر شبكة المنطقة المحلية الخاصة بك."
 
 #. I18N: Moonbase Console is a program name
-#: engines/scumm/dialogs.cpp:1754
+#: engines/scumm/dialogs.cpp:1833
 msgid "Generate random maps"
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1754
+#: engines/scumm/dialogs.cpp:1833
 msgid "Allow random map generation (Based from Moonbase Console)."
 msgstr ""
 
-#: engines/scumm/dialogs.cpp:1757
+#: engines/scumm/dialogs.cpp:1836
 msgid ""
 "Address of the server to connect to for hosting and joining online game "
 "sessions."
@@ -11930,10 +12753,6 @@ msgstr "يحذب"
 msgid "Go to"
 msgstr "اذهب إلى"
 
-#: engines/scumm/help.cpp:128 engines/ultima/nuvie/metaengine.cpp:70
-msgid "Get"
-msgstr "يحصل"
-
 #: engines/scumm/help.cpp:130 engines/scumm/help.cpp:142
 msgid "Read"
 msgstr "يقرأ"
@@ -11971,10 +12790,6 @@ msgstr "يصلح"
 #: engines/scumm/help.cpp:159
 msgid "Switch"
 msgstr "يُحوّل"
-
-#: engines/scumm/help.cpp:175
-msgid "Travel"
-msgstr "يسافر"
 
 #: engines/scumm/help.cpp:176
 msgid "To Henry / To Indy"
@@ -12253,19 +13068,19 @@ msgstr "انتقل إلى اليمين"
 msgid "Fly to lower right"
 msgstr "انتقل إلى أسفل اليمين"
 
-#: engines/scumm/input.cpp:1394
+#: engines/scumm/input.cpp:1405
 msgid "Snap scroll on"
 msgstr "التقط التمرير على"
 
-#: engines/scumm/input.cpp:1396
+#: engines/scumm/input.cpp:1407
 msgid "Snap scroll off"
 msgstr "التقط التمرير للخارج"
 
-#: engines/scumm/input.cpp:1409
+#: engines/scumm/input.cpp:1420
 msgid "Music volume: "
 msgstr "طبقة صوت الموسيقا: "
 
-#: engines/scumm/input.cpp:1426
+#: engines/scumm/input.cpp:1437
 msgid "Subtitle speed: "
 msgstr "سرعة الترجمة: "
 
@@ -12437,36 +13252,36 @@ msgstr "تمكين الصوت"
 msgid "Enable ambience sounds."
 msgstr "تمكين الصوت"
 
-#: engines/scumm/metaengine.cpp:965
+#: engines/scumm/metaengine.cpp:981
 #, fuzzy
 #| msgid "Down Left"
 msgid "Down left"
 msgstr "اسفل اليسار"
 
-#: engines/scumm/metaengine.cpp:978
+#: engines/scumm/metaengine.cpp:994
 #, fuzzy
 #| msgid "Down Right"
 msgid "Down right"
 msgstr "أسفل اليمين"
 
-#: engines/scumm/metaengine.cpp:998
+#: engines/scumm/metaengine.cpp:1014
 #, fuzzy
 #| msgid "Upper left item"
 msgid "Up left"
 msgstr "العنصر العلوي الأيسر"
 
-#: engines/scumm/metaengine.cpp:1011
+#: engines/scumm/metaengine.cpp:1027
 #, fuzzy
 #| msgid "Up Right"
 msgid "Up right"
 msgstr "أعلى اليمين"
 
-#: engines/scumm/metaengine.cpp:1023
+#: engines/scumm/metaengine.cpp:1039
 msgid "Switch weapon"
 msgstr "تبديل السلاح"
 
 #. I18N: Lets one skip the bike/car fight sequences in Full Throttle
-#: engines/scumm/metaengine.cpp:1037
+#: engines/scumm/metaengine.cpp:1053
 msgid "Win the bike fight cheat"
 msgstr "كسب الغش في معركة الدراجة"
 
@@ -12547,7 +13362,7 @@ msgid ""
 "its sub-folders should be what you need."
 msgstr ""
 
-#: engines/scumm/scumm.cpp:1781
+#: engines/scumm/scumm.cpp:1789
 msgid ""
 "Audio files compressed with ScummVM Tools were detected; *.BUN/*.SOU\n"
 "compression is not supported anymore for this game, audio will be disabled.\n"
@@ -12557,7 +13372,7 @@ msgstr ""
 "لم يعد الضغط مدعومًا لهذه اللعبة ، وسيتم تعطيل الصوت.\n"
 "يرجى نسخ اللعبة من الوسائط الأصلية دون ضغط."
 
-#: engines/scumm/scumm.cpp:2272
+#: engines/scumm/scumm.cpp:2280
 #, c-format
 msgid ""
 "Native MIDI support requires the Roland Upgrade from LucasArts,\n"
@@ -12566,7 +13381,7 @@ msgstr ""
 "يتطلب دعم MIDI الأصلي ترقية Roland من LucasArts ،\n"
 "لكن%s مفقود. استخدام AdLib بدلاً من ذلك."
 
-#: engines/scumm/scumm.cpp:2288
+#: engines/scumm/scumm.cpp:2296
 msgid ""
 "This particular version of Monkey Island 1 is known to miss some\n"
 "required resources for MT-32. Using AdLib instead."
@@ -12574,7 +13389,7 @@ msgstr ""
 "من المعروف أن هذه النسخة الخاصة من Monkey Island 1 تفتقد بعضًا منها\n"
 "الموارد المطلوبة ل MT-32. استخدام AdLib بدلاً من ذلك."
 
-#: engines/scumm/scumm.cpp:4110
+#: engines/scumm/scumm.cpp:4140
 msgid ""
 "Usually, Maniac Mansion would start now. But for that to work, the game "
 "files for Maniac Mansion have to be in the 'Maniac' directory inside the "
@@ -12584,7 +13399,7 @@ msgstr ""
 "اللعبة الخاصة ب Maniac Mansion في دليل \"Maniac\" داخل دليل لعبة Tentacle ، "
 "ويجب إضافة اللعبة إلى ScummVM."
 
-#: engines/scumm/scumm.cpp:4222
+#: engines/scumm/scumm.cpp:4252
 msgid "Would you like to host or join a network play session?"
 msgstr "هل ترغب في استضافة أو الانضمام إلى جلسة لعب على الشبكة؟"
 
@@ -12748,48 +13563,472 @@ msgstr ""
 "يرجى نسخ هذه الملفات في دليل بيانات اللعبة.\n"
 "\n"
 
-#: engines/sherlock/metaengine.cpp:51
+#: engines/sherlock/metaengine.cpp:59
 msgid "Pixellated scene transitions"
 msgstr "انتقالات المشهد البيكسيلات"
 
-#: engines/sherlock/metaengine.cpp:52
+#: engines/sherlock/metaengine.cpp:60
 msgid "When changing scenes, a randomized pixel transition is done"
 msgstr "عند تغيير المشاهد ، يتم إجراء انتقال عشوائي للبكسل"
 
-#: engines/sherlock/metaengine.cpp:63
+#: engines/sherlock/metaengine.cpp:71
 msgid "Don't show hotspots when moving mouse"
 msgstr "لا تظهر النقاط الفعالة عند تحريك الماوس"
 
-#: engines/sherlock/metaengine.cpp:64
+#: engines/sherlock/metaengine.cpp:72
 msgid ""
 "Only show hotspot names after you actually click on a hotspot or action "
 "button"
 msgstr ""
 "اعرض أسماء النقاط الفعالة فقط بعد النقر فعليًا على نقطة فعالة أو زر إجراء"
 
-#: engines/sherlock/metaengine.cpp:75
+#: engines/sherlock/metaengine.cpp:83
 msgid "Show character portraits"
 msgstr "اعرض صور الشخصيات"
 
-#: engines/sherlock/metaengine.cpp:76
+#: engines/sherlock/metaengine.cpp:84
 msgid "Show portraits for the characters when conversing"
 msgstr "عرض صور الشخصيات عند التحدث"
 
-#: engines/sherlock/metaengine.cpp:87
+#: engines/sherlock/metaengine.cpp:95
 msgid "Slide dialogs into view"
 msgstr "قم بتمرير الحوارات إلى العرض"
 
-#: engines/sherlock/metaengine.cpp:88
+#: engines/sherlock/metaengine.cpp:96
 msgid "Slide UI dialogs into view, rather than simply showing them immediately"
 msgstr "قم بتمرير مربعات حوار واجهة المستخدم إلى العرض بدلاً من عرضها على الفور"
 
-#: engines/sherlock/metaengine.cpp:99
+#: engines/sherlock/metaengine.cpp:107
 msgid "Transparent windows"
 msgstr "نوافذ شفافة"
 
-#: engines/sherlock/metaengine.cpp:100
+#: engines/sherlock/metaengine.cpp:108
 msgid "Show windows with a partially transparent background"
 msgstr "اعرض النوافذ ذات الخلفية الشفافة جزئيًا"
+
+#: engines/sherlock/metaengine.cpp:331
+#, fuzzy
+#| msgid "Game Options"
+msgid "Scroll keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:332 engines/sherlock/metaengine.cpp:772
+#, fuzzy
+#| msgid "Game Options"
+msgid "Main user interface keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:333 engines/sherlock/metaengine.cpp:777
+#, fuzzy
+#| msgid "Game Options"
+msgid "Darts minigame keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:335
+#, fuzzy
+#| msgid "Game Options"
+msgid "Talk keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:337
+#, fuzzy
+#| msgid "Game Options"
+msgid "Files keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:340
+#, fuzzy
+#| msgid "Game Options"
+msgid "Settings keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:341 engines/sherlock/metaengine.cpp:774
+#, fuzzy
+#| msgid "Game Options"
+msgid "Movie keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:349
+#, fuzzy
+#| msgid "Use Selected Object"
+msgid "Skip / Deselect verb"
+msgstr "استخدم الكائن المحدد"
+
+#: engines/sherlock/metaengine.cpp:450
+msgid "Setup"
+msgstr ""
+
+#: engines/sherlock/metaengine.cpp:472
+#, fuzzy
+#| msgid "Reset"
+msgid "Files"
+msgstr "إعادة الضبط"
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to go back 10 pages in the journal
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a journal, this action is used to go back 10 pages in the journal
+#: engines/sherlock/metaengine.cpp:501 engines/sherlock/metaengine.cpp:906
+msgid "Go back 10 pages"
+msgstr ""
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to go forward 10 pages in the journal
+#: engines/sherlock/metaengine.cpp:507
+msgid "Go ahead 10 pages"
+msgstr ""
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to go to the first page of the journal
+#: engines/sherlock/metaengine.cpp:521
+#: engines/wintermute/keymapper_tables.h:965
+msgid "First page"
+msgstr "الصفحة الأولى"
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to go to the last page of the journal
+#: engines/sherlock/metaengine.cpp:528
+#: engines/wintermute/keymapper_tables.h:970
+msgid "Last page"
+msgstr "آخر صفحة"
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has an inventory, this action is go back a page (one page displays 6 items) in the inventory
+#: engines/sherlock/metaengine.cpp:572
+#, fuzzy
+#| msgid "Show journal"
+msgid "Go back a page"
+msgstr "عرض المجلة"
+
+#: engines/sherlock/metaengine.cpp:578
+#, fuzzy
+#| msgid "Move left"
+msgid "Scroll left"
+msgstr "تحرك يسارا"
+
+#: engines/sherlock/metaengine.cpp:584
+#, fuzzy
+#| msgid "Move right"
+msgid "Scroll Right"
+msgstr "تحرك يمينا"
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has an inventory, this action is go ahead a page (one page displays 6 items) in the inventory
+#: engines/sherlock/metaengine.cpp:591
+msgid "Go ahead a page"
+msgstr ""
+
+#: engines/sherlock/metaengine.cpp:649 engines/sherlock/metaengine.cpp:934
+#, fuzzy
+#| msgid "Select Group by"
+msgid "Select option"
+msgstr "حدد التجميع حسب"
+
+#: engines/sherlock/metaengine.cpp:685 engines/ultima/nuvie/metaengine.cpp:99
+#, fuzzy
+#| msgid "Toggle mute"
+msgid "Toggle music"
+msgstr "تبديل كتم الصوت"
+
+#: engines/sherlock/metaengine.cpp:690
+#, fuzzy
+#| msgid "Toggle Combat"
+msgid "Toggle portraits"
+msgstr "تبديل القتال"
+
+#: engines/sherlock/metaengine.cpp:695
+#, fuzzy
+#| msgid "Change font size"
+msgid "Change font style"
+msgstr "تغيير حجم الخط"
+
+#: engines/sherlock/metaengine.cpp:700
+#, fuzzy
+#| msgid "Special sound effects volume"
+msgid "Toggle sound effects"
+msgstr "حجم المؤثرات الصوتية الخاصة"
+
+#: engines/sherlock/metaengine.cpp:705
+#, fuzzy
+#| msgid "Toggle fast mode"
+msgid "Toggle windows mode"
+msgstr "تبديل الوضع السريع"
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has an auto-help feature, this action is used to change the auto-help location between left and right
+#: engines/sherlock/metaengine.cpp:711
+#, fuzzy
+#| msgid "Change game options"
+msgid "Change auto-help location"
+msgstr "تغيير إعدادات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:716
+#, fuzzy
+#| msgid "Enable cheats"
+msgid "Toggle voices"
+msgstr "تمكين غش"
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a fade animation when switching scenes, this action is used to change the fade mode to "Fade by pixel"
+#: engines/sherlock/metaengine.cpp:724
+msgid "Fade by pixel"
+msgstr ""
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a fade animation when switching scenes, this action is used to change the fade mode to "Fade directly"
+#: engines/sherlock/metaengine.cpp:730
+#, fuzzy
+#| msgid "Create directory"
+msgid "Fade directly"
+msgstr "أنشئ مجلد"
+
+#. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a fade animation when switching scenes, this action is used to change the fade mode
+#: engines/sherlock/metaengine.cpp:736
+#, fuzzy
+#| msgid "Change Command"
+msgid "Change fade mode"
+msgstr "تغيير الأمر"
+
+#: engines/sherlock/metaengine.cpp:776
+#, fuzzy
+#| msgid "Game Options"
+msgid "Journal search keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:779
+#, fuzzy
+#| msgid "Game Options"
+msgid "Menu scrolling keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:780
+#, fuzzy
+#| msgid "Game Options"
+msgid "save / load menu keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:781
+#, fuzzy
+#| msgid "Game Options"
+msgid "Save files name editing keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:782
+#, fuzzy
+#| msgid "Game Options"
+msgid "Foolscap puzzle keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:784
+#, fuzzy
+#| msgid "Game Options"
+msgid "Options menu keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:785
+#, fuzzy
+#| msgid "Game Options"
+msgid "Password entry keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:787
+#, fuzzy
+#| msgid "Game Options"
+msgid "Talk options keymappings"
+msgstr "خيارات اللعبة"
+
+#: engines/sherlock/metaengine.cpp:789
+#, fuzzy
+#| msgid "Move left"
+msgid "Move / Examine / Select"
+msgstr "تحرك يسارا"
+
+#: engines/sherlock/metaengine.cpp:795
+#, fuzzy
+#| msgid "Open main menu"
+msgid "Open verb menu / close menu"
+msgstr "افتح القائمة الرئيسية"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) This action changes the speed of the game (walking, animations, etc.)
+#: engines/sherlock/metaengine.cpp:806
+#, fuzzy
+#| msgid "Change Command"
+msgid "Change speed"
+msgstr "تغيير الأمر"
+
+#: engines/sherlock/metaengine.cpp:829
+#, fuzzy
+#| msgid "Show journal"
+msgid "Open journal"
+msgstr "عرض المجلة"
+
+#: engines/sherlock/metaengine.cpp:842
+#, fuzzy
+#| msgid "Open main menu"
+msgid "Open options"
+msgstr "افتح القائمة الرئيسية"
+
+#: engines/sherlock/metaengine.cpp:858
+#, fuzzy
+#| msgid "Fit to window"
+msgid "Exit / Close window"
+msgstr "تناسب النافذة"
+
+#: engines/sherlock/metaengine.cpp:868
+#, fuzzy
+#| msgid "Skip dialogue"
+msgid "Skip prolog"
+msgstr "تخطي الحوار"
+
+#: engines/sherlock/metaengine.cpp:878 engines/sherlock/metaengine.cpp:945
+msgid "Change selected option to the left"
+msgstr ""
+
+#: engines/sherlock/metaengine.cpp:884 engines/sherlock/metaengine.cpp:951
+msgid "Change selected option to the right"
+msgstr ""
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a journal, this action is used to go forward 10 pages in the journal
+#: engines/sherlock/metaengine.cpp:891
+#, fuzzy
+#| msgid "Show journal"
+msgid "Go forward 10 pages"
+msgstr "عرض المجلة"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a journal, this action is used to go forward 1 page in the journal
+#: engines/sherlock/metaengine.cpp:898
+#, fuzzy
+#| msgid "Show journal"
+msgid "Go forward 1 page"
+msgstr "عرض المجلة"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a journal, this action is used to go back 1 page in the journal
+#: engines/sherlock/metaengine.cpp:913
+#, fuzzy
+#| msgid "Show journal"
+msgid "Go back 1 page"
+msgstr "عرض المجلة"
+
+#: engines/sherlock/metaengine.cpp:920
+#, fuzzy
+#| msgid "Show journal"
+msgid "Go to start of journal"
+msgstr "عرض المجلة"
+
+#: engines/sherlock/metaengine.cpp:927
+#, fuzzy
+#| msgid "Show journal"
+msgid "Go to end of journal"
+msgstr "عرض المجلة"
+
+#: engines/sherlock/metaengine.cpp:968
+#, fuzzy
+#| msgid "Skip autosave"
+msgid "Skip darts minigame"
+msgstr "تخطي الحفظ التلقائي"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a map, this action is used to scroll to the top left of the map
+#: engines/sherlock/metaengine.cpp:979
+#, fuzzy
+#| msgid "Scroll list up"
+msgid "Scroll to top left"
+msgstr "قائمة التمرير لأعلى"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a map, this action is used to scroll to the bottom right of the map
+#: engines/sherlock/metaengine.cpp:987
+#, fuzzy
+#| msgid "Move left"
+msgid "Scroll to bottom right"
+msgstr "تحرك يسارا"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has multiple widgets for various purposes (eg. inventory, save files, etc.), this action is used to scroll up by a page in the widget
+#: engines/sherlock/metaengine.cpp:1037
+#, fuzzy
+#| msgid "Scroll up"
+msgid "Scroll page up"
+msgstr "انتقل إلى أعلى"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has multiple widgets for various purposes (eg. inventory, save files, etc.), this action is used to scroll down by a page in the widget
+#: engines/sherlock/metaengine.cpp:1044
+#, fuzzy
+#| msgid "Scroll down"
+msgid "Scroll page down"
+msgstr "حرك الفأرة لأسفل"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has multiple widgets for various purposes (eg. inventory, save files, etc.), this action is used to scroll to the end of the widget
+#: engines/sherlock/metaengine.cpp:1051
+#, fuzzy
+#| msgid "Scroll list up"
+msgid "Scroll to end"
+msgstr "قائمة التمرير لأعلى"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has multiple widgets for various purposes (eg. inventory, save files, etc.), this action is used to scroll to the start of the widget
+#: engines/sherlock/metaengine.cpp:1058
+#, fuzzy
+#| msgid "Scroll list up"
+msgid "Scroll to start"
+msgstr "قائمة التمرير لأعلى"
+
+#: engines/sherlock/metaengine.cpp:1068
+#, fuzzy
+#| msgid "Highlight next dialogue"
+msgid "Go to next save file slot"
+msgstr "قم بتمييز الحوار التالي"
+
+#: engines/sherlock/metaengine.cpp:1074
+#, fuzzy
+#| msgid "Go to save/load menu"
+msgid "Go to next page of save files"
+msgstr "انتقل إلى حفظ / تحميل القائمة"
+
+#: engines/sherlock/metaengine.cpp:1079
+#, fuzzy
+#| msgid "Select a Theme"
+msgid "Select save file"
+msgstr "حدد موضوعًا"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) This action is used to go to the start of the save file name input field
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) This action is used to go to the start of the password input field
+#: engines/sherlock/metaengine.cpp:1106 engines/sherlock/metaengine.cpp:1211
+#, fuzzy
+#| msgid "Switch to the next scaler"
+msgid "Go to the line start"
+msgstr "قم بالتبديل إلى القشارة التالية"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) This action is used to go to the end of the save file name input field
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) This action is used to go to the end of the password input field
+#: engines/sherlock/metaengine.cpp:1113 engines/sherlock/metaengine.cpp:1218
+#, fuzzy
+#| msgid "Go to main menu"
+msgid "Go to the line end"
+msgstr "اذهب إلى القائمة الرئيسية"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) save file name input field has 2 modes, insert and overwrite, this action toggles between them
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) save password input field has 2 modes, insert and overwrite, this action toggles between them
+#: engines/sherlock/metaengine.cpp:1120 engines/sherlock/metaengine.cpp:1225
+#, fuzzy
+#| msgid "Toggle fast mode"
+msgid "Toggle insert mode"
+msgstr "تبديل الوضع السريع"
+
+#. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a foolscap puzzle, where the player has to decode a hidden message on a piece of paper called a foolscap. this action is used to exit the puzzle
+#: engines/sherlock/metaengine.cpp:1131
+#, fuzzy
+#| msgid "Close"
+msgid "Close puzzle"
+msgstr "إغلاق"
+
+#: engines/sherlock/metaengine.cpp:1173
+msgid "Exit inventory / Close verb menu / Cancel item use action"
+msgstr ""
+
+#: engines/sherlock/metaengine.cpp:1235
+#, fuzzy
+#| msgid "Select next music record"
+msgid "Select next option"
+msgstr "حدد التسجيل الموسيقي التالي"
+
+#: engines/sherlock/metaengine.cpp:1257
+#, fuzzy
+#| msgid "Highlight next dialogue"
+msgid "Go to next talk option"
+msgstr "قم بتمييز الحوار التالي"
+
+#: engines/sherlock/metaengine.cpp:1263
+#, fuzzy
+#| msgid "Go to previous directory level"
+msgid "Go to previous talk option"
+msgstr "إنتقل إلى مستوى المجلد السابق"
 
 #: engines/sky/compact.cpp:140
 msgid "The \"sky.cpt\" engine data file has an incorrect size."
@@ -12830,12 +14069,6 @@ msgstr "تحذير: لا يدعم هذا المحرك حذف فتحة الحفظ
 #| msgid "Default game keymap"
 msgid "Debug keymappings"
 msgstr "خريطة مفاتيح اللعبة الافتراضية"
-
-#: engines/sludge/keymapper_tables.h:35 engines/supernova/metaengine.cpp:218
-#, fuzzy
-#| msgid "Game Options"
-msgid "Menu keymappings"
-msgstr "خيارات اللعبة"
 
 #: engines/sludge/keymapper_tables.h:36
 #, fuzzy
@@ -13208,14 +14441,6 @@ msgstr "استدارة"
 msgid "Page down"
 msgstr "استدارة"
 
-#. I18N: Exits the game
-#: engines/supernova/metaengine.cpp:297 engines/supernova/metaengine.cpp:373
-#: engines/ultima/ultima4/metaengine.cpp:54 engines/voyeur/metaengine.cpp:198
-#: engines/voyeur/metaengine.cpp:229 engines/wintermute/keymapper_tables.h:720
-#: engines/wintermute/keymapper_tables.h:1849
-msgid "Exit"
-msgstr "خرج"
-
 #: engines/supernova/metaengine.cpp:321
 msgid "Go"
 msgstr ""
@@ -13395,13 +14620,6 @@ msgstr "فتح / إغلاق الجرد"
 msgid "Toggle inventory"
 msgstr "تبديل عرض الجرد / نقاط الذكاء"
 
-#: engines/teenagent/metaengine.cpp:232 engines/toon/metaengine.cpp:98
-#: engines/voyeur/metaengine.cpp:235
-#, fuzzy
-#| msgid "Skip line"
-msgid "Skip intro"
-msgstr "تخطي الخط"
-
 #: engines/tetraedge/metaengine.cpp:32
 msgid "Correct movie aspect ratio"
 msgstr "تصحيح نسبة أبعاد الفيلم"
@@ -13579,12 +14797,6 @@ msgstr "الانتقالات:"
 msgid "Toggle between Star Map and photo of your home"
 msgstr ""
 
-#: engines/titanic/metaengine.cpp:343 engines/titanic/metaengine.cpp:384
-#, fuzzy
-#| msgid "Move backwards"
-msgid "Move backward"
-msgstr "ارجع للخلف"
-
 #: engines/titanic/metaengine.cpp:350
 msgid "Stop moving"
 msgstr ""
@@ -13713,12 +14925,6 @@ msgstr ""
 #: engines/touche/metaengine.cpp:182
 msgid "Press \"Yes\" Key"
 msgstr ""
-
-#: engines/trecision/metaengine.cpp:137
-#, fuzzy
-#| msgid "Skip line"
-msgid "Skip video"
-msgstr "تخطي الخط"
 
 #. I18N: Toggles walking speed of actor
 #: engines/trecision/metaengine.cpp:144
@@ -14601,12 +15807,6 @@ msgstr ""
 msgid "Walk south-west"
 msgstr ""
 
-#. I18N: It's a Tetris game clone, this action drops current tetris item
-#: engines/ultima/nuvie/metaengine.cpp:72
-#: engines/wintermute/keymapper_tables.h:2035
-msgid "Drop"
-msgstr "يسقط"
-
 #: engines/ultima/nuvie/metaengine.cpp:75
 msgid "Multi-use"
 msgstr ""
@@ -14704,12 +15904,6 @@ msgstr "الحد الأقصى للإطارات في الثانية"
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle audio"
-msgstr "تبديل كتم الصوت"
-
-#: engines/ultima/nuvie/metaengine.cpp:99
-#, fuzzy
-#| msgid "Toggle mute"
-msgid "Toggle music"
 msgstr "تبديل كتم الصوت"
 
 #: engines/ultima/nuvie/metaengine.cpp:100
@@ -15479,12 +16673,6 @@ msgstr "خيارات اللعبة"
 msgid "Camera keymappings"
 msgstr "خيارات اللعبة"
 
-#: engines/voyeur/metaengine.cpp:188
-#, fuzzy
-#| msgid "Game Options"
-msgid "Intro keymappings"
-msgstr "خيارات اللعبة"
-
 #: engines/voyeur/metaengine.cpp:204
 #, fuzzy
 #| msgid "Skip cutscene"
@@ -15543,19 +16731,19 @@ msgstr "لم يتم تجميع دعم Hero Craft بتنسيق"
 msgid "Wintermute3D support is not compiled in"
 msgstr "لم يتم تجميع دعم Wintermute3D بتنسيق"
 
-#: engines/wintermute/wintermute.cpp:152
+#: engines/wintermute/wintermute.cpp:144
 msgid "This game requires PNG, JPEG and Vorbis support."
 msgstr "تتطلب هذه اللعبة دعم PNG و JPEG و Vorbis."
 
-#: engines/wintermute/wintermute.cpp:163
+#: engines/wintermute/wintermute.cpp:155
 msgid "This game requires the FoxTail subengine, which is not compiled in."
 msgstr "تتطلب هذه اللعبة محرك FoxTail الفرعي ، والذي لم يتم تجميعه بتنسيق."
 
-#: engines/wintermute/wintermute.cpp:174
+#: engines/wintermute/wintermute.cpp:166
 msgid "This game requires the HeroCraft subengine, which is not compiled in."
 msgstr "تتطلب هذه اللعبة محرك فرعي HeroCraft ، والذي لم يتم تجميعه في."
 
-#: engines/wintermute/wintermute.cpp:185
+#: engines/wintermute/wintermute.cpp:177
 msgid ""
 "This game requires 3D capabilities, which is not compiled in. As such, it is "
 "likely to be unplayable totally or partially."
@@ -15818,14 +17006,6 @@ msgstr "سرعة المشي: عالية"
 #: engines/wintermute/keymapper_tables.h:1872
 msgid "Cancel waiting"
 msgstr "إلغاء الانتظار"
-
-#: engines/wintermute/keymapper_tables.h:965
-msgid "First page"
-msgstr "الصفحة الأولى"
-
-#: engines/wintermute/keymapper_tables.h:970
-msgid "Last page"
-msgstr "آخر صفحة"
 
 #. I18N: ultra_super_mega_fast_walk is the name of the variable used at game script for this speed
 #: engines/wintermute/keymapper_tables.h:978
@@ -16141,7 +17321,7 @@ msgstr "استخراج العملة"
 msgid "Preferences"
 msgstr "التفضيلات"
 
-#: engines/zvision/zvision.cpp:298
+#: engines/zvision/zvision.cpp:301
 #, fuzzy
 #| msgid ""
 #| "Before playing this game, you'll need to copy the required fonts into "
@@ -16169,7 +17349,7 @@ msgstr ""
 "مثل LiberationMono و LiberationSans و LiberationSerif أو FreeMono و FreeSans "
 "و FreeSerif على التوالي."
 
-#: engines/zvision/zvision.cpp:313
+#: engines/zvision/zvision.cpp:316
 msgid ""
 "MIDI playback is not available, or else improperly configured. Zork Nemesis "
 "contains several music puzzles which require MIDI audio in order to be "
@@ -16325,11 +17505,6 @@ msgstr ""
 #~ msgid "Roll Left"
 #~ msgstr "تحرك يسارا"
 
-#, fuzzy
-#~| msgid "Move right"
-#~ msgid "Roll Right"
-#~ msgstr "تحرك يمينا"
-
 #~ msgid "Look Up"
 #~ msgstr "انظر الى أعلى"
 
@@ -16345,11 +17520,6 @@ msgstr ""
 #~| msgid "Side Step"
 #~ msgid "Step"
 #~ msgstr "خطوة جانبية"
-
-#, fuzzy
-#~| msgid "Animated inventory items"
-#~ msgid "Next Inventory Item"
-#~ msgstr "عناصر المخزون المتحركة"
 
 #~ msgid "Could not find any engine capable of running the selected game"
 #~ msgstr "تعذر العثور على أي محرك قادر على تشغيل اللعبة المحددة"
@@ -16424,11 +17594,6 @@ msgstr ""
 #~ msgstr "لم يتم الكشف عن اللغة"
 
 #, fuzzy
-#~| msgid "Special sound effects volume"
-#~ msgid "Toggle sound effect on/off"
-#~ msgstr "حجم المؤثرات الصوتية الخاصة"
-
-#, fuzzy
 #~| msgid "Default game keymap"
 #~ msgid "Default keymapppings"
 #~ msgstr "خريطة مفاتيح اللعبة الافتراضية"
@@ -16496,11 +17661,6 @@ msgstr ""
 
 #~ msgid "Minimal Volume"
 #~ msgstr "حجم الصوت الأدنى"
-
-#, fuzzy
-#~| msgid "Select Group by"
-#~ msgid "Select Actor 6"
-#~ msgstr "حدد التجميع حسب"
 
 #, fuzzy
 #~| msgid "Next action"
@@ -16648,9 +17808,6 @@ msgstr ""
 
 #~ msgid "Toggle end conversation mode"
 #~ msgstr "تبديل وضع إنهاء المحادثة"
-
-#~ msgid "Go to main menu"
-#~ msgstr "اذهب إلى القائمة الرئيسية"
 
 #~ msgid "Go to map screen"
 #~ msgstr "انتقل إلى شاشة الخريطة"

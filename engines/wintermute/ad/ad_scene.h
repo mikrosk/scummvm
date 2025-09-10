@@ -38,6 +38,7 @@ class AdRegion;
 class BaseViewport;
 class AdLayer;
 class BasePoint;
+class Light3D;
 class AdWaypointGroup;
 class AdPath;
 class AdScaleLevel;
@@ -73,14 +74,13 @@ public:
 #endif
 	bool afterLoad();
 
-	void setMaxShadowType(TShadowType shadowType);
-
 #ifdef ENABLE_WME3D
 	float _nearClipPlane;
 	float _farClipPlane;
 	float _fov;
 	int32 _editorResolutionWidth;
 	int32 _editorResolutionHeight;
+	Light3D *getActiveLight();
 #endif
 	bool getRegionsAt(int x, int y, AdRegion **regionList, int numRegions);
 	bool handleItemAssociations(const char *itemName, bool show);
@@ -149,7 +149,7 @@ public:
 	bool isWalkableAt(int x, int y, bool checkFreeObjects = false, BaseObject *requester = nullptr);
 	AdLayer *_mainLayer;
 	float getZoomAt(int x, int y);
-	bool getPath(const BasePoint &source, const BasePoint &target, AdPath *path, BaseObject *requester = nullptr);
+	bool getPath(BasePoint source, BasePoint target, AdPath *path, BaseObject *requester = nullptr);
 	AdScene(BaseGame *inGame);
 	~AdScene() override;
 	BaseArray<AdLayer *> _layers;
@@ -157,10 +157,10 @@ public:
 	BaseArray<AdWaypointGroup *> _waypointGroups;
 	bool loadFile(const char *filename);
 	bool loadBuffer(char *buffer, bool complete = true);
-	int32 _width;
-	int32 _height;
-	bool addObject(AdObject *Object);
-	bool removeObject(AdObject *Object);
+	int32 _width{};
+	int32 _height{};
+	bool addObject(AdObject *object);
+	bool removeObject(AdObject *object);
 	int32 _editorMarginH;
 	int32 _editorMarginV;
 	uint32 _editorColFrame;
@@ -185,15 +185,17 @@ public:
 	BaseArray<AdRotLevel *> _rotLevels;
 
 	bool restoreDeviceObjects() override;
-	int getPointsDist(const BasePoint &p1, const BasePoint &p2, BaseObject *requester = nullptr);
+	void setMaxShadowType(TShadowType shadowType);
+	int getPointsDist(BasePoint p1, BasePoint p2, BaseObject *requester = nullptr);
 
 	void onLayerResized(AdLayer *layer);
 
 	// scripting interface
-	ScValue *scGetProperty(const Common::String &name) override;
+	ScValue *scGetProperty(const char *name) override;
 	bool scSetProperty(const char *name, ScValue *value) override;
 	bool scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack, const char *name) override;
 	const char *scToString() override;
+
 	Common::String debuggerToString() const override;
 
 private:

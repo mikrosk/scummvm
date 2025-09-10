@@ -39,9 +39,8 @@ ScriptCastMember::ScriptCastMember(Cast *cast, uint16 castId, Common::SeekableRe
 
 	if (version < kFileVer400) {
 		error("Unhandled Script cast");
-	} else if (version >= kFileVer400 && version < kFileVer600) {
-		byte unk1 = stream.readByte();
-		byte type = stream.readByte();
+	} else if (version >= kFileVer400 && version < kFileVer1100) {
+		uint16 type = stream.readUint16BE();
 
 		switch (type) {
 		case 1:
@@ -58,11 +57,11 @@ ScriptCastMember::ScriptCastMember(Cast *cast, uint16 castId, Common::SeekableRe
 			error("ScriptCastMember: Unprocessed script type: %d", type);
 		}
 
-		debugC(3, kDebugLoading, "CASt: Script type: %s (%d), unk1: %d", scriptType2str(_scriptType), type, unk1);
+		debugC(3, kDebugLoading, "  CASt: Script type: %s (%d)", scriptType2str(_scriptType), type);
 
 		assert(stream.pos() == stream.size()); // There should be no more data
 	} else {
-		warning("STUB: ScriptCastMember::ScriptCastMember(): Scripts not yet supported for version %d", version);
+		warning("STUB: ScriptCastMember::ScriptCastMember(): Scripts not yet supported for version v%d (%d)", humanVersion(version), version);
 	}
 }
 
@@ -113,7 +112,7 @@ Datum ScriptCastMember::getField(int field) {
 	return d;
 }
 
-bool ScriptCastMember::setField(int field, const Datum &d) {
+void ScriptCastMember::setField(int field, const Datum &d) {
 	switch (field) {
 	case kTheScriptType:
 		warning("ScriptCastMember::setField(): setting scriptType! This probably isn't going to work as it doesn't recategorize the script.");
@@ -126,13 +125,12 @@ bool ScriptCastMember::setField(int field, const Datum &d) {
 				_scriptType = kParentScript;
 			}
 		}
-		return true;
-		break;
+		return;
 	default:
 		break;
 	}
 
-	return CastMember::setField(field, d);
+	CastMember::setField(field, d);
 }
 
 Common::String ScriptCastMember::formatInfo() {

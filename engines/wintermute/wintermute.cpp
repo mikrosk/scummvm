@@ -49,15 +49,6 @@
 
 namespace Wintermute {
 
-// Simple constructor for detection - we need to setup the persistence to avoid special-casing in-engine
-// This might not be the prettiest solution
-WintermuteEngine::WintermuteEngine() : Engine(g_system) {
-	_game = new AdGame("");
-	_debugger = nullptr;
-	_dbgController = nullptr;
-	_gameDescription = nullptr;
-}
-
 WintermuteEngine::WintermuteEngine(OSystem *syst, const WMEGameDescription *desc)
 	: Engine(syst), _gameDescription(desc) {
 	// Put your engine in a sane state, but do nothing big yet;
@@ -80,6 +71,7 @@ WintermuteEngine::~WintermuteEngine() {
 	// Dispose your resources here
 	deinit();
 	delete _game;
+	_game = nullptr;
 	//_debugger deleted by Engine
 }
 
@@ -251,7 +243,7 @@ int WintermuteEngine::init() {
 	// load game
 	uint32 dataInitStart = g_system->getMillis();
 
-	if (DID_FAIL(_game->loadGameSettingsFile())) {
+	if (DID_FAIL(_game->loadFile(_game->_settingsGameFile ? _game->_settingsGameFile : "default.game"))) {
 		_game->LOG(ret, "Error loading game file. Exiting.");
 		delete _game;
 		_game = nullptr;

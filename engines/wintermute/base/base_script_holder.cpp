@@ -33,6 +33,7 @@
 #include "engines/wintermute/base/scriptables/script_engine.h"
 #include "engines/wintermute/base/scriptables/script.h"
 #include "engines/wintermute/base/scriptables/script_stack.h"
+#include "engines/wintermute/dcgf.h"
 
 namespace Wintermute {
 
@@ -55,8 +56,7 @@ BaseScriptHolder::~BaseScriptHolder() {
 
 //////////////////////////////////////////////////////////////////////////
 bool BaseScriptHolder::cleanup() {
-	delete[] _filename;
-	_filename = nullptr;
+	SAFE_DELETE_ARRAY(_filename);
 
 	for (int32 i = 0; i < _scripts.getSize(); i++) {
 		_scripts[i]->finish(true);
@@ -98,7 +98,7 @@ bool BaseScriptHolder::applyEvent(const char *eventName, bool unbreakable) {
 		}
 	}
 	if (numHandlers > 0 && unbreakable) {
-		_gameRef->_scEngine->tickUnbreakable();
+		_game->_scEngine->tickUnbreakable();
 	}
 
 	return ret;
@@ -218,13 +218,13 @@ bool BaseScriptHolder::scCallMethod(ScScript *script, ScStack *stack, ScStack *t
 
 
 //////////////////////////////////////////////////////////////////////////
-ScValue *BaseScriptHolder::scGetProperty(const Common::String &name) {
+ScValue *BaseScriptHolder::scGetProperty(const char *name) {
 	_scValue->setNULL();
 
 	//////////////////////////////////////////////////////////////////////////
 	// Type
 	//////////////////////////////////////////////////////////////////////////
-	if (name == "Type") {
+	if (strcmp(name, "Type") == 0) {
 		_scValue->setString("script_holder");
 		return _scValue;
 	}
@@ -232,7 +232,7 @@ ScValue *BaseScriptHolder::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Name
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Name") {
+	else if (strcmp(name, "Name") == 0) {
 		_scValue->setString(_name);
 		return _scValue;
 	}
@@ -240,7 +240,7 @@ ScValue *BaseScriptHolder::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Filename (RO)
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Filename") {
+	else if (strcmp(name, "Filename") == 0) {
 		_scValue->setString(_filename);
 		return _scValue;
 	} else {
@@ -300,20 +300,20 @@ bool BaseScriptHolder::addScript(const char *filename) {
 	for (int32 i = 0; i < _scripts.getSize(); i++) {
 		if (scumm_stricmp(_scripts[i]->_filename, filename) == 0) {
 			if (_scripts[i]->_state != SCRIPT_FINISHED) {
-				BaseEngine::LOG(0, "BaseScriptHolder::AddScript - trying to add script '%s' multiple times (obj: '%s')", filename, _name);
+				BaseEngine::LOG(0, "BaseScriptHolder::addScript - trying to add script '%s' multiple times (obj: '%s')", filename, _name);
 				return STATUS_OK;
 			}
 		}
 	}
 
-	ScScript *scr =  _gameRef->_scEngine->runScript(filename, this);
+	ScScript *scr = _game->_scEngine->runScript(filename, this);
 	if (!scr) {
-		if (_gameRef->_editorForceScripts) {
+		if (_game->_editorForceScripts) {
 			// editor hack
 #if EXTENDED_DEBUGGER_ENABLED
-			scr = new DebuggableScript(_gameRef,  _gameRef->_scEngine);
+			scr = new DebuggableScript(_game, _game->_scEngine);
 #else
-			scr = new ScScript(_gameRef,  _gameRef->_scEngine);
+			scr = new ScScript(_game, _game->_scEngine);
 #endif
 			size_t filenameSize = strlen(filename) + 1;
 			scr->_filename = new char[filenameSize];
@@ -321,7 +321,7 @@ bool BaseScriptHolder::addScript(const char *filename) {
 			scr->_state = SCRIPT_ERROR;
 			scr->_owner = this;
 			_scripts.add(scr);
-			_gameRef->_scEngine->_scripts.add(scr);
+			_game->_scEngine->_scripts.add(scr);
 
 			return STATUS_OK;
 		}
@@ -382,7 +382,7 @@ bool BaseScriptHolder::parseProperty(char *buffer, bool complete) {
 
 	char *params;
 	int cmd;
-	BaseParser parser;
+	BaseParser parser(_game);
 
 	if (complete) {
 		if (parser.getCommand(&buffer, commands, &params) != TOKEN_PROPERTY) {
@@ -398,14 +398,14 @@ bool BaseScriptHolder::parseProperty(char *buffer, bool complete) {
 	while ((cmd = parser.getCommand(&buffer, commands, &params)) > 0) {
 		switch (cmd) {
 		case TOKEN_NAME: {
-			delete[] propName;
+			SAFE_DELETE_ARRAY(propName);
 			size_t propNameSize = strlen(params) + 1;
 			propName = new char[propNameSize];
 			Common::strcpy_s(propName, propNameSize, params);
 			break;
 		}
 		case TOKEN_VALUE: {
-			delete[] propValue;
+			SAFE_DELETE_ARRAY(propValue);
 			size_t propValueSize = strlen(params) + 1;
 			propValue = new char[propValueSize];
 			Common::strcpy_s(propValue, propValueSize, params);
@@ -417,26 +417,26 @@ bool BaseScriptHolder::parseProperty(char *buffer, bool complete) {
 
 	}
 	if (cmd == PARSERR_TOKENNOTFOUND) {
-		delete[] propName;
-		delete[] propValue;
+		SAFE_DELETE_ARRAY(propName);
+		SAFE_DELETE_ARRAY(propValue);
 		BaseEngine::LOG(0, "Syntax error in PROPERTY definition");
 		return STATUS_FAILED;
 	}
 	if (cmd == PARSERR_GENERIC || propName == nullptr || propValue == nullptr) {
-		delete[] propName;
-		delete[] propValue;
+		SAFE_DELETE_ARRAY(propName);
+		SAFE_DELETE_ARRAY(propValue);
 		BaseEngine::LOG(0, "Error loading PROPERTY definition");
 		return STATUS_FAILED;
 	}
 
 
-	ScValue *val = new ScValue(_gameRef);
+	ScValue *val = new ScValue(_game);
 	val->setString(propValue);
 	scSetProperty(propName, val);
 
 	delete val;
-	delete[] propName;
-	delete[] propValue;
+	SAFE_DELETE_ARRAY(propName);
+	SAFE_DELETE_ARRAY(propValue);
 
 	return STATUS_OK;
 }
@@ -461,9 +461,9 @@ ScScript *BaseScriptHolder::invokeMethodThread(const char *methodName) {
 			debuggableEngine = dynamic_cast<DebuggableScEngine*>(_scripts[i]->_engine);
 			// TODO: Not pretty
 			assert(debuggableEngine);
-			ScScript *thread = new DebuggableScript(_gameRef,  debuggableEngine);
+			ScScript *thread = new DebuggableScript(_game,  debuggableEngine);
 #else
-			ScScript *thread = new ScScript(_gameRef,  _scripts[i]->_engine);
+			ScScript *thread = new ScScript(_game,  _scripts[i]->_engine);
 #endif
 			if (thread) {
 				bool ret = thread->createMethodThread(_scripts[i], methodName);

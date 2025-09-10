@@ -43,6 +43,7 @@
 #include "director/castmember/bitmap.h"
 #include "director/castmember/palette.h"
 #include "director/castmember/text.h"
+#include "director/castmember/transition.h"
 #include "director/lingo/lingo-builtins.h"
 #include "director/lingo/lingo-code.h"
 #include "director/lingo/lingo-codegen.h"
@@ -209,6 +210,8 @@ static const BuiltinProto builtins[] = {
 	{ "updateFrame",	LB::b_updateFrame,	0, 0, 500, CBLTIN },	//				D5 c
 	// Point
 	{ "point",			LB::b_point,		2, 2, 400, FBLTIN },	//			D4 f
+	// Rect
+	{ "inflate",        LB::b_inflate,      2, 3, 400, FBLTIN },    //			D4 f
 	{ "inside",			LB::b_inside,		2, 2, 400, FBLTIN },	//			D4 f
 	{ "intersect",		LB::b_intersect,	2, 2, 400, FBLTIN },	//			D4 f
 	{ "map",			LB::b_map,			3, 3, 400, FBLTIN },	//			D4 f
@@ -1144,36 +1147,57 @@ void LB::b_max(int nargs) {
 	max.type = INT;
 	max.u.i = 0;
 
+	bool hasVoidQuirk = g_director->getVersion() < 500;
+
+	Common::Array<Datum> testArr;
+
 	if (nargs == 1) {
 		Datum d = g_lingo->pop();
 		if (d.type == ARRAY) {
-			uint arrsize = d.u.farr->arr.size();
-
-			if (d.u.farr->_sorted && arrsize) {
-				max = d.u.farr->arr[arrsize - 1];
-			} else {
-				for (uint i = 0; i < arrsize; i++) {
-					Datum item = d.u.farr->arr[i];
-					if (i == 0 || item > max) {
-						max = item;
-					}
-				}
+			for (auto &it : d.u.farr->arr) {
+				testArr.push_back(it);
 			}
 		} else {
 			max = d;
 		}
 	} else if (nargs > 0) {
 		for (int i = 0; i < nargs; i++) {
-			Datum d = g_lingo->_state->stack[g_lingo->_state->stack.size() - nargs + i];
+			Datum d = g_lingo->peek(nargs - i - 1);
 			if (d.type == ARRAY) {
 				warning("b_max: undefined behavior: array mixed with other args");
 			}
-			if (i == 0 || d > max) {
-				max = d;
-			}
+			testArr.push_back(d);
 		}
 		g_lingo->dropStack(nargs);
 	}
+
+	if (!testArr.empty()) {
+		// D4: if there is a VOID for the first arg of max, return VOID
+		if (hasVoidQuirk && testArr[0].type == VOID) {
+			g_lingo->pushVoid();
+			return;
+		}
+		// The trick seems to be to compare each item in sequence.
+		// D4: If we encounter a VOID, treat it as the smallest value possible.
+		// D5+: If we encounter a string, and the current maximum is a VOID, it gets ignored.
+		// D5+: If we encounter a VOID, and the current maximum is a STRING, set it to VOID.
+
+		max = testArr[0];
+		for (int i = 1; i < (int)testArr.size(); i++) {
+			if (!hasVoidQuirk) {
+				if ((max.type == VOID) && (testArr[i].type == STRING)) {
+					continue;
+				} else if ((testArr[i].type == VOID) && (max.type == STRING)) {
+					max = Datum();
+					continue;
+				}
+			}
+			if (testArr[i] > max) {
+				max = testArr[i];
+			}
+		}
+	}
+
 	g_lingo->push(max);
 }
 
@@ -1182,35 +1206,57 @@ void LB::b_min(int nargs) {
 	min.type = INT;
 	min.u.i = 0;
 
+	bool hasVoidQuirk = g_director->getVersion() < 500;
+
+	Common::Array<Datum> testArr;
+
 	if (nargs == 1) {
 		Datum d = g_lingo->pop();
 		if (d.type == ARRAY) {
-			uint arrsize = d.u.farr->arr.size();
-
-			if (d.u.farr->_sorted && arrsize) {
-				min = d.u.farr->arr[0];
-			} else {
-				for (uint i = 0; i < arrsize; i++) {
-					Datum item = d.u.farr->arr[i];
-					if (i == 0 || item < min) {
-						min = item;
-					}
-				}
+			for (auto &it : d.u.farr->arr) {
+				testArr.push_back(it);
 			}
 		} else {
 			min = d;
 		}
 	} else if (nargs > 0) {
 		for (int i = 0; i < nargs; i++) {
-			Datum d = g_lingo->_state->stack[g_lingo->_state->stack.size() - nargs + i];
+			Datum d = g_lingo->peek(nargs - i - 1);
 			if (d.type == ARRAY) {
 				warning("b_min: undefined behavior: array mixed with other args");
 			}
-			if (i == 0 || d < min) {
-				min = d;
-			}
+			testArr.push_back(d);
 		}
 		g_lingo->dropStack(nargs);
+	}
+	if (!testArr.empty()) {
+		// D4: if there is a VOID for the last arg of min, return VOID
+		if (hasVoidQuirk && testArr[testArr.size()-1].type == VOID) {
+			g_lingo->pushVoid();
+			return;
+		}
+		// The trick seems to be to compare each item in sequence.
+		// If we encounter a VOID, and the current minimum is a number or a symbol, it gets converted to VOID.
+		// If we encounter a VOID, and the current minimum is a string, we ignore it.
+		// If the current minimum is VOID, and we encounter a string, the current minimum is set to the string.
+
+		min = testArr[0];
+		for (int i = 1; i < (int)testArr.size(); i++) {
+			if (testArr[i].type == VOID) {
+				if (min.type != STRING) {
+					min = Datum();
+				}
+				continue;
+			// D4: if the current minimum is VOID, set the next value as the new minimum
+			// D5+: if the current minimum is VOID, and the next value is a string (coercable or not), set it as the new minimum
+			} else if ((min.type == VOID) && (hasVoidQuirk || (testArr[i].type == STRING))) {
+				min = testArr[i];
+				continue;
+			}
+			if (testArr[i] < min) {
+				min = testArr[i];
+			}
+		}
 	}
 	g_lingo->push(min);
 }
@@ -1446,6 +1492,10 @@ void LB::b_getNthFileNameInFolder(int nargs) {
 
 	Datum r("");
 	Common::Array<Common::String> fileNameList;
+
+	// Update the game quirks archive in case our save state has changed.
+	// This is necessary because we may save a game and then try to open a game in the same session.
+	g_director->gameQuirks(g_director->getGameId(), g_director->getPlatform());
 
 	// First, mix in any files injected from the quirks
 	Common::Archive *cache = SearchMan.getArchive(kQuirksCacheArchive);
@@ -2945,6 +2995,8 @@ void LB::b_puppetTransition(int nargs) {
 	Window *stage = g_director->getCurrentWindow();
 	uint16 duration = 250, area = 1, chunkSize = 1, type = 0;
 
+	TransitionCastMember *tcast = nullptr;
+
 	switch (nargs) {
 	case 4:
 		area = g_lingo->pop().asInt();
@@ -2957,7 +3009,21 @@ void LB::b_puppetTransition(int nargs) {
 		duration = g_lingo->pop().asInt() * 250;
 		// fall through
 	case 1:
-		type = ((TransitionType)(g_lingo->pop().asInt()));
+		{
+			Datum d = g_lingo->pop();
+			if (d.type == CASTREF) {
+				CastMemberID castId = d.asMemberID();
+				CastMember *cast = stage->getCurrentMovie()->getCastMember(castId);
+				if (cast->_type == kCastTransition) {
+					tcast = (TransitionCastMember *)cast;
+				} else {
+					warning("b_puppetTransition: expected transition cast member");
+					return;
+				}
+			} else {
+				type = ((TransitionType)(d.asInt()));
+			}
+		}
 		break;
 	default:
 		ARGNUMCHECK(1);
@@ -2967,11 +3033,17 @@ void LB::b_puppetTransition(int nargs) {
 
 	if (stage->_puppetTransition) {
 		warning("b_puppetTransition: Transition already queued");
-		return;
+		delete stage->_puppetTransition;
+		stage->_puppetTransition = nullptr;
 	}
-	debugC(3, kDebugImages, "b_puppetTransition(): type: %d, duration: %d, chunkSize: %d, area: %d", type, duration, chunkSize, area);
+	if (tcast) {
+		stage->_puppetTransition = new TransParams(tcast->_durationMillis, tcast->_area, tcast->_chunkSize, tcast->_transType);
+	} else {
+		stage->_puppetTransition = new TransParams(duration, area, chunkSize, ((TransitionType)type));
+	}
+	debugC(3, kDebugImages, "b_puppetTransition(): type: %d, duration: %d, chunkSize: %d, area: %d",
+			stage->_puppetTransition->type, stage->_puppetTransition->duration, stage->_puppetTransition->chunkSize, stage->_puppetTransition->area);
 
-	stage->_puppetTransition = new TransParams(duration, area, chunkSize, ((TransitionType)type));
 }
 
 void LB::b_ramNeeded(int nargs) {
@@ -3272,6 +3344,35 @@ void LB::b_intersect(int nargs) {
 	d = rect1.intersects(rect2);
 
 	g_lingo->push(d);
+}
+
+void LB::b_inflate(int nargs) {
+	int inflateHeight = g_lingo->pop().asInt();
+	int inflateWidth = g_lingo->pop().asInt();
+	Datum sR = g_lingo->pop();
+
+	TYPECHECK(sR, RECT);
+
+	Common::Rect sourceRect(sR.u.farr->arr[0].asInt(),
+		                    sR.u.farr->arr[1].asInt(),
+		                    sR.u.farr->arr[2].asInt(),
+		                    sR.u.farr->arr[3].asInt());
+
+	int inflatedLeft = sourceRect.left - inflateWidth;
+	int inflatedTop = sourceRect.top - inflateHeight;
+	int inflatedRight = sourceRect.right + inflateWidth;
+	int inflatedBottom = sourceRect.bottom + inflateHeight;
+
+	Datum inflatedRect;
+	inflatedRect.type = RECT;
+
+	inflatedRect.u.farr = new FArray();
+	inflatedRect.u.farr->arr.push_back(Datum(inflatedLeft));
+	inflatedRect.u.farr->arr.push_back(Datum(inflatedTop));
+	inflatedRect.u.farr->arr.push_back(Datum(inflatedRight));
+	inflatedRect.u.farr->arr.push_back(Datum(inflatedBottom));
+
+	g_lingo->push(inflatedRect);
 }
 
 void LB::b_inside(int nargs) {

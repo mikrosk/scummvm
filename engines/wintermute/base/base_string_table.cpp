@@ -36,7 +36,6 @@ namespace Wintermute {
 
 //////////////////////////////////////////////////////////////////////////
 BaseStringTable::BaseStringTable(BaseGame *inGame) : BaseClass(inGame) {
-
 }
 
 
@@ -44,7 +43,6 @@ BaseStringTable::BaseStringTable(BaseGame *inGame) : BaseClass(inGame) {
 BaseStringTable::~BaseStringTable() {
 	// delete strings
 	_strings.clear();
-
 }
 
 
@@ -55,7 +53,7 @@ bool BaseStringTable::addString(const char *key, const char *val, bool reportDup
 	}
 
 	if (scumm_stricmp(key, "@right-to-left") == 0) {
-		_gameRef->_textRTL = true;
+		_game->_textRTL = true;
 		return STATUS_OK;
 	}
 
@@ -110,7 +108,7 @@ char *BaseStringTable::getKey(const char *str) const {
 }
 
 void BaseStringTable::replaceExpand(char *key, char *newStr, size_t newStrSize) const {
-	// W/A: Remove accented chars as input text in Polish version of Alpha Polaris
+	// W/A: Remove accented chars like input text in Polish version of Alpha Polaris
 	if (BaseEngine::instance().getGameId() == "alphapolaris" &&
 	    BaseEngine::instance().getLanguage() == Common::PL_POL) {
 		if (strcmp(key, "hotspot0360") == 0)
@@ -177,8 +175,9 @@ void BaseStringTable::expand(char **str) const {
 
 //////////////////////////////////////////////////////////////////////////
 void BaseStringTable::expand(Common::String &str) const {
-	char *tmp = new char[str.size() + 1];
-	Common::strcpy_s(tmp, str.size() + 1, str.c_str());
+	size_t tmpSize = str.size() + 1;
+	char *tmp = new char[tmpSize];
+	Common::strcpy_s(tmp, tmpSize, str.c_str());
 	expand(&tmp);
 	str = tmp;
 	delete[] tmp;
@@ -242,13 +241,13 @@ bool BaseStringTable::loadFile(const char *filename, bool clearOld) {
 
 	if (size > 3 && buffer[0] == '\xEF' && buffer[1] == '\xBB' && buffer[2] == '\xBF') {
 		pos += 3;
-		if (_gameRef->_textEncoding != TEXT_UTF8) {
-			_gameRef->_textEncoding = TEXT_UTF8;
-			//_gameRef->_textEncoding = TEXT_ANSI;
+		if (_game->_textEncoding != TEXT_UTF8) {
+			_game->_textEncoding = TEXT_UTF8;
+			//_game->_textEncoding = TEXT_ANSI;
 			BaseEngine::LOG(0, "  UTF8 file detected, switching to UTF8 text encoding");
 		}
 	} else {
-		_gameRef->_textEncoding = TEXT_ANSI;
+		_game->_textEncoding = TEXT_ANSI;
 	}
 
 	uint32 lineLength = 0;

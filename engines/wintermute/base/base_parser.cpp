@@ -25,6 +25,7 @@
  * Copyright (c) 2011 Jan Nedoma
  */
 
+#include "engines/wintermute/base/base.h"
 #include "engines/wintermute/base/base_parser.h"
 #include "engines/wintermute/base/base_engine.h"
 #include "engines/wintermute/base/base_game.h"
@@ -42,7 +43,7 @@ namespace Wintermute {
 
 
 //////////////////////////////////////////////////////////////////////
-BaseParser::BaseParser() {
+BaseParser::BaseParser(BaseGame *inGame) : BaseClass(inGame) {
 	_whiteSpace = new char [sizeof(WHITESPACE)];
 	Common::strcpy_s(_whiteSpace, sizeof(WHITESPACE), WHITESPACE);
 }
@@ -94,7 +95,7 @@ int32 BaseParser::getObject(char **buf, const TokenDesc *tokens, char **name, ch
 	if (tokens->id == 0) {
 		char *p = strchr(*buf, '\n');
 		if (p && p > *buf) {
-			strncpy(_lastOffender, *buf, MIN((uint32)255, (uint32)(p - *buf))); // TODO, clean
+			strncpy(_lastOffender, *buf, MIN((uint32)255, (uint32)(p - *buf)));
 		} else {
 			_lastOffender[0] = '\0';
 		}
@@ -125,7 +126,7 @@ int32 BaseParser::getCommand(char **buf, const TokenDesc *tokens, char **params)
 	if (!*buf) {
 		return PARSERR_TOKENNOTFOUND;
 	}
-	BaseEngine::instance().getGameRef()->miniUpdate();
+	_game->miniUpdate();
 	char *name;
 	return getObject(buf, tokens, &name, params);
 }
@@ -208,18 +209,18 @@ char *BaseParser::getAssignmentText(char **buf) {
 }
 
 //////////////////////////////////////////////////////////////////////
-Common::String BaseParser::getToken(char **buf) {
-	char token[100]; // TODO: Remove static
+char *BaseParser::getToken(char **buf) {
+	static char token[100];
 	char *b = *buf, *t = token;
 	while (true) {
 		while (*b && (*b == ' ' || *b == '\n' || *b == 13 || *b == 10 || *b == '\t')) {
 			b++;
 		}
-		if (*b == ';')
+		if (*b == ';') {
 			while (*b && *b != '\n' && *b != 13 && *b != 10) {
 				b++;
 			}
-		else {
+		} else {
 			break;
 		}
 	}
@@ -252,10 +253,10 @@ Common::String BaseParser::getToken(char **buf) {
 		*t++ = 0;
 	} else if (*b == 0) {
 		*buf = b;
-		return Common::String();
+		return nullptr;
 	} else {
 		// Error.
-		return Common::String();
+		return nullptr;
 	}
 
 	*buf = b;
@@ -265,8 +266,7 @@ Common::String BaseParser::getToken(char **buf) {
 
 //////////////////////////////////////////////////////////////////////
 float BaseParser::getTokenFloat(char **buf) {
-	Common::String token = getToken(buf);
-	const char *t = token.c_str();
+	const char *t = getToken(buf);
 	if (!((*t >= '0' && *t <= '9') || *t == '-' || *t == '.')) {
 		// Error situation. We handle this by return 0.
 		return 0.;
@@ -278,8 +278,7 @@ float BaseParser::getTokenFloat(char **buf) {
 
 //////////////////////////////////////////////////////////////////////
 int32 BaseParser::getTokenInt(char **buf) {
-	Common::String token = getToken(buf);
-	const char *t = token.c_str();
+	const char *t = getToken(buf);
 	if (!((*t >= '0' && *t <= '9') || *t == '-')) {
 		// Error situation. We handle this by return 0.
 		return 0;
@@ -291,8 +290,7 @@ int32 BaseParser::getTokenInt(char **buf) {
 
 //////////////////////////////////////////////////////////////////////
 void BaseParser::skipToken(char **buf, char *tok, char * /*msg*/) {
-	Common::String token = getToken(buf);
-	const char *t = token.c_str();
+	const char *t = getToken(buf);
 	if (strcmp(t, tok)) {
 		return;    // Error
 	}

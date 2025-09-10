@@ -46,7 +46,7 @@ public:
 	DECLARE_PERSISTENT(BaseFrame, BaseScriptable)
 	BaseSound *_sound;
 	bool _editorExpanded;
-	bool getBoundingRect(Rect32 *rect, int x, int y, float scaleX = 100, float scaleY = 100);
+	bool getBoundingRect(Common::Rect32 *rect, int x, int y, float scaleX = 100, float scaleY = 100);
 	bool saveAsText(BaseDynamicBuffer *buffer, int indent) override;
 	int32 _moveY;
 	int32 _moveX;
@@ -61,10 +61,11 @@ public:
 	BaseArray<const char *> _applyEvent;
 
 	// scripting interface
-	ScValue *scGetProperty(const Common::String &name) override;
+	ScValue *scGetProperty(const char *name) override;
 	bool scSetProperty(const char *name, ScValue *value) override;
 	bool scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack, const char *name) override;
 	const char *scToString() override;
+
 	Common::String debuggerToString() const override;
 };
 

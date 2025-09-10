@@ -138,6 +138,8 @@ Common::Error MacVentureEngine::run() {
 	_decodingNamingArticles = new StringTable(this, _resourceManager, kNamingArticlesStringTableID);
 	_decodingIndirectArticles = new StringTable(this, _resourceManager, kIndirectArticlesStringTableID);
 
+	SearchMan.addSubDirectoryMatching(_gamePath, _filenames->getString(3));
+
 	loadDataBundle();
 
 	// Big class instantiation
@@ -154,6 +156,7 @@ Common::Error MacVentureEngine::run() {
 		}
 	} else {
 		setNewGameState();
+		_gui->drawTitle();
 	}
 	selectControl(kStartOrResume);
 
@@ -375,7 +378,7 @@ void MacVentureEngine::handleObjectSelect(ObjID objID, WindowReference win, bool
 		} else {
 			if (objID == 0) {
 				unselectAll();
-				objID = win;
+				objID = windata.objRef;
 			}
 			if (objID > 0) {
 				int currentObjectIndex = findObjectInArray(objID, _currentSelection);
@@ -672,7 +675,7 @@ Item MacVentureEngine::removeOutlier(Layout &layout, bool flag, Common::Rect rec
 			max = flag ? 0x7fff : -0x8000;
 		}
 		if (first || oob) {
-			int center = childBounds.width() / 2 | 0;
+			int center = childBounds.width() / 2;
 			bool over = false;
 			if (flag) {
 				over = (max >= center);
@@ -790,7 +793,7 @@ void MacVentureEngine::cleanUp(WindowReference reference) {
 
 			Item toAdd;
 			toAdd.id = outlier.id;
-			toAdd.bounds = Common::Rect(Common::Point(x, y + (height - outlier.bounds.height()) / 2 | 0),
+			toAdd.bounds = Common::Rect(Common::Point(x, y + (height - outlier.bounds.height()) / 2),
 										outlier.bounds.width(), outlier.bounds.height());
 			items.push_back(toAdd);
 
@@ -813,13 +816,13 @@ void MacVentureEngine::messUp(WindowReference reference) {
 		if (scale < 0)
 			scale = 0;
 		float f = randBetween(0, 10) / 10.0f;
-		int y = ((int)(f * scale) | 0) + data.bounds.top;
+		int y = (int)(f * scale) + data.bounds.top;
 
 		scale = data.bounds.width() - childMeasures.x;
 		if (scale < 0)
 			scale = 0;
 		f = randBetween(0, 10) / 10.0f;
-		int x = ((int)(f * scale) | 0) + data.bounds.left;
+		int x = (int)(f * scale) + data.bounds.left;
 
 		items.push_back(Item{child.obj, Common::Rect(Common::Point(x, y), childMeasures.x, childMeasures.y)});
 	}
@@ -890,6 +893,7 @@ void MacVentureEngine::updateExits() {
 	for (uint i = 0; i < exits.size(); i++)
 		_gui->updateExit(exits[i]);
 
+	_gui->resetExitBackgroundPattern();
 }
 
 int MacVentureEngine::findObjectInArray(ObjID objID, const Common::Array<ObjID> &list) {
@@ -977,7 +981,7 @@ void MacVentureEngine::openObject(ObjID objID) {
 		_gui->updateWindowInfo(kMainGameWindow, objID, _world->getChildren(objID, true));
 		_gui->updateWindow(kMainGameWindow, _world->getObjAttr(objID, kAttrContainerOpen));
 		updateExits();
-		_gui->setWindowTitle(kMainGameWindow, _world->getText(objID, objID, objID)); // it ignores source and target in the original
+		_gui->setWindowTitle(kMainGameWindow, capitalize(_world->getText(objID, objID, objID))); // it ignores source and target in the original
 	} else { // Open inventory window
 		Common::Point p(_world->getObjAttr(objID, kAttrPosX), _world->getObjAttr(objID, kAttrPosY));
 		WindowReference invID = _gui->createInventoryWindow(objID);
@@ -1149,13 +1153,7 @@ Common::String MacVentureEngine::getCommandsPausedString() const {
 }
 
 Common::Path MacVentureEngine::getFilePath(FilePathID id) const {
-	if (id <= 3) { // We don't want a file in the subdirectory
-		return Common::Path(_filenames->getString(id));
-	} else { // We want a game file
-		Common::Path path(_filenames->getString(3));
-		path.joinInPlace(_filenames->getString(id));
-		return path;
-	}
+	return Common::Path(_filenames->getString(id));
 }
 
 bool MacVentureEngine::isOldText() const {
@@ -1186,6 +1184,10 @@ bool MacVentureEngine::isObjVisible(ObjID objID) {
 
 bool MacVentureEngine::isObjClickable(ObjID objID) {
 	return _world->getObjAttr(objID, kAttrUnclickable) == 0;
+}
+
+bool MacVentureEngine::isObjDraggable(ObjID objID) {
+	return _world->isObjDraggable(objID);
 }
 
 bool MacVentureEngine::isObjSelected(ObjID objID) {
@@ -1321,6 +1323,23 @@ bool MacVentureEngine::loadTextHuffman() {
 		return true;
 	}
 	return false;
+}
+
+Common::String MacVentureEngine::capitalize(const Common::String &str) const {
+	Common::String out(str);
+	bool shouldCapitalize = true;
+
+	for (char &c : out) {
+		if (shouldCapitalize) {
+			c = toupper(c);
+			shouldCapitalize = false;
+		} else {
+			if (c == ' ')
+				shouldCapitalize = true;
+		}
+	}
+
+	return out;
 }
 
 // Global Settings

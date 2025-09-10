@@ -58,7 +58,8 @@ enum CastType {
 	kCastDigitalVideo = 10,
 	kCastLingoScript = 11,
 	kCastRichText = 12,
-	kCastTransition = 14,
+	kCastTransition = 14,		// D5
+	kCastXtra = 15,
 };
 
 enum ScriptType {
@@ -466,7 +467,7 @@ const char *spriteType2str(SpriteType type);
 const char *inkType2str(InkType type);
 const char *symbolType2str(SymbolType type);
 Common::String objectType2str(int fl);
-
+\
 enum CollisionTest {
 	kCollisionNo = 0,
 	kCollisionYes,

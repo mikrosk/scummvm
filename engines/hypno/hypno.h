@@ -32,6 +32,7 @@
 #include "graphics/font.h"
 #include "graphics/fontman.h"
 #include "graphics/surface.h"
+#include "video/subtitles.h"
 
 #include "hypno/grammar.h"
 #include "hypno/libfile.h"
@@ -76,6 +77,32 @@ enum HypnoColors {
 enum SpiderColors {
 	kSpiderColorWhite = 248,
 	kSpiderColorBlue = 252,
+};
+
+enum HYPNOActions {
+	kActionNone,
+	kActionSkipIntro,
+	kActionSkipCutscene,
+	kActionPrimaryShoot,
+	kActionSkipLevel,
+	kActionKillPlayer,
+	kActionPause,
+	kActionLeft,
+	kActionDown,
+	kActionRight,
+	kActionUp,
+	kActionYes,
+	kActionNo,
+	kActionDifficultyChump,
+	kActionDifficultyPunk,
+	kActionDifficultyBadass,
+	kActionDifficultExit,
+	kActionRetry,
+	kActionRestart,
+	kActionNewMission,
+	kActionQuit,
+	kActionCredits,
+	kActionSelect,
 };
 
 class HypnoEngine;
@@ -170,6 +197,10 @@ public:
 	bool canSaveAutosaveCurrently() override { return false; }
 	bool canSaveGameStateCurrently(Common::U32String *msg = nullptr) override { return (isDemo() ? false : true); }
 	Common::String _checkpoint;
+
+	Video::Subtitles *_subtitles;
+	void adjustSubtitleSize();
+	void loadSubtitles(const Common::Path &path);
 
 	Common::Path _prefixDir;
 	Common::Path convertPath(const Common::String &);
@@ -287,6 +318,8 @@ public:
 	virtual byte *getTargetColor(Common::String name, int levelId);
 	virtual bool checkRButtonUp();
 	virtual void setRButtonUp(const bool val);
+	virtual void disableGameKeymaps();
+	virtual void enableGameKeymaps();
 
 	// Segments
 	Segments _segments;
@@ -455,6 +488,8 @@ public:
 	byte *getTargetColor(Common::String name, int levelId) override;
 	bool checkRButtonUp() override;
 	void setRButtonUp(const bool val) override;
+	void disableGameKeymaps() override;
+	void enableGameKeymaps() override;
 
 
 	bool hasFeature(EngineFeature f) const override {

@@ -47,6 +47,7 @@
 #include "engines/wintermute/base/base_sprite.h"
 #include "engines/wintermute/base/base_file_manager.h"
 #include "engines/wintermute/platform_osystem.h"
+#include "engines/wintermute/dcgf.h"
 
 namespace Wintermute {
 
@@ -54,8 +55,8 @@ IMPLEMENT_PERSISTENT(UIWindow, false)
 
 //////////////////////////////////////////////////////////////////////////
 UIWindow::UIWindow(BaseGame *inGame) : UIObject(inGame) {
-	_titleRect.setEmpty();
-	_dragRect.setEmpty();
+	BasePlatform::setRectEmpty(&_titleRect);
+	BasePlatform::setRectEmpty(&_dragRect);
 	_titleAlign = TAL_LEFT;
 	_transparent = false;
 
@@ -96,16 +97,12 @@ UIWindow::~UIWindow() {
 
 //////////////////////////////////////////////////////////////////////////
 void UIWindow::cleanup() {
-	delete _shieldWindow;
-	_shieldWindow = nullptr;
-	delete _shieldButton;
-	_shieldButton = nullptr;
-	delete _viewport;
-	_viewport = nullptr;
-
+	SAFE_DELETE(_shieldWindow);
+	SAFE_DELETE(_shieldButton);
+	SAFE_DELETE(_viewport);
 	delete _backInactive;
 	if (!_sharedFonts && _fontInactive) {
-		_gameRef->_fontStorage->removeFont(_fontInactive);
+		_game->_fontStorage->removeFont(_fontInactive);
 	}
 	if (!_sharedImages && _imageInactive) {
 		delete _imageInactive;
@@ -123,28 +120,29 @@ bool UIWindow::display(int offsetX, int offsetY) {
 	// go exclusive
 	if (_mode == WINDOW_EXCLUSIVE || _mode == WINDOW_SYSTEM_EXCLUSIVE) {
 		if (!_shieldWindow) {
-			_shieldWindow = new UIWindow(_gameRef);
+			_shieldWindow = new UIWindow(_game);
 		}
 		if (_shieldWindow) {
 			_shieldWindow->_posX = _shieldWindow->_posY = 0;
-			_shieldWindow->_width = _gameRef->_renderer->getWidth();
-			_shieldWindow->_height = _gameRef->_renderer->getHeight();
+			_shieldWindow->_width = _game->_renderer->getWidth();
+			_shieldWindow->_height = _game->_renderer->getHeight();
 
 			_shieldWindow->display();
 		}
 	} else if (_isMenu) {
 		if (!_shieldButton) {
-			_shieldButton = new UIButton(_gameRef);
+			_shieldButton = new UIButton(_game);
 			_shieldButton->setName("close");
 			_shieldButton->setListener(this, _shieldButton, 0);
 			_shieldButton->_parent = this;
 		}
+		if (_shieldButton) {
+			_shieldButton->_posX = _shieldButton->_posY = 0;
+			_shieldButton->_width = _game->_renderer->getWidth();
+			_shieldButton->_height = _game->_renderer->getHeight();
 
-		_shieldButton->_posX = _shieldButton->_posY = 0;
-		_shieldButton->_width = _gameRef->_renderer->getWidth();
-		_shieldButton->_height = _gameRef->_renderer->getHeight();
-
-		_shieldButton->display();
+			_shieldButton->display();
+		}
 	}
 
 	if (!_visible) {
@@ -156,15 +154,15 @@ bool UIWindow::display(int offsetX, int offsetY) {
 		byte fadeG = RGBCOLGetG(_fadeColor);
 		byte fadeB = RGBCOLGetB(_fadeColor);
 		byte fadeA = RGBCOLGetA(_fadeColor);
-		_gameRef->_renderer->fadeToColor(fadeR, fadeG, fadeB, fadeA);
+		_game->_renderer->fadeToColor(fadeR, fadeG, fadeB, fadeA);
 	}
 
 	if (_dragging) {
-		_posX += (_gameRef->_mousePos.x - _dragFrom.x);
-		_posY += (_gameRef->_mousePos.y - _dragFrom.y);
+		_posX += (_game->_mousePos.x - _dragFrom.x);
+		_posY += (_game->_mousePos.y - _dragFrom.y);
 
-		_dragFrom.x = _gameRef->_mousePos.x;
-		_dragFrom.y = _gameRef->_mousePos.y;
+		_dragFrom.x = _game->_mousePos.x;
+		_dragFrom.y = _game->_mousePos.y;
 	}
 
 	if (!_focusedWidget || (!_focusedWidget->_canFocus || _focusedWidget->_disable || !_focusedWidget->_visible)) {
@@ -174,11 +172,11 @@ bool UIWindow::display(int offsetX, int offsetY) {
 	bool popViewport = false;
 	if (_clipContents) {
 		if (!_viewport) {
-			_viewport = new BaseViewport(_gameRef);
+			_viewport = new BaseViewport(_game);
 		}
 		if (_viewport) {
 			_viewport->setRect(_posX + offsetX, _posY + offsetY, _posX + _width + offsetX, _posY + _height + offsetY);
-			_gameRef->pushViewport(_viewport);
+			_game->pushViewport(_viewport);
 			popViewport = true;
 		}
 	}
@@ -201,7 +199,7 @@ bool UIWindow::display(int offsetX, int offsetY) {
 	}
 
 	if (_alphaColor != 0) {
-		_gameRef->_renderer->_forceAlphaColor = _alphaColor;
+		_game->_renderer->_forceAlphaColor = _alphaColor;
 	}
 	if (back) {
 		back->display(_posX + offsetX, _posY + offsetY, _width, _height);
@@ -210,12 +208,12 @@ bool UIWindow::display(int offsetX, int offsetY) {
 		image->draw(_posX + offsetX, _posY + offsetY, _transparent ? nullptr : this);
 	}
 
-	if (!_titleRect.isRectEmpty() && font && _text) {
+	if (!BasePlatform::isRectEmpty(&_titleRect) && font && _text) {
 		font->drawText((byte *)_text, _posX + offsetX + _titleRect.left, _posY + offsetY + _titleRect.top, _titleRect.right - _titleRect.left, _titleAlign, _titleRect.bottom - _titleRect.top);
 	}
 
 	if (!_transparent && !image) {
-		_gameRef->_renderer->_rectList.add(new BaseActiveRect(_gameRef,  this, nullptr, _posX + offsetX, _posY + offsetY, _width, _height, 100, 100, false));
+		_game->_renderer->_rectList.add(new BaseActiveRect(_game,  this, nullptr, _posX + offsetX, _posY + offsetY, _width, _height, 100, 100, false));
 	}
 
 	for (int32 i = 0; i < _widgets.getSize(); i++) {
@@ -223,11 +221,11 @@ bool UIWindow::display(int offsetX, int offsetY) {
 	}
 
 	if (_alphaColor != 0) {
-		_gameRef->_renderer->_forceAlphaColor = 0;
+		_game->_renderer->_forceAlphaColor = 0;
 	}
 
 	if (popViewport) {
-		_gameRef->popViewport();
+		_game->popViewport();
 	}
 
 	return STATUS_OK;
@@ -238,7 +236,7 @@ bool UIWindow::display(int offsetX, int offsetY) {
 bool UIWindow::loadFile(const char *filename) {
 	char *buffer = (char *)BaseFileManager::getEngineInstance()->readWholeFile(filename);
 	if (buffer == nullptr) {
-		_gameRef->LOG(0, "UIWindow::LoadFile failed for file '%s'", filename);
+		_game->LOG(0, "UIWindow::loadFile failed for file '%s'", filename);
 		return STATUS_FAILED;
 	}
 
@@ -247,7 +245,7 @@ bool UIWindow::loadFile(const char *filename) {
 	setFilename(filename);
 
 	if (DID_FAIL(ret = loadBuffer(buffer, true))) {
-		_gameRef->LOG(0, "Error parsing WINDOW file '%s'", filename);
+		_game->LOG(0, "Error parsing WINDOW file '%s'", filename);
 	}
 
 	delete[] buffer;
@@ -337,14 +335,14 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 
 	char *params;
 	int cmd = 2;
-	BaseParser parser;
+	BaseParser parser(_game);
 
 	int fadeR = 0, fadeG = 0, fadeB = 0, fadeA = 0;
 	int ar = 0, ag = 0, ab = 0, alpha = 0;
 
 	if (complete) {
 		if (parser.getCommand(&buffer, commands, &params) != TOKEN_WINDOW) {
-			_gameRef->LOG(0, "'WINDOW' keyword expected.");
+			_game->LOG(0, "'WINDOW' keyword expected.");
 			return STATUS_FAILED;
 		}
 		buffer = params;
@@ -367,50 +365,46 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_BACK:
-			delete _back;
-			_back = new UITiledImage(_gameRef);
+			SAFE_DELETE(_back);
+			_back = new UITiledImage(_game);
 			if (!_back || DID_FAIL(_back->loadFile(params))) {
-				delete _back;
-				_back = nullptr;
+				SAFE_DELETE(_back);
 				cmd = PARSERR_GENERIC;
 			}
 			break;
 
 		case TOKEN_BACK_INACTIVE:
-			delete _backInactive;
-			_backInactive = new UITiledImage(_gameRef);
+			SAFE_DELETE(_backInactive);
+			_backInactive = new UITiledImage(_game);
 			if (!_backInactive || DID_FAIL(_backInactive->loadFile(params))) {
-				delete _backInactive;
-				_backInactive = nullptr;
+				SAFE_DELETE(_backInactive);
 				cmd = PARSERR_GENERIC;
 			}
 			break;
 
 		case TOKEN_IMAGE:
-			delete _image;
-			_image = new BaseSprite(_gameRef);
+			SAFE_DELETE(_image);
+			_image = new BaseSprite(_game);
 			if (!_image || DID_FAIL(_image->loadFile(params))) {
-				delete _image;
-				_image = nullptr;
+				SAFE_DELETE(_image);
 				cmd = PARSERR_GENERIC;
 			}
 			break;
 
 		case TOKEN_IMAGE_INACTIVE:
-			delete _imageInactive;
-			_imageInactive = new BaseSprite(_gameRef);
+			SAFE_DELETE(_imageInactive);
+			_imageInactive = new BaseSprite(_game);
 			if (!_imageInactive || DID_FAIL(_imageInactive->loadFile(params))) {
-				delete _imageInactive;
-				_imageInactive = nullptr;
+				SAFE_DELETE(_imageInactive);
 				cmd = PARSERR_GENERIC;
 			}
 			break;
 
 		case TOKEN_FONT:
 			if (_font) {
-				_gameRef->_fontStorage->removeFont(_font);
+				_game->_fontStorage->removeFont(_font);
 			}
-			_font = _gameRef->_fontStorage->addFont(params);
+			_font = _game->_fontStorage->addFont(params);
 			if (!_font) {
 				cmd = PARSERR_GENERIC;
 			}
@@ -418,9 +412,9 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 
 		case TOKEN_FONT_INACTIVE:
 			if (_fontInactive) {
-				_gameRef->_fontStorage->removeFont(_fontInactive);
+				_game->_fontStorage->removeFont(_fontInactive);
 			}
-			_fontInactive = _gameRef->_fontStorage->addFont(params);
+			_fontInactive = _game->_fontStorage->addFont(params);
 			if (!_fontInactive) {
 				cmd = PARSERR_GENERIC;
 			}
@@ -428,7 +422,7 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 
 		case TOKEN_TITLE:
 			setText(params);
-			_gameRef->expandStringByStringTable(&_text);
+			_game->_stringTable->expand(&_text);
 			break;
 
 		case TOKEN_TITLE_ALIGN:
@@ -466,20 +460,18 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		case TOKEN_CURSOR:
-			delete _cursor;
-			_cursor = new BaseSprite(_gameRef);
+			SAFE_DELETE(_cursor);
+			_cursor = new BaseSprite(_game);
 			if (!_cursor || DID_FAIL(_cursor->loadFile(params))) {
-				delete _cursor;
-				_cursor = nullptr;
+				SAFE_DELETE(_cursor);
 				cmd = PARSERR_GENERIC;
 			}
 			break;
 
 		case TOKEN_BUTTON: {
-			UIButton *btn = new UIButton(_gameRef);
+			UIButton *btn = new UIButton(_game);
 			if (!btn || DID_FAIL(btn->loadBuffer(params, false))) {
-				delete btn;
-				btn = nullptr;
+				SAFE_DELETE(btn);
 				cmd = PARSERR_GENERIC;
 			} else {
 				btn->_parent = this;
@@ -489,10 +481,9 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 		break;
 
 		case TOKEN_STATIC: {
-			UIText *text = new UIText(_gameRef);
+			UIText *text = new UIText(_game);
 			if (!text || DID_FAIL(text->loadBuffer(params, false))) {
-				delete text;
-				text = nullptr;
+				SAFE_DELETE(text);
 				cmd = PARSERR_GENERIC;
 			} else {
 				text->_parent = this;
@@ -502,10 +493,9 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 		break;
 
 		case TOKEN_EDIT: {
-			UIEdit *edit = new UIEdit(_gameRef);
+			UIEdit *edit = new UIEdit(_game);
 			if (!edit || DID_FAIL(edit->loadBuffer(params, false))) {
-				delete edit;
-				edit = nullptr;
+				SAFE_DELETE(edit);
 				cmd = PARSERR_GENERIC;
 			} else {
 				edit->_parent = this;
@@ -515,10 +505,9 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 		break;
 
 		case TOKEN_WINDOW: {
-			UIWindow *win = new UIWindow(_gameRef);
+			UIWindow *win = new UIWindow(_game);
 			if (!win || DID_FAIL(win->loadBuffer(params, false))) {
-				delete win;
-				win = nullptr;
+				SAFE_DELETE(win);
 				cmd = PARSERR_GENERIC;
 			} else {
 				win->_parent = this;
@@ -586,24 +575,24 @@ bool UIWindow::loadBuffer(char *buffer, bool complete) {
 			break;
 
 		default:
-			if (DID_FAIL(_gameRef->windowLoadHook(this, &buffer, &params))) {
+			if (DID_FAIL(_game->windowLoadHook(this, &buffer, &params))) {
 				cmd = PARSERR_GENERIC;
 			}
 		}
 	}
 	if (cmd == PARSERR_TOKENNOTFOUND) {
-		_gameRef->LOG(0, "Syntax error in WINDOW definition");
+		_game->LOG(0, "Syntax error in WINDOW definition");
 		return STATUS_FAILED;
 	}
 	if (cmd == PARSERR_GENERIC) {
-		_gameRef->LOG(0, "Error loading WINDOW definition");
+		_game->LOG(0, "Error loading WINDOW definition");
 		return STATUS_FAILED;
 	}
 
 	// HACK: Increase window title height by 1 for "5 Lethal Demons" game
 	// For some reason getFontHeight() is off-by-one comparing to height set in TITLE_RECT,
 	// Which made text being bigger then title rect and drawing was skipped.
-	if (BaseEngine::instance().getGameId() == "5ld" && !_titleRect.isRectEmpty() && _text) {
+	if (BaseEngine::instance().getGameId() == "5ld" && !BasePlatform::isRectEmpty(&_titleRect) && _text) {
 		_titleRect.bottom ++;
 	}
 
@@ -633,29 +622,29 @@ bool UIWindow::saveAsText(BaseDynamicBuffer *buffer, int indent) {
 
 	buffer->putTextIndent(indent + 2, "\n");
 
-	if (_back && _back->getFilename()) {
-		buffer->putTextIndent(indent + 2, "BACK=\"%s\"\n", _back->getFilename());
+	if (_back && _back->_filename) {
+		buffer->putTextIndent(indent + 2, "BACK=\"%s\"\n", _back->_filename);
 	}
-	if (_backInactive && _backInactive->getFilename()) {
-		buffer->putTextIndent(indent + 2, "BACK_INACTIVE=\"%s\"\n", _backInactive->getFilename());
-	}
-
-	if (_image && _image->getFilename()) {
-		buffer->putTextIndent(indent + 2, "IMAGE=\"%s\"\n", _image->getFilename());
-	}
-	if (_imageInactive && _imageInactive->getFilename()) {
-		buffer->putTextIndent(indent + 2, "IMAGE_INACTIVE=\"%s\"\n", _imageInactive->getFilename());
+	if (_backInactive && _backInactive->_filename) {
+		buffer->putTextIndent(indent + 2, "BACK_INACTIVE=\"%s\"\n", _backInactive->_filename);
 	}
 
-	if (_font && _font->getFilename()) {
-		buffer->putTextIndent(indent + 2, "FONT=\"%s\"\n", _font->getFilename());
+	if (_image && _image->_filename) {
+		buffer->putTextIndent(indent + 2, "IMAGE=\"%s\"\n", _image->_filename);
 	}
-	if (_fontInactive && _fontInactive->getFilename()) {
-		buffer->putTextIndent(indent + 2, "FONT_INACTIVE=\"%s\"\n", _fontInactive->getFilename());
+	if (_imageInactive && _imageInactive->_filename) {
+		buffer->putTextIndent(indent + 2, "IMAGE_INACTIVE=\"%s\"\n", _imageInactive->_filename);
 	}
 
-	if (_cursor && _cursor->getFilename()) {
-		buffer->putTextIndent(indent + 2, "CURSOR=\"%s\"\n", _cursor->getFilename());
+	if (_font && _font->_filename) {
+		buffer->putTextIndent(indent + 2, "FONT=\"%s\"\n", _font->_filename);
+	}
+	if (_fontInactive && _fontInactive->_filename) {
+		buffer->putTextIndent(indent + 2, "FONT_INACTIVE=\"%s\"\n", _fontInactive->_filename);
+	}
+
+	if (_cursor && _cursor->_filename) {
+		buffer->putTextIndent(indent + 2, "CURSOR=\"%s\"\n", _cursor->_filename);
 	}
 
 	buffer->putTextIndent(indent + 2, "\n");
@@ -678,11 +667,11 @@ bool UIWindow::saveAsText(BaseDynamicBuffer *buffer, int indent) {
 		error("UIWindow::SaveAsText - Unhandled enum-value NUM_TEXT_ALIGN");
 	}
 
-	if (!_titleRect.isRectEmpty()) {
+	if (!BasePlatform::isRectEmpty(&_titleRect)) {
 		buffer->putTextIndent(indent + 2, "TITLE_RECT { %d, %d, %d, %d }\n", _titleRect.left, _titleRect.top, _titleRect.right, _titleRect.bottom);
 	}
 
-	if (!_dragRect.isRectEmpty()) {
+	if (!BasePlatform::isRectEmpty(&_dragRect)) {
 		buffer->putTextIndent(indent + 2, "DRAG_RECT { %d, %d, %d, %d }\n", _dragRect.left, _dragRect.top, _dragRect.right, _dragRect.bottom);
 	}
 
@@ -794,9 +783,9 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 		stack->correctParams(1);
 
 		if (_fontInactive) {
-			_gameRef->_fontStorage->removeFont(_fontInactive);
+			_game->_fontStorage->removeFont(_fontInactive);
 		}
-		_fontInactive = _gameRef->_fontStorage->addFont(stack->pop()->getString());
+		_fontInactive = _game->_fontStorage->addFont(stack->pop()->getString());
 		stack->pushBool(_fontInactive != nullptr);
 
 		return STATUS_OK;
@@ -808,12 +797,11 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 	else if (strcmp(name, "SetInactiveImage") == 0) {
 		stack->correctParams(1);
 
-		delete _imageInactive;
-		_imageInactive = new BaseSprite(_gameRef);
+		SAFE_DELETE(_imageInactive);
+		_imageInactive = new BaseSprite(_game);
 		const char *filename = stack->pop()->getString();
 		if (!_imageInactive || DID_FAIL(_imageInactive->loadFile(filename))) {
-			delete _imageInactive;
-			_imageInactive = nullptr;
+			SAFE_DELETE(_imageInactive);
 			stack->pushBool(false);
 		} else {
 			stack->pushBool(true);
@@ -827,10 +815,10 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 	//////////////////////////////////////////////////////////////////////////
 	else if (strcmp(name, "GetInactiveImage") == 0) {
 		stack->correctParams(0);
-		if (!_imageInactive || !_imageInactive->getFilename()) {
+		if (!_imageInactive || !_imageInactive->_filename) {
 			stack->pushNULL();
 		} else {
-			stack->pushString(_imageInactive->getFilename());
+			stack->pushString(_imageInactive->_filename);
 		}
 
 		return STATUS_OK;
@@ -887,8 +875,8 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 	//////////////////////////////////////////////////////////////////////////
 	else if (strcmp(name, "Center") == 0) {
 		stack->correctParams(0);
-		_posX = (_gameRef->_renderer->getWidth() - _width) / 2;
-		_posY = (_gameRef->_renderer->getHeight() - _height) / 2;
+		_posX = (_game->_renderer->getWidth() - _width) / 2;
+		_posY = (_game->_renderer->getHeight() - _height) / 2;
 		stack->pushNULL();
 		return STATUS_OK;
 	}
@@ -917,7 +905,7 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 		stack->correctParams(1);
 		ScValue *val = stack->pop();
 
-		UIButton *btn = new UIButton(_gameRef);
+		UIButton *btn = new UIButton(_game);
 		if (!val->isNULL()) {
 			btn->setName(val->getString());
 		}
@@ -936,7 +924,7 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 		stack->correctParams(1);
 		ScValue *val = stack->pop();
 
-		UIText *sta = new UIText(_gameRef);
+		UIText *sta = new UIText(_game);
 		if (!val->isNULL()) {
 			sta->setName(val->getString());
 		}
@@ -955,7 +943,7 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 		stack->correctParams(1);
 		ScValue *val = stack->pop();
 
-		UIEdit *edi = new UIEdit(_gameRef);
+		UIEdit *edi = new UIEdit(_game);
 		if (!val->isNULL()) {
 			edi->setName(val->getString());
 		}
@@ -974,7 +962,7 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 		stack->correctParams(1);
 		ScValue *val = stack->pop();
 
-		UIWindow *win = new UIWindow(_gameRef);
+		UIWindow *win = new UIWindow(_game);
 		if (!val->isNULL()) {
 			win->setName(val->getString());
 		}
@@ -1005,7 +993,7 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 		}
 		stack->pushNULL();
 		return STATUS_OK;
-	} else if DID_SUCCEED(_gameRef->windowScriptMethodHook(this, script, stack, name)) {
+	} else if DID_SUCCEED(_game->windowScriptMethodHook(this, script, stack, name)) {
 		return STATUS_OK;
 	}
 
@@ -1016,13 +1004,13 @@ bool UIWindow::scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack
 
 
 //////////////////////////////////////////////////////////////////////////
-ScValue *UIWindow::scGetProperty(const Common::String &name) {
+ScValue *UIWindow::scGetProperty(const char *name) {
 	_scValue->setNULL();
 
 	//////////////////////////////////////////////////////////////////////////
 	// Type
 	//////////////////////////////////////////////////////////////////////////
-	if (name == "Type") {
+	if (strcmp(name, "Type") == 0) {
 		_scValue->setString("window");
 		return _scValue;
 	}
@@ -1030,7 +1018,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// NumWidgets / NumControls (RO)
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "NumWidgets" || name == "NumControls") {
+	else if (strcmp(name, "NumWidgets") == 0 || strcmp(name, "NumControls") == 0) {
 		_scValue->setInt(_widgets.getSize());
 		return _scValue;
 	}
@@ -1038,7 +1026,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Exclusive
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Exclusive") {
+	else if (strcmp(name, "Exclusive") == 0) {
 		_scValue->setBool(_mode == WINDOW_EXCLUSIVE);
 		return _scValue;
 	}
@@ -1046,7 +1034,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// SystemExclusive
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "SystemExclusive") {
+	else if (strcmp(name, "SystemExclusive") == 0) {
 		_scValue->setBool(_mode == WINDOW_SYSTEM_EXCLUSIVE);
 		return _scValue;
 	}
@@ -1054,7 +1042,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Menu
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Menu") {
+	else if (strcmp(name, "Menu") == 0) {
 		_scValue->setBool(_isMenu);
 		return _scValue;
 	}
@@ -1062,7 +1050,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// InGame
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "InGame") {
+	else if (strcmp(name, "InGame") == 0) {
 		_scValue->setBool(_inGame);
 		return _scValue;
 	}
@@ -1070,7 +1058,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// PauseMusic
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "PauseMusic") {
+	else if (strcmp(name, "PauseMusic") == 0) {
 		_scValue->setBool(_pauseMusic);
 		return _scValue;
 	}
@@ -1078,7 +1066,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// ClipContents
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "ClipContents") {
+	else if (strcmp(name, "ClipContents") == 0) {
 		_scValue->setBool(_clipContents);
 		return _scValue;
 	}
@@ -1086,7 +1074,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// Transparent
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "Transparent") {
+	else if (strcmp(name, "Transparent") == 0) {
 		_scValue->setBool(_transparent);
 		return _scValue;
 	}
@@ -1094,7 +1082,7 @@ ScValue *UIWindow::scGetProperty(const Common::String &name) {
 	//////////////////////////////////////////////////////////////////////////
 	// FadeColor
 	//////////////////////////////////////////////////////////////////////////
-	else if (name == "FadeColor") {
+	else if (strcmp(name, "FadeColor") == 0) {
 		_scValue->setInt((int)_fadeColor);
 		return _scValue;
 	} else {
@@ -1215,9 +1203,9 @@ bool UIWindow::handleKeypress(Common::Event *event, bool printable) {
 
 
 //////////////////////////////////////////////////////////////////////////
-bool UIWindow::handleMouseWheel(int32 Delta) {
+bool UIWindow::handleMouseWheel(int32 delta) {
 	if (_focusedWidget) {
-		return _focusedWidget->handleMouseWheel(Delta);
+		return _focusedWidget->handleMouseWheel(delta);
 	} else {
 		return false;
 	}
@@ -1229,17 +1217,17 @@ bool UIWindow::handleMouse(TMouseEvent event, TMouseButton button) {
 	bool res = UIObject::handleMouse(event, button);
 
 	// handle window dragging
-	if (!_dragRect.isRectEmpty()) {
+	if (!BasePlatform::isRectEmpty(&_dragRect)) {
 		// start drag
 		if (event == MOUSE_CLICK && button == MOUSE_BUTTON_LEFT) {
-			Rect32 dragRect = _dragRect;
+			Common::Rect32 dragRect = _dragRect;
 			int offsetX, offsetY;
 			getTotalOffset(&offsetX, &offsetY);
-			dragRect.offsetRect(_posX + offsetX, _posY + offsetY);
+			BasePlatform::offsetRect(&dragRect, _posX + offsetX, _posY + offsetY);
 
-			if (BasePlatform::ptInRect(&dragRect, _gameRef->_mousePos)) {
-				_dragFrom.x = _gameRef->_mousePos.x;
-				_dragFrom.y = _gameRef->_mousePos.y;
+			if (BasePlatform::ptInRect(&dragRect, _game->_mousePos)) {
+				_dragFrom.x = _game->_mousePos.x;
+				_dragFrom.y = _game->_mousePos.y;
 				_dragging = true;
 			}
 		}
@@ -1347,7 +1335,7 @@ bool UIWindow::goExclusive() {
 		_mode = WINDOW_EXCLUSIVE;
 		_visible = true;
 		_disable = false;
-		_gameRef->focusWindow(this);
+		_game->focusWindow(this);
 		return STATUS_OK;
 	} else {
 		return STATUS_FAILED;
@@ -1368,9 +1356,9 @@ bool UIWindow::goSystemExclusive() {
 	_ready = false;
 	_visible = true;
 	_disable = false;
-	_gameRef->focusWindow(this);
+	_game->focusWindow(this);
 
-	_gameRef->freeze(_pauseMusic);
+	_game->freeze(_pauseMusic);
 	return STATUS_OK;
 }
 
@@ -1378,7 +1366,7 @@ bool UIWindow::goSystemExclusive() {
 //////////////////////////////////////////////////////////////////////////
 bool UIWindow::close() {
 	if (_mode == WINDOW_SYSTEM_EXCLUSIVE) {
-		_gameRef->unfreeze();
+		_game->unfreeze();
 	}
 
 	_mode = WINDOW_NORMAL;

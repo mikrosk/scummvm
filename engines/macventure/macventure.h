@@ -221,6 +221,8 @@ public:
 	MacVentureEngine(OSystem *syst, const ADGameDescription *gameDesc);
 	~MacVentureEngine() override;
 
+	void initializePath(const Common::FSNode &gamePath) override;
+
 	bool hasFeature(EngineFeature f) const override;
 
 	Common::Error run() override;
@@ -308,6 +310,7 @@ public:
 	Common::Point getObjPosition(ObjID objID);
 	bool isObjVisible(ObjID objID);
 	bool isObjClickable(ObjID objID);
+	bool isObjDraggable(ObjID objID);
 	bool isObjSelected(ObjID objID);
 	bool isObjExit(ObjID objID);
 	bool isHiddenExit(ObjID objID);
@@ -359,6 +362,8 @@ private:
 
 	const char *getGameFileName() const;
 
+	Common::String capitalize(const Common::String &str) const;
+
 private: // Attributes
 
 	const ADGameDescription *_gameDescription;
@@ -378,6 +383,7 @@ private: // Attributes
 
 	SoundManager *_soundManager;
 
+	Common::FSNode _gamePath;
 	Common::Archive *_dataBundle;
 
 	// Engine state

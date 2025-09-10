@@ -52,7 +52,6 @@ public:
 	virtual bool listen(BaseScriptHolder *param1, uint32 param2);
 	bool applyEvent(const char *eventName, bool unbreakable = false);
 	void setFilename(const char *filename);
-	const char *getFilename() { return _filename; }
 	bool parseProperty(char *buffer, bool complete = true);
 
 	char *_filename;
@@ -61,7 +60,7 @@ public:
 	BaseArray<ScScript *> _scripts;
 
 	// scripting interface
-	ScValue *scGetProperty(const Common::String &name) override;
+	ScValue *scGetProperty(const char *name) override;
 	bool scSetProperty(const char *name, ScValue *value) override;
 	bool scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack, const char *name) override;
 	const char *scToString() override;

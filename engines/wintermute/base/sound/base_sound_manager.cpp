@@ -115,7 +115,7 @@ BaseSoundBuffer *BaseSoundMgr::addSound(const Common::String &filename, Audio::M
 		}
 	}
 
-	sound = new BaseSoundBuffer(_gameRef);
+	sound = new BaseSoundBuffer(_game);
 	if (!sound) {
 		return nullptr;
 	}
@@ -138,8 +138,6 @@ BaseSoundBuffer *BaseSoundMgr::addSound(const Common::String &filename, Audio::M
 	_sounds.add(sound);
 
 	return sound;
-
-	return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////

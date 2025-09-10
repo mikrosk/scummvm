@@ -101,7 +101,6 @@ public:
 	bool _editorAlwaysRegister;
 	bool _editorOnly;
 	bool _is3D;
-
 	DECLARE_PERSISTENT(BaseObject, BaseScriptHolder)
 	virtual bool showCursor();
 	BaseSprite *_cursor;
@@ -113,9 +112,9 @@ public:
 	bool _registrable;
 	bool _zoomable;
 	bool _shadowable;
-	Rect32 _rect;
+	Common::Rect32 _rect;
 	bool _rectSet;
-	int32 _iD;
+	int32 _id;
 	bool _movable;
 	BaseObject(BaseGame *inGame);
 	~BaseObject() override;
@@ -154,15 +153,14 @@ public:
 	DXVector3 _shadowLightPos;
 	bool _drawBackfaces;
 	TShadowType _shadowType;
-
-	virtual uint32 getAnimTransitionTime(char *from, char *to) {
+	virtual uint32 getAnimTransitionTime(const char *from, const char *to) {
 		return 0;
 	};
 #endif
 
 public:
 	// scripting interface
-	ScValue *scGetProperty(const Common::String &name) override;
+	ScValue *scGetProperty(const char *name) override;
 	bool scSetProperty(const char *name, ScValue *value) override;
 	bool scCallMethod(ScScript *script, ScStack *stack, ScStack *thisStack, const char *name) override;
 	const char *scToString() override;

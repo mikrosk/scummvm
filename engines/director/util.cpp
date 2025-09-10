@@ -446,8 +446,10 @@ const char *recIndent() {
 
 bool isAbsolutePath(const Common::String &path) {
 	// Starts with Mac directory notation for the game root
-	if (path.hasPrefix(Common::String("@") + g_director->_dirSeparator))
+	if (path.hasPrefix(Common::String("@:")) ||
+		path.hasPrefix(Common::String("@\\"))) {
 		return true;
+	}
 	// Starts with a Windows drive letter
 	if (path.size() >= 3
 			&& Common::isAlpha(path[0])
@@ -471,6 +473,12 @@ bool isPathWithRelativeMarkers(const Common::String &path) {
 Common::String rectifyRelativePath(const Common::String &path, const Common::Path &base) {
 	Common::StringArray components = base.splitComponents();
 	uint32 idx = 0;
+
+	// If a path is provided that begins with @, it will be relative to the top level, not the base.
+	if ((path.size() > 0) && (path[0] == '@')) {
+		idx++;
+		components.clear();
+	}
 
 	while (idx < path.size()) {
 		uint32 start = idx;
@@ -539,7 +547,8 @@ Common::String convertPath(const Common::String &path) {
 
 	if (path.hasPrefix("::")) { // Parent directory
 		idx = 2;
-	} else if (path.hasPrefix(Common::String("@") + g_director->_dirSeparator)) { // Root of the game
+	} else if (path.hasPrefix(Common::String("@:")) ||
+				path.hasPrefix(Common::String("@\\"))) { // Root of the game
 		idx = 2;
 	} else if (path.size() >= 3
 					&& Common::isAlpha(path[0])
@@ -986,6 +995,14 @@ Common::String getFileNameFromModal(bool save, const Common::String &suggested, 
 	if (ext) {
 		mask += ".";
 		mask += ext;
+
+		/*
+		 The file browser dialog and the save system forces a .txt file extension.
+		 To support other file extensions we need to add .txt to the end if the file extension is different.
+		*/
+		if (strncmp(ext, "txt", 3) != 0) {
+			mask += ".txt";
+		}
 	}
 	GUI::FileBrowserDialog browser(title.c_str(), "txt", save ? GUI::kFBModeSave : GUI::kFBModeLoad, mask.c_str(), suggested.c_str());
 	if (browser.runModal() <= 0) {
@@ -1800,4 +1817,21 @@ double readAppleFloat80(void *ptr_) {
 	uint64 mantissa = READ_BE_UINT64(&ptr[2]);
 
 	return Common::XPFloat(signAndExponent, mantissa).toDouble(Common::XPFloat::kSemanticsSANE);
+}
+
+void hexdumpIfNotZero(byte *data, int len, const char *prefix) {
+	bool nonZero = false;
+	for (int i = 0; i < len; i++) {
+		if (data[i] != 0) {
+			nonZero = true;
+			break;
+		}
+	}
+
+	if (nonZero) {
+		if (prefix)
+			debugN("%s ", prefix);
+
+		Common::hexdump(data, len);
+	}
 }

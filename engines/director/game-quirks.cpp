@@ -107,6 +107,22 @@ struct CachedFile {
 		"PATH.INI",
 		(const byte *)"[cd-path]\r\npath=d:\\", -1
 	},
+	{"tkkg2", Common::kPlatformWindows,
+		// TKKG2 checks a file to determine the location of the CD.
+		"PATH.INI",
+		(const byte *)"[cd-path]\r\npath=d:\\", -1
+	},
+	{"tkkg3", Common::kPlatformWindows,
+		// TKKG3 checks a file to determine the location of the CD.
+		"PATH.INI",
+		(const byte *)"[cd-path]\r\npath=d:\\", -1
+	},
+	{"tkkg4", Common::kPlatformWindows,
+		// TKKG4 checks a file to determine the location of the CD.
+		"PATH.INI",
+		(const byte *)"[cd-path]\r\npath=d:\\", -1
+	},
+
 	// Professor Finkle's Times Table Factory has an installer that copies a bunch of empty files,
 	// which the game gets upset about if they don't exist.
 	{"finkletimes", Common::kPlatformWindows, "finkle.ini", (const byte *)"", 0},
@@ -131,6 +147,8 @@ struct SaveFilePath {
 	const char *path;
 } const saveFilePaths[] = {
 	{ "darkeye", Common::kPlatformWindows, "SAVEDDKY/" },
+	{"simpsonsstudio", Common::kPlatformWindows, "SIMPSONS/SUPPORT/TOONDATA/"},
+	{"simpsonsstudio", Common::kPlatformMacintosh, "SIMPSONS/SUPPORT/TOONDATA/"},
 	{ nullptr, Common::kPlatformUnknown, nullptr },
 };
 
@@ -330,6 +348,12 @@ void DirectorEngine::gameQuirks(const char *target, Common::Platform platform) {
 
 	if (!list.empty()) {
 		CachedArchive *archive = new CachedArchive(list);
+
+		// If gameQuirks is called as an update we need to remove the old quirks cache
+		// archive before adding the new one.
+		if (SearchMan.hasArchive(kQuirksCacheArchive)) {
+			SearchMan.remove(kQuirksCacheArchive);
+		}
 
 		SearchMan.add(kQuirksCacheArchive, archive);
 	}
