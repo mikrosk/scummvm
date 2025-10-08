@@ -23,24 +23,23 @@
 #define BACKENDS_MIXER_ATARI_H
 
 #include "backends/mixer/mixer.h"
-#include "common/events.h"
 
 /**
  *  Atari XBIOS based audio mixer.
  */
 
-class AtariMixerManager : public MixerManager, Common::EventObserver {
+class AtariMixerManager : public MixerManager {
+	friend void __attribute__((interrupt)) AtariAudioTimerA(void);
+	friend int MixCallbackWrapper(AtariMixerManager *manager);
+
 public:
 	AtariMixerManager();
 	virtual ~AtariMixerManager();
 
 	virtual void init() override;
-	void update();
 
 	void suspendAudio() override;
 	int resumeAudio() override;
-
-	bool notifyEvent(const Common::Event &event) override;
 
 private:
 	int _outputRate = 0;
@@ -52,6 +51,9 @@ private:
 	byte *_atariPhysicalSampleBuffer = nullptr;
 	byte *_atariLogicalSampleBuffer = nullptr;
 	bool _downsample = false;
+
+	byte *_stack = nullptr;
+	size_t _stackSize = 0;
 };
 
 #endif

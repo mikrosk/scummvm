@@ -501,8 +501,6 @@ void OSystem_Atari::update() {
 			activeDomain->getValOrDefault("engineid").c_str(),
 			activeDomain->getValOrDefault("gameid").c_str());
 	}
-
-	((AtariMixerManager *)_mixerManager)->update();
 }
 
 OSystem *OSystem_Atari_create() {
