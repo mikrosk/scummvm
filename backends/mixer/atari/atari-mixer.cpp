@@ -62,7 +62,6 @@ int MixCallbackWrapper(AtariMixerManager *manager) {
 static volatile AtariMixerManager *manager;
 void __attribute__((interrupt)) AtariAudioTimerA(void)
 {
-	// TODO: save/restore FPU state
 	if (!manager)
 		return;
 
@@ -74,17 +73,25 @@ void __attribute__((interrupt)) AtariAudioTimerA(void)
 		"	move.l	%%sp,%1\n"
 		"	move.l	%4,%%sp\n"
 
+		"	fsave	%%sp@-\n"
+		"	fmovem.l %%fpcr/%%fpsr/%%fpiar,%%sp@-\n"
+		"	fmovem.x %%fp0-%%fp1,%%sp@-\n"
+
 		// processed = _mixer->mixCallback(manager->_samplesBuf, manager->_samples * manager->_outputChannels * 2);
 		"	move.l	%3,%%sp@-\n"
 		"	jsr		(%2)\n"
 		"	addq.l	#4,%%sp\n"
+
+		"	fmovem.x %%sp@+,%%fp0-%%fp1\n"
+		"	fmovem.l %%sp@+,%%fpcr/%%fpsr/%%fpiar\n"
+		"	frestore %%sp@+\n"
 
 		"	move.l	%1,%%sp\n"
 
 		: "=r"(processed), "=g"(oldsp)	// outputs
 		: "a"(MixCallbackWrapper), "g"(manager),
 		  "g"(manager->_stack + manager->_stackSize)	// inputs
-		: __CLOBBER_RETURN("d0") "d1", "d2", "a0", "a1", "a2", "fp0", "fp1", "cc"	// clobbered regs
+		: __CLOBBER_RETURN("d0") "d1", "d2", "a0", "a1", "a2", "cc"	// clobbered regs
 		  AND_MEMORY
 	);
 #else
