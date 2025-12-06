@@ -327,7 +327,9 @@ private:
 
 public:
 	QueuingAudioStreamImpl(int rate, bool stereo)
-	    : _rate(rate), _stereo(stereo), _finished(false) {}
+		: _rate(rate), _stereo(stereo), _finished(false) {
+		warning("CTOR %p", this);
+	}
 	~QueuingAudioStreamImpl();
 
 	// Implement the AudioStream API
@@ -360,6 +362,7 @@ public:
 };
 
 QueuingAudioStreamImpl::~QueuingAudioStreamImpl() {
+	warning("DTOR %p", this);
 	while (!_queue.empty()) {
 		StreamHolder tmp = _queue.pop();
 		if (tmp._disposeAfterUse == DisposeAfterUse::YES)
@@ -373,6 +376,7 @@ void QueuingAudioStreamImpl::queueAudioStream(AudioStream *stream, DisposeAfterU
 		error("QueuingAudioStreamImpl::queueAudioStream: stream has mismatched parameters");
 
 	Common::StackLock lock(_mutex);
+	warning("QUEU %p: %p", this, stream);
 	_queue.push(StreamHolder(stream, disposeAfterUse));
 }
 
@@ -387,8 +391,10 @@ int QueuingAudioStreamImpl::readBuffer(int16 *buffer, const int numSamples) {
 		// Done with the stream completely
 		if (stream->endOfStream()) {
 			StreamHolder tmp = _queue.pop();
-			if (tmp._disposeAfterUse == DisposeAfterUse::YES)
-				delete stream;
+			if (tmp._disposeAfterUse == DisposeAfterUse::YES) {
+				warning("STRM %p: %p (q %d)", this, stream, _queue.size());
+				//delete stream;
+			}
 			continue;
 		}
 
