@@ -60,10 +60,25 @@ int MixCallbackWrapper(AtariMixerManager *manager) {
 }
 
 static volatile AtariMixerManager *manager;
-void __attribute__((interrupt)) AtariAudioTimerA(void)
-{
+void FakeAtariAudioTimerA(void) {
+
+}
+void __attribute__((interrupt)) AtariAudioTimerA(void) {
 	if (!manager)
 		return;
+
+    {
+        extern bool g_atari_mutex_locked;
+        extern bool g_atari_interrupt_queued;
+
+        if (g_atari_mutex_locked) {
+            g_atari_interrupt_queued = true;
+            return;
+        }
+
+        if (g_atari_interrupt_queued)
+            return;
+    }
 
 #if 1
 	register int processed __asm__("d0");
