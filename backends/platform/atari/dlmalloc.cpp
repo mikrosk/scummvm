@@ -403,13 +403,57 @@ static FORCEINLINE int win32munmap(void* ptr, size_t size) {
 #else
 #if USE_LOCKS > 1
 /* -----------------------  User-defined locks ------------------------ */
-/* Define your own lock implementation here */
-/* #define INITIAL_LOCK(lk)  ... */
-/* #define DESTROY_LOCK(lk)  ... */
-/* #define ACQUIRE_LOCK(lk)  ... */
-/* #define RELEASE_LOCK(lk)  ... */
-/* #define TRY_LOCK(lk) ... */
-/* static MLOCK_T malloc_global_mutex = ... */
+static FORCEINLINE char m68k_cas_lock(char *sl) {
+	char ret;
+
+	__asm__ __volatile__ (
+		"tas %1\n\t"       /* Test and Set high bit of the byte */
+		"sne %0"           /* If CC was NOT zero (already locked), set ret to 0xFF */
+		: "=d" (ret), "+m" (*sl)
+		:
+		: "cc", "memory"
+	);
+
+	/* 0 (success) or -1 (failure) */
+	return ret;
+}
+
+static FORCEINLINE void m68k_clear_lock(char *sl) {
+	assert(*(volatile char *)sl != 0);
+
+	__asm__ __volatile__ (
+		"sf %0"            /* Write 0 to the byte */
+		: "=m" (*sl)
+		:
+		: "memory"
+	);
+}
+
+#define CAS_LOCK(sl)     m68k_cas_lock(sl)
+#define CLEAR_LOCK(sl)   m68k_clear_lock(sl)
+
+/* How to yield for a spin lock */
+#define SPINS_PER_YIELD  63
+#define SPIN_LOCK_YIELD  Syield();
+
+/* Plain spin locks use single word (embedded in malloc_states) */
+static int spin_acquire_lock(char *sl) {
+	int spins = 0;
+	while (*(volatile char *)sl != 0 || CAS_LOCK(sl)) {
+		if ((++spins & SPINS_PER_YIELD) == 0) {
+			SPIN_LOCK_YIELD;
+		}
+	}
+	return 0;
+}
+
+#define MLOCK_T               char
+#define TRY_LOCK(sl)          !CAS_LOCK(sl)
+#define RELEASE_LOCK(sl)      CLEAR_LOCK(sl)
+#define ACQUIRE_LOCK(sl)      (CAS_LOCK(sl) ? spin_acquire_lock(sl) : 0)
+#define INITIAL_LOCK(sl)      (*sl = 0)
+#define DESTROY_LOCK(sl)      (0)
+static MLOCK_T malloc_global_mutex = 0;
 
 #elif USE_SPIN_LOCKS
 

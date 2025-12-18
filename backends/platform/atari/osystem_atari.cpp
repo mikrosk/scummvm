@@ -47,6 +47,7 @@
 #include "backends/graphics/atari/atari-graphics.h"
 #include "backends/keymapper/hardware-input.h"
 #include "backends/mixer/atari/atari-mixer.h"
+#include "backends/mutex/atari/atari-mutex.h"
 #include "backends/mutex/null/null-mutex.h"
 #include "backends/platform/atari/atari-debug.h"
 #include "backends/saves/default/default-saves.h"
@@ -81,28 +82,29 @@ static bool s_dtor_already_called = false;
 static long atari_200hz_init(void)
 {
 	__asm__ __volatile__(
-	"\tmove		%%sr,-(%%sp)\n"
-	"\tor.w		#0x700,%%sr\n"
+		"	move	%%sr,-(%%sp)\n"
+		"	ori		#0x700,%%sr\n"
 
-	"\tmove.l	0x114.w,old_200hz\n"
-	"\tmove.l	#my_200hz,0x114.w\n"
+		"	move.l	0x114.w,old_200hz\n"
+		"	move.l	#my_200hz,0x114.w\n"
 
-	"\tmove		(%%sp)+,%%sr\n"
-	"\tjbra		1f\n"
+		"	move	(%%sp)+,%%sr\n"
+		"	jbra	1f\n"
 
-	"\tdc.l		0x58425241\n" /* "XBRA" */
-	"\tdc.l		0x5343554d\n" /* "SCUM" */
-"old_200hz:\n"
-	"\tdc.l		0\n"
-"my_200hz:\n"
-	"\taddq.l	#1,%0\n"
+		"	dc.l	0x58425241\n" // "XBRA"
+		"	dc.l	0x5343554d\n" // "SCUM"
+		"old_200hz:\n"
+		"	dc.l	0\n"
+		"my_200hz:\n"
+		"	addq.l	#1,%0\n"
 
-	"\tmove.l	old_200hz(%%pc),-(%%sp)\n"
-	"\trts\n"
-"1:\n"
-	: /* output */
-	: "m"(counter_200hz) /* inputs */
-	: "memory", "cc");
+		"	move.l	old_200hz(%%pc),-(%%sp)\n"
+		"	rts\n"
+		"1:\n"
+		: // outputs
+		: "m"(counter_200hz) // inputs
+		: "memory", "cc"
+	);
 
 	return 0;
 }
@@ -110,15 +112,16 @@ static long atari_200hz_init(void)
 static long atari_200hz_shutdown(void)
 {
 	__asm__ __volatile__(
-	"\tmove		%%sr,-(%%sp)\n"
-	"\tor.w		#0x700,%%sr\n"
+		"	move	%%sr,-(%%sp)\n"
+		"	ori		#0x700,%%sr\n"
 
-	"\tmove.l	old_200hz,0x114.w\n"
+		"	move.l	old_200hz,0x114.w\n"
 
-	"\tmove		(%%sp)+,%%sr\n"
-	: /* output */
-	: /* inputs */
-	: "memory", "cc");
+		"	move	(%%sp)+,%%sr\n"
+		: // outputs
+		: // inputs
+		: "memory", "cc"
+	);
 
 	return 0;
 }
@@ -167,9 +170,15 @@ static void exit_restore() {
 }
 
 OSystem_Atari::OSystem_Atari() {
-	_fsFactory = new AtariFilesystemFactory();
-
 	nf_init();
+
+	_threadsAvailable = Getcookie(C_MiNT, NULL) == C_FOUND || Getcookie(C_MagX, NULL) == C_FOUND;
+	if (_threadsAvailable) {
+		if (!AtariMutexInit()) {
+			fprintf(stderr, "Mutex failed to initialize, exiting\n");
+			exit(EXIT_FAILURE);
+		}
+	}
 
 	enum {
 		VDO_NO_ATARI_HW = 0xffff,
@@ -224,6 +233,8 @@ OSystem_Atari::OSystem_Atari() {
 	// protect against sudden crash
 	s_old_procterm = Setexc(VEC_PROCTERM, -1);
 	(void)Setexc(VEC_PROCTERM, critical_restore);
+
+	_fsFactory = new AtariFilesystemFactory();
 }
 
 OSystem_Atari::~OSystem_Atari() {
@@ -252,6 +263,12 @@ OSystem_Atari::~OSystem_Atari() {
 
 	delete _fsFactory;
 	_fsFactory = nullptr;
+
+	if (_threadsAvailable) {
+		if (!AtariMutexDeinit()) {
+			fprintf(stderr, "Mutex failed to deinitialize\n");
+		}
+	}
 
 	if (_timerInitialized) {
 		Supexec(atari_200hz_shutdown);
@@ -363,7 +380,7 @@ void OSystem_Atari::engineDone() {
 }
 
 Common::MutexInternal *OSystem_Atari::createMutex() {
-	return new NullMutexInternal();
+	return _threadsAvailable ? createAtariMutexInternal() : new NullMutexInternal();
 }
 
 uint32 OSystem_Atari::getMillis(bool skipRecord) {
@@ -500,7 +517,8 @@ void OSystem_Atari::update() {
 			activeDomain->getValOrDefault("gameid").c_str());
 	}
 
-	((AtariMixerManager *)_mixerManager)->update();
+	if (!_threadsAvailable)
+		((AtariMixerManager *)_mixerManager)->update();
 }
 
 OSystem *OSystem_Atari_create() {

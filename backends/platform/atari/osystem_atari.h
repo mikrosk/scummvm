@@ -56,6 +56,7 @@ private:
 	long _startTime;
 
 	bool _timerInitialized = false;
+	bool _threadsAvailable;
 
 	int16 _vdi_handle;
 	int _vdi_width;

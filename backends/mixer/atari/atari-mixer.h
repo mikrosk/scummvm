@@ -25,10 +25,11 @@
 #include "backends/mixer/mixer.h"
 #include "common/events.h"
 
+#include <mint/basepage.h>
+
 /**
  *  Atari XBIOS based audio mixer.
  */
-
 class AtariMixerManager : public MixerManager, Common::EventObserver {
 public:
 	AtariMixerManager();
@@ -43,6 +44,17 @@ public:
 	bool notifyEvent(const Common::Event &event) override;
 
 private:
+	enum PlaybackState {
+		kPlaybackStopped,
+		kPlayingFromPhysicalBuffer,
+		kPlayingFromLogicalBuffer
+	};
+
+	static void audioThread(BASEPAGE *bp);
+
+	volatile bool _quit = false;
+	volatile bool _quitAcknowledged = false;
+
 	int _outputRate = 0;
 	int _outputChannels = 0;
 	int _samples = 0;
@@ -52,6 +64,8 @@ private:
 	byte *_atariPhysicalSampleBuffer = nullptr;
 	byte *_atariLogicalSampleBuffer = nullptr;
 	bool _downsample = false;
+
+	PlaybackState _playbackState = kPlaybackStopped;
 };
 
 #endif

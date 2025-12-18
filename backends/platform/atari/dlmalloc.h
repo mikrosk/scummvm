@@ -22,6 +22,8 @@
 #ifndef PLATFORM_ATARI_DLMALLOC_H
 #define PLATFORM_ATARI_DLMALLOC_H
 
+#include <mintbind.h>
+
 #define HAVE_MMAP 0
 #define HAVE_MORECORE 1
 #define MORECORE_CONTIGUOUS 0
@@ -30,6 +32,7 @@
 #define LACKS_TIME_H /* time(0) calls malloc... */
 #define MSPACES 1
 #define MALLOC_ALIGNMENT ((size_t)16U) /* 16B cache line */
+#define USE_LOCKS 2 /* own implementation */
 
 #pragma GCC diagnostic push
 /* warning: 'mallinfo mallinfo()' hides constructor for 'struct mallinfo' [-Wshadow] */
