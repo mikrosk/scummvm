@@ -19,38 +19,11 @@
  *
  */
 
-#ifndef BACKENDS_MIXER_ATARI_H
-#define BACKENDS_MIXER_ATARI_H
+#ifndef BACKENDS_MUTEX_ATARI_H
+#define BACKENDS_MUTEX_ATARI_H
 
-#include "backends/mixer/mixer.h"
+#include "common/mutex.h"
 
-/**
- *  Atari XBIOS based audio mixer.
- */
-extern "C" void AtariAudioHandler(void);
-
-class AtariMixerManager : public MixerManager {
-	friend void AtariAudioHandler(void);
-
-public:
-	AtariMixerManager();
-	virtual ~AtariMixerManager();
-
-	virtual void init() override;
-
-	void suspendAudio() override;
-	int resumeAudio() override;
-
-private:
-	int _outputRate = 0;
-	int _outputChannels = 0;
-	int _samples = 0;
-	uint8 *_samplesBuf = nullptr;
-
-	byte *_atariSampleBuffer = nullptr;
-	byte *_atariPhysicalSampleBuffer = nullptr;
-	byte *_atariLogicalSampleBuffer = nullptr;
-	bool _downsample = false;
-};
+Common::MutexInternal *createAtariMutexInternal();
 
 #endif

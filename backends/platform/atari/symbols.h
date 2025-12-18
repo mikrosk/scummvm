@@ -77,3 +77,15 @@
 #define pc REG(pc)
 
 #define sr REG(sr)
+
+#define fp0 REG(fp0)
+#define fp1 REG(fp1)
+#define fp2 REG(fp2)
+#define fp3 REG(fp3)
+#define fp4 REG(fp4)
+#define fp5 REG(fp5)
+#define fp6 REG(fp6)
+#define fp7 REG(fp7)
+#define fpcr REG(fpcr)
+#define fpsr REG(fpsr)
+#define fpiar REG(fpiar)

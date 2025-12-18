@@ -41,8 +41,10 @@ ifeq "$(HAVE_GCC)" "1"
 	# being helpful.
 	#CXXFLAGS+= -Wmissing-format-attribute
 
+ifneq "$(BACKEND)" "atari"
 	# Disable exceptions.
 	CXXFLAGS+= -fno-exceptions
+endif
 
 ifneq "$(HAVE_CLANG)" "1"
 	# enable checking of pointers returned by "new", but only when we do not

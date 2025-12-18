@@ -19,38 +19,49 @@
  *
  */
 
-#ifndef BACKENDS_MIXER_ATARI_H
-#define BACKENDS_MIXER_ATARI_H
+#ifndef PLATFORM_ATARI_INTERRUPTS_H
+#define PLATFORM_ATARI_INTERRUPTS_H
 
-#include "backends/mixer/mixer.h"
+#include "common/scummsys.h"
 
-/**
- *  Atari XBIOS based audio mixer.
- */
-extern "C" void AtariAudioHandler(void);
+#include <mint/osbind.h>
 
-class AtariMixerManager : public MixerManager {
-	friend void AtariAudioHandler(void);
+inline uint16 AtariDisableInterrupts(void) {
+	long oldSSP = -1;
 
-public:
-	AtariMixerManager();
-	virtual ~AtariMixerManager();
+	if (Super(SUP_INQUIRE) == SUP_USER)
+		oldSSP = Super(SUP_SET);
 
-	virtual void init() override;
+	uint16 oldSR;
+	__asm__ __volatile__(
+		"	move	%%sr,%0\n"
+		"	ori 	#0x700,%%sr\n"
+		: "=g"(oldSR) // outputs
+		: // inputs
+		: "cc"
+	);
 
-	void suspendAudio() override;
-	int resumeAudio() override;
+	if (oldSSP != -1)
+		SuperToUser(oldSSP);
 
-private:
-	int _outputRate = 0;
-	int _outputChannels = 0;
-	int _samples = 0;
-	uint8 *_samplesBuf = nullptr;
+	return oldSR;
+}
 
-	byte *_atariSampleBuffer = nullptr;
-	byte *_atariPhysicalSampleBuffer = nullptr;
-	byte *_atariLogicalSampleBuffer = nullptr;
-	bool _downsample = false;
-};
+inline void AtariEnableInterrupts(uint16 oldSR) {
+	long oldSSP = -1;
 
-#endif
+	if (Super(SUP_INQUIRE) == SUP_USER)
+		oldSSP = Super(SUP_SET);
+
+	__asm__ __volatile__(
+		"	move	%0,%%sr\n"
+		: // outputs
+		: "g"(oldSR) // inputs
+		: "cc"
+	);
+
+	if (oldSSP != -1)
+		SuperToUser(oldSSP);
+}
+
+#endif // PLATFORM_ATARI_INTERRUPTS_H
