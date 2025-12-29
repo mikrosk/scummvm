@@ -307,3 +307,5 @@ scummvm.prg
 __pycache__/
 
 devtools/create_prince
+
+scummvm-?\.?\.?*-atari-*
