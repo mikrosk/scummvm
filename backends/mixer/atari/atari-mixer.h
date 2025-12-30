@@ -44,14 +44,10 @@ public:
 	bool notifyEvent(const Common::Event &event) override;
 
 private:
-	enum PlaybackState {
-		kPlaybackStopped,
-		kPlayingFromPhysicalBuffer,
-		kPlayingFromLogicalBuffer
-	};
-
+	static void timerA(void);
 	static void audioThread(BASEPAGE *bp);
 
+	static volatile bool _timerATriggered;
 	volatile bool _quit = false;
 	volatile bool _quitAcknowledged = false;
 
@@ -64,8 +60,6 @@ private:
 	byte *_atariPhysicalSampleBuffer = nullptr;
 	byte *_atariLogicalSampleBuffer = nullptr;
 	bool _downsample = false;
-
-	PlaybackState _playbackState = kPlaybackStopped;
 };
 
 #endif

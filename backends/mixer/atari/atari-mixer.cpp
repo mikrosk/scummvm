@@ -37,7 +37,7 @@ extern "C" int usleep (__useconds_t __useconds);	// #include <unistd.h>
 #define DEFAULT_SAMPLES 2048	// 83ms
 
 void AtariAudioShutdown() {
-	//Jdisint(MFP_TIMERA);
+	Jdisint(MFP_TIMERA);
 	AtariSoundSetupDeinitXbios();
 }
 
@@ -115,14 +115,14 @@ void AtariMixerManager::init() {
 	if (!_atariSampleBuffer)
 		error("Failed to allocate memory in ST RAM");
 	memset(_atariSampleBuffer, 0, obtained.size * 2);
-	Setbuffer(SR_PLAY, _atariSampleBuffer, _atariSampleBuffer + obtained.size * 2);
 
 	_atariPhysicalSampleBuffer = _atariSampleBuffer;
 	_atariLogicalSampleBuffer = _atariSampleBuffer + obtained.size;
+	atari_debug("phys: %p, log: %p", _atariPhysicalSampleBuffer, _atariLogicalSampleBuffer);
 
-	//Setinterrupt(SI_TIMERA, SI_PLAY);
-	//Xbtimer(XB_TIMERA, 1<<3, 1, timerA);	// event count mode, count to '1'
-	//Jenabint(MFP_TIMERA);
+	Setinterrupt(SI_TIMERA, SI_PLAY);
+	Xbtimer(XB_TIMERA, 1<<3, 1, timerA);	// event count mode, count to '1'
+	Jenabint(MFP_TIMERA);
 
 	_samplesBuf = new uint8[_samples * _outputChannels * 2];	// always 16-bit
 
@@ -144,6 +144,12 @@ void AtariMixerManager::init() {
 
 		Mfree(bp);
 	}
+
+	// set initial buffer (silence)
+	Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariLogicalSampleBuffer);
+	// fire first interrupt (at the beginning of the sample)
+	atari_debug("initial play start");
+	Buffoper(SB_PLA_ENA | SB_PLA_RPT);
 }
 
 void AtariMixerManager::suspendAudio() {
@@ -164,22 +170,30 @@ int AtariMixerManager::resumeAudio() {
 bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	switch (event.type) {
 	case Common::EVENT_QUIT:
+		Buffoper(0x00);
 		_quit = true;
 		while (!_quitAcknowledged) {
 			Syield();
 		}
 		// fall through
 	case Common::EVENT_RETURN_TO_LAUNCHER:
-		Buffoper(0x00);
-		memset(_atariSampleBuffer, 0, _samples * _outputChannels * 2);
-		_playbackState = kPlaybackStopped;
-		atari_debug("silencing the mixer");
 		return false;
 	default:
 		break;
 	}
 
 	return false;
+}
+
+// TODO: Aranym misses the first trigger
+volatile bool AtariMixerManager::_timerATriggered = false;
+
+void __attribute__((interrupt)) AtariMixerManager::timerA(void) {
+	_timerATriggered = true;
+
+	//atari_debug("triggered");
+
+	*((volatile byte *)0xFFFFFA0FL) = ~(1<<5);	// clear in service bit
 }
 
 void AtariMixerManager::audioThread(BASEPAGE *bp) {
@@ -198,8 +212,22 @@ void AtariMixerManager::audioThread(BASEPAGE *bp) {
 		bp->p_bbase = _base->p_bbase;
 		bp->p_blen  = _base->p_blen;
 
+		Pnice(-10);
+
 		while (!manager->_quit) {
+			while (!_timerATriggered && !manager->_quit) {
+				Syield();
+			}
+			_timerATriggered = false;
+
+			int t1 = (int)g_system->getMillis();
 			manager->update();
+			int t2 = (int)g_system->getMillis();
+
+			if (t2 - t1 > manager->_samples * 1000 / manager->_outputRate) {
+				atari_warning("WARNING: mixing takes too long! (%d > %d)",
+					t2 - t1, manager->_samples * 1000 / manager->_outputRate);
+			}
 		}
 		manager->_quitAcknowledged = true;
 
@@ -208,42 +236,15 @@ void AtariMixerManager::audioThread(BASEPAGE *bp) {
 }
 
 void AtariMixerManager::update() {
-	SndBufPtr sPtr;
-	if (Buffptr(&sPtr) != 0) {
-		warning("Buffptr() failed");
-		return;
-	}
+	// _atariPhysicalSampleBuffer is still playing
+	byte *buf = _atariLogicalSampleBuffer;
+	size_t bufLen = _samples * _outputChannels * (_downsample ? 1 : 2);
+	//atari_debug("setting buffer to %p", buf);
+	Setbuffer(SR_PLAY, buf, buf + bufLen);
 
-	//atari_debug("play: %p, phys: %p log: %p; %d, %p", sPtr.play, _atariPhysicalSampleBuffer, _atariLogicalSampleBuffer, _quit, &_quit);
-
-	byte *buf = nullptr;
-
-	switch (_playbackState) {
-	case kPlaybackStopped:
-		// initial state: play the rest of the silence and prepare the next buffer
-		atari_debug("initial setting buffer to log %p", _atariLogicalSampleBuffer);
-		buf = _atariLogicalSampleBuffer;
-		_playbackState = kPlayingFromLogicalBuffer;
-		Buffoper(SB_PLA_ENA | SB_PLA_RPT);
-		break;
-	case kPlayingFromPhysicalBuffer:
-		if (sPtr.play && (byte *)sPtr.play < _atariLogicalSampleBuffer) {
-			atari_debug("setting buffer to log %p", _atariLogicalSampleBuffer);
-			buf = _atariLogicalSampleBuffer;
-			_playbackState = kPlayingFromLogicalBuffer;
-		}
-		break;
-	case kPlayingFromLogicalBuffer:
-		if (sPtr.play && (byte *)sPtr.play >= _atariLogicalSampleBuffer) {
-			atari_debug("setting buffer to phys %p", _atariPhysicalSampleBuffer);
-			buf = _atariPhysicalSampleBuffer;
-			_playbackState = kPlayingFromPhysicalBuffer;
-		}
-		break;
-	}
-
-	if (!buf)
-		return;
+	byte* tmp = _atariPhysicalSampleBuffer;
+	_atariPhysicalSampleBuffer = _atariLogicalSampleBuffer;
+	_atariLogicalSampleBuffer = tmp;
 
 	int processed = _mixer->mixCallback(_samplesBuf, _samples * _outputChannels * 2);
 	if (_downsample) {
@@ -277,29 +278,13 @@ void AtariMixerManager::update() {
 			"2:	dbra	%2,1b\n"
 			"	move.l	%%d0,%%a7\n"
 			: // outputs
-			: "g"(_samplesBuf), "a"(buf), "d"(processed * _outputChannels * 2/2) // inputs
+			: "g"(_samplesBuf), "a"(buf), "d"(processed * _outputChannels * 1) // inputs
 			: "d0", "d1", "cc" AND_MEMORY
 			);
 		}
-		memset(buf + processed * _outputChannels * 2/2, 0, (_samples - processed) * _outputChannels * 2/2);
+		memset(buf + processed * _outputChannels * 1, 0, (_samples - processed) * _outputChannels * 1);
 	} else {
 		memcpy(buf, _samplesBuf, processed * _outputChannels * 2);
 		memset(buf + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
-	}
-
-	if (Buffptr(&sPtr) == 0) {
-		int bytesLeft = -1;
-
-		if (buf == _atariLogicalSampleBuffer) {
-			bytesLeft = _atariLogicalSampleBuffer - (byte *)sPtr.play;
-		} else if (buf == _atariPhysicalSampleBuffer) {
-			bytesLeft = (_atariLogicalSampleBuffer + _samples * _outputChannels * 2) - (byte *)sPtr.play;
-		}
-
-		if (bytesLeft > 0) {
-			int ms = bytesLeft * 1000 / _outputChannels / (_downsample ? 1 : 2) / _outputRate;
-			atari_debug("sleep for: %d ms", ms);
-			usleep(ms * 1000);
-		}
 	}
 }
