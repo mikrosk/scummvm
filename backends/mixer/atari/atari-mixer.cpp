@@ -30,6 +30,7 @@
 
 extern "C" uint32 _stksize;
 extern "C" void _setstack(void *newsp);
+extern "C" int usleep (__useconds_t __useconds);	// #include <unistd.h>
 
 #define DEFAULT_OUTPUT_RATE 24585
 #define DEFAULT_OUTPUT_CHANNELS 2
@@ -227,14 +228,14 @@ void AtariMixerManager::update() {
 		break;
 	case kPlayingFromPhysicalBuffer:
 		if (sPtr.play && (byte *)sPtr.play < _atariLogicalSampleBuffer) {
-			//atari_debug("setting buffer to log %p", _atariLogicalSampleBuffer);
+			atari_debug("setting buffer to log %p", _atariLogicalSampleBuffer);
 			buf = _atariLogicalSampleBuffer;
 			_playbackState = kPlayingFromLogicalBuffer;
 		}
 		break;
 	case kPlayingFromLogicalBuffer:
 		if (sPtr.play && (byte *)sPtr.play >= _atariLogicalSampleBuffer) {
-			//atari_debug("setting buffer to phys %p", _atariPhysicalSampleBuffer);
+			atari_debug("setting buffer to phys %p", _atariPhysicalSampleBuffer);
 			buf = _atariPhysicalSampleBuffer;
 			_playbackState = kPlayingFromPhysicalBuffer;
 		}
@@ -284,5 +285,21 @@ void AtariMixerManager::update() {
 	} else {
 		memcpy(buf, _samplesBuf, processed * _outputChannels * 2);
 		memset(buf + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
+	}
+
+	if (Buffptr(&sPtr) == 0) {
+		int bytesLeft = -1;
+
+		if (buf == _atariLogicalSampleBuffer) {
+			bytesLeft = _atariLogicalSampleBuffer - (byte *)sPtr.play;
+		} else if (buf == _atariPhysicalSampleBuffer) {
+			bytesLeft = (_atariLogicalSampleBuffer + _samples * _outputChannels * 2) - (byte *)sPtr.play;
+		}
+
+		if (bytesLeft > 0) {
+			int ms = bytesLeft * 1000 / _outputChannels / (_downsample ? 1 : 2) / _outputRate;
+			atari_debug("sleep for: %d ms", ms);
+			usleep(ms * 1000);
+		}
 	}
 }
