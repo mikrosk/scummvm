@@ -23,6 +23,7 @@
 
 #include <mint/falcon.h>
 #include <mint/mintbind.h>
+#include <signal.h>
 #include <usound.h>	// https://github.com/mikrosk/usound
 
 #include "backends/platform/atari/atari-debug.h"
@@ -187,11 +188,23 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 
 // TODO: Aranym misses the first trigger
 volatile bool AtariMixerManager::_timerATriggered = false;
+volatile static uint32 timerAMillis = 0;
+
+// Signal handler function
+volatile static int audioPid = -1;
+void signal_handler(long sig) {
+	if (sig == SIGUSR1) {
+		// ...
+	}
+}
 
 void __attribute__((interrupt)) AtariMixerManager::timerA(void) {
 	_timerATriggered = true;
 
 	//atari_debug("triggered");
+	timerAMillis = g_system->getMillis();
+	if (audioPid != -1)
+		Pkill((int)audioPid, SIGUSR1);
 
 	*((volatile byte *)0xFFFFFA0FL) = ~(1<<5);	// clear in service bit
 }
@@ -212,21 +225,36 @@ void AtariMixerManager::audioThread(BASEPAGE *bp) {
 		bp->p_bbase = _base->p_bbase;
 		bp->p_blen  = _base->p_blen;
 
-		Pnice(-10);
+		Pnice(-20);
+
+		audioPid = Pgetpid();
+		Psignal(SIGUSR1, (long)signal_handler);
 
 		while (!manager->_quit) {
-			while (!_timerATriggered && !manager->_quit) {
-				Syield();
-			}
-			_timerATriggered = false;
+			// // while (!_timerATriggered && !manager->_quit) {
+			// // 	Syield();
+			// // }
+			// _timerATriggered = false;
+			Pause();
 
+			uint32 noticed = g_system->getMillis();
+
+			atari_debug("timer a: %d, noticed: %d", timerAMillis, noticed);
+
+			long oldssp = Super(0L);
 			int t1 = (int)g_system->getMillis();
 			manager->update();
 			int t2 = (int)g_system->getMillis();
+			SuperToUser(oldssp);
 
 			if (t2 - t1 > manager->_samples * 1000 / manager->_outputRate) {
-				atari_warning("WARNING: mixing takes too long! (%d > %d)",
-					t2 - t1, manager->_samples * 1000 / manager->_outputRate);
+				atari_warning("WARNING: mixing takes too long! (%d > %d); %d %d",
+					t2 - t1, manager->_samples * 1000 / manager->_outputRate,
+					t1, t2);
+			} else {
+				atari_warning("WARNING: mixing is quick enough (%d <= %d); %d %d",
+							  t1 - t2, manager->_samples * 1000 / manager->_outputRate,
+							  t1, t2);
 			}
 		}
 		manager->_quitAcknowledged = true;
