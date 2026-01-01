@@ -603,6 +603,8 @@ backends/modular-backend.cpp
 backends/modular-backend.h
 backends/mutex/3ds/3ds-mutex.cpp
 backends/mutex/3ds/3ds-mutex.h
+backends/mutex/atari/atari-mutex.cpp
+backends/mutex/atari/atari-mutex.h
 backends/mutex/null/null-mutex.h
 backends/mutex/pthread/pthread-mutex.cpp
 backends/mutex/pthread/pthread-mutex.h
@@ -733,7 +735,7 @@ backends/platform/android/touchcontrols.cpp
 backends/platform/android/touchcontrols.h
 backends/platform/atari/atari-debug.cpp
 backends/platform/atari/atari-debug.h
-backends/platform/atari/atari_ikbd.S
+backends/platform/atari/atari-ikbd.S
 backends/platform/atari/dlmalloc.cpp
 backends/platform/atari/dlmalloc.h
 backends/platform/atari/native_features.cpp

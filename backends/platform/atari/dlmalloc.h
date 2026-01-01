@@ -30,6 +30,8 @@
 #define LACKS_TIME_H /* time(0) calls malloc... */
 #define MSPACES 1
 #define MALLOC_ALIGNMENT ((size_t)16U) /* 16B cache line */
+#define USE_LOCKS 2 /* own implementation */
+#include <uthread.h>
 
 #pragma GCC diagnostic push
 /* warning: 'mallinfo mallinfo()' hides constructor for 'struct mallinfo' [-Wshadow] */

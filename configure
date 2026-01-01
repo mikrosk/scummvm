@@ -4203,7 +4203,7 @@ case $_backend in
 		define_in_config_if_yes yes "ATARI"
 		append_var DEFINES "-DDISABLE_NES_APU"
 		#append_var DEFINES "-DDISABLE_DOSBOX_OPL"
-		append_var LIBS "-lgem"
+		append_var LIBS "-lgem -luthread"
 		_ogg=no
 		_vorbis=no
 		_tremor=no

@@ -415,7 +415,8 @@ MODULE_OBJS += \
 	graphics/atari/atari-screen.o \
 	graphics/atari/atari-supervidel.o \
 	graphics/atari/atari-surface.o \
-	mixer/atari/atari-mixer.o
+	mixer/atari/atari-mixer.o \
+	mutex/atari/atari-mutex.o
 endif
 
 ifeq ($(BACKEND),ds)
