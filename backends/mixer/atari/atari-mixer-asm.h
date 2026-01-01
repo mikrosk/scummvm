@@ -19,43 +19,19 @@
  *
  */
 
-#ifndef BACKENDS_MIXER_ATARI_H
-#define BACKENDS_MIXER_ATARI_H
+#ifndef BACKENDS_MIXER_ATARI_ASM_H
+#define BACKENDS_MIXER_ATARI_ASM_H
 
-#include "backends/mixer/mixer.h"
-#include "common/events.h"
+#include "common/scummsys.h"
 
-/**
- *  Atari XBIOS based audio mixer.
- */
-extern "C" void AtariAudioCallback();
+extern "C" void asm_atari_timer_a(void);
+extern "C" void asm_atari_audio_handler(void);
+extern "C" void asm_atari_audio_handler_switch_to_main(void);
+extern "C" void asm_atari_audio_handler_switch_to_interrupt(void);
 
-class AtariMixerManager : public MixerManager, Common::EventObserver {
-	friend void AtariAudioCallback();
+extern "C" volatile uint32 g_asm_atari_in_interrupt;
 
-public:
-	AtariMixerManager();
-	virtual ~AtariMixerManager();
+extern "C" byte *g_asm_atari_isp;
+extern "C" uint32 g_asm_atari_isp_size;
 
-	virtual void init() override;
-
-	void suspendAudio() override;
-	int resumeAudio() override;
-
-	bool notifyEvent(const Common::Event &event) override;
-
-private:
-	void update();
-
-	int _outputRate = 0;
-	int _outputChannels = 0;
-	int _samples = 0;
-	uint8 *_samplesBuf = nullptr;
-
-	byte *_atariSampleBuffer = nullptr;
-	byte *_atariPhysicalSampleBuffer = nullptr;
-	byte *_atariLogicalSampleBuffer = nullptr;
-	bool _downsample = false;
-};
-
-#endif
+#endif // BACKENDS_MIXER_ATARI_ASM_H
