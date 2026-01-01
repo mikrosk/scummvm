@@ -403,13 +403,12 @@ static FORCEINLINE int win32munmap(void* ptr, size_t size) {
 #else
 #if USE_LOCKS > 1
 /* -----------------------  User-defined locks ------------------------ */
-/* Define your own lock implementation here */
-/* #define INITIAL_LOCK(lk)  ... */
-/* #define DESTROY_LOCK(lk)  ... */
-/* #define ACQUIRE_LOCK(lk)  ... */
-/* #define RELEASE_LOCK(lk)  ... */
-/* #define TRY_LOCK(lk) ... */
-/* static MLOCK_T malloc_global_mutex = ... */
+#define MLOCK_T                    uthread_mutex_t
+#define ACQUIRE_LOCK(lk)           (!uthread_mutex_lock(lk))
+#define RELEASE_LOCK(lk)           (!uthread_mutex_unlock(lk))
+#define INITIAL_LOCK(lk)           (!uthread_mutex_init(lk))
+#define DESTROY_LOCK(lk)           (0)
+static MLOCK_T malloc_global_mutex;
 
 #elif USE_SPIN_LOCKS
 

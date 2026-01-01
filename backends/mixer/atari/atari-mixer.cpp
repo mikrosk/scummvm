@@ -21,11 +21,9 @@
 
 #include "backends/mixer/atari/atari-mixer.h"
 
-#include <math.h>
 #include <mint/falcon.h>
-#include <mint/osbind.h>
-#include <mint/ostruct.h>
 #include <usound.h>	// https://github.com/mikrosk/usound
+#include <uthread.h>	// https://github.com/mikrosk/uthread
 
 #include "backends/platform/atari/atari-debug.h"
 #include "common/config-manager.h"
@@ -39,24 +37,12 @@ void AtariAudioShutdown() {
 	AtariSoundSetupDeinitXbios();
 }
 
-static volatile bool muted;
-static volatile bool endOfPlayback;
-static void __attribute__((interrupt)) timerA(void)
-{
-	if (endOfPlayback && !muted) {
-		*((volatile unsigned char *)0xFFFF8901L) &= 0xFC;	// disable playback/repeat (and triggers another interrupt)
-		muted = true;
-	}
-
-	endOfPlayback = true;
-
-	*((volatile byte *)0xFFFFFA0FL) &= ~(1<<5);	// clear in service bit
-}
+AtariMixerManager *AtariMixerManager::_manager = nullptr;
 
 AtariMixerManager::AtariMixerManager() : MixerManager() {
 	atari_debug("AtariMixerManager()");
 
-	suspendAudio();
+	_manager = this;
 
 	ConfMan.registerDefault("output_rate", DEFAULT_OUTPUT_RATE);
 	_outputRate = ConfMan.getInt("output_rate");
@@ -83,20 +69,24 @@ AtariMixerManager::~AtariMixerManager() {
 
 	AtariAudioShutdown();
 
+	uthread_deinit();
+
 	Mfree(_atariSampleBuffer);
 	_atariSampleBuffer = _atariPhysicalSampleBuffer = _atariLogicalSampleBuffer = nullptr;
 
 	delete[] _samplesBuf;
 	_samplesBuf = nullptr;
+
+	_manager = nullptr;
 }
 
 void AtariMixerManager::init() {
 	AudioSpec desired, obtained;
 
 	desired.frequency = _outputRate;
-	desired.channels = _outputChannels;
-	desired.format = AudioFormatSigned16MSB;
-	desired.samples = _samples;
+	desired.channels  = _outputChannels;
+	desired.format    = AudioFormatSigned16MSB;
+	desired.samples   = _samples;
 
 	if (!AtariSoundSetupInitXbios(&desired, &obtained)) {
 		error("Sound system is not available");
@@ -104,6 +94,10 @@ void AtariMixerManager::init() {
 
 	if (obtained.format != AudioFormatSigned8 && obtained.format != AudioFormatSigned16MSB) {
 		error("Sound system currently supports only 8/16-bit signed big endian samples");
+	}
+
+	if (!uthread_init(interruptCallback)) {
+		error("uthread_init failed");
 	}
 
 	// don't use the recommended number of samples
@@ -120,7 +114,7 @@ void AtariMixerManager::init() {
 	ConfMan.setInt("audio_buffer_size", _samples);
 
 	atari_debug("setting %d Hz mixing frequency (%d-bit, %s)",
-		  _outputRate, obtained.format == AudioFormatSigned8 ? 8 : 16, _outputChannels == 1 ? "mono" : "stereo");
+		_outputRate, obtained.format == AudioFormatSigned8 ? 8 : 16, _outputChannels == 1 ? "mono" : "stereo");
 	atari_debug("sample buffer size: %d", _samples);
 
 	ConfMan.flushToDisk();
@@ -128,12 +122,13 @@ void AtariMixerManager::init() {
 	_atariSampleBuffer = (byte*)Mxalloc(obtained.size * 2, MX_STRAM);
 	if (!_atariSampleBuffer)
 		error("Failed to allocate memory in ST RAM");
+	memset(_atariSampleBuffer, 0, obtained.size * 2);
 
 	_atariPhysicalSampleBuffer = _atariSampleBuffer;
 	_atariLogicalSampleBuffer = _atariSampleBuffer + obtained.size;
 
 	Setinterrupt(SI_TIMERA, SI_PLAY);
-	Xbtimer(XB_TIMERA, 1<<3, 1, timerA);	// event count mode, count to '1'
+	Xbtimer(XB_TIMERA, 1<<3, 1, uthread_interrupt_handler);	// event count mode, count to '1'
 	Jenabint(MFP_TIMERA);
 
 	_samplesBuf = new uint8[_samples * _outputChannels * 2];	// always 16-bit
@@ -141,34 +136,34 @@ void AtariMixerManager::init() {
 	_mixer = new Audio::MixerImpl(_outputRate, _outputChannels == 2, _samples);
 	_mixer->setReady(true);
 
-	resumeAudio();
+	// set initial buffer (silence)
+	Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariLogicalSampleBuffer);
+	// fire first interrupt (at the beginning of the sample)
+	atari_debug("initial play start");
+	Buffoper(SB_PLA_ENA | SB_PLA_RPT);
 }
 
 void AtariMixerManager::suspendAudio() {
 	atari_debug("suspendAudio");
 
-	Buffoper(0x00);
-	muted = true;
+	// TODO
 	_audioSuspended = true;
 }
 
 int AtariMixerManager::resumeAudio() {
 	atari_debug("resumeAudio");
 
+	// TODO
 	_audioSuspended = false;
-	update();
 	return 0;
 }
 
 bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	switch (event.type) {
 	case Common::EVENT_QUIT:
+		Buffoper(0x00);
+		// fall through
 	case Common::EVENT_RETURN_TO_LAUNCHER:
-		if (!muted) {
-			Buffoper(0x00);
-			muted = true;
-			atari_debug("silencing the mixer");
-		}
 		return false;
 	default:
 		break;
@@ -177,77 +172,71 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	return false;
 }
 
+void AtariMixerManager::interruptCallback() {
+	assert(_manager);
+
+	_manager->update();
+
+	// clear pending bit: if the callback is too CPU heavy,
+	// we don't want to flood the system with endless pending interrupts
+	*((volatile byte *)0xFFFFFA0B) &= ~(1<<5);
+
+	// clear in service bit
+	*((volatile byte *)0xFFFFFA0FL) &= ~(1<<5);
+}
+
+// TODO: Aranym misses the first trigger
 void AtariMixerManager::update() {
-	if (_audioSuspended) {
-		return;
-	}
+	// _atariPhysicalSampleBuffer is still playing
+	byte *buf = _atariLogicalSampleBuffer;
+	size_t bufLen = _samples * _outputChannels * (_downsample ? 1 : 2);
+	//atari_debug("setting buffer to %p", buf);
+	Setbuffer(SR_PLAY, buf, buf + bufLen);
 
-	assert(_mixer);
+	byte* tmp = _atariPhysicalSampleBuffer;
+	_atariPhysicalSampleBuffer = _atariLogicalSampleBuffer;
+	_atariLogicalSampleBuffer = tmp;
 
-	int processed = -1;
-
-	if (muted || endOfPlayback) {
-		endOfPlayback = false;
-		processed = _mixer->mixCallback(_samplesBuf, _samples * _outputChannels * 2);
-	}
-
-	if (processed > 0) {
-		byte* tmp = _atariPhysicalSampleBuffer;
-		_atariPhysicalSampleBuffer = _atariLogicalSampleBuffer;
-		_atariLogicalSampleBuffer = tmp;
-
-		if (_downsample) {
-			// use the trick with move.b (a7)+,dx which skips two bytes at once
-			// basically supplying move.w (src)+,dx; asr.w #8,dx; move.b dx,(dst)+
+	int processed = _mixer->mixCallback(_samplesBuf, _samples * _outputChannels * 2);
+	if (_downsample) {
+		// TODO: this will break if I enable lower IPL (for mouse/keyboard)
+		// use the trick with move.b (a7)+,dx which skips two bytes at once
+		// basically supplying move.w (src)+,dx; asr.w #8,dx; move.b dx,(dst)+
+		if (processed > 0) {
 			__asm__ volatile(
-				"	move.l	%%a7,%%d0\n"
-				"	move.l	%0,%%a7\n"
-				"	moveq	#0x0f,%%d1\n"
-				"	and.l	%2,%%d1\n"
-				"	neg.l	%%d1\n"
-				"	lsr.l	#4,%2\n"
-				"	jmp		(2f,%%pc,%%d1.l*2)\n"
-				"1:	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"	move.b	(%%a7)+,(%1)+\n"
-				"2:	dbra	%2,1b\n"
-				"	move.l	%%d0,%%a7\n"
-				: // outputs
-				: "g"(_samplesBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels * 2/2) // inputs
-				: "d0", "d1", "cc" AND_MEMORY
-				);
-			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2/2, 0, (_samples - processed) * _outputChannels * 2/2);
-			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2/2);
-		} else {
-			memcpy(_atariPhysicalSampleBuffer, _samplesBuf, processed * _outputChannels * 2);
-			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
-			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2);
+			"	move.l	%%a7,%%d0\n"
+			"	move.l	%0,%%a7\n"
+			"	moveq	#0x0f,%%d1\n"
+			"	and.l	%2,%%d1\n"
+			"	neg.l	%%d1\n"
+			"	lsr.l	#4,%2\n"
+			"	jmp		(2f,%%pc,%%d1.l*2)\n"
+			"1:	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"	move.b	(%%a7)+,(%1)+\n"
+			"2:	dbra	%2,1b\n"
+			"	move.l	%%d0,%%a7\n"
+			: // outputs
+			: "g"(_samplesBuf), "a"(buf), "d"(processed * _outputChannels * 1) // inputs
+			: "d0", "d1", "cc" AND_MEMORY
+			);
 		}
-
-		if (muted) {
-			Buffoper(SB_PLA_ENA | SB_PLA_RPT);
-			endOfPlayback = true;
-			muted = false;
-		}
-	} else if (processed == 0 && !muted) {
-		Buffoper(0x00);
-		muted = true;
-	}
-
-	if (processed > 0 && processed != _samples) {
-		atari_warning("processed: %d, _samples: %d", processed, _samples);
+		memset(buf + processed * _outputChannels * 1, 0, (_samples - processed) * _outputChannels * 1);
+	} else {
+		memcpy(buf, _samplesBuf, processed * _outputChannels * 2);
+		memset(buf + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
 	}
 }

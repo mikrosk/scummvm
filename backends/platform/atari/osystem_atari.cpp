@@ -47,7 +47,7 @@
 #include "backends/graphics/atari/atari-graphics.h"
 #include "backends/keymapper/hardware-input.h"
 #include "backends/mixer/atari/atari-mixer.h"
-#include "backends/mutex/null/null-mutex.h"
+#include "backends/mutex/atari/atari-mutex.h"
 #include "backends/platform/atari/atari-debug.h"
 #include "backends/saves/default/default-saves.h"
 #include "backends/timer/default/default-timer.h"
@@ -78,31 +78,60 @@ static volatile uint32 counter_200hz;
 
 static bool s_dtor_already_called = false;
 
+// TODO: rename
 static long atari_200hz_init(void)
 {
 	__asm__ __volatile__(
-	"\tmove		%%sr,-(%%sp)\n"
-	"\tor.w		#0x700,%%sr\n"
+		"	move	%%sr,-(%%sp)\n"
+		"	ori		#0x700,%%sr\n"
 
-	"\tmove.l	0x114.w,old_200hz\n"
-	"\tmove.l	#my_200hz,0x114.w\n"
+		"	move.l	0xB4.w,old_trap13\n"
+		"	move.l	#my_trap13,0xB4.w\n"
 
-	"\tmove		(%%sp)+,%%sr\n"
-	"\tjbra		1f\n"
+		"	move.l	0xB8.w,old_trap14\n"
+		"	move.l	#my_trap14,0xB8.w\n"
 
-	"\tdc.l		0x58425241\n" /* "XBRA" */
-	"\tdc.l		0x5343554d\n" /* "SCUM" */
-"old_200hz:\n"
-	"\tdc.l		0\n"
-"my_200hz:\n"
-	"\taddq.l	#1,%0\n"
+		"	move.l	0x114.w,old_200hz\n"
+		"	move.l	#my_200hz,0x114.w\n"
 
-	"\tmove.l	old_200hz(%%pc),-(%%sp)\n"
-	"\trts\n"
-"1:\n"
-	: /* output */
-	: "m"(counter_200hz) /* inputs */
-	: "memory", "cc");
+		"	move	(%%sp)+,%%sr\n"
+		"	jbra	1f\n"
+
+		"	dc.l	0x58425241\n" // "XBRA"
+		"	dc.l	0x5343554d\n" // "SCUM"
+		"old_200hz:\n"
+		"	dc.l	0\n"
+		"my_200hz:\n"
+		"	addq.l	#1,%0\n"
+
+		"	move.l	old_200hz(%%pc),-(%%sp)\n"
+		"	rts\n"
+
+		"	dc.l	0x58425241\n" // "XBRA"
+		"	dc.l	0x5343554d\n" // "SCUM"
+		"old_trap13:\n"
+		"	dc.l	0\n"
+		"my_trap13:\n"
+		"	ori		#0x700,%%sr\n"
+
+		"	move.l	old_trap13(%%pc),%%a0\n"
+		"	jmp		(%%a0)\n"
+
+		"	dc.l	0x58425241\n" // "XBRA"
+		"	dc.l	0x5343554d\n" // "SCUM"
+		"old_trap14:\n"
+		"	dc.l	0\n"
+		"my_trap14:\n"
+		"	ori		#0x700,%%sr\n"
+
+		"	move.l	old_trap14(%%pc),%%a0\n"
+		"	jmp		(%%a0)\n"
+
+		"1:\n"
+		: // outputs
+		: "m"(counter_200hz) // inputs
+		: "memory", "cc"
+	);
 
 	return 0;
 }
@@ -110,15 +139,18 @@ static long atari_200hz_init(void)
 static long atari_200hz_shutdown(void)
 {
 	__asm__ __volatile__(
-	"\tmove		%%sr,-(%%sp)\n"
-	"\tor.w		#0x700,%%sr\n"
+		"	move	%%sr,-(%%sp)\n"
+		"	ori		#0x700,%%sr\n"
 
-	"\tmove.l	old_200hz,0x114.w\n"
+		"	move.l	old_trap13,0xB4.w\n"
+		"	move.l	old_trap14,0xB8.w\n"
+		"	move.l	old_200hz,0x114.w\n"
 
-	"\tmove		(%%sp)+,%%sr\n"
-	: /* output */
-	: /* inputs */
-	: "memory", "cc");
+		"	move	(%%sp)+,%%sr\n"
+		: // outputs
+		: // inputs
+		: "memory", "cc"
+	);
 
 	return 0;
 }
@@ -363,7 +395,7 @@ void OSystem_Atari::engineDone() {
 }
 
 Common::MutexInternal *OSystem_Atari::createMutex() {
-	return new NullMutexInternal();
+	return createAtariMutexInternal();
 }
 
 uint32 OSystem_Atari::getMillis(bool skipRecord) {
@@ -499,8 +531,6 @@ void OSystem_Atari::update() {
 			activeDomain->getValOrDefault("engineid").c_str(),
 			activeDomain->getValOrDefault("gameid").c_str());
 	}
-
-	((AtariMixerManager *)_mixerManager)->update();
 }
 
 OSystem *OSystem_Atari_create() {
