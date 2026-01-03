@@ -84,6 +84,12 @@ static long atari_200hz_init(void)
 		"	move	%%sr,-(%%sp)\n"
 		"	ori		#0x700,%%sr\n"
 
+		"	move.l	0xB4.w,old_trap13\n"
+		"	move.l	#my_trap13,0xB4.w\n"
+
+		"	move.l	0xB8.w,old_trap14\n"
+		"	move.l	#my_trap14,0xB8.w\n"
+
 		"	move.l	0x114.w,old_200hz\n"
 		"	move.l	#my_200hz,0x114.w\n"
 
@@ -99,6 +105,27 @@ static long atari_200hz_init(void)
 
 		"	move.l	old_200hz(%%pc),-(%%sp)\n"
 		"	rts\n"
+
+		"	dc.l	0x58425241\n" // "XBRA"
+		"	dc.l	0x5343554d\n" // "SCUM"
+		"old_trap13:\n"
+		"	dc.l	0\n"
+		"my_trap13:\n"
+		"	ori		#0x700,%%sr\n"
+
+		"	move.l	old_trap13(%%pc),%%a0\n"
+		"	jmp		(%%a0)\n"
+
+		"	dc.l	0x58425241\n" // "XBRA"
+		"	dc.l	0x5343554d\n" // "SCUM"
+		"old_trap14:\n"
+		"	dc.l	0\n"
+		"my_trap14:\n"
+		"	ori		#0x700,%%sr\n"
+
+		"	move.l	old_trap14(%%pc),%%a0\n"
+		"	jmp		(%%a0)\n"
+
 		"1:\n"
 		: // outputs
 		: "m"(counter_200hz) // inputs
@@ -114,6 +141,8 @@ static long atari_200hz_shutdown(void)
 		"	move	%%sr,-(%%sp)\n"
 		"	ori		#0x700,%%sr\n"
 
+		"	move.l	old_trap13,0xB4.w\n"
+		"	move.l	old_trap14,0xB8.w\n"
 		"	move.l	old_200hz,0x114.w\n"
 
 		"	move	(%%sp)+,%%sr\n"
