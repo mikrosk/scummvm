@@ -393,6 +393,10 @@ static FORCEINLINE int win32munmap(void* ptr, size_t size) {
 
 */
 
+#define FORBIDDEN_SYMBOL_ALLOW_ALL
+#include "common/mutex.h"
+
+
 #if !USE_LOCKS
 #define USE_LOCK_BIT               (0U)
 #define INITIAL_LOCK(l)            (0)
@@ -403,13 +407,13 @@ static FORCEINLINE int win32munmap(void* ptr, size_t size) {
 #else
 #if USE_LOCKS > 1
 /* -----------------------  User-defined locks ------------------------ */
-/* Define your own lock implementation here */
-/* #define INITIAL_LOCK(lk)  ... */
-/* #define DESTROY_LOCK(lk)  ... */
-/* #define ACQUIRE_LOCK(lk)  ... */
-/* #define RELEASE_LOCK(lk)  ... */
-/* #define TRY_LOCK(lk) ... */
-/* static MLOCK_T malloc_global_mutex = ... */
+#define MLOCK_T               Common::Mutex
+#define ACQUIRE_LOCK(lk)      (lk)->lock()
+#define RELEASE_LOCK(lk)      (lk)->unlock()
+#define TRY_LOCK(lk)          (0)
+#define INITIAL_LOCK(lk)      (0)
+#define DESTROY_LOCK(lk)      (0)
+static MLOCK_T malloc_global_mutex;
 
 #elif USE_SPIN_LOCKS
 
