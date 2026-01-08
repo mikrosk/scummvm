@@ -590,8 +590,6 @@ backends/midi/stmidi.cpp
 backends/midi/timidity.cpp
 backends/midi/webmidi.cpp
 backends/midi/windows.cpp
-backends/mixer/atari/atari-mixer-asm.S
-backends/mixer/atari/atari-mixer-asm.h
 backends/mixer/atari/atari-mixer.cpp
 backends/mixer/atari/atari-mixer.h
 backends/mixer/maxmod/maxmod-mixer.cpp

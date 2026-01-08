@@ -21,22 +21,16 @@
 
 #include "backends/mixer/atari/atari-mixer.h"
 
-#include <math.h>
 #include <mint/falcon.h>
-#include <mint/osbind.h>
-#include <mint/ostruct.h>
 #include <usound.h>	// https://github.com/mikrosk/usound
+#include <uthread.h>	// https://github.com/mikrosk/uthread
 
-#include "backends/mixer/atari/atari-mixer-asm.h"
 #include "backends/platform/atari/atari-debug.h"
 #include "common/config-manager.h"
 
 #define DEFAULT_OUTPUT_RATE 24585
 #define DEFAULT_OUTPUT_CHANNELS 2
 #define DEFAULT_SAMPLES 2048	// 83ms
-
-extern "C" uint32 _stksize;
-static AtariMixerManager *s_manager = nullptr;
 
 void AtariAudioShutdown() {
 	Jdisint(MFP_TIMERA);
@@ -46,7 +40,7 @@ void AtariAudioShutdown() {
 AtariMixerManager::AtariMixerManager() : MixerManager() {
 	atari_debug("AtariMixerManager()");
 
-	s_manager = this;
+	_manager = this;
 
 	ConfMan.registerDefault("output_rate", DEFAULT_OUTPUT_RATE);
 	_outputRate = ConfMan.getInt("output_rate");
@@ -62,10 +56,6 @@ AtariMixerManager::AtariMixerManager() : MixerManager() {
 	_samples = ConfMan.getInt("audio_buffer_size");
 	if (_samples <= 0)
 		_samples = DEFAULT_SAMPLES;
-
-	// hacky way to ensure that the audio stack can be altered from outside
-	g_asm_atari_isp      = new byte[_stksize];
-	g_asm_atari_isp_size = _stksize;
 
 	g_system->getEventManager()->getEventDispatcher()->registerObserver(this, 10, false);
 }
@@ -83,11 +73,7 @@ AtariMixerManager::~AtariMixerManager() {
 	delete[] _samplesBuf;
 	_samplesBuf = nullptr;
 
-	delete[] g_asm_atari_isp;
-	g_asm_atari_isp      = nullptr;
-	g_asm_atari_isp_size = 0;
-
-	s_manager = nullptr;
+	_manager = nullptr;
 }
 
 void AtariMixerManager::init() {
@@ -133,8 +119,10 @@ void AtariMixerManager::init() {
 	_atariPhysicalSampleBuffer = _atariSampleBuffer;
 	_atariLogicalSampleBuffer = _atariSampleBuffer + obtained.size;
 
+	uthread_init(interruptCallback);
+
 	Setinterrupt(SI_TIMERA, SI_PLAY);
-	Xbtimer(XB_TIMERA, 1<<3, 1, asm_atari_timer_a);	// event count mode, count to '1'
+	Xbtimer(XB_TIMERA, 1<<3, 1, uthread_interrupt_handler);	// event count mode, count to '1'
 	Jenabint(MFP_TIMERA);
 
 	_samplesBuf = new uint8[_samples * _outputChannels * 2];	// always 16-bit
@@ -178,8 +166,17 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	return false;
 }
 
-void AtariAudioCallback() {
-	s_manager->update();
+void AtariMixerManager::interruptCallback() {
+	assert(_manager);
+
+	_manager->update();
+
+	// clear pending bit: if the callback is too CPU heavy,
+	// we don't want to flood the system with endless pending interrupts
+	*((volatile byte *)0xFFFFFA0B) &= ~(1<<5);
+
+	// clear in service bit
+	*((volatile byte *)0xFFFFFA0FL) &= ~(1<<5);
 }
 
 // TODO: Aranym misses the first trigger

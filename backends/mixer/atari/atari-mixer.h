@@ -28,16 +28,12 @@
 /**
  *  Atari XBIOS based audio mixer.
  */
-extern "C" void AtariAudioCallback();
-
 class AtariMixerManager : public MixerManager, Common::EventObserver {
-	friend void AtariAudioCallback();
-
 public:
 	AtariMixerManager();
-	virtual ~AtariMixerManager();
+	~AtariMixerManager() override;
 
-	virtual void init() override;
+	void init() override;
 
 	void suspendAudio() override;
 	int resumeAudio() override;
@@ -45,7 +41,10 @@ public:
 	bool notifyEvent(const Common::Event &event) override;
 
 private:
+	static void interruptCallback();
 	void update();
+
+	static AtariMixerManager *_manager;
 
 	int _outputRate = 0;
 	int _outputChannels = 0;
