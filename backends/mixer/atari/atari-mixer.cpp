@@ -171,17 +171,32 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	return false;
 }
 
+static inline void SetSR(short newSR)
+{
+	__asm__ __volatile__(
+		"move.w %0,%%sr"
+		:
+		: "id"(newSR)
+		: "cc"
+	);
+}
+
 void AtariMixerManager::interruptCallback() {
 	assert(_manager);
 
+	// Allow ACIA interrupts but prevent Timer A re-entrancy
+	*((volatile byte *)0xFFFFFA07) &= ~(1<<5);	// IERA; clear the enable bit
+	*((volatile byte *)0xFFFFFA0F) = ~(1<<5);	// ISR; clear the in-service bit
+	// re-enable MFP interrupts again and let them enabled for
+	// the rest of the handler execution
+	SetSR(0x2500);
+
 	_manager->update();
 
-	// clear pending bit: if the callback is too CPU heavy,
-	// we don't want to flood the system with endless pending interrupts
-	*((volatile byte *)0xFFFFFA0B) &= ~(1<<5);
-
-	// clear in service bit
-	*((volatile byte *)0xFFFFFA0FL) &= ~(1<<5);
+	// any pending interrupt requests have been ignored which is good,
+	// if the callback is too CPU heavy we don't want to flood the
+	// system with endless pending interrupts
+	*((volatile byte *)0xFFFFFA07) |= (1<<5);	// IERA; set the enable bit
 }
 
 // TODO: Aranym misses the first trigger
@@ -198,10 +213,11 @@ void AtariMixerManager::update() {
 
 	int processed = _mixer->mixCallback(_samplesBuf, _samples * _outputChannels * 2);
 	if (_downsample) {
-		// TODO: this will break if I enable lower IPL (for mouse/keyboard)
 		// use the trick with move.b (a7)+,dx which skips two bytes at once
 		// basically supplying move.w (src)+,dx; asr.w #8,dx; move.b dx,(dst)+
 		if (processed > 0) {
+			SetSR(0x2700);	// disable all interrupts to protect SP/A7
+
 			__asm__ volatile(
 			"	move.l	%%a7,%%d0\n"
 			"	move.l	%0,%%a7\n"
@@ -232,6 +248,8 @@ void AtariMixerManager::update() {
 			: "g"(_samplesBuf), "a"(buf), "d"(processed * _outputChannels * 1) // inputs
 			: "d0", "d1", "cc" AND_MEMORY
 			);
+
+			SetSR(0x2500);	// allow other interrupts again
 		}
 		memset(buf + processed * _outputChannels * 1, 0, (_samples - processed) * _outputChannels * 1);
 	} else {
