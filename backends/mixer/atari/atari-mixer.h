@@ -41,10 +41,14 @@ public:
 	bool notifyEvent(const Common::Event &event) override;
 
 private:
+	static void interruptEnable();
+	static void interruptDisable();
 	static void interruptCallback();
+
 	void update();
 
 	static AtariMixerManager *_manager;
+	static volatile bool _inInterrupt;
 
 	int _outputRate = 0;
 	int _outputChannels = 0;

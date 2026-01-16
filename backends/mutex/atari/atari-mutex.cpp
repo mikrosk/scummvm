@@ -23,6 +23,8 @@
 
 #include <uthread.h>	// https://github.com/mikrosk/uthread
 
+#include "backends/platform/atari/atari-debug.h"
+
 /**
  * Atari mutex implementation (aimed at the audio handler in an interrupt)
  */
@@ -40,8 +42,8 @@ private:
 
 
 AtariMutexInternal::AtariMutexInternal() {
-	if (!uthread_mutex_init(&_mutex)) {
-		warning("uthread_mutex_init() failed");
+	if (uthread_mutex_init(&_mutex) != 0) {
+		atari_warning("uthread_mutex_init() failed");
 	}
 }
 
@@ -49,8 +51,8 @@ AtariMutexInternal::~AtariMutexInternal() {
 }
 
 bool AtariMutexInternal::lock() {
-	if (!uthread_mutex_lock(&_mutex)) {
-		warning("uthread_mutex_lock() failed");
+	if (uthread_mutex_lock(&_mutex) != 0) {
+		atari_warning("uthread_mutex_lock() failed");
 		return false;
 	} else {
 		return true;
@@ -58,8 +60,8 @@ bool AtariMutexInternal::lock() {
 }
 
 bool AtariMutexInternal::unlock() {
-	if (!uthread_mutex_unlock(&_mutex)) {
-		warning("uthread_mutex_unlock() failed");
+	if (uthread_mutex_unlock(&_mutex) != 0) {
+		atari_warning("uthread_mutex_unlock() failed");
 		return false;
 	} else {
 		return true;

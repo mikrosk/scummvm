@@ -38,6 +38,7 @@ void AtariAudioShutdown() {
 }
 
 AtariMixerManager *AtariMixerManager::_manager = nullptr;
+volatile bool AtariMixerManager::_inInterrupt = false;
 
 AtariMixerManager::AtariMixerManager() : MixerManager() {
 	atari_debug("AtariMixerManager()");
@@ -96,7 +97,8 @@ void AtariMixerManager::init() {
 		error("Sound system currently supports only 8/16-bit signed big endian samples");
 	}
 
-	if (!uthread_init(interruptCallback)) {
+	// TODO: we can't call it here, dlmalloc uses it!!!
+	if (uthread_init(interruptEnable, interruptDisable, interruptCallback) != 0) {
 		error("uthread_init failed");
 	}
 
@@ -171,8 +173,17 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	return false;
 }
 
-static inline void SetSR(short newSR)
-{
+void AtariMixerManager::interruptEnable() {
+	if (!_inInterrupt)
+		Jenabint(MFP_TIMERA);
+}
+
+void AtariMixerManager::interruptDisable() {
+	if (!_inInterrupt)
+		Jdisint(MFP_TIMERA);
+}
+
+static inline void SetSR(short newSR) {
 	__asm__ __volatile__(
 		"move.w %0,%%sr"
 		:
@@ -186,12 +197,16 @@ void AtariMixerManager::interruptCallback() {
 
 	// Allow ACIA interrupts but prevent Timer A re-entrancy
 	*((volatile byte *)0xFFFFFA07) &= ~(1<<5);	// IERA; clear the enable bit
-	*((volatile byte *)0xFFFFFA0F) = ~(1<<5);	// ISR; clear the in-service bit
+	*((volatile byte *)0xFFFFFA0F) = ~(1<<5);	// ISR; clear the in-service bit (let MFP assert other interrupts)
 	// re-enable MFP interrupts again and let them enabled for
 	// the rest of the handler execution
 	SetSR(0x2500);
 
+	_inInterrupt = true;
+
 	_manager->update();
+
+	_inInterrupt = false;
 
 	// any pending interrupt requests have been ignored which is good,
 	// if the callback is too CPU heavy we don't want to flood the
@@ -257,3 +272,4 @@ void AtariMixerManager::update() {
 		memset(buf + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
 	}
 }
+
