@@ -120,7 +120,7 @@ ScriptValue CameraActor::callMethod(BuiltInMethod methodId, Common::Array<Script
 		ARGCOUNTCHECK(3);
 		int16 deltaX = static_cast<uint16>(args[0].asFloat());
 		int16 deltaY = static_cast<int16>(args[1].asFloat());
-		double duration = args[2].asTime();
+		double duration = args[2].asFloatOrTime();
 		_nextViewportOrigin = Common::Point(deltaX, deltaY) + _currentViewportOrigin;
 		adjustCameraViewport(_nextViewportOrigin);
 		startPan(deltaX, deltaY, duration);
@@ -227,10 +227,10 @@ ScriptValue CameraActor::callMethod(BuiltInMethod methodId, Common::Array<Script
 
 		if (args.size() == 4) {
 			uint panSteps = static_cast<uint>(args[2].asFloat());
-			double duration = args[3].asFloat();
+			double duration = args[3].asFloatOrTime();
 			panToByStepCount(x, y, panSteps, duration);
 		} else {
-			double duration = args[2].asFloat();
+			double duration = args[2].asFloatOrTime();
 			panToByTime(x, y, duration);
 		}
 		break;

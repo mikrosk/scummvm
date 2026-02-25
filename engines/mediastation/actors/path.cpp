@@ -123,7 +123,8 @@ ScriptValue PathActor::callMethod(BuiltInMethod methodId, Common::Array<ScriptVa
 		ARGCOUNTCHECK(1);
 		// Convert from seconds to milliseconds.
 		const uint MILLISECONDS_IN_ONE_SECOND = 1000;
-		_duration = args[0].asTime() * MILLISECONDS_IN_ONE_SECOND;
+		double durationAsFractionalSeconds = args[0].asFloatOrTime();
+		_duration = durationAsFractionalSeconds * MILLISECONDS_IN_ONE_SECOND;
 		_useTimeForCompletion = true;
 		break;
 	}

@@ -197,6 +197,17 @@ double ScriptValue::asFloat() const {
 	}
 }
 
+double ScriptValue::asFloatOrTime() const {
+	if (_type == kScriptValueTypeFloat || _type == kScriptValueTypeTime) {
+		return _u.d;
+	} else {
+		// Times usually appear as floats (not the other way around), so
+		// for the one log we will use the time type.
+		VALUETYPEMISMATCH(kScriptValueTypeTime);
+		return 0.0;
+	}
+}
+
 void ScriptValue::setToBool(bool b) {
 	_type = kScriptValueTypeBool;
 	_u.b = b;
@@ -351,7 +362,7 @@ bool ScriptValue::compare(Opcode op, const ScriptValue &lhs, const ScriptValue &
 		break;
 
 	case kScriptValueTypeFloat:
-		result = compare(op, lhs.asFloat(), rhs.asFloat());
+		result = compare(op, lhs.asFloatOrTime(), rhs.asFloatOrTime());
 		break;
 
 	case kScriptValueTypeBool:
@@ -359,7 +370,7 @@ bool ScriptValue::compare(Opcode op, const ScriptValue &lhs, const ScriptValue &
 		break;
 
 	case kScriptValueTypeTime:
-		result = compare(op, lhs.asTime(), rhs.asTime());
+		result = compare(op, lhs.asFloatOrTime(), rhs.asFloatOrTime());
 		break;
 
 	case kScriptValueTypeParamToken:

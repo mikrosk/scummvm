@@ -346,7 +346,7 @@ void VideoDisplayManager::fadeToBlack(Common::Array<ScriptValue> &args) {
 	uint colorCount = DEFAULT_PALETTE_TRANSITION_COLOR_COUNT;
 
 	if (args.size() >= 2) {
-		fadeTime = args[1].asTime();
+		fadeTime = args[1].asFloatOrTime();
 	}
 	if (args.size() >= 4) {
 		startIndex = static_cast<uint>(args[2].asFloat());
@@ -363,7 +363,7 @@ void VideoDisplayManager::fadeToRegisteredPalette(Common::Array<ScriptValue> &ar
 	uint colorCount = DEFAULT_PALETTE_TRANSITION_COLOR_COUNT;
 
 	if (args.size() >= 2) {
-		fadeTime = args[1].asTime();
+		fadeTime = args[1].asFloatOrTime();
 	}
 	if (args.size() >= 4) {
 		startIndex = static_cast<uint>(args[2].asFloat());
@@ -410,10 +410,10 @@ void VideoDisplayManager::fadeToColor(Common::Array<ScriptValue> &args) {
 		r = static_cast<byte>(args[1].asFloat());
 		g = static_cast<byte>(args[2].asFloat());
 		b = static_cast<byte>(args[3].asFloat());
-		fadeTime = args[4].asTime();
+		fadeTime = args[4].asFloatOrTime();
 	}
 	if (args.size() >= 7) {
-		fadeTime = args[5].asTime();
+		fadeTime = args[5].asFloatOrTime();
 		startIndex = static_cast<uint>(args[6].asFloat());
 		colorCount = static_cast<uint>(args[7].asFloat());
 	}
@@ -471,7 +471,7 @@ void VideoDisplayManager::fadeToPaletteObject(Common::Array<ScriptValue> &args) 
 		return;
 	}
 	if (args.size() >= 3) {
-		fadeTime = args[2].asFloat();
+		fadeTime = args[2].asFloatOrTime();
 	}
 	if (args.size() >= 5) {
 		startIndex = static_cast<uint>(args[3].asFloat());
