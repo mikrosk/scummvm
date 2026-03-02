@@ -37,7 +37,6 @@
 #ifdef ENABLE_MADSV2
 #include "mads/dragonsphere/game_dragonsphere.h"
 #include "mads/forest/game_forest.h"
-#include "mads/phantom/game_phantom.h"
 #endif
 
 namespace MADS {
@@ -50,7 +49,7 @@ Game *Game::init(MADSEngine *vm) {
 	case GType_Dragonsphere:
 		return new Dragonsphere::GameDragonsphere(vm);
 	case GType_Phantom:
-		return new Phantom::GamePhantom(vm);
+		return nullptr; // new Phantom::GamePhantom(vm);
 	case GType_Forest:
 		return new Forest::GameForest(vm);
 #endif
