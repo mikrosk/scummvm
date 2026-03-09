@@ -144,9 +144,9 @@ byte ClassicCostumeRenderer::paintCelByleRLE(int xMoveCur, int yMoveCur) {
 void ClassicCostumeRenderer::markAsDirty(const Common::Rect &rect, ByleRLEData &compData, bool &decode) {
 	if (_vm->_game.version == 1) {
 		// V1 games uses 8 x 8 pixels for actors
-		_vm->markRectAsDirty(kMainVirtScreen, rect.left, rect.right + 8, rect.top, rect.bottom, _actorID);
+		_vm->markRectAsDirty(kMainVirtScreen, rect.left, rect.right + 7, rect.top, rect.bottom, _actorID);
 	} else {
-		_vm->markRectAsDirty(kMainVirtScreen, rect.left, rect.right + 1, rect.top, rect.bottom, _actorID);
+		_vm->markRectAsDirty(kMainVirtScreen, rect.left, rect.right, rect.top, rect.bottom, _actorID);
 	}
 }
 

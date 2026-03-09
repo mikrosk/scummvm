@@ -69,7 +69,7 @@ byte BaseCostumeRenderer::paintCelByleRLECommon(
 
 	bool actorIsScaled;
 	int i, j;
-	int linesToSkip = 0, startScaleIndexX, startScaleIndexY;
+	int linesToSkip = 0, trailingLinesToSkip = 0, startScaleIndexX, startScaleIndexY;
 	Common::Rect rect;
 	int step;
 	byte drawFlag = 1;
@@ -94,12 +94,11 @@ byte BaseCostumeRenderer::paintCelByleRLECommon(
 	compData.boundsRect.bottom = _out.h;
 
 	if (actorIsScaled) {
-
 		/* Scale direction */
 		compData.scaleXStep = -1;
 		if (xMoveCur < 0) {
 			xMoveCur = -xMoveCur;
-			compData.scaleXStep = 1;
+			compData.scaleXStep = -compData.scaleXStep;
 		}
 
 		if (_drawActorToRight) {
@@ -114,13 +113,15 @@ byte BaseCostumeRenderer::paintCelByleRLECommon(
 
 			j = startScaleIndexX;
 			for (i = 0; i < _width; i++) {
-				if (rect.right < 0) {
+				if (rect.right < compData.boundsRect.left) {
 					linesToSkip++;
-					startScaleIndexX = j;
+				} else if (rect.right >= compData.boundsRect.right) {
+					trailingLinesToSkip++;
 				}
 				if (compData.scaleTable[j++ & compData.scaleIndexMask] < _scaleX)
 					rect.right++;
 			}
+			startScaleIndexX += linesToSkip;
 		} else {
 			/* No mirror */
 			/* Adjust X position */
@@ -135,16 +136,15 @@ byte BaseCostumeRenderer::paintCelByleRLECommon(
 			j = startScaleIndexX;
 			for (i = 0; i < _width; i++) {
 				if (rect.left >= compData.boundsRect.right) {
-					startScaleIndexX = j;
 					linesToSkip++;
+				} else if (rect.left < compData.boundsRect.left) {
+					trailingLinesToSkip++;
 				}
 				if (compData.scaleTable[j-- & compData.scaleIndexMask] < _scaleX)
 					rect.left--;
 			}
+			startScaleIndexX -= linesToSkip;
 		}
-
-		if (linesToSkip)
-			linesToSkip--;
 
 		step = -1;
 		if (yMoveCur < 0) {
@@ -175,9 +175,18 @@ byte BaseCostumeRenderer::paintCelByleRLECommon(
 		if (_drawActorToRight) {
 			rect.left = compData.x;
 			rect.right = compData.x + _width;
+
+			linesToSkip = compData.boundsRect.left - compData.x;
+			trailingLinesToSkip = rect.right - compData.boundsRect.right;
 		} else {
 			rect.left = compData.x - _width;
 			rect.right = compData.x;
+
+			linesToSkip = rect.right - compData.boundsRect.right + 1;
+			if (c64Cost)
+				trailingLinesToSkip = (compData.boundsRect.left - 8) - rect.left;
+			else
+				trailingLinesToSkip = (compData.boundsRect.left - 1) - rect.left;
 		}
 
 		rect.top = compData.y;
@@ -192,7 +201,26 @@ byte BaseCostumeRenderer::paintCelByleRLECommon(
 	compData.skipWidth = _width;
 	compData.scaleXStep = _drawActorToRight ? 1 : -1;
 
-	markAsDirty(rect, compData, decode);
+	// All the important 'rect' values. scale sequence = 'compData.scaleTable[i] < _scaleX' result)
+	//
+	// rendering dir | scaled | scale sequence | drawn columns | dirty columns          | ideal fix
+	// --------------+--------+----------------+---------------+------------------------+----------------
+	// left-to-right | no     | N/A            | 10, 11, 12    | [10, 13) = 10, 11, 12  | none needed
+	// left-to-right | yes    | T, T, T        | 10, 11, 12    | [10, 13) = 10, 11, 12  | none needed
+	// left-to-right | yes    | T, F, T        | 10, 11        | [10, 12) = 10, 11      | none needed
+	// left-to-right | yes    | T, T, F        | 10, 11, 12    | [10, 12) = 10, 11      | right++
+	// right-to-left | no     | N/A            | 10,  9,  8    | [ 7, 10) =  9,  8,  7  | left++, right++
+	// right-to-left | yes    | T, T, T        | 10,  9,  8    | [ 7, 10) =  9,  8,  7  | left++, right++
+	// right-to-left | yes    | T, F, T        | 10,  9        | [ 8, 10) =  9,  8      | left++, right++
+	// right-to-left | yes    | T, T, F        | 10,  9,  8    | [ 8, 10) =  9,  8      | right++
+	//
+	// Considering how complex would be to handle all left/right adjustments precisely, go with what the old
+	// costume renderer did, just add +1 to the right. That sometimes extends the dirty rect by one or two
+	// columns but definitely fixes all edge cases with zero effort.
+	Common::Rect dirtyRect = rect;
+	dirtyRect.right++;
+
+	markAsDirty(dirtyRect, compData, decode);
 	if (!decode)
 		return 0;
 
@@ -208,47 +236,20 @@ byte BaseCostumeRenderer::paintCelByleRLECommon(
 
 	compData.repLen = 0;
 
-	if (_drawActorToRight) {
-		if (!actorIsScaled)
-			linesToSkip = compData.boundsRect.left - compData.x;
-		if (linesToSkip > 0) {
-			if (!amiOrPcEngCost && !c64Cost) {
-				compData.skipWidth -= linesToSkip;
-				skipCelLines(compData, linesToSkip);
-				compData.x = compData.boundsRect.left;
-			}
-		} else {
-			linesToSkip = rect.right - compData.boundsRect.right;
-			if (linesToSkip <= 0) {
-				drawFlag = 2;
-			} else {
-				compData.skipWidth -= linesToSkip;
-			}
+	if (linesToSkip > 0) {
+		if (!amiOrPcEngCost && !c64Cost) {
+			compData.skipWidth -= linesToSkip;
+			skipCelLines(compData, linesToSkip);
+			compData.x = _drawActorToRight ? compData.boundsRect.left : (compData.boundsRect.right - 1);
 		}
-	} else {
-		if (!actorIsScaled) {
-			if (_akosRendering)
-				linesToSkip = rect.right - compData.boundsRect.right + 1;
-			else
-				linesToSkip = rect.right - compData.boundsRect.right;
-		}
-		if (linesToSkip > 0) {
-			if (!amiOrPcEngCost && !c64Cost) {
-				compData.skipWidth -= linesToSkip;
-				skipCelLines(compData, linesToSkip);
-				compData.x = compData.boundsRect.right - 1;
-			}
-		} else {
-			// V1 games uses 8 x 8 pixels for actors
-			if (c64Cost)
-				linesToSkip = (compData.boundsRect.left - 8) - rect.left;
-			else
-				linesToSkip = (compData.boundsRect.left - 1) - rect.left;
-			if (linesToSkip <= 0)
-				drawFlag = 2;
-			else
-				compData.skipWidth -= linesToSkip;
-		}
+	}
+
+	if (trailingLinesToSkip > 0) {
+		compData.skipWidth -= trailingLinesToSkip;
+	}
+
+	if (linesToSkip <= 0 && trailingLinesToSkip <= 0) {
+		drawFlag = 2;
 	}
 
 	if (compData.skipWidth <= 0) {
@@ -339,11 +340,12 @@ void ByleRLEDecode_m68k(
 			len -= batch;
 			height -= batch;
 
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
 			do {
 				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
 					if (color) {
 						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (compData.x < compData.boundsRect.left || compData.x >= compData.boundsRect.right)
 							|| (*mask & maskbit);
 
 						if (!masked) {
@@ -400,8 +402,6 @@ void ByleRLEDecode_m68k(
 
 				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
 					compData.x += compData.scaleXStep;
-					if (compData.x < compData.boundsRect.left || compData.x >= compData.boundsRect.right)
-						return;
 					maskbit = revBitMask(compData.x & 7);
 					compData.destPtr += compData.scaleXStep;
 				}
