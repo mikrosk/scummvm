@@ -305,6 +305,7 @@ void ByleRLEDecode_m68k_Mode0(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -387,6 +388,7 @@ void ByleRLEDecode_m68k_Mode1(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -480,6 +482,7 @@ void ByleRLEDecode_m68k_Mode3(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -575,6 +578,7 @@ void ByleRLEDecode_m68k_Classic(
 	const uint16 *_palette /* unused */) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -661,6 +665,7 @@ void ByleRLEDecode_m68k_Scaled_Mode0(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -748,6 +753,7 @@ void ByleRLEDecode_m68k_Scaled_Mode0_SMask(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -835,6 +841,7 @@ void ByleRLEDecode_m68k_Scaled_Mode1(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -932,6 +939,7 @@ void ByleRLEDecode_m68k_Scaled_Mode1_SMask(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -1029,6 +1037,7 @@ void ByleRLEDecode_m68k_Scaled_Mode3(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -1128,6 +1137,7 @@ void ByleRLEDecode_m68k_Scaled_Mode3_SMask(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -1227,6 +1237,7 @@ void ByleRLEDecode_m68k_Scaled_Classic(
 	const uint16 *_palette /* unused */) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
@@ -1317,6 +1328,7 @@ void ByleRLEDecode_m68k_Scaled_Classic_SMask(
 	const uint16 *_palette /* unused */) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;
