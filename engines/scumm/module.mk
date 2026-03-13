@@ -105,6 +105,12 @@ MODULE_OBJS += \
 	debugger/resource.o
 endif
 
+ifdef USE_M68K_COSTUME_ASM
+MODULE_OBJS += \
+	byleRLEDecode_m68k.o \
+	byleRLEDecode_m68k-asm.o
+endif
+
 ifdef ENABLE_SCUMM_7_8
 MODULE_OBJS += \
 	nut_renderer.o \

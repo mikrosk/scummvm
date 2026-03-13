@@ -13137,6 +13137,8 @@ engines/scumm/bomp.cpp
 engines/scumm/bomp.h
 engines/scumm/boxes.cpp
 engines/scumm/boxes.h
+engines/scumm/byleRLEDecode_m68k-asm.S
+engines/scumm/byleRLEDecode_m68k.cpp
 engines/scumm/camera.cpp
 engines/scumm/cdda.cpp
 engines/scumm/cdda.h
