@@ -293,7 +293,7 @@ enum class ShadowMode : int {
 	Classic
 };
 
-void ByleRLEDecode_m68k(
+void ByleRLEDecode_m68k_Mode0(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX,
 	const byte _scaleY,
@@ -415,6 +415,1882 @@ void ByleRLEDecode_m68k(
 		} while (len > 0);
 	} while (true);
 }
+
+void ByleRLEDecode_m68k_Mode0_SMask(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Mode1(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Mode1_SMask(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Mode3(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Mode3_SMask(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Classic(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+						|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Classic_SMask(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+						|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Scaled_Mode0(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Scaled_Mode0_SMask(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Scaled_Mode1(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Scaled_Mode1_SMask(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Scaled_Mode3(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Scaled_Mode3_SMask(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+							|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Scaled_Classic(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+						|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+void ByleRLEDecode_m68k_Scaled_Classic_SMask(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette) {
+
+	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+
+	const byte *src = _srcPtr;
+	byte *dst = compData.destPtr;
+
+	byte len = compData.repLen;
+	uint16 color = compData.repColor;
+
+	// reset every column
+	int lastColumnX = -1;
+	int y = compData.y;
+	uint16 height = _height;
+	int scaleIndexY = compData.scaleYIndex;
+
+	byte maskbit = revBitMask(compData.x & 7);
+	const byte *mask = compData.maskPtr + compData.x / 8;
+
+	byte batch;
+	if (len) {
+		--len;
+		goto StartPos;
+	}
+
+	do {
+		len = *src++;
+		color = len >> compData.shr;
+		len &= compData.mask;
+		if (!len)
+			len = *src++;
+
+		do {
+			batch = height < len ? (byte)height : len;
+			len -= batch;
+			height -= batch;
+
+			assert(compData.x >= compData.boundsRect.left && compData.x < compData.boundsRect.right);
+
+			do {
+				if (_scaleY == 255 || compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
+					if (color) {
+						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
+						|| (*mask & maskbit);
+
+						if (!masked) {
+							uint16 pcolor;
+
+							switch(shadowMode) {
+							case ShadowMode::Mode0:
+								*dst = _palette[color];
+								break;
+
+							case ShadowMode::Classic:
+								if (lastColumnX != compData.x)
+									*dst = _shadowTable[*dst];
+								break;
+
+							case ShadowMode::Mode1:
+								pcolor = _palette[color];
+								if (pcolor == 13 && _shadowTable) {
+									if (lastColumnX != compData.x)
+										*dst = _shadowTable[*dst];
+								} else {
+									*dst = pcolor;
+								}
+								break;
+
+							case ShadowMode::Mode3:
+								pcolor = _palette[color];
+								if (pcolor < 8) {
+									if (lastColumnX != compData.x) {
+										pcolor = (pcolor << 8) + *dst;
+										*dst = _shadowTable[pcolor];
+									}
+								} else {
+									*dst = pcolor;
+								}
+								break;
+							}
+						}
+					}
+					dst += pitch;
+					mask += _numStrips;
+					y++;
+				}
+			} while (--batch);
+
+			if (height == 0) {
+				if (--compData.skipWidth == 0)
+					return;
+				height = _height;
+				y = compData.y;
+
+				scaleIndexY = compData.scaleYIndex;
+				lastColumnX = compData.x;
+
+				if (_scaleX == 255 || compData.scaleTable[compData.scaleXIndex] < _scaleX) {
+					compData.x += compData.scaleXStep;
+					maskbit = revBitMask(compData.x & 7);
+					compData.destPtr += compData.scaleXStep;
+				}
+
+				compData.scaleXIndex = (compData.scaleXIndex + compData.scaleXStep) & compData.scaleIndexMask;
+
+				dst = compData.destPtr;
+				mask = compData.maskPtr + compData.x / 8;
+			}
+		StartPos:;
+		} while (len > 0);
+	} while (true);
+}
+
+typedef void (*ByleRLEDecodeFunc)(
+	BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const ShadowMode shadowMode,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette);
+
+static const ByleRLEDecodeFunc byleRLEDecodeTable[16] = {
+	ByleRLEDecode_m68k_Mode0,                // 0:  noScale, Mode0,   no scaleIndexMask
+	ByleRLEDecode_m68k_Mode0_SMask,          // 1:  noScale, Mode0,   scaleIndexMask
+	ByleRLEDecode_m68k_Mode1,                // 2:  noScale, Mode1,   no scaleIndexMask
+	ByleRLEDecode_m68k_Mode1_SMask,          // 3:  noScale, Mode1,   scaleIndexMask
+	ByleRLEDecode_m68k_Mode3,                // 4:  noScale, Mode3,   no scaleIndexMask
+	ByleRLEDecode_m68k_Mode3_SMask,          // 5:  noScale, Mode3,   scaleIndexMask
+	ByleRLEDecode_m68k_Classic,              // 6:  noScale, Classic, no scaleIndexMask
+	ByleRLEDecode_m68k_Classic_SMask,        // 7:  noScale, Classic, scaleIndexMask
+	ByleRLEDecode_m68k_Scaled_Mode0,         // 8:  scaled,  Mode0,   no scaleIndexMask
+	ByleRLEDecode_m68k_Scaled_Mode0_SMask,   // 9:  scaled,  Mode0,   scaleIndexMask
+	ByleRLEDecode_m68k_Scaled_Mode1,         // 10: scaled,  Mode1,   no scaleIndexMask
+	ByleRLEDecode_m68k_Scaled_Mode1_SMask,   // 11: scaled,  Mode1,   scaleIndexMask
+	ByleRLEDecode_m68k_Scaled_Mode3,         // 12: scaled,  Mode3,   no scaleIndexMask
+	ByleRLEDecode_m68k_Scaled_Mode3_SMask,   // 13: scaled,  Mode3,   scaleIndexMask
+	ByleRLEDecode_m68k_Scaled_Classic,       // 14: scaled,  Classic, no scaleIndexMask
+	ByleRLEDecode_m68k_Scaled_Classic_SMask, // 15: scaled,  Classic, scaleIndexMask
+};
 #endif
 
 void BaseCostumeRenderer::byleRLEDecode(ByleRLEData &compData, int16 actorHitX, int16 actorHitY, bool *actorHitResult, const uint8 *xmap) {
@@ -437,7 +2313,9 @@ void BaseCostumeRenderer::byleRLEDecode(ByleRLEData &compData, int16 actorHitX, 
 				shadowMode = ShadowMode::Mode3;
 		}
 
-		ByleRLEDecode_m68k(
+		int scaled = (_scaleX != 255 || _scaleY != 255);
+		int useScaleIndexMask = compData.scaleIndexMask != -1;
+		byleRLEDecodeTable[(scaled << 3) | (static_cast<int>(shadowMode) << 1) | useScaleIndexMask](
 			&compData,
 			_scaleX,
 			_scaleY,
