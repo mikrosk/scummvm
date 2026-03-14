@@ -308,19 +308,17 @@ void ByleRLEDecode_m68k_Mode0(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
-	byte len = compData.repLen;
+	uint16 len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
-	int y = compData.y;
+	byte *dst = compData.destPtr;
 	uint16 height = _height;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
-	byte batch;
+	uint16 batch;
 	if (len) {
 		--len;
 		goto StartPos;
@@ -334,7 +332,7 @@ void ByleRLEDecode_m68k_Mode0(
 			len = *src++;
 
 		do {
-			batch = height < len ? (byte)height : len;
+			batch = height < len ? height : len;
 			len -= batch;
 			height -= batch;
 
@@ -342,27 +340,20 @@ void ByleRLEDecode_m68k_Mode0(
 
 			if (color) {
 				do {
-					const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-						|| (*mask & maskbit);
-
-					if (!masked) {
+					if (!(*mask & maskbit))
 						*dst = _palette[color];
-					}
-					dst += pitch;
+					dst  += pitch;
 					mask += _numStrips;
-					y++;
 				} while (--batch);
 			} else {
-				dst += batch * pitch;
+				dst  += batch * pitch;
 				mask += batch * _numStrips;
-				y += batch;
 			}
 
 			if (height == 0) {
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				compData.x += compData.scaleXStep;
 				maskbit = revBitMask(compData.x & 7);
@@ -391,20 +382,18 @@ void ByleRLEDecode_m68k_Mode1(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
-	byte len = compData.repLen;
+	uint16 len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
-	byte batch;
+	uint16 batch;
 	if (len) {
 		--len;
 		goto StartPos;
@@ -418,7 +407,7 @@ void ByleRLEDecode_m68k_Mode1(
 			len = *src++;
 
 		do {
-			batch = height < len ? (byte)height : len;
+			batch = height < len ? height : len;
 			len -= batch;
 			height -= batch;
 
@@ -426,13 +415,8 @@ void ByleRLEDecode_m68k_Mode1(
 
 			if (color) {
 				do {
-					const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-						|| (*mask & maskbit);
-
-					if (!masked) {
-						uint16 pcolor;
-
-						pcolor = _palette[color];
+					if (!(*mask & maskbit)) {
+						uint16 pcolor = _palette[color];
 						if (pcolor == 13 && _shadowTable) {
 							if (lastColumnX != compData.x)
 								*dst = _shadowTable[*dst];
@@ -440,21 +424,18 @@ void ByleRLEDecode_m68k_Mode1(
 							*dst = pcolor;
 						}
 					}
-					dst += pitch;
+					dst  += pitch;
 					mask += _numStrips;
-					y++;
 				} while (--batch);
 			} else {
-				dst += batch * pitch;
+				dst  += batch * pitch;
 				mask += batch * _numStrips;
-				y += batch;
 			}
 
 			if (height == 0) {
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				lastColumnX = compData.x;
 
@@ -485,20 +466,18 @@ void ByleRLEDecode_m68k_Mode3(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
-	byte len = compData.repLen;
+	uint16 len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
-	byte batch;
+	uint16 batch;
 	if (len) {
 		--len;
 		goto StartPos;
@@ -512,7 +491,7 @@ void ByleRLEDecode_m68k_Mode3(
 			len = *src++;
 
 		do {
-			batch = height < len ? (byte)height : len;
+			batch = height < len ? height : len;
 			len -= batch;
 			height -= batch;
 
@@ -520,13 +499,8 @@ void ByleRLEDecode_m68k_Mode3(
 
 			if (color) {
 				do {
-					const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-						|| (*mask & maskbit);
-
-					if (!masked) {
-						uint16 pcolor;
-
-						pcolor = _palette[color];
+					if (!(*mask & maskbit)) {
+						uint16 pcolor = _palette[color];
 						if (pcolor < 8) {
 							if (lastColumnX != compData.x) {
 								pcolor = (pcolor << 8) + *dst;
@@ -536,21 +510,18 @@ void ByleRLEDecode_m68k_Mode3(
 							*dst = pcolor;
 						}
 					}
-					dst += pitch;
+					dst  += pitch;
 					mask += _numStrips;
-					y++;
 				} while (--batch);
 			} else {
-				dst += batch * pitch;
+				dst  += batch * pitch;
 				mask += batch * _numStrips;
-				y += batch;
 			}
 
 			if (height == 0) {
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				lastColumnX = compData.x;
 
@@ -581,20 +552,18 @@ void ByleRLEDecode_m68k_Classic(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
-	byte len = compData.repLen;
+	uint16 len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
-	byte batch;
+	uint16 batch;
 	if (len) {
 		--len;
 		goto StartPos;
@@ -608,7 +577,7 @@ void ByleRLEDecode_m68k_Classic(
 			len = *src++;
 
 		do {
-			batch = height < len ? (byte)height : len;
+			batch = height < len ? height : len;
 			len -= batch;
 			height -= batch;
 
@@ -616,28 +585,22 @@ void ByleRLEDecode_m68k_Classic(
 
 			if (color) {
 				do {
-					const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-						|| (*mask & maskbit);
-
-					if (!masked) {
+					if (!(*mask & maskbit)) {
 						if (lastColumnX != compData.x)
 							*dst = _shadowTable[*dst];
 					}
-					dst += pitch;
+					dst  += pitch;
 					mask += _numStrips;
-					y++;
 				} while (--batch);
 			} else {
-				dst += batch * pitch;
+				dst  += batch * pitch;
 				mask += batch * _numStrips;
-				y += batch;
 			}
 
 			if (height == 0) {
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				lastColumnX = compData.x;
 
@@ -668,16 +631,14 @@ void ByleRLEDecode_m68k_Scaled_Mode0(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
-	int y = compData.y;
+	byte *dst = compData.destPtr;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
@@ -704,16 +665,11 @@ void ByleRLEDecode_m68k_Scaled_Mode0(
 			do {
 				if (compData.scaleTable[scaleIndexY++] < _scaleY) {
 					if (color) {
-						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (*mask & maskbit);
-
-						if (!masked) {
+						if (!(*mask & maskbit))
 							*dst = _palette[color];
-						}
 					}
 					dst += pitch;
 					mask += _numStrips;
-					y++;
 				}
 			} while (--batch);
 
@@ -721,7 +677,6 @@ void ByleRLEDecode_m68k_Scaled_Mode0(
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				scaleIndexY = compData.scaleYIndex;
 
@@ -756,16 +711,14 @@ void ByleRLEDecode_m68k_Scaled_Mode0_SMask(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
-	int y = compData.y;
+	byte *dst = compData.destPtr;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
@@ -792,16 +745,11 @@ void ByleRLEDecode_m68k_Scaled_Mode0_SMask(
 			do {
 				if (compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
 					if (color) {
-						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (*mask & maskbit);
-
-						if (!masked) {
+						if (!(*mask & maskbit))
 							*dst = _palette[color];
-						}
 					}
 					dst += pitch;
 					mask += _numStrips;
-					y++;
 				}
 			} while (--batch);
 
@@ -809,7 +757,6 @@ void ByleRLEDecode_m68k_Scaled_Mode0_SMask(
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				scaleIndexY = compData.scaleYIndex;
 
@@ -844,17 +791,15 @@ void ByleRLEDecode_m68k_Scaled_Mode1(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
@@ -881,10 +826,7 @@ void ByleRLEDecode_m68k_Scaled_Mode1(
 			do {
 				if (compData.scaleTable[scaleIndexY++] < _scaleY) {
 					if (color) {
-						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (*mask & maskbit);
-
-						if (!masked) {
+						if (!(*mask & maskbit)) {
 							uint16 pcolor;
 
 							pcolor = _palette[color];
@@ -898,7 +840,6 @@ void ByleRLEDecode_m68k_Scaled_Mode1(
 					}
 					dst += pitch;
 					mask += _numStrips;
-					y++;
 				}
 			} while (--batch);
 
@@ -906,7 +847,6 @@ void ByleRLEDecode_m68k_Scaled_Mode1(
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				scaleIndexY = compData.scaleYIndex;
 				lastColumnX = compData.x;
@@ -942,17 +882,15 @@ void ByleRLEDecode_m68k_Scaled_Mode1_SMask(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
@@ -979,10 +917,7 @@ void ByleRLEDecode_m68k_Scaled_Mode1_SMask(
 			do {
 				if (compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
 					if (color) {
-						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (*mask & maskbit);
-
-						if (!masked) {
+						if (!(*mask & maskbit)) {
 							uint16 pcolor;
 
 							pcolor = _palette[color];
@@ -996,7 +931,6 @@ void ByleRLEDecode_m68k_Scaled_Mode1_SMask(
 					}
 					dst += pitch;
 					mask += _numStrips;
-					y++;
 				}
 			} while (--batch);
 
@@ -1004,7 +938,6 @@ void ByleRLEDecode_m68k_Scaled_Mode1_SMask(
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				scaleIndexY = compData.scaleYIndex;
 				lastColumnX = compData.x;
@@ -1040,17 +973,15 @@ void ByleRLEDecode_m68k_Scaled_Mode3(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
@@ -1077,10 +1008,7 @@ void ByleRLEDecode_m68k_Scaled_Mode3(
 			do {
 				if (compData.scaleTable[scaleIndexY++] < _scaleY) {
 					if (color) {
-						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (*mask & maskbit);
-
-						if (!masked) {
+						if (!(*mask & maskbit)) {
 							uint16 pcolor;
 
 							pcolor = _palette[color];
@@ -1096,7 +1024,6 @@ void ByleRLEDecode_m68k_Scaled_Mode3(
 					}
 					dst += pitch;
 					mask += _numStrips;
-					y++;
 				}
 			} while (--batch);
 
@@ -1104,7 +1031,6 @@ void ByleRLEDecode_m68k_Scaled_Mode3(
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				scaleIndexY = compData.scaleYIndex;
 				lastColumnX = compData.x;
@@ -1140,17 +1066,15 @@ void ByleRLEDecode_m68k_Scaled_Mode3_SMask(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
@@ -1177,10 +1101,7 @@ void ByleRLEDecode_m68k_Scaled_Mode3_SMask(
 			do {
 				if (compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
 					if (color) {
-						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (*mask & maskbit);
-
-						if (!masked) {
+						if (!(*mask & maskbit)) {
 							uint16 pcolor;
 
 							pcolor = _palette[color];
@@ -1196,7 +1117,6 @@ void ByleRLEDecode_m68k_Scaled_Mode3_SMask(
 					}
 					dst += pitch;
 					mask += _numStrips;
-					y++;
 				}
 			} while (--batch);
 
@@ -1204,7 +1124,6 @@ void ByleRLEDecode_m68k_Scaled_Mode3_SMask(
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				scaleIndexY = compData.scaleYIndex;
 				lastColumnX = compData.x;
@@ -1240,17 +1159,15 @@ void ByleRLEDecode_m68k_Scaled_Classic(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
@@ -1277,17 +1194,13 @@ void ByleRLEDecode_m68k_Scaled_Classic(
 			do {
 				if (compData.scaleTable[scaleIndexY++] < _scaleY) {
 					if (color) {
-						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (*mask & maskbit);
-
-						if (!masked) {
+						if (!(*mask & maskbit)) {
 							if (lastColumnX != compData.x)
 								*dst = _shadowTable[*dst];
 						}
 					}
 					dst += pitch;
 					mask += _numStrips;
-					y++;
 				}
 			} while (--batch);
 
@@ -1295,7 +1208,6 @@ void ByleRLEDecode_m68k_Scaled_Classic(
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				scaleIndexY = compData.scaleYIndex;
 				lastColumnX = compData.x;
@@ -1331,17 +1243,15 @@ void ByleRLEDecode_m68k_Scaled_Classic_SMask(
 	warning("%s", __FUNCTION__);
 
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
-	int y = compData.y;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
@@ -1368,17 +1278,13 @@ void ByleRLEDecode_m68k_Scaled_Classic_SMask(
 			do {
 				if (compData.scaleTable[scaleIndexY++ & compData.scaleIndexMask] < _scaleY) {
 					if (color) {
-						const bool masked = (y < compData.boundsRect.top || y >= compData.boundsRect.bottom)
-							|| (*mask & maskbit);
-
-						if (!masked) {
+						if (!(*mask & maskbit)) {
 							if (lastColumnX != compData.x)
 								*dst = _shadowTable[*dst];
 						}
 					}
 					dst += pitch;
 					mask += _numStrips;
-					y++;
 				}
 			} while (--batch);
 
@@ -1386,7 +1292,6 @@ void ByleRLEDecode_m68k_Scaled_Classic_SMask(
 				if (--compData.skipWidth == 0)
 					return;
 				height = _height;
-				y = compData.y;
 
 				scaleIndexY = compData.scaleYIndex;
 				lastColumnX = compData.x;
@@ -1442,8 +1347,9 @@ void BaseCostumeRenderer::byleRLEDecode(ByleRLEData &compData, int16 actorHitX, 
 	if ((_vm->_bytesPerPixel == 1) &&
 		(!_akosRendering || _shadowMode != 3 || (!(_vm->_game.features & GF_16BIT_COLOR) && _vm->_game.heversion < 90)) &&
 		(actorHitResult == NULL) &&
-		(compData.maskPtr != NULL))
-	{
+		(compData.maskPtr != NULL) &&
+		(compData.y >= compData.boundsRect.top && compData.y + _height <= compData.boundsRect.bottom)) {
+
 		ShadowMode shadowMode = ShadowMode::Mode0;
 		if (!_akosRendering) {
 			if (_shadowMode & 0x20)
@@ -1458,8 +1364,7 @@ void BaseCostumeRenderer::byleRLEDecode(ByleRLEData &compData, int16 actorHitX, 
 		}
 
 		const int scaled = (_scaleX != 255 || _scaleY != 255);
-		const int useScaleIndexMask = compData.scaleIndexMask != -1;
-		if (!scaled)
+		if (!scaled) {
 			byleRLEDecodeNoScaleTable[static_cast<int>(shadowMode)](
 				&compData,
 				_scaleX,
@@ -1470,7 +1375,9 @@ void BaseCostumeRenderer::byleRLEDecode(ByleRLEData &compData, int16 actorHitX, 
 				_srcPtr,
 				_shadowTable,
 				_palette);
-		else
+		} else {
+			const int useScaleIndexMask = compData.scaleIndexMask != -1;
+
 			byleRLEDecodeScaledTable[(static_cast<int>(shadowMode) << 1) | useScaleIndexMask](
 				&compData,
 				_scaleX,
@@ -1481,21 +1388,22 @@ void BaseCostumeRenderer::byleRLEDecode(ByleRLEData &compData, int16 actorHitX, 
 				_srcPtr,
 				_shadowTable,
 				_palette);
+		}
 		return;
 	}
+	warning("%s", __FUNCTION__);
 #endif
 	const byte *src = _srcPtr;
-	byte *dst = compData.destPtr;
 
 	byte len = compData.repLen;
 	uint16 color = compData.repColor;
 
 	// reset every column
+	byte *dst = compData.destPtr;
 	int lastColumnX = -1;
 	int y = compData.y;
 	uint16 height = _height;
 	int scaleIndexY = compData.scaleYIndex;
-
 	byte maskbit = revBitMask(compData.x & 7);
 	const byte *mask = compData.maskPtr + compData.x / 8;
 
