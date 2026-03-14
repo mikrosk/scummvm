@@ -105,9 +105,11 @@ MODULE_OBJS += \
 	debugger/resource.o
 endif
 
+MODULE_OBJS += \
+	byleRLEDecode_m68k.o
+
 ifdef USE_M68K_COSTUME_ASM
 MODULE_OBJS += \
-	byleRLEDecode_m68k.o \
 	byleRLEDecode_m68k-asm.o
 endif
 

@@ -22,6 +22,10 @@
 
 #include "scumm/base-costume.h"
 #include "scumm/util.h"
+#include "backends/platform/atari/atari-debug.h"
+
+#undef warning
+#define warning atari_warning
 
 enum class ShadowMode : int {
 	Mode0,

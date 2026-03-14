@@ -22,6 +22,10 @@
 
 #include "scumm/base-costume.h"
 #include "scumm/util.h"
+#include "backends/platform/atari/atari-debug.h"
+
+#undef warning
+#define warning atari_warning
 
 namespace Scumm {
 
@@ -283,6 +287,10 @@ byte BaseCostumeRenderer::paintCelByleRLECommon(
 
 	return drawFlag;
 }
+
+#ifndef USE_M68K_COSTUME_ASM
+#define USE_M68K_COSTUME_ASM
+#endif
 
 #ifdef USE_M68K_COSTUME_ASM
 extern "C" void ByleRLEDecodeM68K(
