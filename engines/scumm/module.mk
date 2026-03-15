@@ -111,7 +111,8 @@ MODULE_OBJS += \
 ifdef USE_M68K_COSTUME_ASM
 MODULE_OBJS += \
 	byleRLEDecode_mode0_m68k-asm.o \
-	byleRLEDecode_mode3_m68k-asm.o
+	byleRLEDecode_mode3_m68k-asm.o \
+	byleRLEDecode_scaled_mode3_m68k-asm.o
 endif
 
 ifdef ENABLE_SCUMM_7_8
