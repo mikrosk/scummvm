@@ -21,87 +21,11 @@
 
 | kate: tab-width 8; replace-tabs off; hl Motorola 68k (VASM/Devpac);
 
-#include "../../backends/platform/atari/symbols.h"
+#include "byleRLEDecode_m68k-asm.inc"
 
 	.globl	SYM(ByleRLEDecode_m68k_Mode0)
 
-	.struct	0
-compData.x:
-	.space	4	// int x;
-compData.y:
-	.space	4	// int y;
-compData.scaleTable:
-	.space	4	// const byte *scaleTable;
-//compData.height:
-//	.space	4	// int height;
-//compData.width:
-//	.space	4	// int width;
-
-	.space	2
-compData.skipWidth:
-	.space	2	// int skipWidth; (used as uint16)
-
-compData.destPtr:
-	.space	4	// byte *destPtr;
-compData.maskPtr:
-	.space	4	// const byte *maskPtr;
-compData.scaleXStep:
-	.space	4	// int scaleXStep;
-compData.mask:
-	.space	1	// byte mask;
-compData.shr:
-	.space	1	// byte shr;
-compData.repColor:
-	.space	1	// byte repColor;
-compData.repLen:
-	.space	1	// byte repLen;
-compData.boundsRect:
-	.space	8	// Common::Rect boundsRect; (4 x int16)
-compData.scaleXIndex:
-	.space	4	// int scaleXIndex;
-compData.scaleYIndex:
-	.space	4	// int scaleYIndex;
-compData.scaleIndexMask:
-	.space	4	// int scaleIndexMask;
-
-	.set	sizeof_local_vars,0
-	.macro	add_var name,size
-	.set	sizeof_local_vars,sizeof_local_vars+\size
-	\name = -sizeof_local_vars
-	.endm
-
 	add_var	len,2	// uint16 len;
-
-	.struct 0
-arg_fp:
-	.space	4
-arg_rts:
-	.space	4
-arg_pcompData:
-	.space	4	// BaseCostumeRenderer::ByleRLEData *pcompData
-
-	.space	3
-arg_scaleX:
-	.space	1	// const byte _scaleX
-
-	.space	3
-arg_scaleY:
-	.space	1	// const byte _scaleY
-
-	.space	2
-arg_height:
-	.space	2	// const int _height (used as uint16)
-
-arg_pitch:
-	.space	4	// const int pitch
-arg_numStrips:
-	.space	4	// const int _numStrips
-arg_srcPtr:
-	.space	4	// const byte *_srcPtr
-arg_shadowTable:
-	.space	4	// const byte *_shadowTable
-arg_palette:
-	.space	4	// const uint16 *_palette
 
 
 	.text
@@ -122,7 +46,7 @@ SYM(ByleRLEDecode_m68k_Mode0):
 	movem.l	d2-d7/a2-a5,-(sp)
 
 	// registers taken so far:
-	// - d6(color), d5(height), d4(maskbit), d3(pitch), d2(_numStrips)
+	// - d7(pcolor), d6(color), d5(height), d4(maskbit), d3(pitch), d2(_numStrips)
 	// - a0(src), a1(dst), a2(mask), a3(_palette), a5(pcompData), a6(frame pointer)
 
 	// BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
@@ -157,8 +81,6 @@ SYM(ByleRLEDecode_m68k_Mode0):
 	move.l	(arg_numStrips,a6),d2		| d2.w: _numStrips (used as long, too)
 	move.l	(arg_palette,a6),a3		| a3: _palette
 
-	move.w	(a3,d6.l*2),d7			| d7.w: _palette[color]
-
 	// if (len) {
 	// 	--len;
 	// 	goto StartPos;
@@ -169,7 +91,7 @@ SYM(ByleRLEDecode_m68k_Mode0):
 	// 2      1    jump into len_loop (1x)
 	// 3      2    jump into len_loop (2x)
 	subq.w	#1,(len,a6)
-	bgt.b	len_loop
+	bgt.b	pcolor_setup
 main_loop:
 	// do {
 	// len = *src++;
@@ -187,6 +109,7 @@ main_loop:
 	move.b	(a0)+,d7
 1:	move.w	d7,(len,a6)
 
+pcolor_setup:
 	move.w	(a3,d6.l*2),d7			| d7.w: _palette[color]
 len_loop:
 	// do {

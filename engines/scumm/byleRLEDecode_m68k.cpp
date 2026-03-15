@@ -201,6 +201,7 @@ void ByleRLEDecode_m68k_Mode1(
 	} while (true);
 }
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_m68k_Mode3(
 	Scumm::BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX, /* unused */
@@ -281,6 +282,18 @@ void ByleRLEDecode_m68k_Mode3(
 		} while (len > 0);
 	} while (true);
 }
+#else
+extern "C" void ByleRLEDecode_m68k_Mode3(
+	Scumm::BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX, /* unused */
+	const byte _scaleY, /* unused */
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const byte *_srcPtr,
+	const byte *_shadowTable,
+	const uint16 *_palette);
+#endif
 
 void ByleRLEDecode_m68k_Classic(
 	Scumm::BaseCostumeRenderer::ByleRLEData *pcompData,
