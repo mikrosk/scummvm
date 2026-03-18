@@ -20,12 +20,21 @@
  */
 
 
+#ifdef SCUMM_OPTIMISED_CODE
+
+#include "config.h"
+#ifdef USE_M68K_COSTUME_ASM
+#include "bylerledecodeM68K.h"
+#include "backends/platform/atari/atari-debug.h"
+#undef warning
+#define warning atari_warning
+#endif
+
 #include "scumm/base-costume.h"
 #include "scumm/util.h"
 
 namespace Scumm {
 
-#ifdef SCUMM_OPTIMISED_CODE
 byte BaseCostumeRenderer::paintCelByleRLECommon(
 	int xMoveCur,
 	int yMoveCur,
@@ -264,6 +273,7 @@ enum class ShadowMode : int {
 	Classic
 };
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Mode0(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX, /* unused */
@@ -337,7 +347,9 @@ void ByleRLEDecode_Mode0(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Mode1(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX, /* unused */
@@ -417,7 +429,9 @@ void ByleRLEDecode_Mode1(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Mode3(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX, /* unused */
@@ -498,7 +512,9 @@ void ByleRLEDecode_Mode3(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Classic(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX, /* unused */
@@ -572,7 +588,9 @@ void ByleRLEDecode_Classic(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Scaled_Mode0(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX,
@@ -652,6 +670,7 @@ void ByleRLEDecode_Scaled_Mode0(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
 void ByleRLEDecode_Scaled_Mode0_SMask(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
@@ -733,6 +752,7 @@ void ByleRLEDecode_Scaled_Mode0_SMask(
 	} while (true);
 }
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Scaled_Mode1(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX,
@@ -823,7 +843,9 @@ void ByleRLEDecode_Scaled_Mode1(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Scaled_Mode1_SMask(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX,
@@ -914,7 +936,9 @@ void ByleRLEDecode_Scaled_Mode1_SMask(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Scaled_Mode3(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX,
@@ -1007,6 +1031,7 @@ void ByleRLEDecode_Scaled_Mode3(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
 void ByleRLEDecode_Scaled_Classic_SMask(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
@@ -1272,6 +1297,7 @@ void BaseCostumeRenderer::byleRLEDecodeFast(ByleRLEData &compData) {
 		} while (len > 0);
 	} while (true);
 }
-#endif
 
 } // End of namespace Scumm
+
+#endif

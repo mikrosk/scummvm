@@ -3862,6 +3862,8 @@ if test -n "$_host"; then
 			#	# --disable-debug
 			#	append_var LDFLAGS "-s"
 			#fi
+			append_var DEFINES "-DSCUMM_OPTIMISED_CODE"
+			define_in_config_if_yes yes "USE_M68K_COSTUME_ASM"
 
 			# auto -> no
 			if test "$_optimizations" = "yes"; then

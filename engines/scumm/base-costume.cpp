@@ -20,6 +20,13 @@
  */
 
 
+#include "config.h"
+#ifdef USE_M68K_COSTUME_ASM
+#include "backends/platform/atari/atari-debug.h"
+#undef warning
+#define warning atari_warning
+#endif
+
 #include "scumm/base-costume.h"
 #include "scumm/util.h"
 

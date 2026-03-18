@@ -13138,6 +13138,7 @@ engines/scumm/bomp.cpp
 engines/scumm/bomp.h
 engines/scumm/boxes.cpp
 engines/scumm/boxes.h
+engines/scumm/bylerledecodeM68K.h
 engines/scumm/camera.cpp
 engines/scumm/cdda.cpp
 engines/scumm/cdda.h
@@ -13362,6 +13363,15 @@ engines/scumm/insane/insane_iact.cpp
 engines/scumm/insane/insane_scenes.cpp
 engines/scumm/ks_check.cpp
 engines/scumm/ks_check.h
+engines/scumm/m68k/bylerledecode.inc
+engines/scumm/m68k/bylerledecode_classic.S
+engines/scumm/m68k/bylerledecode_mode0.S
+engines/scumm/m68k/bylerledecode_mode1.S
+engines/scumm/m68k/bylerledecode_mode3.S
+engines/scumm/m68k/bylerledecode_scaled_mode0.S
+engines/scumm/m68k/bylerledecode_scaled_mode1.S
+engines/scumm/m68k/bylerledecode_scaled_mode1_smask.S
+engines/scumm/m68k/bylerledecode_scaled_mode3.S
 engines/scumm/macgui/macgui.cpp
 engines/scumm/macgui/macgui.h
 engines/scumm/macgui/macgui_colors.h
