@@ -20,6 +20,10 @@
  */
 
 
+#ifndef SCUMM_OPTIMISED_CODE
+#define SCUMM_OPTIMISED_CODE
+#endif
+
 #include "config.h"
 #ifdef USE_M68K_COSTUME_ASM
 #include "backends/platform/atari/atari-debug.h"

@@ -21,12 +21,12 @@ then
 	LDFLAGS="$LDFLAGS -mfastcall"
 fi
 
-if [ ! -f ../backends/platform/atari/.patched ]
-then
-	cd .. && cat backends/platform/atari/patches/print_rate.patch | patch -p1 && cd -
-	cd .. && cat backends/platform/atari/patches/tooltips.patch | patch -p1 && cd -
-	touch ../backends/platform/atari/.patched
-fi
+#if [ ! -f ../backends/platform/atari/.patched ]
+#then
+#	cd .. && cat backends/platform/atari/patches/print_rate.patch | patch -p1 && cd -
+#	cd .. && cat backends/platform/atari/patches/tooltips.patch | patch -p1 && cd -
+#	touch ../backends/platform/atari/.patched
+#fi
 
 if [ ! -f config.log ]
 then
@@ -37,7 +37,9 @@ then
 	--disable-highres \
 	--disable-bink \
 	--enable-verbose-build \
-	--disable-engine=hugo,director,cine,ultima
+	--disable-engine=hugo,director,cine,ultima \
+	--disable-all-engines \
+	--enable-engines=scumm,scumm-7-8,he,gob
 fi
 
 make -j$(getconf _NPROCESSORS_CONF) atarilitedist

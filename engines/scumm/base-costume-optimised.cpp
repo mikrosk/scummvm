@@ -20,6 +20,10 @@
  */
 
 
+#ifndef SCUMM_OPTIMISED_CODE
+#define SCUMM_OPTIMISED_CODE
+#endif
+
 #ifdef SCUMM_OPTIMISED_CODE
 
 #include "config.h"
