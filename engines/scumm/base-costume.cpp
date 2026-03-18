@@ -294,6 +294,7 @@ void BaseCostumeRenderer::byleRLEDecode(ByleRLEData &compData, int16 actorHitX, 
 		byleRLEDecodeFast(compData);
 		return;
 	}
+	warning("%s: unoptimised version is being executed", __FUNCTION__);
 #endif
 	const byte *src = _srcPtr;
 	byte *dst = compData.destPtr;

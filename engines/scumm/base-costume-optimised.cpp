@@ -276,6 +276,7 @@ void ByleRLEDecode_Mode0(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -349,6 +350,7 @@ void ByleRLEDecode_Mode1(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -428,6 +430,7 @@ void ByleRLEDecode_Mode3(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -508,6 +511,7 @@ void ByleRLEDecode_Classic(
 	const uint16 *_palette /* unused */) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -581,6 +585,7 @@ void ByleRLEDecode_Scaled_Mode0(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -660,6 +665,7 @@ void ByleRLEDecode_Scaled_Mode0_SMask(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -739,6 +745,7 @@ void ByleRLEDecode_Scaled_Mode1(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -829,6 +836,7 @@ void ByleRLEDecode_Scaled_Mode1_SMask(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -919,6 +927,7 @@ void ByleRLEDecode_Scaled_Mode3(
 	const uint16 *_palette) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
@@ -1011,6 +1020,7 @@ void ByleRLEDecode_Scaled_Classic_SMask(
 	const uint16 *_palette /* unused */) {
 
 	BaseCostumeRenderer::ByleRLEData &compData = *pcompData;
+	warning("%s: unexpected call, save your game and report", __FUNCTION__);
 
 	const byte *src = _srcPtr;
 
