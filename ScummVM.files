@@ -13131,6 +13131,7 @@ engines/scumm/actor.h
 engines/scumm/actor_he.h
 engines/scumm/akos.cpp
 engines/scumm/akos.h
+engines/scumm/base-costume-optimised.cpp
 engines/scumm/base-costume.cpp
 engines/scumm/base-costume.h
 engines/scumm/bomp.cpp
