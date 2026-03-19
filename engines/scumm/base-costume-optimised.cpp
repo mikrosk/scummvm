@@ -676,6 +676,7 @@ void ByleRLEDecode_Scaled_Mode0(
 }
 #endif
 
+#ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Scaled_Mode0_SMask(
 	BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX,
@@ -755,6 +756,7 @@ void ByleRLEDecode_Scaled_Mode0_SMask(
 		} while (len > 0);
 	} while (true);
 }
+#endif
 
 #ifndef USE_M68K_COSTUME_ASM
 void ByleRLEDecode_Scaled_Mode1(

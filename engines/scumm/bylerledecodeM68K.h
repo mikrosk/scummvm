@@ -79,6 +79,17 @@ extern "C" void ByleRLEDecode_Scaled_Mode0(
 	const byte *_shadowTable, /* unused */
 	const uint16 *_palette);
 
+extern "C" void ByleRLEDecode_Scaled_Mode0_SMask(
+	Scumm::BaseCostumeRenderer::ByleRLEData *pcompData,
+	const byte _scaleX,
+	const byte _scaleY,
+	const int _height,
+	const int pitch,
+	const int _numStrips,
+	const byte *_srcPtr,
+	const byte *_shadowTable, /* unused */
+	const uint16 *_palette);
+
 extern "C" void ByleRLEDecode_Scaled_Mode1(
 	Scumm::BaseCostumeRenderer::ByleRLEData *pcompData,
 	const byte _scaleX,

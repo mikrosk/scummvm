@@ -113,6 +113,7 @@ MODULE_OBJS += \
 	m68k/bylerledecode_mode1.o \
 	m68k/bylerledecode_mode3.o \
 	m68k/bylerledecode_scaled_mode0.o \
+	m68k/bylerledecode_scaled_mode0_smask.o \
 	m68k/bylerledecode_scaled_mode1.o \
 	m68k/bylerledecode_scaled_mode1_smask.o \
 	m68k/bylerledecode_scaled_mode3.o
