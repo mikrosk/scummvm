@@ -3864,6 +3864,7 @@ if test -n "$_host"; then
 			#fi
 			append_var DEFINES "-DSCUMM_OPTIMISED_CODE"
 			define_in_config_if_yes yes "USE_M68K_COSTUME_ASM"
+			define_in_config_if_yes yes "USE_M68K_GFX_ASM"
 
 			# auto -> no
 			if test "$_optimizations" = "yes"; then

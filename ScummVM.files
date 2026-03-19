@@ -13180,6 +13180,7 @@ engines/scumm/file_nes.h
 engines/scumm/gfx.cpp
 engines/scumm/gfx.h
 engines/scumm/gfxARM.s
+engines/scumm/gfxM68K.S
 engines/scumm/gfx_gui.cpp
 engines/scumm/gfx_mac.cpp
 engines/scumm/gfx_nes.cpp
