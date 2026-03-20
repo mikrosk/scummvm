@@ -1349,8 +1349,13 @@ void Inter_v1::o1_palLoad(OpFuncParams &params) {
 
 void Inter_v1::o1_keyFunc(OpFuncParams &params) {
 	if (!_vm->_vidPlayer->isPlayingLive()) {
-		_vm->_draw->forceBlit();
-		_vm->_video->retrace();
+		if (_wasPlayingLive) {
+			_vm->_draw->forceBlit();
+			_vm->_video->retrace();
+			_wasPlayingLive = false;
+		}
+	} else {
+		_wasPlayingLive = true;
 	}
 
 	animPalette();

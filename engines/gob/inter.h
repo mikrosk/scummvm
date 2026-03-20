@@ -355,6 +355,7 @@ protected:
 
 private:
 	bool _ignoreSpeakerOff = false;
+	bool _wasPlayingLive = true;
 };
 
 class Inter_Geisha : public Inter_v1 {
