@@ -47,7 +47,7 @@ void ImageActor::readParameter(Chunk &chunk, ActorHeaderSectionType paramType) {
 		break;
 
 	case kActorHeaderLoadType:
-		_decompressImmediately = chunk.readTypedByte();
+		_decompressInPlace = chunk.readTypedByte();
 		break;
 
 	case kActorHeaderX:
@@ -116,7 +116,7 @@ Common::Rect ImageActor::getBbox() const {
 
 void ImageActor::readChunk(Chunk &chunk) {
 	ImageInfo bitmapHeader = ImageInfo(chunk);
-	_asset->bitmap = new PixMapImage(chunk, bitmapHeader);
+	_asset->bitmap = new PixMapImage(chunk, bitmapHeader, _decompressInPlace);
 }
 
 } // End of namespace MediaStation

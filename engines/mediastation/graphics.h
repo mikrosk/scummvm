@@ -151,6 +151,11 @@ public:
 		const double dissolveFactor,
 		DisplayContext *displayContext);
 
+	Graphics::ManagedSurface decompressRle8Bitmap(
+		const PixMapImage *source,
+		const Graphics::ManagedSurface *keyFrame = nullptr,
+		const Common::Point *keyFrameOffset = nullptr);
+
 	void effectTransition(Common::Array<ScriptValue> &args);
 	void setTransitionOnSync(Common::Array<ScriptValue> &args) { _scheduledTransitionOnSync = args; }
 	void doTransitionOnSync();
@@ -193,10 +198,6 @@ private:
 		const Common::Point &destLocation,
 		const PixMapImage *source,
 		const Common::Array<Common::Rect> &dirtyRegion);
-	Graphics::ManagedSurface decompressRle8Bitmap(
-		const PixMapImage *source,
-		const Graphics::ManagedSurface *keyFrame = nullptr,
-		const Common::Point *keyFrameOffset = nullptr);
 	void dissolveBlitRectsClip(
 		Graphics::ManagedSurface *dest,
 		const Common::Point &destPos,

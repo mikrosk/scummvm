@@ -33,8 +33,8 @@ Common::String SpriteMovieClip::getDebugString() const {
 	return Common::String::format("%s: [%d, %d]", g_engine->formatParamTokenName(id).c_str(), firstFrameIndex, lastFrameIndex);
 }
 
-SpriteFrame::SpriteFrame(Chunk &chunk, uint index, Common::Point offset, const ImageInfo &imageInfo) :
-	PixMapImage(chunk, imageInfo), _index(index), _origin(offset) {
+SpriteFrame::SpriteFrame(Chunk &chunk, uint index, Common::Point offset, const ImageInfo &imageInfo, bool decompressInPlace) :
+	PixMapImage(chunk, imageInfo, decompressInPlace), _index(index), _origin(offset) {
 	debugC(5, kDebugLoading, "%s: frame 0x%x", __func__, _index);
 }
 
@@ -65,7 +65,7 @@ void SpriteMovieActor::readParameter(Chunk &chunk, ActorHeaderSectionType paramT
 		break;
 
 	case kActorHeaderLoadType:
-		_decompressImmediately = static_cast<bool>(chunk.readTypedByte());
+		_decompressInPlace = static_cast<bool>(chunk.readTypedByte());
 		break;
 
 	case kActorHeaderSpriteChunkCount:
@@ -332,7 +332,7 @@ void SpriteMovieActor::readChunk(Chunk &chunk) {
 	ImageInfo imageInfo(chunk);
 	uint index = chunk.readTypedUint16();
 	Common::Point offset = chunk.readTypedPoint();
-	SpriteFrame *frame = new SpriteFrame(chunk, index, offset, imageInfo);
+	SpriteFrame *frame = new SpriteFrame(chunk, index, offset, imageInfo, _decompressInPlace);
 	_asset->frames.push_back(frame);
 
 	// TODO: Are these in exactly reverse order? If we can just reverse the

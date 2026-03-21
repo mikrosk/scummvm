@@ -611,6 +611,7 @@ void StreamMovieActor::decompressIntoAuxImage(MovieFrame *frame) {
 	frame->keyframeImage->_image.create(frame->keyframeImage->width(), frame->keyframeImage->height(), Graphics::PixelFormat::createFormatCLUT8());
 	frame->keyframeImage->_image.setTransparentColor(0);
 	g_engine->getDisplayManager()->imageBlit(origin, frame->keyframeImage, 1.0, nullptr, &frame->keyframeImage->_image);
+	frame->keyframeImage->setCompressionType(kUncompressedBitmap);
 }
 
 void StreamMovieActorFrames::readImageData(Chunk &chunk) {
