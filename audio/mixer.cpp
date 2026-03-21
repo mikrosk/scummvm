@@ -54,7 +54,7 @@ public:
 	 *             16 bits, for a total of 40 bytes.
 	 * @return number of sample pairs processed (which can still be silence!)
 	 */
-	int mix(int32 *data, uint len);
+	int mix(int32 *data, uint len, int first);
 
 	/**
 	 * Queries whether the channel is still playing or not.
@@ -334,36 +334,43 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
 	Common::StackLock lock(_mutex);
 
 	int32 *buf = (int32 *)samples;
+	const uint bytesPerFrame = (_stereo ? 2 : 1) * sizeof(int32);
 
 	// Since the mixer callback has been called, the mixer must be ready...
 	_mixerReady = true;
 
-	//  zero the buf
-	memset(buf, 0, len);
-
-	// we store 32-bit samples
-	if (_stereo) {
-		assert(len % 8 == 0);
-		len >>= 3;
-	} else {
-		assert(len % 4 == 0);
-		len >>= 2;
-	}
+	assert(len % bytesPerFrame == 0);
+	len /= bytesPerFrame; 
 
 	// mix all channels
-	int res = 0, tmp;
-	for (int i = 0; i != NUM_CHANNELS; i++)
+	int res = 0, tmp, first = 1;
+	for (int i = 0; i != NUM_CHANNELS; i++) {
 		if (_channels[i]) {
 			if (_channels[i]->isFinished()) {
 				delete _channels[i];
 				_channels[i] = nullptr;
 			} else if (!_channels[i]->isPaused()) {
-				tmp = _channels[i]->mix(buf, len);
+
+				tmp = _channels[i]->mix(buf, len, first);
+
+				if (first) {
+					first = 0;
+
+					if (tmp < len) {
+						byte *tailBuf = (byte *)buf + (tmp * bytesPerFrame);
+						uint tailBytes = (len - tmp) * bytesPerFrame;
+						memset(tailBuf, 0, tailBytes);
+					}
+				}
 
 				if (tmp > res)
 					res = tmp;
 			}
 		}
+	}
+
+	if (first)
+		memset(samples, 0, len * bytesPerFrame); 
 
 	return res;
 }
@@ -793,7 +800,7 @@ void Channel::loop() {
 	}
 }
 
-int Channel::mix(int32 *data, uint len) {
+int Channel::mix(int32 *data, uint len, int first) {
 	assert(_stream);
 	assert(_converter);
 
@@ -802,7 +809,7 @@ int Channel::mix(int32 *data, uint len) {
 		_samplesConsumed = _samplesDecoded;
 		_mixerTimeStamp = g_system->getMillis(true);
 		_pauseTime = 0;
-		res = _converter->convert(*_stream, data, len, _volL, _volR);
+		res = _converter->convert(*_stream, data, len, _volL, _volR, first);
 		_samplesDecoded += res;
 	}
 

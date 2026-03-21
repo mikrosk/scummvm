@@ -78,8 +78,11 @@ private:
 	/** Current sample(s) in the input stream (left/right channel) */
 	int16 _inCurL, _inCurR;
 
+	template<bool first>
 	int copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+	template<bool first>
 	int simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+	template<bool first>
 	int interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
 
 	void printConvertType(const Common::String &name) {
@@ -100,7 +103,7 @@ public:
 	RateConverter_Impl(st_rate_t inputRate, st_rate_t outputRate);
 	virtual ~RateConverter_Impl() {}
 
-	int convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r) override;
+	int convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r, int first) override;
 
 	void setInputRate(st_rate_t inputRate) override { _inRate = inputRate; }
 	void setOutputRate(st_rate_t outputRate) override { _outRate = outputRate; }
@@ -112,6 +115,7 @@ public:
 };
 
 template<bool inStereo, bool outStereo, bool reverseStereo>
+template<bool first>
 int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
 	st_sample_t *outStart, *outEnd;
 
@@ -142,15 +146,21 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
 
 		if (outStereo) {
 			// Output left channel
-			unclampedAdd(outBuffer[reverseStereo    ], outL);
+			first
+				? assign(outBuffer[reverseStereo    ], outL)
+				: unclampedAdd(outBuffer[reverseStereo    ], outL);
 
 			// Output right channel
-			unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
+			first
+				? assign(outBuffer[reverseStereo ^ 1], outR)
+				: unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
 
 			outBuffer += 2;
 		} else {
 			// Output mono channel
-			unclampedAdd(outBuffer[0], (outL + outR) / 2);
+			first
+				? assign(outBuffer[0], (outL + outR) / 2)
+				: unclampedAdd(outBuffer[0], (outL + outR) / 2);
 
 			outBuffer += 1;
 		}
@@ -160,6 +170,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
 }
 
 template<bool inStereo, bool outStereo, bool reverseStereo>
+template<bool first>
 int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
 	// How much to increment _outPos by
 	frac_t outPos_inc = _inRate / _outRate;
@@ -204,15 +215,21 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
 
 		if (outStereo) {
 			// output left channel
-			unclampedAdd(outBuffer[reverseStereo    ], outL);
+			first
+				? assign(outBuffer[reverseStereo    ], outL)
+				: unclampedAdd(outBuffer[reverseStereo    ], outL);
 
 			// output right channel
-			unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
+			first
+				? assign(outBuffer[reverseStereo ^ 1], outR)
+				: unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
 
 			outBuffer += 2;
 		} else {
 			// output mono channel
-			unclampedAdd(outBuffer[0], (outL + outR) / 2);
+			first
+				? assign(outBuffer[0], (outL + outR) / 2)
+				: unclampedAdd(outBuffer[0], (outL + outR) / 2);
 
 			outBuffer += 1;
 		}
@@ -221,6 +238,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
 }
 
 template<bool inStereo, bool outStereo, bool reverseStereo>
+template<bool first>
 int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
 	// How much to increment _outPosFrac by
 	frac_t outPos_inc = (_inRate << FRAC_BITS_LOW) / _outRate;
@@ -271,15 +289,21 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(A
 
 			if (outStereo) {
 				// Output left channel
-				unclampedAdd(outBuffer[reverseStereo    ], outL);
+				first
+					? assign(outBuffer[reverseStereo    ], outL)
+					: unclampedAdd(outBuffer[reverseStereo    ], outL);
 
 				// Output right channel
-				unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
+				first
+					? assign(outBuffer[reverseStereo ^ 1], outR)
+					: unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
 
 				outBuffer += 2;
 			} else {
 				// Output mono channel
-				unclampedAdd(outBuffer[0], (outL + outR) / 2);
+				first
+					? assign(outBuffer[0], (outL + outR) / 2)
+					: unclampedAdd(outBuffer[0], (outL + outR) / 2);
 
 				outBuffer += 1;
 			}
@@ -305,16 +329,22 @@ RateConverter_Impl<inStereo, outStereo, reverseStereo>::RateConverter_Impl(st_ra
 	_bufferPos(nullptr) {}
 
 template<bool inStereo, bool outStereo, bool reverseStereo>
-int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR, int first) {
 	assert(input.isStereo() == inStereo);
 
 	if (_inRate == _outRate) {
-		return copyConvert(input, outBuffer, numSamples, volL, volR);
+		return first
+			? copyConvert<true>(input, outBuffer, numSamples, volL, volR)
+			: copyConvert<false>(input, outBuffer, numSamples, volL, volR);
 	} else {
 		if ((_inRate % _outRate) == 0 && (_inRate < 65536)) {
-			return simpleConvert(input, outBuffer, numSamples, volL, volR);
+			return first
+				? simpleConvert<true>(input, outBuffer, numSamples, volL, volR)
+				: simpleConvert<false>(input, outBuffer, numSamples, volL, volR);
 		} else {
-			return interpolateConvert(input, outBuffer, numSamples, volL, volR);
+			return first
+				? interpolateConvert<true>(input, outBuffer, numSamples, volL, volR)
+				: interpolateConvert<false>(input, outBuffer, numSamples, volL, volR);
 		}
 	}
 }
