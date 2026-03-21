@@ -58,10 +58,10 @@ private:
 	 * but only until some point (depends largely on cache size, target
 	 * processor and various other factors), at which it will decrease again.
 	 */
-	st_sample_t _buffer[512];
+	int16 _buffer[512];
 
 	/** Current position inside the buffer */
-	const st_sample_t *_bufferPos;
+	const int16 *_bufferPos;
 
 	/** Size of data currently loaded into the buffer */
 	int _bufferSize;
@@ -73,10 +73,10 @@ private:
 	frac_t _outPosFrac;
 
 	/** Last sample(s) in the input stream (left/right channel) */
-	st_sample_t _inLastL, _inLastR;
+	int16 _inLastL, _inLastR;
 	
 	/** Current sample(s) in the input stream (left/right channel) */
-	st_sample_t _inCurL, _inCurR;
+	int16 _inCurL, _inCurR;
 
 	int copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
 	int simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
@@ -131,7 +131,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
 		}
 
 		// Mix the data into the output buffer
-		st_sample_t inL, inR;
+		int16 inL, inR;
 		inL = *_bufferPos++;
 		inR = (inStereo ? *_bufferPos++ : inL);
 		_bufferSize -= (inStereo ? 2 : 1);
@@ -142,15 +142,15 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
 
 		if (outStereo) {
 			// Output left channel
-			clampedAdd(outBuffer[reverseStereo    ], outL);
+			unclampedAdd(outBuffer[reverseStereo    ], outL);
 
 			// Output right channel
-			clampedAdd(outBuffer[reverseStereo ^ 1], outR);
+			unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
 
 			outBuffer += 2;
 		} else {
 			// Output mono channel
-			clampedAdd(outBuffer[0], (outL + outR) / 2);
+			unclampedAdd(outBuffer[0], (outL + outR) / 2);
 
 			outBuffer += 1;
 		}
@@ -191,7 +191,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
 			}
 		} while (_outPos >= 0);
 
-		st_sample_t inL, inR;
+		int16 inL, inR;
 		inL = *_bufferPos++;
 		inR = (inStereo ? *_bufferPos++ : inL);
 
@@ -204,15 +204,15 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
 
 		if (outStereo) {
 			// output left channel
-			clampedAdd(outBuffer[reverseStereo    ], outL);
+			unclampedAdd(outBuffer[reverseStereo    ], outL);
 
 			// output right channel
-			clampedAdd(outBuffer[reverseStereo ^ 1], outR);
+			unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
 
 			outBuffer += 2;
 		} else {
 			// output mono channel
-			clampedAdd(outBuffer[0], (outL + outR) / 2);
+			unclampedAdd(outBuffer[0], (outL + outR) / 2);
 
 			outBuffer += 1;
 		}
@@ -259,10 +259,10 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(A
 		// still space in the output buffer.
 		while (_outPosFrac < (frac_t)FRAC_ONE_LOW && outBuffer < outEnd) {
 			// Interpolate
-			st_sample_t inL, inR;
-			inL = (st_sample_t)(_inLastL + (((_inCurL - _inLastL) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW));
+			int16 inL, inR;
+			inL = (int16)(_inLastL + (((_inCurL - _inLastL) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW));
 			inR = (inStereo ?
-						(st_sample_t)(_inLastR + (((_inCurR - _inLastR) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW)) :
+						(int16)(_inLastR + (((_inCurR - _inLastR) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW)) :
 						inL);
 
 			st_sample_t outL, outR;
@@ -271,15 +271,15 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(A
 
 			if (outStereo) {
 				// Output left channel
-				clampedAdd(outBuffer[reverseStereo    ], outL);
+				unclampedAdd(outBuffer[reverseStereo    ], outL);
 
 				// Output right channel
-				clampedAdd(outBuffer[reverseStereo ^ 1], outR);
+				unclampedAdd(outBuffer[reverseStereo ^ 1], outR);
 
 				outBuffer += 2;
 			} else {
 				// Output mono channel
-				clampedAdd(outBuffer[0], (outL + outR) / 2);
+				unclampedAdd(outBuffer[0], (outL + outR) / 2);
 
 				outBuffer += 1;
 			}

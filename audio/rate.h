@@ -35,7 +35,7 @@ namespace Audio {
 
 class AudioStream;
 
-typedef int16 st_sample_t;
+typedef int32 st_sample_t;
 typedef uint16 st_volume_t;
 typedef uint32 st_size_t;
 typedef uint32 st_rate_t;
@@ -64,6 +64,10 @@ static inline void clampedAdd(int16& a, int b) {
 #else
 	a = val;
 #endif
+}
+
+static inline void unclampedAdd(st_sample_t& a, int b) {
+	a += b;
 }
 
 /**

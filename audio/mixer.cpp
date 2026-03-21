@@ -54,7 +54,7 @@ public:
 	 *             16 bits, for a total of 40 bytes.
 	 * @return number of sample pairs processed (which can still be silence!)
 	 */
-	int mix(int16 *data, uint len);
+	int mix(int32 *data, uint len);
 
 	/**
 	 * Queries whether the channel is still playing or not.
@@ -333,7 +333,7 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
 
 	Common::StackLock lock(_mutex);
 
-	int16 *buf = (int16 *)samples;
+	int32 *buf = (int32 *)samples;
 
 	// Since the mixer callback has been called, the mixer must be ready...
 	_mixerReady = true;
@@ -341,13 +341,13 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
 	//  zero the buf
 	memset(buf, 0, len);
 
-	// we store 16-bit samples
+	// we store 32-bit samples
 	if (_stereo) {
+		assert(len % 8 == 0);
+		len >>= 3;
+	} else {
 		assert(len % 4 == 0);
 		len >>= 2;
-	} else {
-		assert(len % 2 == 0);
-		len >>= 1;
 	}
 
 	// mix all channels
@@ -793,7 +793,7 @@ void Channel::loop() {
 	}
 }
 
-int Channel::mix(int16 *data, uint len) {
+int Channel::mix(int32 *data, uint len) {
 	assert(_stream);
 	assert(_converter);
 

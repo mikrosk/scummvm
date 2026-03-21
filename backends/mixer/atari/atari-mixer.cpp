@@ -27,6 +27,7 @@
 #include <mint/ostruct.h>
 #include <usound.h>	// https://github.com/mikrosk/usound
 
+#include "audio/rate.h"
 #include "backends/platform/atari/atari-debug.h"
 #include "common/config-manager.h"
 
@@ -86,8 +87,8 @@ AtariMixerManager::~AtariMixerManager() {
 	Mfree(_atariSampleBuffer);
 	_atariSampleBuffer = _atariPhysicalSampleBuffer = _atariLogicalSampleBuffer = nullptr;
 
-	delete[] _samplesBuf;
-	_samplesBuf = nullptr;
+	delete[] _sampleBuf;
+	_sampleBuf = nullptr;
 }
 
 void AtariMixerManager::init() {
@@ -136,7 +137,8 @@ void AtariMixerManager::init() {
 	Xbtimer(XB_TIMERA, 1<<3, 1, timerA);	// event count mode, count to '1'
 	Jenabint(MFP_TIMERA);
 
-	_samplesBuf = new uint8[_samples * _outputChannels * 2];	// always 16-bit
+	_sampleBufSize = _samples * _outputChannels * 4;	// always 32-bit
+	_sampleBuf = new uint8[_sampleBufSize];
 
 	_mixer = new Audio::MixerImpl(_outputRate, _outputChannels == 2, _samples);
 	_mixer->setReady(true);
@@ -188,7 +190,7 @@ void AtariMixerManager::update() {
 
 	if (muted || endOfPlayback) {
 		endOfPlayback = false;
-		processed = _mixer->mixCallback(_samplesBuf, _samples * _outputChannels * 2);
+		processed = _mixer->mixCallback(_sampleBuf, _sampleBufSize);
 	}
 
 	if (processed > 0) {
@@ -200,6 +202,7 @@ void AtariMixerManager::update() {
 			// use the trick with move.b (a7)+,dx which skips two bytes at once
 			// basically supplying move.w (src)+,dx; asr.w #8,dx; move.b dx,(dst)+
 			__asm__ volatile(
+				// TODO
 				"	move.l	%%a7,%%d0\n"
 				"	move.l	%0,%%a7\n"
 				"	moveq	#0x0f,%%d1\n"
@@ -226,13 +229,23 @@ void AtariMixerManager::update() {
 				"2:	dbra	%2,1b\n"
 				"	move.l	%%d0,%%a7\n"
 				: // outputs
-				: "g"(_samplesBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels * 2/2) // inputs
+				: "g"(_sampleBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels * 2/2) // inputs
 				: "d0", "d1", "cc" AND_MEMORY
 				);
 			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2/2, 0, (_samples - processed) * _outputChannels * 2/2);
 			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2/2);
 		} else {
-			memcpy(_atariPhysicalSampleBuffer, _samplesBuf, processed * _outputChannels * 2);
+			//memcpy(_atariPhysicalSampleBuffer, _sampleBuf, processed * _outputChannels * 2);
+			const int32 *src = (int32 *)_sampleBuf;
+			int16 *dst = (int16 *)_atariPhysicalSampleBuffer;
+			for (int i = 0; i < processed * _outputChannels; i++) {
+				int val = *src++;
+				if (val > Audio::ST_SAMPLE_MAX)
+					val = Audio::ST_SAMPLE_MAX;
+				else if (val < Audio::ST_SAMPLE_MIN)
+					val = Audio::ST_SAMPLE_MIN;
+				*dst++ = (int16)val;
+			}
 			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
 			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2);
 		}
