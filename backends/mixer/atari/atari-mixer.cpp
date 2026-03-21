@@ -235,17 +235,28 @@ void AtariMixerManager::update() {
 			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2/2, 0, (_samples - processed) * _outputChannels * 2/2);
 			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2/2);
 		} else {
-			//memcpy(_atariPhysicalSampleBuffer, _sampleBuf, processed * _outputChannels * 2);
-			const int32 *src = (int32 *)_sampleBuf;
-			int16 *dst = (int16 *)_atariPhysicalSampleBuffer;
-			for (int i = 0; i < processed * _outputChannels; i++) {
-				int val = *src++;
-				if (val > Audio::ST_SAMPLE_MAX)
-					val = Audio::ST_SAMPLE_MAX;
-				else if (val < Audio::ST_SAMPLE_MIN)
-					val = Audio::ST_SAMPLE_MIN;
-				*dst++ = (int16)val;
-			}
+			__asm__ volatile(
+				"	move.l	#32768,%%d2\n"
+				"	move.l	#65535,%%d3\n"
+				"	subq.l	#1,%2\n"
+				"1:	move.l	(%0)+,%%d0\n"
+				"	move.l	%%d0,%%d1\n"
+				"	add.l	%%d2,%%d1\n"
+				"	cmp.l	%%d3,%%d1\n"
+				"	bhi.b	3f\n"
+				"2:	move.w	%%d0,(%1)+\n"
+				"	dbra	%2,1b\n"
+				"	bra.b	4f\n"
+				"3:	tst.l	%%d0\n"
+				"	spl		%%d0\n"
+				"	ext.w	%%d0\n"
+				"	add.w	%%d2,%%d0\n"
+				"	bra.b	2b\n"
+				"4:\n"
+				: // outputs
+				: "a"(_sampleBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels) // inputs
+				: "d0", "d1", "d2", "d3", "cc" AND_MEMORY
+				);
 			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
 			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2);
 		}
