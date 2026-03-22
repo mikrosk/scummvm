@@ -168,7 +168,7 @@ private:
 	Common::HashMap<uint, ScreenReference> _screenReferences;
 	Common::HashMap<uint, FileInfo> _fileMap;
 	Common::HashMap<uint, StreamInfo> _streamMap;
-	Common::HashMap<uint, EngineResourceDeclaration> _engineResourceDeclarations;
+	Common::HashMap<Common::String, ScriptValue> _paramTokenDeclarations;
 	uint _unk1 = 0;
 	uint _functionTableSize = 0;
 	uint _unk3 = 0;
@@ -202,7 +202,7 @@ private:
 	void readDestroyActorData(Chunk &chunk);
 	void readActorLoadComplete(Chunk &chunk);
 	void readCreateVariableData(Chunk &chunk);
-	void readContextNameData(Chunk &chunk);
+	void readSetContextName(Chunk &chunk);
 
 	void destroyActorsInContext(uint contextId);
 };

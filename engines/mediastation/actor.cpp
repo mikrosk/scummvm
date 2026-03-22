@@ -142,6 +142,10 @@ void Actor::readParameter(Chunk &chunk, ActorHeaderSectionType paramType) {
 		break;
 	}
 
+	case kActorHeaderActorName:
+		_debugName = chunk.readTypedString();
+		break;
+
 	default:
 		error("[%s] %s: Got unimplemented actor parameter 0x%x", debugName(), __func__, static_cast<uint>(paramType));
 	}

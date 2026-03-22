@@ -92,7 +92,7 @@ MediaStationEngine::~MediaStationEngine() {
 
 	_contextReferences.clear();
 	_streamMap.clear();
-	_engineResourceDeclarations.clear();
+	_paramTokenDeclarations.clear();
 	_screenReferences.clear();
 	_fileMap.clear();
 	_actors.clear();

@@ -200,6 +200,20 @@ void MediaStationEngine::readDocumentInfoFromStream(Chunk &chunk, BootSectionTyp
 		_unk3 = chunk.readTypedUint16();
 		break;
 
+	case kBootParamTokenDeclaration: {
+		Common::String paramTokenName = chunk.readTypedString();
+		sectionType = static_cast<BootSectionType>(chunk.readTypedUint16());
+		if (sectionType != kBootParamTokenValue) {
+			warning("%s: Incorrect separator when reading engine resource type", __func__);
+		}
+
+		Common::String paramTokenValueStr = chunk.readTypedString();
+		ScriptValue paramTokenValue;
+		paramTokenValue.setToParamToken(atoi(paramTokenValueStr.c_str()));
+		_paramTokenDeclarations.setVal(paramTokenName, paramTokenValue);
+		break;
+	}
+
 	default:
 		// See if any registered parameter clients know how to
 		// handle this parameter.

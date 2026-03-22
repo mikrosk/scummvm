@@ -208,7 +208,7 @@ void MediaStationEngine::readHeaderSections(Subfile &subfile, Chunk &chunk) {
 	} while (!subfile.atEnd());
 }
 
-void MediaStationEngine::readContextNameData(Chunk &chunk) {
+void MediaStationEngine::readSetContextName(Chunk &chunk) {
 	uint contextId = chunk.readTypedUint16();
 	debugC(5, kDebugLoading, "%s: Context %d", __func__, contextId);
 	Context *context = _loadedContexts.getValOrDefault(contextId);
@@ -245,7 +245,7 @@ void MediaStationEngine::readCommandFromStream(Chunk &chunk, ContextSectionType 
 		break;
 
 	case kContextNameData:
-		readContextNameData(chunk);
+		readSetContextName(chunk);
 		break;
 
 	default:
