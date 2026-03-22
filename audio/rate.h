@@ -70,10 +70,6 @@ static inline void unclampedAdd(st_sample_t& a, int b) {
 	a += b;
 }
 
-static inline void assign(st_sample_t& a, int b) {
-	a = b;
-}
-
 /**
  * Helper class that handles resampling an AudioStream between an input and output
  * sample rate. Its regular use case is upsampling from the native stream rate
@@ -96,7 +92,7 @@ public:
 	 * 
 	 * @return Number of sample pairs written into the buffer.
 	 */
-	virtual int convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r, int first) = 0;
+	virtual int convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r) = 0;
 
 	virtual void setInputRate(st_rate_t inputRate) = 0;
 	virtual void setOutputRate(st_rate_t outputRate) = 0;
