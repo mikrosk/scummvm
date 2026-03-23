@@ -53,9 +53,10 @@ public:
 	 *             in stereo and 16-bit samples means that the
 	 *             buffer contains twice 10 sample, each 16 bits,
 	 *             for a total of 40 bytes.
+	 * @param assign if true, don't add samples to the buffer, just assign them
 	 * @return number of sample pairs processed (which can still be silence!)
 	 */
-	int mix(byte *data, uint len);
+	int mix(byte *data, uint len, bool assign = false);
 
 	/**
 	 * Queries whether the channel is still playing or not.
@@ -346,9 +347,6 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
 	// Since the mixer callback has been called, the mixer must be ready...
 	_mixerReady = true;
 
-	// zero the sample buffer
-	memset(samples, 0, len);
-
 	// we store samples of size defined by the backend
 	const uint bytesPerFrame = _outBytesPerSample * (_stereo ? 2 : 1);
 	assert(len % bytesPerFrame == 0);
@@ -356,18 +354,39 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
 
 	// mix all channels
 	int res = 0, tmp;
-	for (int i = 0; i != NUM_CHANNELS; i++)
+	for (int i = 0; i != NUM_CHANNELS; i++) {
 		if (_channels[i]) {
 			if (_channels[i]->isFinished()) {
 				delete _channels[i];
 				_channels[i] = nullptr;
 			} else if (!_channels[i]->isPaused()) {
-				tmp = _channels[i]->mix(samples, len);
-
+				if (res == 0) {
+					// nothing assigned yet => assign 'len' samples
+					tmp = _channels[i]->mix(samples, len, true);
+				} else if (res >= (int)len) {
+					// everything assigned => add 'len' samples
+					tmp = _channels[i]->mix(samples, len, false);
+				} else {
+					// 'res' represents the assigned sample count
+					tmp = _channels[i]->mix(samples, res, false);
+					if (tmp == res) {
+						// if all 'res' samples have been processed, there are still
+						// 'len - res' samples to assign
+						tmp += _channels[i]->mix(samples + res * bytesPerFrame, len - res, true);
+					}
+				}
 				if (tmp > res)
 					res = tmp;
 			}
 		}
+	}
+
+	if (res < (int)len && _clamp) {
+		// optimisation: if external clamping is used, skip clearing the tail;
+		// the caller knows from 'res' which samples are valid and can write
+		// zeroes directly to its clamped output buffer
+		memset(samples + res * bytesPerFrame, 0, (len - res) * bytesPerFrame);
+	}
 
 	return res;
 }
@@ -797,7 +816,7 @@ void Channel::loop() {
 	}
 }
 
-int Channel::mix(byte *data, uint len) {
+int Channel::mix(byte *data, uint len, bool assign) {
 	assert(_stream);
 	assert(_converter);
 
@@ -813,7 +832,7 @@ int Channel::mix(byte *data, uint len) {
 			len,
 			_volL,
 			_volR,
-			_mixer->getClamping() ? MIX_CLAMPED_ADD : MIX_ADD);
+			assign ? MIX_ASSIGN : (_mixer->getClamping() ? MIX_CLAMPED_ADD : MIX_ADD));
 		_samplesDecoded += res;
 	}
 
