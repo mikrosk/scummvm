@@ -348,11 +348,16 @@ void OSystem_Atari::initBackend() {
 	}
 #endif
 
+	// init() will be called upon starting a new game
 	_mixerManager = new AtariMixerManager();
-	// Setup and start mixer
-	_mixerManager->init();
 
 	BaseBackend::initBackend();
+}
+
+void OSystem_Atari::engineBeforeCreate() {
+	debug("engineBeforeCreate");
+
+	((AtariMixerManager *)_mixerManager)->init();
 }
 
 void OSystem_Atari::engineInit() {
@@ -365,6 +370,12 @@ void OSystem_Atari::engineDone() {
 	//debug("engineDone");
 
 	g_gameEngineActive = false;
+}
+
+void OSystem_Atari::engineAfterDelete() {
+	debug("engineAfterDelete");
+
+	((AtariMixerManager *)_mixerManager)->deinit();
 }
 
 Common::MutexInternal *OSystem_Atari::createMutex() {
@@ -399,7 +410,7 @@ void OSystem_Atari::getTimeAndDate(TimeDate &td, bool skipRecord) const {
 Common::KeymapArray OSystem_Atari::getGlobalKeymaps() {
 	Common::KeymapArray globalMaps = BaseBackend::getGlobalKeymaps();
 
-	Common::Keymap *keymap = ((AtariGraphicsManager*)_graphicsManager)->getKeymap();
+	Common::Keymap *keymap = ((AtariGraphicsManager *)_graphicsManager)->getKeymap();
 	globalMaps.push_back(keymap);
 
 	return globalMaps;
