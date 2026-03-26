@@ -241,8 +241,7 @@ void AtariMixerManager::update() {
 				: "a"(_sampleBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels) // inputs
 				: "d0", "d1", "d2", "d3", "cc" AND_MEMORY
 				);
-			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2/2, 0, (_samples - processed) * _outputChannels * 2/2);
-			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2/2);
+			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + processed * _outputChannels * 2/2);
 		} else {
 			__asm__ volatile(
 				"	move.l	#32768,%%d2\n"
@@ -266,8 +265,7 @@ void AtariMixerManager::update() {
 				: "a"(_sampleBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels) // inputs
 				: "d0", "d1", "d2", "d3", "cc" AND_MEMORY
 				);
-			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
-			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2);
+			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + processed * _outputChannels * 2);
 		}
 
 		if (muted) {
