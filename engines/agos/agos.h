@@ -1452,7 +1452,6 @@ public:
 	void setupGame() override;
 	void setupOpcodes() override;
 	void setupVideoOpcodes(VgaOpcodeProc *op) override;
-	void quickLoadOrSave() override;
 	void windowDrawChar(WindowBlock *window, uint x, uint y, byte chr) override;
 	void saveInventoryPalette();
 	void applyInventoryPalette();
