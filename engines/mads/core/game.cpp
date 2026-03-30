@@ -697,4 +697,4 @@ void Game::camUpdate() {
 	}
 }
 
-} // End of namespace MADS
+} // namespace MADS
