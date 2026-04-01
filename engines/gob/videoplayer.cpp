@@ -1066,6 +1066,14 @@ Common::SeekableReadStream *VideoPlayer::getEmbeddedFile(const Common::String &f
 	return video->decoder->getEmbeddedFile(fileName);
 }
 
+bool VideoPlayer::getFrameCoords(int slot, int16 frame, int16 &x, int16 &y, int16 &width, int16 &height) const {
+	const Video *video = getVideoBySlot(slot);
+	if (!video)
+		return false;
+
+	return video->decoder->getFrameCoords(frame, x, y, width, height);
+}
+
 int32 VideoPlayer::getSubtitleIndex(int slot) const {
 	const Video *video = getVideoBySlot(slot);
 	if (!video)

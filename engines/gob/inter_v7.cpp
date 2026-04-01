@@ -87,6 +87,7 @@ void Inter_v7::setupOpcodesDraw() {
 	OPCODEDRAW(0x8A, o7_findFile);
 	OPCODEDRAW(0x8B, o7_findNextFile);
 	OPCODEDRAW(0x8C, o7_getSystemProperty);
+	OPCODEDRAW(0x8D, o7_getVmdCurrentFrameRect);
 	OPCODEDRAW(0x8E, o7_getFileInfo);
 	OPCODEDRAW(0x90, o7_loadImage);
 	OPCODEDRAW(0x91, o7_copyDataToClipboard);
@@ -991,6 +992,24 @@ void Inter_v7::o7_findNextFile() {
 
 	storeString(varIndex, type, file.getLastComponent().toString().c_str());
 	storeValue(file.empty() ? 0 : 1);
+}
+
+void Inter_v7::o7_getVmdCurrentFrameRect() {
+	int16 slot = _vm->_game->_script->readValExpr();
+
+	int16 x, y, width, height;
+	if (slot >= 0 && slot < 7 && _vm->_vidPlayer->slotIsOpen(slot) &&
+			_vm->_vidPlayer->getFrameCoords(slot, _vm->_vidPlayer->getCurrentFrame(slot), x, y, width, height)) {
+		storeValue((uint32)x);                    // left
+		storeValue((uint32)(x + width - 1));      // right
+		storeValue((uint32)y);                    // top
+		storeValue((uint32)(y + height - 1));     // bottom
+	} else {
+		storeValue((uint32)-1);
+		storeValue((uint32)-1);
+		storeValue((uint32)-1);
+		storeValue((uint32)-1);
+	}
 }
 
 void Inter_v7::o7_getSystemProperty() {
