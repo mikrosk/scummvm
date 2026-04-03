@@ -934,13 +934,9 @@ bool ColonyEngine::makePlanet() {
 
 bool ColonyEngine::timeSquare(const Common::String &str, const Graphics::Font *macFont) {
 	// Original: TimeSquare() in intro.c
-	// 1. Draw horizontal blue gradient lines above/below center
-	// 2. Scroll red text from right to center
-	// 3. Flash klaxon 6 times with inverted rect
-	// 4. Play Mars again, scroll text off to the left
-	//
-	// Mac original: fcolor starts at (0,0,0xFFFF) and subtracts 4096 per pair of lines.
-	// Text is drawn in red (0xFFFF,0,0) on black background.
+	// Mac and DOS use different presentation here. DOS is a monochrome/gray
+	// warning band with 16-pixel blits and white text; Mac uses the colorful
+	// gradient treatment.
 
 	_gfx->clear(_gfx->black());
 
@@ -950,44 +946,67 @@ bool ColonyEngine::timeSquare(const Common::String &str, const Graphics::Font *m
 
 	int centery = _height / 2 - 10;
 
-	// Set up gradient palette entries (160-175) for the gradient lines
-	// Mac original: blue starts at 0xFFFF and decreases by 4096 per line pair
-	// B&W Mac: white gradient instead of blue
 	const bool bwMac = (macFont && !_hasMacColors);
 	const bool macStyle = (macFont != nullptr);
-	for (int i = 0; i < 16; i++) {
-		int val = 255 - i * 16; // 255, 239, 223, ... 15
-		if (val < 0)
-			val = 0;
-		byte pal[3] = { (byte)(bwMac ? val : 0), (byte)(bwMac ? val : 0), (byte)val };
-		_gfx->setPalette(pal, 160 + i, 1);
-	}
-	// Set palette entry 176 for text (red in color, white in B&W)
-	{
-		byte pal[3] = { 255, (byte)(bwMac ? 255 : 0), (byte)(bwMac ? 255 : 0) };
-		_gfx->setPalette(pal, 176, 1);
-	}
+	const uint32 grayIndex = 160;
+	const uint32 textIndex = 176;
+	const Common::Rect textBand(0, centery + 1, _width, centery + 16);
 
-	// Draw blue gradient lines above/below center band
-	for (int i = 0; i < 16; i++) {
-		_gfx->drawLine(0, centery - 2 - i * 2, _width, centery - 2 - i * 2, 160 + i);
-		_gfx->drawLine(0, centery - 2 - (i * 2 + 1), _width, centery - 2 - (i * 2 + 1), 160 + i);
-		_gfx->drawLine(0, centery + 16 + i * 2, _width, centery + 16 + i * 2, 160 + i);
-		_gfx->drawLine(0, centery + 16 + i * 2 + 1, _width, centery + 16 + i * 2 + 1, 160 + i);
+	if (macStyle) {
+		// Mac original: blue starts at 0xFFFF and decreases by 4096 per line pair.
+		for (int i = 0; i < 16; i++) {
+			int val = 255 - i * 16; // 255, 239, 223, ... 15
+			if (val < 0)
+				val = 0;
+			byte pal[3] = { (byte)(bwMac ? val : 0), (byte)(bwMac ? val : 0), (byte)val };
+			_gfx->setPalette(pal, 160 + i, 1);
+		}
+
+		// Text is red in color, white in B&W.
+		{
+			byte pal[3] = { 255, (byte)(bwMac ? 255 : 0), (byte)(bwMac ? 255 : 0) };
+			_gfx->setPalette(pal, textIndex, 1);
+		}
+
+		// Draw the blue gradient lines above/below the center band.
+		for (int i = 0; i < 16; i++) {
+			_gfx->drawLine(0, centery - 2 - i * 2, _width, centery - 2 - i * 2, 160 + i);
+			_gfx->drawLine(0, centery - 2 - (i * 2 + 1), _width, centery - 2 - (i * 2 + 1), 160 + i);
+			_gfx->drawLine(0, centery + 16 + i * 2, _width, centery + 16 + i * 2, 160 + i);
+			_gfx->drawLine(0, centery + 16 + i * 2 + 1, _width, centery + 16 + i * 2 + 1, 160 + i);
+		}
+	} else {
+		// DOS warning band: white outer lines, gray inner lines, white text.
+		const byte grayPal[3] = { 170, 170, 170 };
+		const byte whitePal[3] = { 255, 255, 255 };
+		_gfx->setPalette(grayPal, grayIndex, 1);
+		_gfx->setPalette(whitePal, textIndex, 1);
+
+		_gfx->drawLine(0, centery - 3, _width, centery - 3, textIndex);
+		_gfx->drawLine(0, centery - 2, _width, centery - 2, grayIndex);
+		_gfx->drawLine(0, centery - 1, _width, centery - 1, textIndex);
+		_gfx->drawLine(0, centery + 17, _width, centery + 17, textIndex);
+		_gfx->drawLine(0, centery + 18, _width, centery + 18, grayIndex);
+		_gfx->drawLine(0, centery + 19, _width, centery + 19, textIndex);
 	}
 	_gfx->copyToScreen();
 
-	// Phase 1: Scroll text in from the right to center
-	// Original: if(Button()) if(qt=OptionKey()) break;
+	// Phase 1: Scroll text in from the right to center.
+	// DOS uses 16-pixel blits of a black text box; Mac scrolls smoothly.
 	int targetX = (_width - swidth) / 2;
-	for (int x = _width; x > targetX; x -= 2) {
-		_gfx->fillRect(Common::Rect(0, centery + 1, _width, centery + 16), 0);
-		_gfx->drawString(font, str, x, centery + 2, 176, Graphics::kTextAlignLeft);
+	const int startX = macStyle ? _width : (_width + 16);
+	const int stepX = macStyle ? 2 : 16;
+	const int endX = macStyle ? -swidth : (-swidth - 16);
+	const uint32 scrollDelayMs = macStyle ? 8 : (1000 / 60);
+
+	for (int x = startX; x > targetX; x -= stepX) {
+		_gfx->fillRect(textBand, 0);
+		_gfx->drawString(font, str, x, centery + 2, textIndex, Graphics::kTextAlignLeft);
 		_gfx->copyToScreen();
 
 		if (checkSkipRequested())
 			return true;
-		_system->delayMillis(8);
+		_system->delayMillis(scrollDelayMs);
 	}
 
 	// Phase 2: Klaxon flash — original intro.c lines 312-322.
@@ -1003,7 +1022,7 @@ bool ColonyEngine::timeSquare(const Common::String &str, const Graphics::Font *m
 		}
 
 		// InvertRect(&invrt) — XOR the text band
-		_gfx->fillRect(Common::Rect(0, centery + 1, _width, centery + 16), 0xFFFFFFFF);
+		_gfx->fillRect(textBand, 0xFFFFFFFF);
 		_gfx->copyToScreen();
 
 		_sound->play(Sound::kKlaxon);
@@ -1027,14 +1046,14 @@ bool ColonyEngine::timeSquare(const Common::String &str, const Graphics::Font *m
 	// Phase 3: Mac resumes Mars here; DOS scrolls out silently.
 	if (macStyle)
 		_sound->play(Sound::kMars);
-	for (int x = targetX; x > -swidth; x -= 2) {
-		_gfx->fillRect(Common::Rect(0, centery + 1, _width, centery + 16), 0);
-		_gfx->drawString(font, str, x, centery + 2, 176, Graphics::kTextAlignLeft);
+	for (int x = targetX; x > endX; x -= stepX) {
+		_gfx->fillRect(textBand, 0);
+		_gfx->drawString(font, str, x, centery + 2, textIndex, Graphics::kTextAlignLeft);
 		_gfx->copyToScreen();
 
 		if (checkSkipRequested())
 			return true;
-		_system->delayMillis(8);
+		_system->delayMillis(scrollDelayMs);
 	}
 
 	return false;
