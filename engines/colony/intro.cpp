@@ -395,28 +395,21 @@ void ColonyEngine::playIntro() {
 			_gfx->clear(_gfx->black());
 		}
 
-		// Final crash: DOS IBM_INTR.C lines 119-131
-		// Original DOS: while(!SoundDone()) { EraseRect; PaintRect; } — flashes
-		// for the full Explode2 sound (~7s). On Mac the digitized sample is shorter.
+		// Final crash: DOS IBM_INTR.C lines 119-131.
+		// Keep this much shorter than the original long PC speaker strobe.
 		_sound->stop();
-		if (getPlatform() == Common::kPlatformMacintosh) {
-			// Mac: play short digitized crash sample with brief flash
-			_sound->play(Sound::kExplode);
-			uint32 crashStart = _system->getMillis();
-			int frame = 0;
-			while (!shouldQuit() && _sound->isPlaying() && _system->getMillis() - crashStart < 2000) {
-				_gfx->clear(frame % 2 ? _gfx->black() : _gfx->white());
-				_gfx->copyToScreen();
-				_system->delayMillis(125);
-				frame++;
-			}
-			_sound->stop();
-		} else {
-			// DOS: skip the harsh 7-second PC speaker explode
-			_gfx->clear(_gfx->black());
+		_sound->play(Sound::kExplode);
+		const uint32 crashFlashDurationMs = 700;
+		const uint32 crashFlashStepMs = 200;
+		const uint32 crashStart = _system->getMillis();
+		int frame = 0;
+		while (!shouldQuit() && _system->getMillis() - crashStart < crashFlashDurationMs) {
+			_gfx->clear(frame % 2 ? _gfx->black() : _gfx->white());
 			_gfx->copyToScreen();
-			_system->delayMillis(1000);
+			_system->delayMillis(crashFlashStepMs);
+			frame++;
 		}
+		_sound->stop();
 		_gfx->clear(_gfx->black());
 		_gfx->copyToScreen();
 
@@ -452,7 +445,8 @@ bool ColonyEngine::scrollInfo(const Graphics::Font *macFont) {
 	};
 	const int storyLength = ARRAYSIZE(story);
 
-	if (getPlatform() == Common::kPlatformMacintosh)
+	bool qt = checkSkipRequested();
+	if (!qt)
 		_sound->play(Sound::kBeamMe);
 
 	_gfx->clear(_gfx->black());
@@ -487,7 +481,6 @@ bool ColonyEngine::scrollInfo(const Graphics::Font *macFont) {
 	// moves up by inc=4 each frame until text is visible at its correct position.
 	// We simulate by drawing text with a y-offset that starts at _height and decreases to 0.
 	int inc = 4;
-	bool qt = false;
 
 	for (int scrollOff = _height; scrollOff > 0 && !qt; scrollOff -= inc) {
 		if (checkSkipRequested()) {
@@ -525,10 +518,10 @@ bool ColonyEngine::scrollInfo(const Graphics::Font *macFont) {
 	if (!qt) {
 		for (int scrollOff = 0; scrollOff > -_height && !qt; scrollOff -= inc) {
 			if (checkSkipRequested()) {
-			qt = true;
-			_sound->stop();
-			break;
-		}
+				qt = true;
+				_sound->stop();
+				break;
+			}
 
 			_gfx->clear(_gfx->black());
 			for (int i = 0; i < storyLength; i++) {
@@ -541,9 +534,9 @@ bool ColonyEngine::scrollInfo(const Graphics::Font *macFont) {
 		}
 	}
 
-	// Original does NOT stop the sound here  BeamMe continues playing
-	// and intro() waits for it with while(!SoundDone()) after ScrollInfo returns.
-	// Only stop if skipping (qt already stops in the modifier+click handlers above).
+	// DOS stops BeamMe here; Mac lets it continue and waits in playIntro().
+	if (!qt && !macFont)
+		_sound->stop();
 	_gfx->clear(_gfx->black());
 	_gfx->copyToScreen();
 	return qt;
@@ -937,6 +930,7 @@ bool ColonyEngine::timeSquare(const Common::String &str, const Graphics::Font *m
 	// Mac original: blue starts at 0xFFFF and decreases by 4096 per line pair
 	// B&W Mac: white gradient instead of blue
 	const bool bwMac = (macFont && !_hasMacColors);
+	const bool macStyle = (macFont != nullptr);
 	for (int i = 0; i < 16; i++) {
 		int val = 255 - i * 16; // 255, 239, 223, ... 15
 		if (val < 0)
@@ -972,33 +966,43 @@ bool ColonyEngine::timeSquare(const Common::String &str, const Graphics::Font *m
 		_system->delayMillis(8);
 	}
 
-	// Phase 2: Klaxon flash — original intro.c lines 312-322:
-	// EndCSound(); for 6 iterations: wait for sound, stop, play klaxon,
-	// InvertRect. The klaxon is short (~200ms). Inversions happen rapidly
-	// at the start of each klaxon, creating a fast strobe effect.
+	// Phase 2: Klaxon flash — original intro.c lines 312-322.
+	// DOS does 4 full klaxon cycles here; Mac uses the longer 6-flash variant.
 	_sound->stop();
 	_gfx->setXorMode(true);
-	for (int i = 0; i < 6; i++) {
+	const int klaxonCount = macStyle ? 6 : 4;
+	const uint32 dosKlaxonFlashMs = 12 * 1000 / 60;
+	for (int i = 0; i < klaxonCount; i++) {
 		if (checkSkipRequested()) {
 			_gfx->setXorMode(false);
 			return true;
 		}
 
-		_sound->play(Sound::kKlaxon);
 		// InvertRect(&invrt) — XOR the text band
 		_gfx->fillRect(Common::Rect(0, centery + 1, _width, centery + 16), 0xFFFFFFFF);
 		_gfx->copyToScreen();
-		// Brief pause matching klaxon duration (~200ms)
-		_system->delayMillis(200);
+
+		_sound->play(Sound::kKlaxon);
+		if (macStyle) {
+			// Keep the snappier Mac timing.
+			_system->delayMillis(200);
+		} else {
+			// At modern frame rates, waiting for the synthesized klaxon to end
+			// drags these warning cards out too long. Keep a short fixed flash.
+			_system->delayMillis(dosKlaxonFlashMs);
+		}
 	}
 	_gfx->setXorMode(false);
-	// Wait for last klaxon to finish
-	while (_sound->isPlaying() && !shouldQuit())
-		_system->delayMillis(10);
+	if (macStyle) {
+		// Wait for last klaxon to finish
+		while (_sound->isPlaying() && !shouldQuit())
+			_system->delayMillis(10);
+	}
 	_sound->stop();
 
-	// Phase 3: PlayMars(), scroll text off to the left
-	_sound->play(Sound::kMars);
+	// Phase 3: Mac resumes Mars here; DOS scrolls out silently.
+	if (macStyle)
+		_sound->play(Sound::kMars);
 	for (int x = targetX; x > -swidth; x -= 2) {
 		_gfx->fillRect(Common::Rect(0, centery + 1, _width, centery + 16), 0);
 		_gfx->drawString(font, str, x, centery + 2, 176, Graphics::kTextAlignLeft);

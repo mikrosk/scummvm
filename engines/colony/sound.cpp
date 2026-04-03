@@ -34,6 +34,73 @@
 
 namespace Colony {
 
+namespace {
+
+struct MelodyStep {
+	uint32 divider;
+	uint8 ticks;
+};
+
+
+void queueMelody(Audio::PCSpeaker *speaker, const MelodyStep *steps, uint count, uint repeats, uint32 tickUs) {
+	if (!speaker || !steps || !count || !repeats)
+		return;
+
+	for (uint repeat = 0; repeat < repeats; ++repeat) {
+		for (uint i = 0; i < count; ++i) {
+			const MelodyStep &step = steps[i];
+			if (step.divider == 0)
+				speaker->playQueue(Audio::PCSpeaker::kWaveFormSilence, 0, step.ticks * tickUs);
+			else
+				speaker->playQueue(Audio::PCSpeaker::kWaveFormSquare, 1193180.0f / step.divider, step.ticks * tickUs);
+		}
+	}
+}
+
+const uint32 kRestDivider = 0;
+
+// Ambient DOS intro phrases from COLDAT.ASM.
+// These are sparse note patterns with long rests; exact VSP note decoding
+// is not available here, so we map them to stable PC speaker dividers.
+static const MelodyStep kStars1Phrase[] = {
+	{ 4831, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 },
+	{ 4063, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 },
+	{ 1811, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 },
+	{ 1715, 3 }, { kRestDivider, 3 }
+};
+
+static const MelodyStep kStars2Phrase[] = {
+	{ 4831, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 }, { 2712, 3 },
+	{ 4063, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 }, { 2032, 3 },
+	{ 1811, 3 }, { kRestDivider, 3 }, { kRestDivider, 3 }, { 9121, 3 },
+	{ 1715, 3 }, { kRestDivider, 3 }
+};
+
+static const MelodyStep kStars3Phrase[] = {
+	{ 4831, 3 }, { kRestDivider, 3 }, { 9121, 3 }, { 2712, 3 },
+	{ 4063, 3 }, { kRestDivider, 3 }, { 7670, 3 }, { 2032, 3 },
+	{ 1811, 3 }, { kRestDivider, 3 }, { 4560, 3 }, { 9121, 3 },
+	{ 1715, 3 }, { kRestDivider, 3 }
+};
+
+static const MelodyStep kStars4Phrase[] = {
+	{ 4831, 3 }, { 1524, 3 }, { 9121, 3 }, { 2712, 3 },
+	{ 4063, 3 }, { 4831, 3 }, { 7670, 3 }, { 2032, 3 },
+	{ 1811, 3 }, { 3044, 3 }, { 4560, 3 }, { 9121, 3 },
+	{ 1715, 3 }, { 2032, 3 }
+};
+
+
+// The original DOS VSP data loops these ambience patterns until killed.
+// In ScummVM that becomes grating, so keep them long enough for the intro
+// section but do not let them drone for many seconds.
+const uint kIntroStarsRepeats = 2;
+const int kBeamMeRamp1Steps = 20;
+const int kBeamMeRamp2Steps = 20;
+const int kBeamMeRamp3Steps = 80;
+
+} // namespace
+
 Sound::Sound(ColonyEngine *vm) : _vm(vm), _resMan(nullptr), _appResMan(nullptr) {
 	_speaker = new Audio::PCSpeaker();
 	_speaker->init();
@@ -231,14 +298,31 @@ void Sound::playPCSpeaker(int soundID) {
 		queueTick(1000, 2);
 		queueTick(40000, 3);
 		break;
+	case kBeamMe:
+		queueTick(65535, 1);
+		for (int i = 0; i < kBeamMeRamp1Steps; ++i) {
+			queueTick(65535 - i * 20, 1);
+		}
+		queueTick(65531, 1);
+		for (int i = 0; i < kBeamMeRamp2Steps; ++i) {
+			queueTick(65531 - i * 20, 1);
+		}
+		queueTick(65535, 1);
+		for (int i = 0; i < kBeamMeRamp3Steps; ++i) {
+			queueTick(65535 - i * 20, 1);
+		}
+		break;
 	case kStars1:
+		queueMelody(_speaker, kStars1Phrase, ARRAYSIZE(kStars1Phrase), kIntroStarsRepeats, tickUs);
+		break;
 	case kStars2:
+		queueMelody(_speaker, kStars2Phrase, ARRAYSIZE(kStars2Phrase), kIntroStarsRepeats, tickUs);
+		break;
 	case kStars3:
+		queueMelody(_speaker, kStars3Phrase, ARRAYSIZE(kStars3Phrase), kIntroStarsRepeats, tickUs);
+		break;
 	case kStars4:
-		queueTick(4000, 2);
-		queueTick(8000, 2);
-		queueTick(2000, 2);
-		queueTick(6000, 2);
+		queueMelody(_speaker, kStars4Phrase, ARRAYSIZE(kStars4Phrase), kIntroStarsRepeats, tickUs);
 		break;
 	case kToilet: // "Sailor's Hornpipe"
 		queueTick(2651, 4); // G
