@@ -427,7 +427,22 @@ bool ColonyEngine::scrollInfo(const Graphics::Font *macFont) {
 	// waits for click, then scrolls it off the top.
 	// Mac original: TextFont(190 = Commando); TextSize(12);
 	// Text blue starts at 0xFFFF and fades by -4096 per visible line.
-	const char *story[] = {
+	static const char *const kDosStory[] = {
+		"Mankind has left the",
+		"cradle of earth and",
+		"is beginning to eye",
+		"the galaxy. He has",
+		"begun to colonize",
+		"distant planets but has",
+		"yet to meet any alien",
+		"life forms.",
+		"****",
+		"Until now...",
+		"****",
+		"Press any key to begin",
+		"the Adventure..."
+	};
+	static const char *const kMacStory[] = {
 		"",
 		"Mankind has left the",
 		"cradle of earth and",
@@ -437,13 +452,14 @@ bool ColonyEngine::scrollInfo(const Graphics::Font *macFont) {
 		"distant planets but has",
 		"yet to meet any alien",
 		"life forms.",
-		"",      // null separator in original
+		"",
 		"Until now...",
-		"",      // null separator in original
+		"",
 		"Click to begin",
 		"the Adventure..."
 	};
-	const int storyLength = ARRAYSIZE(story);
+	const char *const *story = macFont ? kMacStory : kDosStory;
+	const int storyLength = macFont ? ARRAYSIZE(kMacStory) : ARRAYSIZE(kDosStory);
 
 	bool qt = checkSkipRequested();
 	if (!qt)
@@ -454,9 +470,10 @@ bool ColonyEngine::scrollInfo(const Graphics::Font *macFont) {
 
 	Graphics::DosFont dosFont;
 	const Graphics::Font *font = macFont ? macFont : (const Graphics::Font *)&dosFont;
+	const bool macStyle = (macFont != nullptr);
 
-	// Original uses 19px line height, centers vertically within height
-	int lineHeight = 19;
+	// Mac and DOS use different title layouts here.
+	int lineHeight = macStyle ? 19 : 15;
 	int totalHeight = lineHeight * storyLength;
 	int ht = (_height - totalHeight) / 2;
 
@@ -476,31 +493,38 @@ bool ColonyEngine::scrollInfo(const Graphics::Font *macFont) {
 	}
 	_gfx->setPalette(pal, 200, storyLength);
 
-	// Phase 1: Scroll text up from below screen
-	// Original: scrollRect starts at bottom (stayRect.bottom..stayRect.bottom*2),
-	// moves up by inc=4 each frame until text is visible at its correct position.
-	// We simulate by drawing text with a y-offset that starts at _height and decreases to 0.
-	int inc = 4;
+	int inc = macStyle ? 4 : 8;
+	if (macStyle) {
+		// Mac: scroll the text in from below.
+		for (int scrollOff = _height; scrollOff > 0 && !qt; scrollOff -= inc) {
+			if (checkSkipRequested()) {
+				qt = true;
+				_sound->stop();
+				break;
+			}
 
-	for (int scrollOff = _height; scrollOff > 0 && !qt; scrollOff -= inc) {
-		if (checkSkipRequested()) {
-			qt = true;
-			_sound->stop();
-			break;
+			_gfx->clear(_gfx->black());
+			for (int i = 0; i < storyLength; i++) {
+				int drawY = ht + lineHeight * i + scrollOff;
+				if (strlen(story[i]) > 0 && drawY >= 0 && drawY < _height)
+					_gfx->drawString(font, story[i], _width / 2, drawY, 200 + i, Graphics::kTextAlignCenter);
+			}
+			_gfx->copyToScreen();
+			_system->delayMillis(16);
 		}
 
-		_gfx->clear(_gfx->black());
-		for (int i = 0; i < storyLength; i++) {
-			int drawY = ht + lineHeight * i + scrollOff;
-			if (strlen(story[i]) > 0 && drawY >= 0 && drawY < _height)
-				_gfx->drawString(font, story[i], _width / 2, drawY, 200 + i, Graphics::kTextAlignCenter);
+		// Draw final position (scrollOff = 0)
+		if (!qt) {
+			_gfx->clear(_gfx->black());
+			for (int i = 0; i < storyLength; i++) {
+				if (strlen(story[i]) > 0)
+					_gfx->drawString(font, story[i], _width / 2, ht + lineHeight * i, 200 + i, Graphics::kTextAlignCenter);
+			}
+			_gfx->copyToScreen();
 		}
-		_gfx->copyToScreen();
-		_system->delayMillis(16);
-	}
-
-	// Draw final position (scrollOff = 0)
-	if (!qt) {
+	} else {
+		// DOS: draw the whole story immediately, then wait for input before
+		// scrolling it off the top.
 		_gfx->clear(_gfx->black());
 		for (int i = 0; i < storyLength; i++) {
 			if (strlen(story[i]) > 0)
