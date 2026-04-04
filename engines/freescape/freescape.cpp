@@ -1148,6 +1148,7 @@ void FreescapeEngine::rotate(float xoffset, float yoffset, float zoffset) {
 	if (_roll < 0.0f)
 		_roll += 360.0f;
 
+	onRotate(xoffset, yoffset, zoffset);
 	updateCamera();
 }
 

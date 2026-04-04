@@ -101,6 +101,9 @@ public:
 	void drawAnalogClock(Graphics::Surface *surface, int x, int y, uint32 colorHand1, uint32 colorHand2, uint32 colorBack);
 	void drawAnalogClockHand(Graphics::Surface *surface, int x, int y, double degrees, double magnitude, uint32 color);
 	void drawCompass(Graphics::Surface *surface, int x, int y, double degrees, double magnitude, uint32 color);
+	int atariCompassPhaseFromRotationY(float rotationY) const;
+	int atariCompassTargetPhaseFromYaw(float yaw, int referencePhase) const;
+	void onRotate(float xoffset, float yoffset, float zoffset) override;
 	void drawEclipseIndicator(Graphics::Surface *surface, int x, int y, uint32 color1, uint32 color2, uint32 color3 = 0);
 	Common::String getScoreString(int score);
 	void drawScoreString(int score, int x, int y, uint32 front, uint32 back, Graphics::Surface *surface);
@@ -132,14 +135,20 @@ public:
 	Font _fontScore; // Font B (10 score digit glyphs, 4-plane at $249BE)
 	Common::Array<Graphics::ManagedSurface *> _eclipseSprites; // 2 eclipse animation frames (16x13)
 	Common::Array<Graphics::ManagedSurface *> _eclipseProgressSprites;  // 16 eclipse animation frames (16x16)
-	Common::Array<Graphics::ManagedSurface *> _compassSprites; // 37 pre-composited compass frames (32x27)
+	Graphics::ManagedSurface *_compassBackground; // Atari ST compass background at $20986
+	Common::Array<Graphics::ManagedSurface *> _compassSprites; // signed Atari compass needle bank addressed by the $1542 lookup table
 	Common::Array<Graphics::ManagedSurface *> _lanternLightSprites;  // 6 lantern light animation frames (32x6)
 	Common::Array<Graphics::ManagedSurface *> _lanternSwitchSprites; // 2 lantern on/off frames (32x23)
 	Common::Array<Graphics::ManagedSurface *> _shootSprites;         // 2 shooting crosshair frames (32x25, 48x25)
 	Common::Array<Graphics::ManagedSurface *> _ankhSprites;          // 5 ankh fade-in frames (16x15)
 	Common::Array<Graphics::ManagedSurface *> _waterSprites;         // 9 water ripple frames (32x9)
 	Common::Array<Graphics::ManagedSurface *> _soundToggleSprites;   // 5 sound on/off toggle frames (16x11)
-	byte _compassLookup[72];  // direction-to-needle-frame lookup table
+	int8 _compassLookup[72];  // signed Atari ST phase-to-frame lookup table
+	int _atariCompassPhase;
+	int _atariCompassTargetPhase;
+	float _atariCompassTargetRemainder;
+	int _atariCompassLastUpdateTick;
+	bool _atariCompassPhaseInitialized;
 
 	// Atari ST on-screen control hotspots (from binary hotspot table at prog $869A)
 	bool onScreenControls(Common::Point mouse) override;

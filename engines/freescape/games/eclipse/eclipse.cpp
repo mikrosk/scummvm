@@ -35,6 +35,7 @@
 #include "freescape/games/eclipse/ay.music.h"
 #include "freescape/games/eclipse/opl.music.h"
 #include "freescape/games/eclipse/eclipse.h"
+#include "freescape/objects/entrance.h"
 #include "freescape/language/8bitDetokeniser.h"
 
 namespace Freescape {
@@ -105,6 +106,12 @@ EclipseEngine::EclipseEngine(OSystem *syst, const ADGameDescription *gd) : Frees
 	_lastHeartbeatSoundTick = -1;
 	_lastHeartIndicatorFrame = 1;
 	_lastSecond = -1;
+	_compassBackground = nullptr;
+	_atariCompassPhase = 0;
+	_atariCompassTargetPhase = 0;
+	_atariCompassTargetRemainder = 0.0f;
+	_atariCompassLastUpdateTick = -1;
+	_atariCompassPhaseInitialized = false;
 	_resting = false;
 	_flashlightOn = false;
 }
@@ -143,6 +150,10 @@ void EclipseEngine::restartBackgroundMusic() {
 
 EclipseEngine::~EclipseEngine() {
 	stopBackgroundMusic();
+	if (_compassBackground) {
+		_compassBackground->free();
+		delete _compassBackground;
+	}
 	delete _playerOPLMusic;
 	delete _playerAYMusic;
 	delete _playerC64Music;
@@ -163,6 +174,11 @@ void EclipseEngine::initGameState() {
 	_lastFiveSeconds = seconds / 5;
 	_lastHeartbeatSoundTick = -1;
 	_lastHeartIndicatorFrame = 1;
+	_atariCompassPhase = 0;
+	_atariCompassTargetPhase = 0;
+	_atariCompassTargetRemainder = 0.0f;
+	_atariCompassLastUpdateTick = -1;
+	_atariCompassPhaseInitialized = false;
 	_resting = false;
 	_flashlightOn = false;
 	restartBackgroundMusic();
@@ -420,6 +436,18 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 	if (isAmiga() || isAtariST())
 		_currentArea->_skyColor = 15;
 
+	if (isAtariST() && entranceID > 0) {
+		Entrance *entrance = (Entrance *)_currentArea->entranceWithID(entranceID);
+		if (entrance) {
+			int phase = atariCompassPhaseFromRotationY(entrance->getRotation().y());
+			_atariCompassPhase = phase;
+			_atariCompassTargetPhase = phase;
+			_atariCompassTargetRemainder = 0.0f;
+			_atariCompassLastUpdateTick = _ticks;
+			_atariCompassPhaseInitialized = true;
+		}
+	}
+
 	// Start background music (Atari ST)
 	if (isAtariST() && !_musicData.empty() && !_mixer->isSoundHandleActive(_musicHandle)) {
 		Audio::AudioStream *musicStream = makeEclipseAtariMusicStream(
@@ -627,6 +655,58 @@ void EclipseEngine::pressedKey(const int keycode) {
 	}
 }
 
+void EclipseEngine::onRotate(float xoffset, float yoffset, float zoffset) {
+	(void)yoffset;
+	(void)zoffset;
+
+	if (!isAtariST() || xoffset == 0.0f)
+		return;
+
+	if (!_atariCompassPhaseInitialized) {
+		int phase = atariCompassTargetPhaseFromYaw(_yaw, 0);
+		_atariCompassPhase = phase;
+		_atariCompassTargetPhase = phase;
+		_atariCompassTargetRemainder = 0.0f;
+		_atariCompassLastUpdateTick = _ticks;
+		_atariCompassPhaseInitialized = true;
+	}
+
+	_atariCompassTargetRemainder += xoffset / 5.0f;
+	int phaseDelta = 0;
+	while (_atariCompassTargetRemainder >= 1.0f) {
+		_atariCompassTargetRemainder -= 1.0f;
+		phaseDelta++;
+	}
+	while (_atariCompassTargetRemainder <= -1.0f) {
+		_atariCompassTargetRemainder += 1.0f;
+		phaseDelta--;
+	}
+
+	if (phaseDelta == 0)
+		return;
+
+	_atariCompassTargetPhase = _atariCompassTargetPhase + phaseDelta;
+
+	// The original ST draw routine at $1CC0 always moves by the shortest path
+	// to a stored target phase. Clamp the target so that queued ScummVM input
+	// cannot place it more than half a turn away, which would otherwise trigger
+	// a wraparound reversal the original transition-driven code never presents.
+	while (_atariCompassTargetPhase < 0)
+		_atariCompassTargetPhase += 72;
+	while (_atariCompassTargetPhase >= 72)
+		_atariCompassTargetPhase -= 72;
+
+	if (phaseDelta > 0) {
+		int forwardDistance = (_atariCompassTargetPhase - _atariCompassPhase + 72) % 72;
+		if (forwardDistance > 35)
+			_atariCompassTargetPhase = (_atariCompassPhase + 35) % 72;
+	} else {
+		int backwardDistance = (_atariCompassPhase - _atariCompassTargetPhase + 72) % 72;
+		if (backwardDistance > 35)
+			_atariCompassTargetPhase = (_atariCompassPhase + 72 - 35) % 72;
+	}
+}
+
 bool EclipseEngine::onScreenControls(Common::Point mouse) {
 	if (!isAmiga() && !isAtariST())
 		return false;
@@ -645,8 +725,7 @@ bool EclipseEngine::onScreenControls(Common::Point mouse) {
 		rotate(5, 0, 0);
 		return true;
 	} else if (_uTurnArea.contains(mouse)) {
-		_yaw += 180;
-		updateCamera();
+		rotate(180, 0, 0);
 		return true;
 	} else if (_faceForwardArea.contains(mouse)) {
 		pressedKey(kActionFaceForward);
@@ -1091,6 +1170,11 @@ Common::Error EclipseEngine::saveGameStreamExtended(Common::WriteStream *stream,
 Common::Error EclipseEngine::loadGameStreamExtended(Common::SeekableReadStream *stream) {
 	_lastHeartbeatSoundTick = -1;
 	_lastHeartIndicatorFrame = 1;
+	_atariCompassPhase = 0;
+	_atariCompassTargetPhase = 0;
+	_atariCompassTargetRemainder = 0.0f;
+	_atariCompassLastUpdateTick = -1;
+	_atariCompassPhaseInitialized = false;
 	return Common::kNoError;
 }
 

@@ -29,6 +29,23 @@
 
 namespace Freescape {
 
+const int kAtariCompassPhaseCount = 72;
+const int kAtariCompassBaseFrames = 19;
+const int kAtariCompassTotalFrames = 37;
+const int kAtariClockCenterX = 106;
+const int kAtariClockCenterY = 159;
+const int kAtariCompassX = 176;
+const int kAtariCompassY = 151;
+
+// Repaired ST phase-to-frame table from $1542. Six corrupt bytes in the dumped
+// binary break the intended 37-frame sweep built from $20B36 and $22B46.
+const int8 kAtariCompassPhaseToFrame[kAtariCompassPhaseCount] = {
+	0, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+	36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19,
+	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 17, 16,
+	15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+};
+
 void EclipseEngine::initAmigaAtari() {
 	_viewArea = Common::Rect(32, 16, 288, 118);
 
@@ -231,7 +248,162 @@ static Graphics::ManagedSurface *loadAtariSTRawSprite(Common::SeekableReadStream
 	return surface;
 }
 
-static Graphics::ManagedSurface *loadAtariSTSprite(Common::SeekableReadStream *stream,
+float atariCompassAbs(float value) {
+	return value < 0.0f ? -value : value;
+}
+
+int atariCompassRoundToNearestInt(float value) {
+	return value >= 0.0f ? (int)(value + 0.5f) : (int)(value - 0.5f);
+}
+
+int wrapAtariCompassPhase(int phase) {
+	phase %= kAtariCompassPhaseCount;
+	if (phase < 0)
+		phase += kAtariCompassPhaseCount;
+	return phase;
+}
+
+float normalizeAtariCompassYaw(float yaw) {
+	while (yaw < 0.0f)
+		yaw += 360.0f;
+	while (yaw >= 360.0f)
+		yaw -= 360.0f;
+	return yaw;
+}
+
+int atariCompassPhaseToYaw(int phase) {
+	int rotationY = wrapAtariCompassPhase(phase) * 5;
+	int yaw = 0;
+	if (rotationY < 90) {
+		yaw = 90 - rotationY;
+	} else if (rotationY <= 180) {
+		yaw = 450 - rotationY;
+	} else if (rotationY <= 225) {
+		yaw = rotationY;
+	} else if (rotationY < 270) {
+		yaw = rotationY - 90;
+	} else {
+		yaw = 450 - rotationY;
+	}
+
+	while (yaw < 0)
+		yaw += 360;
+	while (yaw >= 360)
+		yaw -= 360;
+	return yaw;
+}
+
+float atariCompassAngularDistance(float a, float b) {
+	float diff = atariCompassAbs(a - b);
+	if (diff > 180.0f)
+		diff = 360.0f - diff;
+	return diff;
+}
+
+int stepAtariCompassPhaseTowardTarget(int currentPhase, int targetPhase) {
+	if (currentPhase == targetPhase)
+		return 0;
+
+	int forwardDistance = wrapAtariCompassPhase(targetPhase - currentPhase);
+	int backwardDistance = wrapAtariCompassPhase(currentPhase - targetPhase);
+	return (forwardDistance < backwardDistance) ? 1 : -1;
+}
+
+bool atariCompassPhaseUsesVerticalFlip(int phase) {
+	int wrappedPhase = wrapAtariCompassPhase(phase);
+	return wrappedPhase < 18 || wrappedPhase > 54;
+}
+
+void atariCompassRoxl(uint32 &value, uint32 &extend) {
+	uint32 nextExtend = (value >> 31) & 1;
+	value = ((value << 1) | extend) & 0xFFFFFFFF;
+	extend = nextExtend;
+}
+
+void atariCompassRoxr(uint32 &value, uint32 &extend) {
+	uint32 nextExtend = value & 1;
+	value = ((extend << 31) | (value >> 1)) & 0xFFFFFFFF;
+	extend = nextExtend;
+}
+
+void decodeAtariSTNeedleRow(Graphics::ManagedSurface *surface, int row, const uint16 *rowWords,
+		const Graphics::PixelFormat &pixelFormat) {
+	for (int half = 0; half < 2; half++) {
+		int offset = half * 4;
+		for (int bit = 15; bit >= 0; bit--) {
+			byte colorIndex = ((rowWords[offset + 0] >> bit) & 1)
+			                | (((rowWords[offset + 1] >> bit) & 1) << 1)
+			                | (((rowWords[offset + 2] >> bit) & 1) << 2)
+			                | (((rowWords[offset + 3] >> bit) & 1) << 3);
+			if (colorIndex == 0)
+				continue;
+
+			int x = half * 16 + (15 - bit);
+			uint32 color = pixelFormat.ARGBToColor(0xFF,
+				kBorderPalette[colorIndex * 3],
+				kBorderPalette[colorIndex * 3 + 1],
+				kBorderPalette[colorIndex * 3 + 2]);
+			surface->setPixel(x, row, color);
+		}
+	}
+}
+
+Graphics::ManagedSurface *loadAtariSTNeedleSprite(Common::SeekableReadStream *stream,
+		int pixelOffset, const Graphics::PixelFormat &pixelFormat) {
+	stream->seek(pixelOffset);
+
+	uint32 transparent = pixelFormat.ARGBToColor(0x00, 0, 0, 0);
+	Graphics::ManagedSurface *surface = new Graphics::ManagedSurface();
+	surface->create(32, 27, pixelFormat);
+	surface->fillRect(Common::Rect(0, 0, surface->w, surface->h), transparent);
+
+	for (int row = 0; row < 27; row++) {
+		uint16 sourceWords[8];
+		for (int word = 0; word < 8; word++)
+			sourceWords[word] = stream->readUint16BE();
+		decodeAtariSTNeedleRow(surface, row, sourceWords, pixelFormat);
+	}
+
+	return surface;
+}
+
+void buildAtariSTCompassMirrorCache(Common::SeekableReadStream *stream, int pixelOffset,
+		Common::Array<Graphics::ManagedSurface *> &sprites, const Graphics::PixelFormat &pixelFormat) {
+	stream->seek(pixelOffset + 432);
+
+	uint32 extend = 0;
+	uint32 transformed = 0;
+
+	for (int frame = 1; frame < kAtariCompassBaseFrames; frame++) {
+		uint32 transparent = pixelFormat.ARGBToColor(0x00, 0, 0, 0);
+		Graphics::ManagedSurface *surface = new Graphics::ManagedSurface();
+		surface->create(32, 27, pixelFormat);
+		surface->fillRect(Common::Rect(0, 0, surface->w, surface->h), transparent);
+
+		for (int row = 0; row < 27; row++) {
+			uint16 sourceWords[8];
+			uint16 rowWords[8];
+			for (int word = 0; word < 8; word++)
+				sourceWords[word] = stream->readUint16BE();
+
+			for (int plane = 0; plane < 4; plane++) {
+				uint32 value = ((uint32)sourceWords[plane] << 16) | sourceWords[plane + 4];
+				for (int bit = 0; bit <= 0x20; bit++) {
+					atariCompassRoxl(value, extend);
+					atariCompassRoxr(transformed, extend);
+				}
+				rowWords[plane] = transformed >> 16;
+				rowWords[plane + 4] = transformed & 0xFFFF;
+			}
+
+			decodeAtariSTNeedleRow(surface, row, rowWords, pixelFormat);
+		}
+
+		sprites[18 + frame] = surface;
+	}
+}
+
+Graphics::ManagedSurface *loadAtariSTSprite(Common::SeekableReadStream *stream,
 		int maskOffset, int pixelOffset, int cols, int rows) {
 	// Read per-column mask (1 word per column, same for all rows)
 	stream->seek(maskOffset);
@@ -260,6 +432,44 @@ static Graphics::ManagedSurface *loadAtariSTSprite(Common::SeekableReadStream *s
 		}
 	}
 	return surface;
+}
+
+void drawAtariCompassNeedle(Graphics::Surface *surface, const Graphics::ManagedSurface *needle,
+		int x, int y, bool flipVertically, uint32 transparent) {
+	for (int destY = 0; destY < needle->h; destY++) {
+		int srcY = flipVertically ? (needle->h - 1 - destY) : destY;
+		for (int srcX = 0; srcX < needle->w; srcX++) {
+			uint32 pixel = needle->getPixel(srcX, srcY);
+			if (pixel != transparent)
+				surface->setPixel(x + srcX, y + destY, pixel);
+		}
+	}
+}
+
+int EclipseEngine::atariCompassPhaseFromRotationY(float rotationY) const {
+	return wrapAtariCompassPhase(atariCompassRoundToNearestInt(rotationY / 5.0f));
+}
+
+int EclipseEngine::atariCompassTargetPhaseFromYaw(float yaw, int referencePhase) const {
+	float normalizedYaw = normalizeAtariCompassYaw(yaw);
+	int wrappedReferencePhase = wrapAtariCompassPhase(referencePhase);
+	int bestPhase = wrappedReferencePhase;
+	float bestYawError = 361.0f;
+	int bestPhaseDistance = kAtariCompassPhaseCount + 1;
+
+	for (int phase = 0; phase < kAtariCompassPhaseCount; phase++) {
+		float yawError = atariCompassAngularDistance(normalizedYaw, (float)atariCompassPhaseToYaw(phase));
+		int phaseDistance = MIN(wrapAtariCompassPhase(phase - wrappedReferencePhase),
+			wrapAtariCompassPhase(wrappedReferencePhase - phase));
+		if (yawError + 0.001f < bestYawError ||
+				(atariCompassAbs(yawError - bestYawError) <= 0.001f && phaseDistance < bestPhaseDistance)) {
+			bestPhase = phase;
+			bestYawError = yawError;
+			bestPhaseDistance = phaseDistance;
+		}
+	}
+
+	return bestPhase;
 }
 
 void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
@@ -367,15 +577,34 @@ void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 		}
 	}
 
-	// Compass at x=$B0(176), y=$97(151) — from sprite header at prog $2097C/$2097E
-	if (_compassSprites.size() >= 37) {
-		// Normalize yaw to 0-359 first (C++ modulo can return negative), then map to table index
-		int deg = ((int)_yaw % 360 + 360) % 360;
-		int lookupIdx = deg / 5;
-		int needleFrame = _compassLookup[lookupIdx];
-		if (needleFrame < (int)_compassSprites.size()) {
-			surface->copyRectToSurface(*_compassSprites[needleFrame], 176, 151,
-				Common::Rect(_compassSprites[needleFrame]->w, _compassSprites[needleFrame]->h));
+	// Compass at x=$B0(176), y=$97(151): restore the ST background, then overlay
+	// the animated needle.
+	if (_compassBackground) {
+		surface->copyRectToSurface(*_compassBackground, kAtariCompassX, kAtariCompassY,
+			Common::Rect(_compassBackground->w, _compassBackground->h));
+	}
+
+	if (_compassSprites.size() >= kAtariCompassTotalFrames) {
+		uint32 transparent = _gfx->_texturePixelFormat.ARGBToColor(0x00, 0, 0, 0);
+		if (!_atariCompassPhaseInitialized) {
+			int targetPhase = atariCompassTargetPhaseFromYaw(_yaw, 0);
+			_atariCompassPhase = targetPhase;
+			_atariCompassTargetPhase = targetPhase;
+			_atariCompassLastUpdateTick = _ticks;
+			_atariCompassPhaseInitialized = true;
+		}
+
+		if (_atariCompassLastUpdateTick != _ticks) {
+			_atariCompassPhase = wrapAtariCompassPhase(_atariCompassPhase +
+				stepAtariCompassPhaseTowardTarget(_atariCompassPhase, _atariCompassTargetPhase));
+			_atariCompassLastUpdateTick = _ticks;
+		}
+
+		int wrappedPhase = wrapAtariCompassPhase(_atariCompassPhase);
+		int needleFrame = _compassLookup[wrappedPhase];
+		if (needleFrame >= 0 && needleFrame < (int)_compassSprites.size()) {
+			drawAtariCompassNeedle(surface, _compassSprites[needleFrame], kAtariCompassX, kAtariCompassY,
+				atariCompassPhaseUsesVerticalFlip(wrappedPhase), transparent);
 		}
 	}
 
@@ -399,7 +628,8 @@ void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 			Common::Rect(_shootSprites[shootFrame]->w, _shootSprites[shootFrame]->h));
 	}
 
-	// Analog clock — kept from existing implementation
+	// The Atari border art uses a different clock pivot than the CPC-style UI.
+	// These coordinates are the center of the bezel drawn in CONSOLE.NEO.
 	uint8 r, g, b;
 	uint32 color = _currentArea->_underFireBackgroundColor;
 	_gfx->readFromPalette(color, r, g, b);
@@ -415,7 +645,7 @@ void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 	_gfx->readFromPalette(color, r, g, b);
 	uint32 other = _gfx->_texturePixelFormat.ARGBToColor(0xFF, r, g, b);
 
-	drawAnalogClock(surface, 90, 172, back, other, front);
+	drawAnalogClock(surface, kAtariClockCenterX, kAtariClockCenterY, back, other, front);
 }
 
 void EclipseEngine::loadAssetsAtariFullGame() {
@@ -483,47 +713,21 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 			const_cast<byte *>(kBorderPalette), 16);
 	}
 
-	// Compass background at prog $20986 (32x27, raw 4-plane) and needle at prog $20B36
-	// (37 frames, 32x27 each, stride 432 bytes). Pre-composite background + needle.
+	// Compass background at $20986 and needle bank at $20B36.
+	_compassBackground = loadAtariSTRawSprite(stream, 0x20986 + kHdr, 2, 27);
+	_compassBackground->convertToInPlace(_gfx->_texturePixelFormat,
+		const_cast<byte *>(kBorderPalette), 16);
+
+	// The ST init code expands frames 1-18 into the second 18-frame bank in RAM.
 	{
-		Graphics::ManagedSurface *compassBG = loadAtariSTRawSprite(stream, 0x20986 + kHdr, 2, 27);
+		Common::copy(kAtariCompassPhaseToFrame, kAtariCompassPhaseToFrame + kAtariCompassPhaseCount, _compassLookup);
 
-		// Load compass direction lookup table (72 entries at prog $1542)
-		stream->seek(0x1542 + kHdr);
-		stream->read(_compassLookup, 72);
-
-		// Find max needle frame index
-		int maxFrame = 0;
-		for (int i = 0; i < 72; i++)
-			if (_compassLookup[i] < 200 && _compassLookup[i] > maxFrame)
-				maxFrame = _compassLookup[i];
-
-		int numFrames = maxFrame + 1;
-		_compassSprites.resize(numFrames);
-		for (int f = 0; f < numFrames; f++) {
-			// Load needle frame (raw 4-plane, no mask)
-			Graphics::ManagedSurface *needle = loadAtariSTRawSprite(stream,
-				0x20B36 + kHdr + f * 432, 2, 27);
-
-			// Composite: copy background, then overlay needle where non-zero
-			Graphics::ManagedSurface *composite = new Graphics::ManagedSurface();
-			composite->create(32, 27, Graphics::PixelFormat::createFormatCLUT8());
-			composite->copyFrom(*compassBG);
-			for (int y = 0; y < 27; y++) {
-				for (int x = 0; x < 32; x++) {
-					byte needlePixel = *(const byte *)needle->getBasePtr(x, y);
-					if (needlePixel != 0)
-						composite->setPixel(x, y, needlePixel);
-				}
-			}
-			delete needle;
-
-			// Convert to target format
-			composite->convertToInPlace(_gfx->_texturePixelFormat,
-				const_cast<byte *>(kBorderPalette), 16);
-			_compassSprites[f] = composite;
+		_compassSprites.resize(kAtariCompassTotalFrames);
+		for (int frame = 0; frame < kAtariCompassBaseFrames; frame++) {
+			_compassSprites[frame] = loadAtariSTNeedleSprite(stream,
+				0x20B36 + kHdr + frame * 432, _gfx->_texturePixelFormat);
 		}
-		delete compassBG;
+		buildAtariSTCompassMirrorCache(stream, 0x20B36 + kHdr, _compassSprites, _gfx->_texturePixelFormat);
 	}
 
 	// Lantern light animation: 6 frames, 32x6, at prog $2026A, stride 96 bytes

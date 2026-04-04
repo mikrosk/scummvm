@@ -427,6 +427,7 @@ public:
 
 	Math::Vector3d directionToVector(float pitch, float heading, bool useTable);
 	void updateCamera();
+	virtual void onRotate(float xoffset, float yoffset, float zoffset) {}
 
 	// Camera options
 	Common::Point _crossairPosition;
