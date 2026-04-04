@@ -130,16 +130,6 @@ ChannelIdent ParameterReadStream::readTypedChannelIdent() {
 	return readUint32BE();
 }
 
-Polygon ParameterReadStream::readTypedPolygon() {
-	Polygon polygon;
-	uint totalPoints = readTypedUint16();
-	for (uint i = 0; i < totalPoints; ++i) {
-		Common::Point point = readTypedGraphicSize();
-		polygon.push_back(point);
-	}
-	return polygon;
-}
-
 Chunk::Chunk(Common::SeekableReadStream *stream) : _parentStream(stream) {
 	_id = _parentStream->readUint32BE();
 	_length = _parentStream->readUint32LE();

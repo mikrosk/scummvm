@@ -31,9 +31,8 @@ namespace MediaStation {
 class HotspotActor : public SpatialEntity {
 public:
 	HotspotActor() : SpatialEntity(kActorTypeHotspot) {};
-	virtual ~HotspotActor() { _mouseActiveArea.clear(); }
 
-	bool isInside(const Common::Point &pointToCheck);
+	bool inBounds(const Common::Point &point);
 	virtual bool isVisible() const override { return false; }
 	bool isActive() const { return _isActive; }
 	virtual bool interactsWithMouse() const override { return isActive(); }
@@ -45,7 +44,7 @@ public:
 		const Common::Point &point,
 		uint16 eventMask,
 		MouseActorState &state,
-		bool inBounds) override;
+		bool clipMouseEvents) override;
 
 	void activate();
 	void deactivate();
@@ -57,10 +56,11 @@ public:
 	virtual void mouseMovedEvent(const Common::Event &event) override;
 
 	uint _cursorResourceId = 0;
-	Common::Array<Common::Point> _mouseActiveArea;
 
 private:
 	bool _isActive = false;
+	bool _getOffstageEvents = false;
+	Polygon _mouseActiveArea;
 };
 
 } // End of namespace MediaStation

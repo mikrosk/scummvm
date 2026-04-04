@@ -88,6 +88,88 @@ void StageActor::preloadTest(const Common::Rect &rect, CylindricalWrapMode wrapM
 	}
 }
 
+bool StageActor::inBounds(const Common::Point &point, const Common::Rect &bounds, const Polygon &polygon) {
+	if (_cameras.empty()) {
+		return inBoundsTest(point, bounds, polygon);
+	} else {
+		return inBoundsCamera(point, bounds, polygon);
+	}
+}
+
+bool StageActor::inBoundsTest(Common::Point point, const Common::Rect &bounds, const Polygon &polygon) {
+	if (bounds.contains(point)) {
+		point -= bounds.origin();
+		return polygon.containsPoint(point);
+	} else {
+		return false;
+	}
+}
+
+bool StageActor::inBoundsCamera(const Common::Point &point, const Common::Rect &bounds, const Polygon &polygon) {
+	for (uint i = 0; i < _cameras.size(); i++) {
+		(void)i; // Silence the unused variable warning. The original loop doesn't use this index.
+		bool isInCameraBounds = inBoundsObject(point, bounds, polygon);
+		if (isInCameraBounds) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool StageActor::inBoundsObject(const Common::Point &point, const Common::Rect &bounds, const Polygon &polygon) {
+	bool isInCameraBounds = inBoundsTest(point, bounds, polygon);
+
+	if (!isInCameraBounds && cylindricalX()) {
+		Common::Rect adjustedBounds = bounds;
+		adjustedBounds.translate(-_extent.x, 0);
+		isInCameraBounds = inBoundsTest(point, adjustedBounds, polygon);
+
+		if (!isInCameraBounds) {
+			adjustedBounds = bounds;
+			adjustedBounds.translate(_extent.x, 0);
+			isInCameraBounds = inBoundsTest(point, adjustedBounds, polygon);
+		}
+	}
+
+	if (!isInCameraBounds && cylindricalY()) {
+		Common::Rect adjustedBounds = bounds;
+		adjustedBounds.translate(0, -_extent.y);
+		isInCameraBounds = inBoundsTest(point, adjustedBounds, polygon);
+
+		if (!isInCameraBounds) {
+			adjustedBounds = bounds;
+			adjustedBounds.translate(0, _extent.y);
+			isInCameraBounds = inBoundsTest(point, adjustedBounds, polygon);
+		}
+	}
+
+	if (!isInCameraBounds && cylindricalX() && cylindricalY()) {
+		Common::Rect adjustedBounds = bounds;
+		adjustedBounds.translate(_extent.x, _extent.y);
+		isInCameraBounds = inBoundsTest(point, adjustedBounds, polygon);
+
+		if (!isInCameraBounds) {
+			adjustedBounds = bounds;
+			adjustedBounds.translate(-_extent.x, -_extent.y);
+			isInCameraBounds = inBoundsTest(point, adjustedBounds, polygon);
+
+			if (!isInCameraBounds) {
+				adjustedBounds = bounds;
+				adjustedBounds.translate(-_extent.x, _extent.y);
+				isInCameraBounds = inBoundsTest(point, adjustedBounds, polygon);
+
+				if (!isInCameraBounds) {
+					adjustedBounds = bounds;
+					adjustedBounds.translate(_extent.x, -_extent.y);
+					isInCameraBounds = inBoundsTest(point, adjustedBounds, polygon);
+				}
+			}
+		}
+	}
+
+	return isInCameraBounds;
+}
+
 bool StageActor::isRectInMemory(const Common::Rect &rect) {
 	bool result = true;
 	if (cylindricalX()) {
@@ -402,47 +484,41 @@ void StageActor::removeChildSpatialEntity(SpatialEntity *entity) {
 }
 
 uint16 StageActor::queryChildrenAboutMouseEvents(
-	const Common::Point &point,
-	uint16 eventMask,
-	MouseActorState &state,
-	CylindricalWrapMode wrapMode) {
+	const Common::Point &point, uint16 eventMask, MouseActorState &state, bool clipMouseEvents, CylindricalWrapMode wrapMode) {
 
 	uint16 result = 0;
-	Common::Point mousePosRelativeToStageOrigin = point - _boundingBox.origin();
 	for (auto childIterator = _children.end(); childIterator != _children.begin();) {
 		--childIterator; // Decrement first, then dereference
 		SpatialEntity *child = *childIterator;
-		debugC(6, kDebugEvents, "  [%s] %s: Checking %s (mousePos: %d, %d -> %d, %d) (bounds: %d, %d, %d, %d) (z-index: %d) (eventMask: 0x%02x) (result: 0x%02x) (wrapMode: %d)",
-			debugName(), __func__, child->debugName(),
-			point.x, point.y, mousePosRelativeToStageOrigin.x, mousePosRelativeToStageOrigin.y,
+		debugC(8, kDebugEvents, "  [%s] %s: Checking %s (mousePos: %d, %d) (bounds: %d, %d, %d, %d) (z-index: %d) (eventMask: 0x%02x) (result: 0x%02x) (wrapMode: %d)",
+			debugName(), __func__, child->debugName(), point.x, point.y,
 			PRINT_RECT(child->getBbox()), child->zIndex(), eventMask, result, wrapMode);
 
 		child->setAdjustedBounds(wrapMode);
-		uint16 handledEvents = child->findActorToAcceptMouseEvents(mousePosRelativeToStageOrigin, eventMask, state, true);
+		uint16 handledEvents = child->findActorToAcceptMouseEvents(point, eventMask, state, clipMouseEvents);
 		child->setAdjustedBounds(kWrapNone);
 
 		eventMask &= ~handledEvents;
 		result |= handledEvents;
+		if (eventMask == 0) {
+			break;
+		}
 	}
 	return result;
 }
 
 uint16 StageActor::findActorToAcceptMouseEventsObject(
-	const Common::Point &point,
-	uint16 eventMask,
-	MouseActorState &state,
-	bool inBounds) {
+	const Common::Point &point, uint16 eventMask, MouseActorState &state, bool clipMouseEvents) {
 
 	uint16 result = 0;
-
-	uint16 handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapNone);
+	uint16 handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, clipMouseEvents, kWrapNone);
 	if (handledEvents != 0) {
 		eventMask &= ~handledEvents;
 		result |= handledEvents;
 	}
 
 	if ((eventMask != 0) && cylindricalX()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapLeft);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, clipMouseEvents, kWrapLeft);
 		if (handledEvents != 0) {
 			eventMask &= ~handledEvents;
 			result |= handledEvents;
@@ -450,7 +526,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalX()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapRight);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, clipMouseEvents, kWrapRight);
 		if (handledEvents != 0) {
 			eventMask &= ~handledEvents;
 			result |= handledEvents;
@@ -458,7 +534,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalY()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapUp);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, clipMouseEvents, kWrapUp);
 		if (handledEvents != 0) {
 			eventMask &= ~handledEvents;
 			result |= handledEvents;
@@ -466,7 +542,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalY()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapDown);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, clipMouseEvents, kWrapDown);
 		if (handledEvents != 0) {
 			eventMask &= ~handledEvents;
 			result |= handledEvents;
@@ -474,7 +550,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalY() && cylindricalX()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapLeftUp);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, clipMouseEvents, kWrapLeftUp);
 		if (handledEvents != 0) {
 			eventMask &= ~handledEvents;
 			result |= handledEvents;
@@ -482,7 +558,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalY() && cylindricalX()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapRightDown);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, clipMouseEvents, kWrapRightDown);
 		if (handledEvents != 0) {
 			result |= handledEvents;
 		}
@@ -492,55 +568,45 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 }
 
 uint16 StageActor::findActorToAcceptMouseEventsCamera(
-	const Common::Point &point,
-	uint16 eventMask,
-	MouseActorState &state,
-	bool inBounds) {
+	const Common::Point &point, uint16 eventMask, MouseActorState &state, bool clipMouseEvents) {
 
 	uint16 result = 0;
-	for (CameraActor *camera : _cameras) {
-		Common::Point mousePosRelativeToCamera = point;
+	for (auto cameraIterator = _cameras.end(); cameraIterator != _cameras.begin();) {
+		--cameraIterator; // Decrement first, then dereference
+		CameraActor *camera = *cameraIterator;
+		Common::Point mousePosRelativeToCamera = point + camera->getViewportOrigin();
 		setCurrentCamera(camera);
 
-		Common::Point cameraViewportOrigin = camera->getViewportOrigin();
-		mousePosRelativeToCamera.x += cameraViewportOrigin.x;
-		mousePosRelativeToCamera.y += cameraViewportOrigin.y;
-
-		if (!inBounds) {
+		if (!clipMouseEvents) {
 			Common::Rect viewportBounds = camera->getViewportBounds();
 			if (!viewportBounds.contains(mousePosRelativeToCamera)) {
-				inBounds = true;
+				clipMouseEvents = true;
 			}
 		}
 
-		result = findActorToAcceptMouseEventsObject(mousePosRelativeToCamera, eventMask, state, inBounds);
+		result = findActorToAcceptMouseEventsObject(mousePosRelativeToCamera, eventMask, state, clipMouseEvents);
 	}
 
 	return result;
 }
 
 uint16 StageActor::findActorToAcceptMouseEvents(
-	const Common::Point &point,
-	uint16 eventMask,
-	MouseActorState &state,
-	bool inBounds) {
+	const Common::Point &point, uint16 eventMask, MouseActorState &state, bool clipMouseEvents) {
 
-	Common::Point mousePosRelativeToStageOrigin = point;
-	mousePosRelativeToStageOrigin.x -= _boundingBox.left;
-	mousePosRelativeToStageOrigin.y -= _boundingBox.top;
-	debugC(4, kDebugEvents, "[%s] %s: mousePos: (%d, %d), relativeToStage: (%d, %d)", debugName(), __func__,
+	Common::Point mousePosRelativeToStageOrigin = point - _boundingBox.origin();
+	debugC(8, kDebugEvents, "[%s] %s: mousePos: (%d, %d), relativeToStage: (%d, %d)", debugName(), __func__,
 		point.x, point.y, mousePosRelativeToStageOrigin.x, mousePosRelativeToStageOrigin.y);
 
 	uint16 result;
 	if (_cameras.empty()) {
-		if (!inBounds) {
+		if (!clipMouseEvents) {
 			if (!_boundingBox.contains(point)) {
-				inBounds = true;
+				clipMouseEvents = true;
 			}
 		}
-		result = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapNone);
+		result = queryChildrenAboutMouseEvents(mousePosRelativeToStageOrigin, eventMask, state, clipMouseEvents, kWrapNone);
 	} else {
-		result = findActorToAcceptMouseEventsCamera(mousePosRelativeToStageOrigin, eventMask, state, inBounds);
+		result = findActorToAcceptMouseEventsCamera(mousePosRelativeToStageOrigin, eventMask, state, clipMouseEvents);
 	}
 
 	return result;
@@ -674,13 +740,9 @@ void RootStage::drawDirtyRegion(DisplayContext &displayContext) {
 }
 
 uint16 RootStage::findActorToAcceptMouseEvents(
-	const Common::Point &point,
-	uint16 eventMask,
-	MouseActorState &state,
-	bool inBounds) {
-
+	const Common::Point &point, uint16 eventMask, MouseActorState &state, bool clipMouseEvents) {
 	// Handle any mouse moved events.
-	uint16 result = StageActor::findActorToAcceptMouseEvents(point, eventMask, state, inBounds);
+	uint16 result = StageActor::findActorToAcceptMouseEvents(point, eventMask, state, clipMouseEvents);
 	eventMask &= ~result;
 	if (eventMask & kMouseEnterFlag) {
 		state.mouseEnter = this;
@@ -815,15 +877,15 @@ void StageDirector::handleMouseOutOfFocusEvent(const Common::Event &event) {
 }
 
 void StageDirector::sendMouseEnterExitEvent(uint16 flags, MouseActorState &state, const Common::Event &event) {
-	if (state.mouseMoved != state.mouseEnter || state.mouseMoved != state.mouseExit) {
-		if (flags & kMouseEnterFlag) {
-			debugC(5, kDebugEvents, "%s: Dispatching mouse enter to %s", __func__, state.mouseEnter->debugName());
-			state.mouseEnter->mouseEnteredEvent(event);
-		}
-
+	if (state.mouseEnter != state.mouseExit) {
 		if (flags & kMouseExitFlag) {
 			debugC(5, kDebugEvents, "%s: Dispatching mouse exit to %s", __func__, state.mouseExit->debugName());
 			state.mouseExit->mouseExitedEvent(event);
+		}
+
+		if (flags & kMouseEnterFlag) {
+			debugC(5, kDebugEvents, "%s: Dispatching mouse enter to %s", __func__, state.mouseEnter->debugName());
+			state.mouseEnter->mouseEnteredEvent(event);
 		}
 	} else {
 		debugC(5, kDebugEvents, "%s: No actor to accept event", __func__);

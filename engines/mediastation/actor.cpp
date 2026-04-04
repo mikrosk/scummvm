@@ -89,6 +89,42 @@ const char *actorTypeToStr(ActorType type) {
 	}
 }
 
+void Polygon::loadFromParameterStream(Chunk & chunk) {
+	uint16 totalPoints = chunk.readTypedUint16();
+	for (uint16 i = 0; i < totalPoints; i++) {
+		Common::Point point = chunk.readTypedPoint();
+		_polygon.push_back(point);
+	}
+}
+
+bool Polygon::containsPoint(const Common::Point &point) const {
+	// We're in the bbox, but there might not be a polygon to check.
+	if (_polygon.empty()) {
+		return true;
+	}
+
+	// Each edge is checked whether it cuts the outgoing stream from the point.
+	int rcross = 0; // Number of right-side overlaps
+	for (unsigned i = 0; i < _polygon.size(); i++) {
+		const Common::Point &edgeStart = _polygon[i];
+		const Common::Point &edgeEnd = _polygon[(i + 1) % _polygon.size()];
+
+		// A vertex is a point? Then it lies on one edge of the polygon.
+		if (point == edgeStart)
+			return true;
+
+		if ((edgeStart.y > point.y) != (edgeEnd.y > point.y)) {
+			int term1 = (edgeStart.x - point.x) * (edgeEnd.y - point.y) - (edgeEnd.x - point.x) * (edgeStart.y - point.y);
+			int term2 = (edgeEnd.y - point.y) - (edgeStart.y - edgeEnd.y);
+			if ((term1 > 0) == (term2 >= 0))
+				rcross++;
+		}
+	}
+
+	// The point is strictly inside the polygon if and only if the number of overlaps is odd.
+	return ((rcross % 2) == 1);
+}
+
 void Actor::setId(uint id) {
 	_id = id;
 	_debugName = g_engine->formatActorName(this);

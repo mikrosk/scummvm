@@ -173,6 +173,15 @@ enum MouseEventFlag {
 	// There is no key up event.
 };
 
+class Polygon {
+public:
+	void loadFromParameterStream(Chunk &chunk);
+	bool containsPoint(const Common::Point &pointToCheck) const;
+
+private:
+	Common::Array<Common::Point> _polygon;
+};
+
 // Argument count validation macros for built-in script methods.
 // For exact argument count.
 #define ARGCOUNTCHECK(n) \
@@ -261,7 +270,7 @@ public:
 		const Common::Point &point,
 		uint16 eventMask,
 		MouseActorState &state,
-		bool inBounds) { return kNoFlag; }
+		bool clipMouseEvents) { return kNoFlag; }
 	virtual uint16 findActorToAcceptKeyboardEvents(
 		uint16 asciiCode,
 		uint16 eventMask,
@@ -293,7 +302,6 @@ protected:
 	Common::Rect _originalBoundingBox;
 	bool _isVisible = false;
 	bool _hasTransparency = false;
-	bool _getOffstageEvents = false;
 	StageActor *_parentStage = nullptr;
 
 	void moveToCentered(int16 x, int16 y);

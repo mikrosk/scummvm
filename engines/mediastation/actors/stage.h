@@ -59,6 +59,7 @@ public:
 	virtual void preload(const Common::Rect &rect, bool fireStepEvent = true) override;
 	virtual bool isVisible() const override { return _children.size() > 0; }
 	virtual bool isRectInMemory(const Common::Rect &rect) override;
+	bool inBounds(const Common::Point &point, const Common::Rect &bounds, const Polygon &polygon);
 
 	void addChildSpatialEntity(SpatialEntity *entity);
 	void removeChildSpatialEntity(SpatialEntity *entity);
@@ -71,22 +72,23 @@ public:
 		const Common::Point &point,
 		uint16 eventMask,
 		MouseActorState &state,
+		bool clipMouseEvents,
 		CylindricalWrapMode wrapMode = kWrapNone);
 	uint16 findActorToAcceptMouseEventsObject(
 		const Common::Point &point,
 		uint16 eventMask,
 		MouseActorState &state,
-		bool inBounds);
+		bool clipMouseEvents);
 	uint16 findActorToAcceptMouseEventsCamera(
 		const Common::Point &point,
 		uint16 eventMask,
 		MouseActorState &state,
-		bool inBounds);
+		bool clipMouseEvents);
 	virtual uint16 findActorToAcceptMouseEvents(
 		const Common::Point &point,
 		uint16 eventMask,
 		MouseActorState &state,
-		bool inBounds) override;
+		bool clipMouseEvents) override;
 	virtual uint16 findActorToAcceptKeyboardEvents(
 		uint16 asciiCode,
 		uint16 eventMask,
@@ -114,6 +116,9 @@ protected:
 	void removeActorFromStage(uint actorId);
 	bool isRectInMemoryTest(const Common::Rect &rect, CylindricalWrapMode wrapMode);
 	void preloadTest(const Common::Rect &rect, CylindricalWrapMode wrapMode, bool fireStepEvent);
+	bool inBoundsTest(Common::Point point, const Common::Rect &bounds, const Polygon &polygon);
+	bool inBoundsCamera(const Common::Point &point, const Common::Rect &bounds, const Polygon &polygon);
+	bool inBoundsObject(const Common::Point &point, const Common::Rect &bounds, const Polygon &polygon);
 
 	bool assertHasNoParent(const SpatialEntity *entity);
 	bool assertHasParentThatIsNotMe(const SpatialEntity *entity) { return !assertIsMyChild(entity); }
@@ -143,7 +148,7 @@ public:
 		const Common::Point &point,
 		uint16 eventMask,
 		MouseActorState &state,
-		bool inBounds) override;
+		bool clipMouseEvents) override;
 	virtual void currentMousePosition(Common::Point &point) override;
 	virtual void setMousePosition(int16 x, int16 y) override;
 	virtual void invalidateRect(const Common::Rect &rect) override;
