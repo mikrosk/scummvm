@@ -471,8 +471,8 @@ void ColonyEngine::drawDashboardStep1() {
 	// RCompass(): draw compass oval
 	// _compassRect stores the post-shrink compOval (inner erasable area)
 	if (_compassRect.width() > 2 && _compassRect.height() > 2) {
-		// Original draws FillOval on the pre-shrink rect, then EraseOval on the shrunk rect.
-		// Pre-shrink = _compassRect expanded by 2 on each side
+		// Original DOS draws a solid black outer oval, shrinks the rect by 2px on
+		// each side, then erases the inner oval to white, leaving a black annulus.
 		const int cx = (_compassRect.left + _compassRect.right) >> 1;
 		const int cy = (_compassRect.top + _compassRect.bottom) >> 1;
 		const int outerRx = (_compassRect.width() + 4) >> 1;
@@ -480,16 +480,14 @@ void ColonyEngine::drawDashboardStep1() {
 		const int innerRx = _compassRect.width() >> 1;
 		const int innerRy = _compassRect.height() >> 1;
 
-		// FillOval: filled oval (vINTWHITE background)
-		_gfx->fillEllipse(cx, cy, outerRx, outerRy, 15);
-		// EraseOval: clear interior (also vINTWHITE)
+		_gfx->fillEllipse(cx, cy, outerRx, outerRy, 0);
 		_gfx->fillEllipse(cx, cy, innerRx, innerRy, 15);
-		// Frame the outer oval
-		_gfx->drawEllipse(cx, cy, outerRx, outerRy, 0);
 
-		// Compass needle: updateDashBoard() uses Me.ang
-		const int ex = cx + ((_cost[_me.ang] * innerRx) >> 8);
-		const int ey = cy - ((_sint[_me.ang] * innerRy) >> 8);
+		// In the current ScummVM colony controls, the rendered camera follows
+		// _me.look. Using _me.ang here leaves the DOS compass static under
+		// mouse/camera rotation even though the scene is turning.
+		const int ex = cx + ((_cost[_me.look] * _compassRect.width()) >> 8);
+		const int ey = cy - ((_sint[_me.look] * _compassRect.height()) >> 8);
 		_gfx->drawLine(cx, cy, ex, ey, 0); // vBLACK needle
 	}
 
@@ -741,8 +739,9 @@ void ColonyEngine::drawMiniMap(uint32 lineColor) {
 		ccenterx = (_headsUpRect.left + _headsUpRect.right) >> 1;
 		ccentery = (_headsUpRect.top + _headsUpRect.bottom) >> 1;
 	}
-	const int tsin = _sint[_me.look];
-	const int tcos = _cost[_me.look];
+	const uint8 mapAngle = _me.look;
+	const int tsin = _sint[mapAngle];
+	const int tcos = _cost[mapAngle];
 
 	int xcorner[6];
 	int ycorner[6];
@@ -962,8 +961,9 @@ void ColonyEngine::drawAutomap() {
 	const int yloc = (lExt * ((_me.yindex << 8) - _me.yloc)) >> 8;
 	const int ccx = (vp.left + vp.right) >> 1;
 	const int ccy = (vp.top + vp.bottom) >> 1;
-	const int tsin = _sint[_me.look];
-	const int tcos = _cost[_me.look];
+	const uint8 mapAngle = _me.look;
+	const int tsin = _sint[mapAngle];
+	const int tcos = _cost[mapAngle];
 	const uint32 lineColor = 0;
 
 	const int radius = (int)(sqrtf((float)(vpW * vpW + vpH * vpH)) / (2.0f * lExt)) + 2;
