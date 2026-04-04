@@ -35,7 +35,7 @@
  *   $0DCC  Pattern pointer table (up to 31 x uint32 BE)
  */
 
-#include "audio/softsynth/ay8912.h"
+#include "audio/softsynth/ym2149.h"
 
 #include "freescape/freescape.h"
 #include "freescape/wb.h"
@@ -58,7 +58,7 @@ static const int kTENumPeriods     = 96;
 static const int kTENumInstruments = 12;
 static const int kTEMaxPatterns    = 31;
 
-class EclipseAtariMusicStream : public Audio::AY8912Stream {
+class EclipseAtariMusicStream : public Audio::YM2149Emu {
 public:
 	EclipseAtariMusicStream(const byte *data, uint32 dataSize, int songNum, int rate = 44100);
 	~EclipseAtariMusicStream() override {}
@@ -66,6 +66,7 @@ public:
 	int readBuffer(int16 *buffer, const int numSamples) override;
 	bool endOfData() const override { return !_musicActive; }
 	bool endOfStream() const override { return !_musicActive; }
+	Audio::AudioStream *toAudioStream() { return this; }
 
 private:
 	// --- Data tables ---
@@ -194,6 +195,7 @@ private:
 	void buildArpeggioTable(ChannelState &c, byte mask);
 	void tickUpdate();
 	void writeYMRegisters();
+	void setReg(int reg, byte value) { writeReg(reg, value); }
 
 	uint16 getPeriod(int note) const {
 		if (note < 0 || note >= kTENumPeriods)
@@ -225,9 +227,8 @@ private:
 // ---------------------------------------------------------------------------
 
 EclipseAtariMusicStream::EclipseAtariMusicStream(const byte *data, uint32 dataSize,
-                                                   int songNum, int rate)
-	: AY8912Stream(rate, 2000000), // YM2149 at 2 MHz on Atari ST
-	  _data(data), _dataSize(dataSize),
+                                                   int songNum, int)
+	: _data(data), _dataSize(dataSize),
 	  _musicActive(false), _tickSpeed(6), _tickCounter(0),
 	  _tickSampleCount(0), _hwEnvelopeDirty(false), _hwEnvelopePeriod(0), _hwEnvelopeShape(0),
 	  _numPatterns(0) {
@@ -239,11 +240,7 @@ EclipseAtariMusicStream::EclipseAtariMusicStream(const byte *data, uint32 dataSi
 	memset(_arpeggioIntervals, 0, sizeof(_arpeggioIntervals));
 	memset(_channels, 0, sizeof(_channels));
 
-	// Reset all YM registers
-	for (int r = 0; r < 14; r++)
-		setReg(r, 0);
-	// Mixer: all channels disabled initially
-	setReg(7, 0x3F);
+	init();
 
 	loadTables();
 	startSong(songNum);
@@ -1035,8 +1032,7 @@ int EclipseAtariMusicStream::readBuffer(int16 *buffer, const int numSamples) {
 		return 0;
 
 	int samplesGenerated = 0;
-	// AY8912Stream is stereo: 2 int16 values per frame
-	int samplesPerTick = (getRate() / 50) * 2;
+	int samplesPerTick = MAX(1, getRate() / 50);
 
 	while (samplesGenerated < numSamples && _musicActive) {
 		int remaining = samplesPerTick - _tickSampleCount;
