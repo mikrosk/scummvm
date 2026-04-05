@@ -145,6 +145,8 @@ public:
 	Common::Array<Graphics::ManagedSurface *> _shootSprites;         // 2 shooting crosshair frames (32x25, 48x25)
 	Common::Array<Graphics::ManagedSurface *> _ankhSprites;          // 5 ankh fade-in frames (16x15)
 	Common::Array<uint16> _atariDarkAreas;                           // Atari ST dark areas from the $2A520 runtime table
+	byte _eclipseFadePalettes[6][16 * 3];                            // 6 brightness levels from prog $10EB6 (post LSR.L #1)
+	void applyEclipseFadePalette(uint16 areaID, int brightnessLevel);
 	Common::Array<uint16> _atariWaterSurfacePixels;                  // Atari ST water surface row words at $2024C
 	Common::Array<uint16> _atariWaterSurfaceMask;                    // Atari ST water surface mask words at $2025C
 	Common::Array<Graphics::ManagedSurface *> _soundToggleSprites;   // 5 sound on/off toggle frames (16x11)

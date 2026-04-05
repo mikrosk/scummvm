@@ -446,6 +446,8 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 	}
 
 	_gfx->_keyColor = 0;
+	if (isAtariST() && isAtariDarkArea(areaID))
+		applyEclipseFadePalette(areaID, _lanternBatteryLevel);
 	swapPalette(areaID);
 	if (isCPC())
 		updateHeartFramesCPC();

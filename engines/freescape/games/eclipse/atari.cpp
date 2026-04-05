@@ -39,8 +39,15 @@ const int kAtariCompassY = 151;
 const int kAtariWaterIndicatorX = 224;
 const int kAtariWaterIndicatorY = 154;
 const int kAtariWaterIndicatorMaxLevel = 29;
-const int kAtariDarkLightRadius = 34;
-const int kAtariDarkLightRadiusStep = 4;
+// The original 68K code at $07BA renders the dark room light hole using a
+// pre-built bitplane mask. The fully-visible center spans 6 word-groups
+// (96px) with 2 masked border groups (32px each) on either side, for a
+// total visible width of ~160px in the 256px-wide viewport. The vertical
+// extent is similarly masked per-scanline. This corresponds to a circle
+// radius of approximately 80 pixels. The lantern battery (6 levels)
+// scales this down proportionally.
+const int kAtariDarkLightRadius = 80;
+const int kAtariDarkLightRadiusStep = 10;
 const uint32 kAtariAreaRecordBase = 0x2A520;
 const uint32 kAtariAreaIndexBase = 0x2A6B0;
 const int kAtariAreaIndexCount = 64;
@@ -56,6 +63,15 @@ const int8 kAtariCompassPhaseToFrame[kAtariCompassPhaseCount] = {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 17, 16,
 	15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
 };
+
+void EclipseEngine::applyEclipseFadePalette(uint16 areaID, int brightnessLevel) {
+	if (!_paletteByArea.contains(areaID))
+		return;
+	brightnessLevel = CLIP(brightnessLevel, 0, 5);
+	byte *pal = _paletteByArea[areaID];
+	// Colors 0-5 stay as the border palette; overwrite 6-15 from the fade table
+	memcpy(pal + 6 * 3, _eclipseFadePalettes[brightnessLevel] + 6 * 3, 10 * 3);
+}
 
 void EclipseEngine::initAmigaAtari() {
 	_viewArea = Common::Rect(32, 16, 288, 118);
@@ -879,18 +895,13 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 	// the per-area palette table. The table has 6 brightness levels (0=black,
 	// 5=brightest), 32 bytes each. The 68K copy routine at $10FDC applies
 	// LSR.L #1 to each packed longword pair (values are pre-doubled).
-	// For now we use level 5 (brightest, matching full lantern).
-	{
-		static const uint32 kEclipseFadePalette = 0x10EB6;
-		static const int kBrightest = 5;
-		static const int kHdrSize = 0x1C;
-		stream->seek(kEclipseFadePalette + kHdrSize + kBrightest * 32);
+	// Load all 6 levels into _eclipseFadePalettes for runtime use.
+	for (int level = 0; level < 6; level++) {
+		stream->seek(0x10EB6 + 0x1C + level * 32);
 		uint16 rawWords[16];
 		for (int w = 0; w < 16; w++)
 			rawWords[w] = stream->readUint16BE();
 
-		// Simulate the 68K LSR.L #1 on packed longword pairs, then mask to $0777
-		byte darkPal[16 * 3];
 		for (int i = 0; i < 16; i += 2) {
 			uint32 packed = ((uint32)rawWords[i] << 16) | rawWords[i + 1];
 			packed >>= 1;
@@ -899,27 +910,19 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 			for (int j = 0; j < 2; j++) {
 				uint16 v = (j == 0) ? w1 : w2;
 				int idx = i + j;
-				int r = (v >> 8) & 0xf; 
-				r = r << 4 | r;
-				int g = (v >> 4) & 0xf; 
-				g = g << 4 | g;
-				int b = v & 0xf;
-				b = b << 4 | b;
-				darkPal[idx * 3 + 0] = r;
-				darkPal[idx * 3 + 1] = g;
-				darkPal[idx * 3 + 2] = b;
-			}
-		}
-
-		// Overwrite dark area palettes: colors 0-5 from border, 6-15 from dark palette
-		for (uint i = 0; i < _atariDarkAreas.size(); i++) {
-			uint16 areaID = _atariDarkAreas[i];
-			if (_paletteByArea.contains(areaID)) {
-				byte *pal = _paletteByArea[areaID];
-				memcpy(pal + 6 * 3, darkPal + 6 * 3, 10 * 3);
+				int r = (v >> 8) & 0xf; r = r << 4 | r;
+				int g = (v >> 4) & 0xf; g = g << 4 | g;
+				int b = v & 0xf;         b = b << 4 | b;
+				_eclipseFadePalettes[level][idx * 3 + 0] = r;
+				_eclipseFadePalettes[level][idx * 3 + 1] = g;
+				_eclipseFadePalettes[level][idx * 3 + 2] = b;
 			}
 		}
 	}
+
+	// Apply brightest fade palette to all dark areas at load time
+	for (uint i = 0; i < _atariDarkAreas.size(); i++)
+		applyEclipseFadePalette(_atariDarkAreas[i], _lanternBatteryLevel);
 
 	// Heart indicator sprites: 2 frames, 16x13 pixels
 	// Descriptor at prog $1D2B8 (1 col × 13 rows), mask at +6, pixels at +8
