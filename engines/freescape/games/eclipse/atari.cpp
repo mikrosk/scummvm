@@ -811,11 +811,9 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 	// the start of the first region so all areas get palettes.
 	loadPalettes(stream, 0x29e52);
 
-	// The original Atari ST game uses a Timer-B raster interrupt to split the
-	// hardware palette mid-screen: colors 0-5 always come from the border
-	// (CONSOLE.NEO) palette, while only colors 6-15 are swapped per area.
-	// Objects using indices 0-5 (e.g. ankhs at color 4 = bright gold) must
-	// therefore show the border palette values, not the area-specific ones.
+	// The original game uses a Timer-B raster interrupt to split the hardware
+	// palette mid-screen: colors 0-5 always come from the border (CONSOLE.NEO)
+	// palette, while only colors 6-15 are swapped per area.
 	for (auto &entry : _paletteByArea) {
 		byte *pal = entry._value;
 		memcpy(pal, kBorderPalette, 6 * 3);
@@ -875,6 +873,52 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 		parsedAreas.push_back(areaID);
 		if ((flags & kAtariDarkAreaFlag) != 0)
 			_atariDarkAreas.push_back(areaID);
+	}
+
+	// Eclipse/dark areas use a fade palette table at prog $10EB6 instead of
+	// the per-area palette table. The table has 6 brightness levels (0=black,
+	// 5=brightest), 32 bytes each. The 68K copy routine at $10FDC applies
+	// LSR.L #1 to each packed longword pair (values are pre-doubled).
+	// For now we use level 5 (brightest, matching full lantern).
+	{
+		static const uint32 kEclipseFadePalette = 0x10EB6;
+		static const int kBrightest = 5;
+		static const int kHdrSize = 0x1C;
+		stream->seek(kEclipseFadePalette + kHdrSize + kBrightest * 32);
+		uint16 rawWords[16];
+		for (int w = 0; w < 16; w++)
+			rawWords[w] = stream->readUint16BE();
+
+		// Simulate the 68K LSR.L #1 on packed longword pairs, then mask to $0777
+		byte darkPal[16 * 3];
+		for (int i = 0; i < 16; i += 2) {
+			uint32 packed = ((uint32)rawWords[i] << 16) | rawWords[i + 1];
+			packed >>= 1;
+			uint16 w1 = (packed >> 16) & 0x0777;
+			uint16 w2 = packed & 0x0777;
+			for (int j = 0; j < 2; j++) {
+				uint16 v = (j == 0) ? w1 : w2;
+				int idx = i + j;
+				int r = (v >> 8) & 0xf; 
+				r = r << 4 | r;
+				int g = (v >> 4) & 0xf; 
+				g = g << 4 | g;
+				int b = v & 0xf;
+				b = b << 4 | b;
+				darkPal[idx * 3 + 0] = r;
+				darkPal[idx * 3 + 1] = g;
+				darkPal[idx * 3 + 2] = b;
+			}
+		}
+
+		// Overwrite dark area palettes: colors 0-5 from border, 6-15 from dark palette
+		for (uint i = 0; i < _atariDarkAreas.size(); i++) {
+			uint16 areaID = _atariDarkAreas[i];
+			if (_paletteByArea.contains(areaID)) {
+				byte *pal = _paletteByArea[areaID];
+				memcpy(pal + 6 * 3, darkPal + 6 * 3, 10 * 3);
+			}
+		}
 	}
 
 	// Heart indicator sprites: 2 frames, 16x13 pixels
