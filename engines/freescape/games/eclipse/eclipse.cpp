@@ -1177,6 +1177,10 @@ void EclipseEngine::updateTimeVariables() {
 				_atariLanternLightFrame = -1;
 				_atariLanternAnimationDirection = 0;
 			}
+			if (_atariAreaDark && _currentArea) {
+				applyEclipseFadePalette(_currentArea->getAreaID(), _lanternBatteryLevel);
+				swapPalette(_currentArea->getAreaID());
+			}
 		}
 	}
 
