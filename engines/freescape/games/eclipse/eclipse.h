@@ -136,12 +136,14 @@ public:
 	Common::Array<Graphics::ManagedSurface *> _eclipseSprites; // 2 eclipse animation frames (16x13)
 	Common::Array<Graphics::ManagedSurface *> _eclipseProgressSprites;  // 16 eclipse animation frames (16x16)
 	Graphics::ManagedSurface *_compassBackground; // Atari ST compass background at $20986
+	Graphics::ManagedSurface *_atariWaterBody; // Atari ST water body bitmap at $2003C
 	Common::Array<Graphics::ManagedSurface *> _compassSprites; // signed Atari compass needle bank addressed by the $1542 lookup table
 	Common::Array<Graphics::ManagedSurface *> _lanternLightSprites;  // 6 lantern light animation frames (32x6)
 	Common::Array<Graphics::ManagedSurface *> _lanternSwitchSprites; // 2 lantern on/off frames (32x23)
 	Common::Array<Graphics::ManagedSurface *> _shootSprites;         // 2 shooting crosshair frames (32x25, 48x25)
 	Common::Array<Graphics::ManagedSurface *> _ankhSprites;          // 5 ankh fade-in frames (16x15)
-	Common::Array<Graphics::ManagedSurface *> _waterSprites;         // 9 water ripple frames (32x9)
+	Common::Array<uint16> _atariWaterSurfacePixels;                  // Atari ST water surface row words at $2024C
+	Common::Array<uint16> _atariWaterSurfaceMask;                    // Atari ST water surface mask words at $2025C
 	Common::Array<Graphics::ManagedSurface *> _soundToggleSprites;   // 5 sound on/off toggle frames (16x11)
 	int8 _compassLookup[72];  // signed Atari ST phase-to-frame lookup table
 	int _atariCompassPhase;

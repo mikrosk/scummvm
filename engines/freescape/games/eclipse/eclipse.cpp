@@ -107,6 +107,7 @@ EclipseEngine::EclipseEngine(OSystem *syst, const ADGameDescription *gd) : Frees
 	_lastHeartIndicatorFrame = 1;
 	_lastSecond = -1;
 	_compassBackground = nullptr;
+	_atariWaterBody = nullptr;
 	_atariCompassPhase = 0;
 	_atariCompassTargetPhase = 0;
 	_atariCompassTargetRemainder = 0.0f;
@@ -150,6 +151,10 @@ void EclipseEngine::restartBackgroundMusic() {
 
 EclipseEngine::~EclipseEngine() {
 	stopBackgroundMusic();
+	if (_atariWaterBody) {
+		_atariWaterBody->free();
+		delete _atariWaterBody;
+	}
 	if (_compassBackground) {
 		_compassBackground->free();
 		delete _compassBackground;

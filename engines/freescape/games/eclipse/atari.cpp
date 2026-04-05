@@ -36,6 +36,9 @@ const int kAtariClockCenterX = 106;
 const int kAtariClockCenterY = 159;
 const int kAtariCompassX = 176;
 const int kAtariCompassY = 151;
+const int kAtariWaterIndicatorX = 224;
+const int kAtariWaterIndicatorY = 154;
+const int kAtariWaterIndicatorMaxLevel = 29;
 
 // Repaired ST phase-to-frame table from $1542. Six corrupt bytes in the dumped
 // binary break the intended 37-frame sweep built from $20B36 and $22B46.
@@ -446,6 +449,36 @@ void drawAtariCompassNeedle(Graphics::Surface *surface, const Graphics::ManagedS
 	}
 }
 
+uint32 getAtariBorderColor(const Graphics::PixelFormat &pixelFormat, byte colorIndex) {
+	return pixelFormat.ARGBToColor(0xFF,
+		kBorderPalette[colorIndex * 3],
+		kBorderPalette[colorIndex * 3 + 1],
+		kBorderPalette[colorIndex * 3 + 2]);
+}
+
+void drawAtariWaterSurfaceRow(Graphics::Surface *surface, int x, int y,
+		const Common::Array<uint16> &maskWords, const Common::Array<uint16> &pixelWords,
+		const Graphics::PixelFormat &pixelFormat) {
+	if (maskWords.size() != 2 || pixelWords.size() != 8)
+		return;
+
+	for (uint col = 0; col < maskWords.size(); col++) {
+		uint16 mask = maskWords[col];
+		int offset = col * 4;
+		for (int bit = 15; bit >= 0; bit--) {
+			if ((mask >> bit) & 1)
+				continue;
+
+			byte colorIndex = ((pixelWords[offset + 0] >> bit) & 1)
+			                | (((pixelWords[offset + 1] >> bit) & 1) << 1)
+			                | (((pixelWords[offset + 2] >> bit) & 1) << 2)
+			                | (((pixelWords[offset + 3] >> bit) & 1) << 3);
+			surface->setPixel(x + col * 16 + (15 - bit), y,
+				getAtariBorderColor(pixelFormat, colorIndex));
+		}
+	}
+}
+
 int EclipseEngine::atariCompassPhaseFromRotationY(float rotationY) const {
 	return wrapAtariCompassPhase(atariCompassRoundToNearestInt(rotationY / 5.0f));
 }
@@ -501,6 +534,26 @@ void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 		_temporaryMessageDeadlines.push_back(deadline);
 	} else if (!_currentAreaMessages.empty())
 		drawStringInSurface(_currentArea->_name, 85, 119, pal[1], pal[2], pal[0], surface);
+
+	// Atari ST water indicator from TeDrawWaterIndicator at $1EF0:
+	// a fixed 32x31 body bitmap at $2003C and a highlighted top row at
+	// $2024C/$2025C.
+	int waterLevel = _gameStateVars[k8bitVariableEnergy];
+	if (waterLevel < 0)
+		waterLevel = 0;
+	if (waterLevel > kAtariWaterIndicatorMaxLevel)
+		waterLevel = kAtariWaterIndicatorMaxLevel;
+
+	if (_atariWaterBody) {
+		surface->copyRectToSurface(*_atariWaterBody, kAtariWaterIndicatorX, kAtariWaterIndicatorY,
+			Common::Rect(_atariWaterBody->w, _atariWaterBody->h));
+	}
+
+	if (waterLevel > 0) {
+		int topY = 183 - waterLevel;
+		drawAtariWaterSurfaceRow(surface, kAtariWaterIndicatorX, topY,
+			_atariWaterSurfaceMask, _atariWaterSurfacePixels, _gfx->_texturePixelFormat);
+	}
 
 	// Step indicator: $CDC at x=$4C(76), y=$77(119)
 	// d7 = $42 + (2 - _playerStepIndex) * 2, drawChar chr = d7 + 31
@@ -756,14 +809,22 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 			const_cast<byte *>(kBorderPalette), 16);
 	}
 
-	// Water ripple animation: 9 frames, 32x9, at prog $27714, stride 144 bytes
-	// Mask at prog $27710. Drawn at (0, 28) in left border strip.
-	_waterSprites.resize(9);
-	for (int i = 0; i < 9; i++) {
-		_waterSprites[i] = loadAtariSTSprite(stream, 0x27710 + kHdr, 0x27714 + kHdr + i * 144, 2, 9);
-		_waterSprites[i]->convertToInPlace(_gfx->_texturePixelFormat,
-			const_cast<byte *>(kBorderPalette), 16);
-	}
+	// Water indicator data from TeDrawWaterIndicator at $1EF0:
+	// a 32x31 body bitmap at $2003C and a highlighted 32-pixel cap row at
+	// $2024C/$2025C.
+	_atariWaterBody = loadAtariSTRawSprite(stream, 0x2003C + kHdr, 2, 31);
+	_atariWaterBody->convertToInPlace(_gfx->_texturePixelFormat,
+		const_cast<byte *>(kBorderPalette), 16);
+
+	_atariWaterSurfacePixels.resize(8);
+	stream->seek(0x2024C + kHdr);
+	for (uint i = 0; i < _atariWaterSurfacePixels.size(); i++)
+		_atariWaterSurfacePixels[i] = stream->readUint16BE();
+
+	_atariWaterSurfaceMask.resize(2);
+	stream->seek(0x2025C + kHdr);
+	for (uint i = 0; i < _atariWaterSurfaceMask.size(); i++)
+		_atariWaterSurfaceMask[i] = stream->readUint16BE();
 
 	// Shooting crosshair sprites: 2 frames with mask, at prog $1CC26 and $1CDC0
 	// Frame 0: 32x25 (2 cols), frame 1: 48x25 (3 cols)
