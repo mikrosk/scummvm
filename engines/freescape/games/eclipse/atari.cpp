@@ -892,32 +892,16 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 	}
 
 	// Eclipse/dark areas use a fade palette table at prog $10EB6 instead of
-	// the per-area palette table. The table has 6 brightness levels (0=black,
-	// 5=brightest), 32 bytes each. The 68K copy routine at $10FDC applies
-	// LSR.L #1 to each packed longword pair (values are pre-doubled).
-	// Load all 6 levels into _eclipseFadePalettes for runtime use.
+	// the per-area palette table. 6 brightness levels (0=black, 5=brightest),
+	// 16 words each. The 68K code at $10FDC applies LSR.L #1 before writing
+	// to the raster interrupt buffer, but ScummVM reads normal area palettes
+	// from the same table format without that shift (and they look correct),
+	// so we load these the same way — via loadPalette, no shift.
 	for (int level = 0; level < 6; level++) {
 		stream->seek(0x10EB6 + 0x1C + level * 32);
-		uint16 rawWords[16];
-		for (int w = 0; w < 16; w++)
-			rawWords[w] = stream->readUint16BE();
-
-		for (int i = 0; i < 16; i += 2) {
-			uint32 packed = ((uint32)rawWords[i] << 16) | rawWords[i + 1];
-			packed >>= 1;
-			uint16 w1 = (packed >> 16) & 0x0777;
-			uint16 w2 = packed & 0x0777;
-			for (int j = 0; j < 2; j++) {
-				uint16 v = (j == 0) ? w1 : w2;
-				int idx = i + j;
-				int r = (v >> 8) & 0xf; r = r << 4 | r;
-				int g = (v >> 4) & 0xf; g = g << 4 | g;
-				int b = v & 0xf;         b = b << 4 | b;
-				_eclipseFadePalettes[level][idx * 3 + 0] = r;
-				_eclipseFadePalettes[level][idx * 3 + 1] = g;
-				_eclipseFadePalettes[level][idx * 3 + 2] = b;
-			}
-		}
+		byte *pal = loadPalette(stream);
+		memcpy(_eclipseFadePalettes[level], pal, 16 * 3);
+		delete[] pal;
 	}
 
 	// Apply brightest fade palette to all dark areas at load time
