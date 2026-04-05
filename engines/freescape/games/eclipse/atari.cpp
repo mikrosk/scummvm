@@ -574,7 +574,16 @@ int EclipseEngine::atariCompassTargetPhaseFromYaw(float yaw, int referencePhase)
 
 void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 	int lanternFrame = _atariLanternLightFrame;
-	int lanternRadius = getAtariLanternHoleRadius(lanternFrame);
+
+	// Darkness radius based on battery level (5=full/bright → 0=dim → -1=dead).
+	// ROM uses TeLanternBrightnessFrame ($7f6c) directly: frame 5 = largest radius,
+	// frame 0 = smallest, frame -1 = no light.  ScummVM's getAtariLanternHoleRadius
+	// maps frame 0→34px and frame 5→14px (inverted), so we pass (5 - battery).
+	int lanternRadius = 0;
+	if (_flashlightOn && _lanternBatteryLevel >= 0) {
+		int effectiveFrame = 5 - _lanternBatteryLevel;
+		lanternRadius = getAtariLanternHoleRadius(effectiveFrame);
+	}
 
 	if (_atariAreaDark)
 		drawAtariDarknessMask(surface, _viewArea, _crossairPosition.x, _crossairPosition.y,
@@ -743,12 +752,17 @@ void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 			Common::Rect(_lanternSwitchSprites[switchFrame]->w, _lanternSwitchSprites[switchFrame]->h));
 	}
 
-	// Lantern light strip at (48, 139). The ST code uses a finite frame index,
-	// not a looping idle animation, so keep drawing the settled frame instead
-	// of cycling on _ticks.
-	if (lanternFrame >= 0 && lanternFrame < 6 && _lanternLightSprites.size() >= 6) {
-		surface->copyRectToSurface(*_lanternLightSprites[lanternFrame], 48, 139,
-			Common::Rect(_lanternLightSprites[lanternFrame]->w, _lanternLightSprites[lanternFrame]->h));
+	// Lantern light strip at (48, 139). During on/off animation use the animation
+	// frame; once settled, show the battery level (5=full → 0=dim, mapped to
+	// sprite index 0=bright → 5=dim via inversion).
+	{
+		int hudLanternFrame = lanternFrame;
+		if (_flashlightOn && _atariLanternAnimationDirection == 0 && _lanternBatteryLevel >= 0)
+			hudLanternFrame = 5 - _lanternBatteryLevel;
+		if (hudLanternFrame >= 0 && hudLanternFrame < 6 && _lanternLightSprites.size() >= 6) {
+			surface->copyRectToSurface(*_lanternLightSprites[hudLanternFrame], 48, 139,
+				Common::Rect(_lanternLightSprites[hudLanternFrame]->w, _lanternLightSprites[hudLanternFrame]->h));
+		}
 	}
 
 	// Shooting crosshair overlay at x=$80(128), y=$9F(159)

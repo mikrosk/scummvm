@@ -157,6 +157,7 @@ public:
 	int _atariLanternLightFrame;
 	int _atariLanternAnimationDirection;
 	int _atariLanternLastUpdateTick;
+	int _lanternBatteryLevel; // 5=full, 0=nearly dead, -1=dead (non-rechargeable)
 
 	// Atari ST on-screen control hotspots (from binary hotspot table at prog $869A)
 	bool onScreenControls(Common::Point mouse) override;

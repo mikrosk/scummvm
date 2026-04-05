@@ -116,6 +116,7 @@ EclipseEngine::EclipseEngine(OSystem *syst, const ADGameDescription *gd) : Frees
 	_atariLanternLightFrame = -1;
 	_atariLanternAnimationDirection = 0;
 	_atariLanternLastUpdateTick = -1;
+	_lanternBatteryLevel = 5;
 	_atariAreaDark = false;
 	_resting = false;
 	_flashlightOn = false;
@@ -191,6 +192,7 @@ void EclipseEngine::initGameState() {
 	_atariLanternLightFrame = -1;
 	_atariLanternAnimationDirection = 0;
 	_atariLanternLastUpdateTick = -1;
+	_lanternBatteryLevel = 5;
 	_atariAreaDark = false;
 	_resting = false;
 	_flashlightOn = false;
@@ -673,7 +675,7 @@ void EclipseEngine::pressedKey(const int keycode) {
 				if (_atariLanternLightFrame < 0)
 					_atariLanternLightFrame = 0;
 				_atariLanternAnimationDirection = 1;
-			} else {
+			} else if (_lanternBatteryLevel >= 0) {
 				_flashlightOn = true;
 				if (_atariLanternLightFrame < 0 || _atariLanternLightFrame > 5)
 					_atariLanternLightFrame = 5;
@@ -1161,6 +1163,18 @@ void EclipseEngine::updateTimeVariables() {
 
 		if (_gameStateVars[k8bitVariableShield] < _maxShield) {
 			_gameStateVars[k8bitVariableShield] += 1;
+		}
+
+		// Lantern battery drain: non-rechargeable, one level per 30-second tick
+		// while the flashlight is on. ROM drains TeLanternBrightnessFrame ($7f6c)
+		// from 5 (brightest) down to -1 (dead). 6 levels total.
+		if (isAtariST() && _flashlightOn && _lanternBatteryLevel >= 0) {
+			_lanternBatteryLevel--;
+			if (_lanternBatteryLevel < 0) {
+				_flashlightOn = false;
+				_atariLanternLightFrame = -1;
+				_atariLanternAnimationDirection = 0;
+			}
 		}
 	}
 
