@@ -769,12 +769,13 @@ void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 	}
 
 	// Lantern light strip at (48, 139). During on/off animation use the animation
-	// frame; once settled, show the battery level (5=full → 0=dim, mapped to
-	// sprite index 0=bright → 5=dim via inversion).
+	// frame; once settled, show the battery level. The original 68K code at
+	// $1C1C uses eclipse_brightness_level ($7F6C) directly as the sprite index:
+	// level 5 = sprite 5 (brightest), level 0 = sprite 0 (dimmest).
 	{
 		int hudLanternFrame = lanternFrame;
 		if (_flashlightOn && _atariLanternAnimationDirection == 0 && _lanternBatteryLevel >= 0)
-			hudLanternFrame = 5 - _lanternBatteryLevel;
+			hudLanternFrame = _lanternBatteryLevel;
 		if (hudLanternFrame >= 0 && hudLanternFrame < 6 && _lanternLightSprites.size() >= 6) {
 			surface->copyRectToSurface(*_lanternLightSprites[hudLanternFrame], 48, 139,
 				Common::Rect(_lanternLightSprites[hudLanternFrame]->w, _lanternLightSprites[hudLanternFrame]->h));
