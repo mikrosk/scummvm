@@ -806,7 +806,21 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 	load8bitBinary(stream, 0x2a53c, 16);
 
 	_border = loadAndConvertNeoImage(stream, 0x139c8);
-	loadPalettes(stream, 0x2a0fa);
+	// The palette table is split across two regions in the binary: areas 32-51
+	// at prog $29E36, then areas 25-31, 127, 1-24 at prog $2A0DE. Load from
+	// the start of the first region so all areas get palettes.
+	loadPalettes(stream, 0x29e52);
+
+	// The original Atari ST game uses a Timer-B raster interrupt to split the
+	// hardware palette mid-screen: colors 0-5 always come from the border
+	// (CONSOLE.NEO) palette, while only colors 6-15 are swapped per area.
+	// Objects using indices 0-5 (e.g. ankhs at color 4 = bright gold) must
+	// therefore show the border palette values, not the area-specific ones.
+	for (auto &entry : _paletteByArea) {
+		byte *pal = entry._value;
+		memcpy(pal, kBorderPalette, 6 * 3);
+	}
+
 	loadSoundsFx(stream, 0x3030c, 6);
 
 	// Load TEMUSIC.ST (GEMDOS executable at file offset $11F5A, skip $1C header, TEXT size $11E8)
