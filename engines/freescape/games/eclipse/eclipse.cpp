@@ -113,6 +113,10 @@ EclipseEngine::EclipseEngine(OSystem *syst, const ADGameDescription *gd) : Frees
 	_atariCompassTargetRemainder = 0.0f;
 	_atariCompassLastUpdateTick = -1;
 	_atariCompassPhaseInitialized = false;
+	_atariLanternLightFrame = -1;
+	_atariLanternAnimationDirection = 0;
+	_atariLanternLastUpdateTick = -1;
+	_atariAreaDark = false;
 	_resting = false;
 	_flashlightOn = false;
 }
@@ -184,6 +188,10 @@ void EclipseEngine::initGameState() {
 	_atariCompassTargetRemainder = 0.0f;
 	_atariCompassLastUpdateTick = -1;
 	_atariCompassPhaseInitialized = false;
+	_atariLanternLightFrame = -1;
+	_atariLanternAnimationDirection = 0;
+	_atariLanternLastUpdateTick = -1;
+	_atariAreaDark = false;
 	_resting = false;
 	_flashlightOn = false;
 	restartBackgroundMusic();
@@ -402,6 +410,7 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 	assert(_areaMap.contains(areaID));
 	_currentArea = _areaMap[areaID];
 	_currentArea->show();
+	_atariAreaDark = isAtariST() && isAtariDarkArea(areaID);
 
 	_currentAreaMessages.clear();
 	_currentAreaMessages.push_back(_currentArea->_name);
@@ -464,6 +473,14 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 	}
 
 	resetInput();
+}
+
+bool EclipseEngine::isAtariDarkArea(uint16 areaID) const {
+	for (uint i = 0; i < _atariDarkAreas.size(); i++) {
+		if (_atariDarkAreas[i] == areaID)
+			return true;
+	}
+	return false;
 }
 
 void EclipseEngine::drawBackground() {
@@ -650,7 +667,22 @@ void EclipseEngine::pressedKey(const int keycode) {
 		_pitch = 0;
 		updateCamera();
 	} else if (keycode == kActionToggleFlashlight) {
-		_flashlightOn = !_flashlightOn;
+		if (isAtariST()) {
+			if (_flashlightOn) {
+				_flashlightOn = false;
+				if (_atariLanternLightFrame < 0)
+					_atariLanternLightFrame = 0;
+				_atariLanternAnimationDirection = 1;
+			} else {
+				_flashlightOn = true;
+				if (_atariLanternLightFrame < 0 || _atariLanternLightFrame > 5)
+					_atariLanternLightFrame = 5;
+				_atariLanternAnimationDirection = -1;
+			}
+			_atariLanternLastUpdateTick = -1;
+		} else {
+			_flashlightOn = !_flashlightOn;
+		}
 	} else if (keycode == kActionRunModifier) {
 		// Shift-to-sprint: save current step, switch to max while held
 		if (_savedPlayerStepIndex < 0) {
@@ -1173,6 +1205,7 @@ Common::Error EclipseEngine::saveGameStreamExtended(Common::WriteStream *stream,
 }
 
 Common::Error EclipseEngine::loadGameStreamExtended(Common::SeekableReadStream *stream) {
+	(void)stream;
 	_lastHeartbeatSoundTick = -1;
 	_lastHeartIndicatorFrame = 1;
 	_atariCompassPhase = 0;
@@ -1180,6 +1213,10 @@ Common::Error EclipseEngine::loadGameStreamExtended(Common::SeekableReadStream *
 	_atariCompassTargetRemainder = 0.0f;
 	_atariCompassLastUpdateTick = -1;
 	_atariCompassPhaseInitialized = false;
+	_atariLanternAnimationDirection = 0;
+	_atariLanternLightFrame = _flashlightOn ? 0 : -1;
+	_atariLanternLastUpdateTick = -1;
+	_atariAreaDark = isAtariST() && _currentArea && isAtariDarkArea(_currentArea->getAreaID());
 	return Common::kNoError;
 }
 

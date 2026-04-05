@@ -67,6 +67,7 @@ public:
 
 	bool _resting;
 	bool _flashlightOn;
+	bool _atariAreaDark;
 	int _lastThirtySeconds;
 	int _lastFiveSeconds;
 	int _lastHeartbeatSoundTick;
@@ -103,6 +104,7 @@ public:
 	void drawCompass(Graphics::Surface *surface, int x, int y, double degrees, double magnitude, uint32 color);
 	int atariCompassPhaseFromRotationY(float rotationY) const;
 	int atariCompassTargetPhaseFromYaw(float yaw, int referencePhase) const;
+	bool isAtariDarkArea(uint16 areaID) const;
 	void onRotate(float xoffset, float yoffset, float zoffset) override;
 	void drawEclipseIndicator(Graphics::Surface *surface, int x, int y, uint32 color1, uint32 color2, uint32 color3 = 0);
 	Common::String getScoreString(int score);
@@ -142,6 +144,7 @@ public:
 	Common::Array<Graphics::ManagedSurface *> _lanternSwitchSprites; // 2 lantern on/off frames (32x23)
 	Common::Array<Graphics::ManagedSurface *> _shootSprites;         // 2 shooting crosshair frames (32x25, 48x25)
 	Common::Array<Graphics::ManagedSurface *> _ankhSprites;          // 5 ankh fade-in frames (16x15)
+	Common::Array<uint16> _atariDarkAreas;                           // Atari ST dark areas from the $2A520 runtime table
 	Common::Array<uint16> _atariWaterSurfacePixels;                  // Atari ST water surface row words at $2024C
 	Common::Array<uint16> _atariWaterSurfaceMask;                    // Atari ST water surface mask words at $2025C
 	Common::Array<Graphics::ManagedSurface *> _soundToggleSprites;   // 5 sound on/off toggle frames (16x11)
@@ -151,6 +154,9 @@ public:
 	float _atariCompassTargetRemainder;
 	int _atariCompassLastUpdateTick;
 	bool _atariCompassPhaseInitialized;
+	int _atariLanternLightFrame;
+	int _atariLanternAnimationDirection;
+	int _atariLanternLastUpdateTick;
 
 	// Atari ST on-screen control hotspots (from binary hotspot table at prog $869A)
 	bool onScreenControls(Common::Point mouse) override;

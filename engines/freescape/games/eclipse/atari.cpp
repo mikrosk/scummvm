@@ -39,6 +39,14 @@ const int kAtariCompassY = 151;
 const int kAtariWaterIndicatorX = 224;
 const int kAtariWaterIndicatorY = 154;
 const int kAtariWaterIndicatorMaxLevel = 29;
+const int kAtariDarkLightRadius = 34;
+const int kAtariDarkLightRadiusStep = 4;
+const uint32 kAtariAreaRecordBase = 0x2A520;
+const uint32 kAtariAreaIndexBase = 0x2A6B0;
+const int kAtariAreaIndexCount = 64;
+const uint16 kAtariDarkAreaFlag = 0x8000;
+
+void fillCircle(Graphics::Surface *surface, int x, int y, int radius, int color);
 
 // Repaired ST phase-to-frame table from $1542. Six corrupt bytes in the dumped
 // binary break the intended 37-frame sweep built from $20B36 and $22B46.
@@ -456,6 +464,65 @@ uint32 getAtariBorderColor(const Graphics::PixelFormat &pixelFormat, byte colorI
 		kBorderPalette[colorIndex * 3 + 2]);
 }
 
+bool containsAtariAreaID(const Common::Array<uint16> &areaIDs, uint16 areaID) {
+	for (uint i = 0; i < areaIDs.size(); i++) {
+		if (areaIDs[i] == areaID)
+			return true;
+	}
+	return false;
+}
+
+int getAtariLanternHoleRadius(int lanternFrame) {
+	if (lanternFrame < 0)
+		return 0;
+
+	int radius = kAtariDarkLightRadius - lanternFrame * kAtariDarkLightRadiusStep;
+	if (radius < 0)
+		radius = 0;
+	return radius;
+}
+
+void advanceAtariLanternAnimation(EclipseEngine *engine) {
+	if (engine->_atariLanternAnimationDirection == 0 || engine->_atariLanternLastUpdateTick == engine->_ticks)
+		return;
+
+	if (engine->_atariLanternAnimationDirection < 0) {
+		if (engine->_atariLanternLightFrame > 0)
+			engine->_atariLanternLightFrame--;
+		else
+			engine->_atariLanternAnimationDirection = 0;
+	} else if (engine->_atariLanternLightFrame < 5) {
+		engine->_atariLanternLightFrame++;
+	} else {
+		engine->_atariLanternLightFrame = -1;
+		engine->_atariLanternAnimationDirection = 0;
+	}
+
+	engine->_atariLanternLastUpdateTick = engine->_ticks;
+}
+
+void drawAtariDarknessMask(Graphics::Surface *surface, const Common::Rect &viewArea,
+		int holeX, int holeY, int holeRadius, const Graphics::PixelFormat &pixelFormat) {
+	uint32 blackout = pixelFormat.ARGBToColor(0xFF, 0, 0, 0);
+	int transparent = pixelFormat.ARGBToColor(0x00, 0, 0, 0);
+
+	surface->fillRect(viewArea, blackout);
+	if (holeRadius <= 0)
+		return;
+
+	if (holeX < viewArea.left)
+		holeX = viewArea.left;
+	else if (holeX >= viewArea.right)
+		holeX = viewArea.right - 1;
+
+	if (holeY < viewArea.top)
+		holeY = viewArea.top;
+	else if (holeY >= viewArea.bottom)
+		holeY = viewArea.bottom - 1;
+
+	fillCircle(surface, holeX, holeY, holeRadius, transparent);
+}
+
 void drawAtariWaterSurfaceRow(Graphics::Surface *surface, int x, int y,
 		const Common::Array<uint16> &maskWords, const Common::Array<uint16> &pixelWords,
 		const Graphics::PixelFormat &pixelFormat) {
@@ -506,6 +573,13 @@ int EclipseEngine::atariCompassTargetPhaseFromYaw(float yaw, int referencePhase)
 }
 
 void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
+	int lanternFrame = _atariLanternLightFrame;
+	int lanternRadius = getAtariLanternHoleRadius(lanternFrame);
+
+	if (_atariAreaDark)
+		drawAtariDarknessMask(surface, _viewArea, _crossairPosition.x, _crossairPosition.y,
+			lanternRadius, _gfx->_texturePixelFormat);
+
 	// Border palette colors for the 4-plane font (from CONSOLE.NEO).
 	// The Atari ST uses raster interrupts to switch palettes between
 	// the 3D viewport (area palette) and the border/UI area (border palette).
@@ -661,17 +735,20 @@ void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 		}
 	}
 
-	// Lantern switch at x=$30(48), y=$91(145) — only drawn when lantern is ON
-	if (_flashlightOn && _lanternSwitchSprites.size() >= 2) {
-		surface->copyRectToSurface(*_lanternSwitchSprites[0], 48, 145,
-			Common::Rect(_lanternSwitchSprites[0]->w, _lanternSwitchSprites[0]->h));
+	// Lantern switch at x=$30(48), y=$91(145). The ST code always draws the
+	// switch and picks frame 0/1 from the persistent lantern state.
+	if (_lanternSwitchSprites.size() >= 2) {
+		int switchFrame = _flashlightOn ? 0 : 1;
+		surface->copyRectToSurface(*_lanternSwitchSprites[switchFrame], 48, 145,
+			Common::Rect(_lanternSwitchSprites[switchFrame]->w, _lanternSwitchSprites[switchFrame]->h));
 	}
 
-	// Lantern light animation overlay at (48, 139) — 6 frames, 32x6, toggled with 'T' key
-	if (_flashlightOn && _lanternLightSprites.size() >= 6) {
-		int lightFrame = (_ticks / 8) % 6;
-		surface->copyRectToSurface(*_lanternLightSprites[lightFrame], 48, 139,
-			Common::Rect(_lanternLightSprites[lightFrame]->w, _lanternLightSprites[lightFrame]->h));
+	// Lantern light strip at (48, 139). The ST code uses a finite frame index,
+	// not a looping idle animation, so keep drawing the settled frame instead
+	// of cycling on _ticks.
+	if (lanternFrame >= 0 && lanternFrame < 6 && _lanternLightSprites.size() >= 6) {
+		surface->copyRectToSurface(*_lanternLightSprites[lanternFrame], 48, 139,
+			Common::Rect(_lanternLightSprites[lanternFrame]->w, _lanternLightSprites[lanternFrame]->h));
 	}
 
 	// Shooting crosshair overlay at x=$80(128), y=$9F(159)
@@ -699,6 +776,7 @@ void EclipseEngine::drawAmigaAtariSTUI(Graphics::Surface *surface) {
 	uint32 other = _gfx->_texturePixelFormat.ARGBToColor(0xFF, r, g, b);
 
 	drawAnalogClock(surface, kAtariClockCenterX, kAtariClockCenterY, back, other, front);
+	advanceAtariLanternAnimation(this);
 }
 
 void EclipseEngine::loadAssetsAtariFullGame() {
@@ -742,6 +820,34 @@ void EclipseEngine::loadAssetsAtariFullGame() {
 	// The decrypted stream includes a $1C-byte GEMDOS header, so add $1C to
 	// convert program addresses to stream offsets.
 	static const int kHdr = 0x1C;
+
+	_atariDarkAreas.clear();
+	Common::Array<uint16> parsedAreas;
+	uint32 streamSize = stream->size();
+	for (int i = 0; i < kAtariAreaIndexCount; i++) {
+		uint32 indexOffset = kAtariAreaIndexBase + kHdr + i * 4;
+		if (indexOffset + 4 > streamSize)
+			break;
+
+		stream->seek(indexOffset);
+		uint16 lowWord = stream->readUint16BE();
+		uint16 highWord = stream->readUint16BE();
+		uint32 recordWordOffset = lowWord | ((uint32)highWord << 8);
+		uint32 recordOffset = kAtariAreaRecordBase + kHdr + recordWordOffset * 2;
+		if (recordOffset + 6 > streamSize)
+			continue;
+
+		stream->seek(recordOffset);
+		uint16 flags = stream->readUint16BE();
+		stream->readUint16BE();
+		uint16 areaID = stream->readUint16BE();
+		if (!_areaMap.contains(areaID) || containsAtariAreaID(parsedAreas, areaID))
+			continue;
+
+		parsedAreas.push_back(areaID);
+		if ((flags & kAtariDarkAreaFlag) != 0)
+			_atariDarkAreas.push_back(areaID);
+	}
 
 	// Heart indicator sprites: 2 frames, 16x13 pixels
 	// Descriptor at prog $1D2B8 (1 col × 13 rows), mask at +6, pixels at +8
