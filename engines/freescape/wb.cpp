@@ -905,10 +905,15 @@ void WallyBebenStream::processEnvelope(int ch) {
 		break;
 
 	case 1: // Decay — decrease toward decay target.
+		// The 68K code decreases volume each tick; when it reaches exactly
+		// decayTarget it enters sustain. If attack == decay, the volume
+		// never changes and the engine stays in this phase (holds forever).
 		if (c.volume > c.decayTarget) {
 			c.volume--;
-		} else {
-			c.envelopePhase = 2;
+			if (c.volume <= c.decayTarget) {
+				c.volume = c.decayTarget;
+				c.envelopePhase = 2;
+			}
 		}
 		break;
 
