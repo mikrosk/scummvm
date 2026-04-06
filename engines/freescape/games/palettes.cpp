@@ -218,8 +218,8 @@ void FreescapeEngine::loadPalettes(Common::SeekableReadStream *file, int offset)
 			debugC(1, kFreescapeDebugParser, "Color %d: (%04x) %02x %02x %02x", c, v, palette[c][0], palette[c][1], palette[c][2]);
 		}
 		if (_paletteByArea.contains(label)) {
-			// Eclipse Atari ST has a duplicate palette entry for area 42
-			assert(isEclipse() && isAtariST());
+			// Eclipse Atari ST / Amiga has a duplicate palette entry for area 42
+			assert(isEclipse() && (isAtariST() || isAmiga()));
 			delete[] palette;
 			continue;
 		}

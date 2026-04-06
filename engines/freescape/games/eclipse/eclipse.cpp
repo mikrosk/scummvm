@@ -140,7 +140,7 @@ void EclipseEngine::restartBackgroundMusic() {
 		_playerAYMusic->startMusic();
 	} else if (isDOS() && _playerOPLMusic) {
 		_playerOPLMusic->startMusic();
-	} else if (isAtariST() && !_musicData.empty()) {
+	} else if ((isAtariST() || isAmiga()) && !_musicData.empty()) {
 		if (_mixer)
 			_mixer->stopHandle(_musicHandle);
 		Audio::AudioStream *musicStream = makeEclipseAtariMusicStream(
@@ -412,7 +412,7 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 	assert(_areaMap.contains(areaID));
 	_currentArea = _areaMap[areaID];
 	_currentArea->show();
-	_atariAreaDark = isAtariST() && isAtariDarkArea(areaID);
+	_atariAreaDark = (isAtariST() || isAmiga()) && isAtariDarkArea(areaID);
 
 	_currentAreaMessages.clear();
 	_currentAreaMessages.push_back(_currentArea->_name);
@@ -446,7 +446,7 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 	}
 
 	_gfx->_keyColor = 0;
-	if (isAtariST() && isAtariDarkArea(areaID))
+	if ((isAtariST() || isAmiga()) && isAtariDarkArea(areaID))
 		applyEclipseFadePalette(areaID, _lanternBatteryLevel);
 	swapPalette(areaID);
 	if (isCPC())
@@ -454,7 +454,7 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 	if (isAmiga() || isAtariST())
 		_currentArea->_skyColor = 15;
 
-	if (isAtariST() && entranceID > 0) {
+	if ((isAtariST() || isAmiga()) && entranceID > 0) {
 		Entrance *entrance = (Entrance *)_currentArea->entranceWithID(entranceID);
 		if (entrance) {
 			int phase = atariCompassPhaseFromRotationY(entrance->getRotation().y());
@@ -466,8 +466,8 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 		}
 	}
 
-	// Start background music (Atari ST)
-	if (isAtariST() && !_musicData.empty() && !_mixer->isSoundHandleActive(_musicHandle)) {
+	// Start background music (Atari ST / Amiga)
+	if ((isAtariST() || isAmiga()) && !_musicData.empty() && !_mixer->isSoundHandleActive(_musicHandle)) {
 		Audio::AudioStream *musicStream = makeEclipseAtariMusicStream(
 			_musicData.data(), _musicData.size(), 1);
 		if (musicStream) {
@@ -671,7 +671,7 @@ void EclipseEngine::pressedKey(const int keycode) {
 		_pitch = 0;
 		updateCamera();
 	} else if (keycode == kActionToggleFlashlight) {
-		if (isAtariST()) {
+		if (isAtariST() || isAmiga()) {
 			if (_flashlightOn) {
 				_flashlightOn = false;
 				if (_atariLanternLightFrame < 0)
@@ -700,7 +700,7 @@ void EclipseEngine::onRotate(float xoffset, float yoffset, float zoffset) {
 	(void)yoffset;
 	(void)zoffset;
 
-	if (!isAtariST() || xoffset == 0.0f)
+	if ((!isAtariST() && !isAmiga()) || xoffset == 0.0f)
 		return;
 
 	if (!_atariCompassPhaseInitialized) {
@@ -1100,7 +1100,7 @@ void EclipseEngine::drawScoreString(int score, int x, int y, uint32 front, uint3
 	// Font B has 10 glyphs (0-9) for digits. In the original, the score bytes
 	// have $2F subtracted to map '0'→glyph 0, '1'→glyph 1, etc.
 	// For drawChar: chr = glyph_index + 32, so digit '0' → chr 32, '9' → chr 41.
-	if (isAtariST()) {
+	if (isAtariST() || isAmiga()) {
 		_fontScore.setBackground(back);
 		_fontScore.setSecondaryColor(front);
 		// Font B uses palette indices 1-4 like Font A
@@ -1170,7 +1170,7 @@ void EclipseEngine::updateTimeVariables() {
 		// Lantern battery drain: non-rechargeable, one level per 30-second tick
 		// while the flashlight is on. ROM drains TeLanternBrightnessFrame ($7f6c)
 		// from 5 (brightest) down to -1 (dead). 6 levels total.
-		if (isAtariST() && _flashlightOn && _lanternBatteryLevel >= 0) {
+		if ((isAtariST() || isAmiga()) && _flashlightOn && _lanternBatteryLevel >= 0) {
 			_lanternBatteryLevel--;
 			if (_lanternBatteryLevel < 0) {
 				_flashlightOn = false;
@@ -1236,7 +1236,7 @@ Common::Error EclipseEngine::loadGameStreamExtended(Common::SeekableReadStream *
 	_atariLanternAnimationDirection = 0;
 	_atariLanternLightFrame = _flashlightOn ? 0 : -1;
 	_atariLanternLastUpdateTick = -1;
-	_atariAreaDark = isAtariST() && _currentArea && isAtariDarkArea(_currentArea->getAreaID());
+	_atariAreaDark = (isAtariST() || isAmiga()) && _currentArea && isAtariDarkArea(_currentArea->getAreaID());
 	return Common::kNoError;
 }
 

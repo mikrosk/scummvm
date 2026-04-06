@@ -85,6 +85,7 @@ public:
 	void loadAssetsZXFullGame() override;
 	void loadAssetsCPCFullGame() override;
 	void loadAssetsC64FullGame() override;
+	void loadAssetsAmigaFullGame() override;
 	void loadAssetsAtariFullGame() override;
 	void loadAssetsCPCDemo() override;
 	void loadAssetsZXDemo() override;

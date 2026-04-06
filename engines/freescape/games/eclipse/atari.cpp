@@ -29,9 +29,9 @@
 
 namespace Freescape {
 
-const int kAtariCompassPhaseCount = 72;
-const int kAtariCompassBaseFrames = 19;
-const int kAtariCompassTotalFrames = 37;
+extern const int kAtariCompassPhaseCount = 72;
+extern const int kAtariCompassBaseFrames = 19;
+extern const int kAtariCompassTotalFrames = 37;
 const int kAtariClockCenterX = 106;
 const int kAtariClockCenterY = 159;
 const int kAtariCompassX = 176;
@@ -48,16 +48,16 @@ const int kAtariWaterIndicatorMaxLevel = 29;
 // scales this down proportionally.
 const int kAtariDarkLightRadius = 80;
 const int kAtariDarkLightRadiusStep = 10;
-const uint32 kAtariAreaRecordBase = 0x2A520;
-const uint32 kAtariAreaIndexBase = 0x2A6B0;
-const int kAtariAreaIndexCount = 64;
-const uint16 kAtariDarkAreaFlag = 0x8000;
+extern const uint32 kAtariAreaRecordBase = 0x2A520;
+extern const uint32 kAtariAreaIndexBase = 0x2A6B0;
+extern const int kAtariAreaIndexCount = 64;
+extern const uint16 kAtariDarkAreaFlag = 0x8000;
 
 void fillCircle(Graphics::Surface *surface, int x, int y, int radius, int color);
 
 // Repaired ST phase-to-frame table from $1542. Six corrupt bytes in the dumped
 // binary break the intended 37-frame sweep built from $20B36 and $22B46.
-const int8 kAtariCompassPhaseToFrame[kAtariCompassPhaseCount] = {
+extern const int8 kAtariCompassPhaseToFrame[kAtariCompassPhaseCount] = {
 	0, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
 	36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19,
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 17, 16,
@@ -231,7 +231,7 @@ void EclipseEngine::drawCPCUI(Graphics::Surface *surface) {
 
 // Border palette from CONSOLE.NEO (Atari ST 9-bit $0RGB, scaled to 8-bit).
 // Used for font rendering and sprite conversion.
-static const byte kBorderPalette[16 * 3] = {
+extern const byte kBorderPalette[16 * 3] = {
 	0, 0, 0,        // 0: $000 black
 	145, 72, 0,     // 1: $420 dark brown
 	182, 109, 36,   // 2: $531 medium brown
@@ -251,7 +251,7 @@ static const byte kBorderPalette[16 * 3] = {
 };
 
 // Load raw 4-plane pixel data (no mask) from stream into a CLUT8 surface.
-static Graphics::ManagedSurface *loadAtariSTRawSprite(Common::SeekableReadStream *stream,
+Graphics::ManagedSurface *loadAtariSTRawSprite(Common::SeekableReadStream *stream,
 		int pixelOffset, int cols, int rows) {
 	stream->seek(pixelOffset);
 	Graphics::ManagedSurface *surface = new Graphics::ManagedSurface();
