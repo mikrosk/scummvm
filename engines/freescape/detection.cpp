@@ -767,6 +767,20 @@ static const ADGameDescription gameDescriptions[] = {
 		GUIO2(GUIO_NOMIDI, GUIO_RENDERAMIGA)
 	},
 	{
+		// Virtual Worlds release
+		"totaleclipse",
+		"",
+		{
+			{"TEC.ALL", 0, "e71e07b7d20ea9888dd0b35d66d30ec3", 48128},
+  			{"1.TEC", 0, "7bc83a8293f3a7e09a827db1c278c8bc", 122620},
+			AD_LISTEND
+		},
+		Common::EN_ANY,
+		Common::kPlatformAtariST,
+		ADGF_TESTING,
+		GUIO4(GUIO_NOMIDI, GUIO_RENDERATARIST, GAMEOPTION_MODERN_MOVEMENT, GAMEOPTION_WASD_CONTROLS)
+	},
+	{
 		"totaleclipse",
 		"",
 		{
@@ -776,8 +790,8 @@ static const ADGameDescription gameDescriptions[] = {
 		},
 		Common::EN_ANY,
 		Common::kPlatformAtariST,
-		ADGF_UNSTABLE,
-		GUIO2(GUIO_NOMIDI, GUIO_RENDERATARIST)
+		ADGF_TESTING,
+		GUIO4(GUIO_NOMIDI, GUIO_RENDERATARIST, GAMEOPTION_MODERN_MOVEMENT, GAMEOPTION_WASD_CONTROLS)
 	},
 	{
 		// Stampede Atari, Issue 7
@@ -790,7 +804,7 @@ static const ADGameDescription gameDescriptions[] = {
 		},
 		Common::EN_ANY,
 		Common::kPlatformAtariST,
-		ADGF_UNSUPPORTED,
+		ADGF_UNSTABLE,
 		GUIO2(GUIO_NOMIDI, GUIO_RENDERATARIST)
 	},
 

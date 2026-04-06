@@ -155,7 +155,6 @@ private:
 	Texture *_borderExtraTexture;
 
 	Common::SeekableReadStream *decryptFileAtari(const Common::Path &filename);
-	Common::SeekableReadStream *decryptFileAtariVirtualWorlds(const Common::Path &filename);
 };
 
 enum DrillerReleaseFlags {
