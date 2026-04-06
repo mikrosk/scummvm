@@ -74,6 +74,18 @@ void EclipseEngine::loadAssetsAmigaFullGame() {
 
 	loadSoundsFx(stream, 0x3030c + kAmigaDelta, 6);
 
+	// Load TEMUSIC.AM — Wally Beben custom Paula engine (same family as Dark Side)
+	// GEMDOS executable embedded at stream offset 0x10F5E, TEXT size 0xEB20
+	{
+		static const uint32 kTEMusicAmigaOffset = 0x10F5E;
+		static const uint32 kGemdosHeaderSize = 0x1C;
+		static const uint32 kTEMusicAmigaTextSize = 0xEB20;
+		stream->seek(kTEMusicAmigaOffset + kGemdosHeaderSize);
+		_musicData.resize(kTEMusicAmigaTextSize);
+		stream->read(_musicData.data(), kTEMusicAmigaTextSize);
+		debug(3, "TE-Amiga: Loaded TEMUSIC.AM TEXT segment (%d bytes)", kTEMusicAmigaTextSize);
+	}
+
 	// UI font (Font A): same 4-plane format as Atari ST
 	Common::Array<Graphics::ManagedSurface *> chars;
 	chars = getChars4Plane(stream, 0x24C5A + kAmigaDelta, 85);

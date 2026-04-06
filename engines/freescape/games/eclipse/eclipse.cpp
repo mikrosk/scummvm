@@ -30,6 +30,7 @@
 #include "common/translation.h"
 
 #include "freescape/freescape.h"
+#include "freescape/wb.h"
 #include "freescape/games/eclipse/c64.music.h"
 #include "freescape/games/eclipse/c64.sfx.h"
 #include "freescape/games/eclipse/ay.music.h"
@@ -43,6 +44,18 @@ namespace Freescape {
 // Forward declaration (defined in atari.music.cpp)
 Audio::AudioStream *makeEclipseAtariMusicStream(const byte *data, uint32 dataSize,
                                                   int songNum = 1, int rate = 44100);
+
+// Wally Beben table offsets for Total Eclipse Amiga TEMUSIC.AM
+static const WBTableOffsets kEclipseAmigaMusicOffsets = {
+	0x0ACA, // periodTable
+	0x0C5E, // samplePtrTable
+	0x0CA6, // instrumentTable
+	0x0D16, // arpeggioIntervals
+	0x0D1E, // envelopeTable
+	0x0D8E, // songTable
+	0x0D9E, // patternPtrTable (songTable + 16, overlaps Song 2 like Dark Side)
+	14, 14, 14 // numSamples, numInstruments, numEnvelopes
+};
 
 EclipseEngine::EclipseEngine(OSystem *syst, const ADGameDescription *gd) : FreescapeEngine(syst, gd) {
 	_playerC64Music = nullptr;
@@ -143,8 +156,14 @@ void EclipseEngine::restartBackgroundMusic() {
 	} else if ((isAtariST() || isAmiga()) && !_musicData.empty()) {
 		if (_mixer)
 			_mixer->stopHandle(_musicHandle);
-		Audio::AudioStream *musicStream = makeEclipseAtariMusicStream(
-			_musicData.data(), _musicData.size(), 1);
+		Audio::AudioStream *musicStream = nullptr;
+		if (isAmiga())
+			musicStream = makeWallyBebenStream(
+				_musicData.data(), _musicData.size(), 1, 44100, true,
+				&kEclipseAmigaMusicOffsets);
+		else
+			musicStream = makeEclipseAtariMusicStream(
+				_musicData.data(), _musicData.size(), 1);
 		if (musicStream) {
 			_mixer->playStream(Audio::Mixer::kMusicSoundType,
 				&_musicHandle, musicStream);
@@ -468,8 +487,14 @@ void EclipseEngine::gotoArea(uint16 areaID, int entranceID) {
 
 	// Start background music (Atari ST / Amiga)
 	if ((isAtariST() || isAmiga()) && !_musicData.empty() && !_mixer->isSoundHandleActive(_musicHandle)) {
-		Audio::AudioStream *musicStream = makeEclipseAtariMusicStream(
-			_musicData.data(), _musicData.size(), 1);
+		Audio::AudioStream *musicStream = nullptr;
+		if (isAmiga())
+			musicStream = makeWallyBebenStream(
+				_musicData.data(), _musicData.size(), 1, 44100, true,
+				&kEclipseAmigaMusicOffsets);
+		else
+			musicStream = makeEclipseAtariMusicStream(
+				_musicData.data(), _musicData.size(), 1);
 		if (musicStream) {
 			_mixer->playStream(Audio::Mixer::kMusicSoundType,
 				&_musicHandle, musicStream);
