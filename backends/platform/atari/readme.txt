@@ -162,17 +162,23 @@ value; it will be rounded automatically to the nearest suitable value.
 that Falcon doesn't allow mixing in 16-bit mono, so this will have no effect on
 this machine.
 
-"print_rate" in scummvm.ini: used for optimising sample playback (where
-available). It prints input and output sample format as well as the name of the
-converter used. See below for details.
-
 "audio_buffer_size" in scummvm.ini: number of samples to preload. Default is
 2048 which equals to about 83ms of audio lag and seems to be about right for
 most games on my CT60@66 MHz.
 
+"print_rate" in scummvm.ini: used for optimising sample playback (where
+available). It prints input and output sample format as well as the name of the
+converter used. See below for details.
+
 If you want to play with "audio_buffer_size", the rule of thumb is: (lag in ms)
 = (audio_buffer_size / output_rate) * 1000. But it's totally OK just to double
 the samples value to get rid of stuttering in a heavier game.
+
+Please note that unlike previous versions, these values will never be written
+back to scummvm.ini. This is beneficial if you want to switch between Falcon
+and TT or between Falcon with and without external DSP clock (as mentioned,
+DOS/Windows friendly values are automatically converted to a frequency which
+TT/Falcon supports).
 
 
 Graphics modes
@@ -335,12 +341,12 @@ avoid unpleasant gaming experiences.
 Game engines with unexpected performance hit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A typical example from this category is Gobliiins (and its sequels), some SCI
-engine games (Gabriel Knight, Larry 2/7, ...) or the Sherlock engine (The Case
-of the Rose Tattoo). At first it looks like our machine or Atari backend is
-doing something terribly wrong but the truth is that it is the engine itself
-which is doing a lot of redraws, sometimes even before reaching the backend.
-The only solution is to profile and fix those engines.
+A typical example from this category are some SCI engine games (Gabriel Knight,
+Larry 2/7, ...) or the Sherlock engine (The Case of the Rose Tattoo). At first
+it looks like our machine or Atari backend is doing something terribly wrong
+but the truth is that it is the engine itself which is doing a lot of redraws,
+sometimes even before reaching the backend. The only solution is to profile and
+fix those engines.
 
 Too many fullscreen updates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -395,14 +401,20 @@ Mute vs. "No music"
 
 Currently ScummVM requires each backend to mix samples, even though they may
 contain muted output (i.e. zeroes). This is because the progression of sample
-playback tells ScummVM how much time has passed in e.g. an animation.
+playback tells ScummVM how much time has passed in e.g. an animation. However,
+one part of the pending audio mixing changes is an optimisation: the input
+stream is still loaded and decoded but it is not mixed which alone leads to an
+enormous performance boost!
 
 "No music" means using the null audio plugin which prevents generating any MIDI
 music (and therefore avoiding the expensive synthesis emulation) but beware, it
-doesn't affect CD (*.wav) playback at all! Same applies for speech and sfx.
+doesn't affect CD (*.wav) playback at all! Same applies for speech and sfx. So
+mute one or all of those if frame rate drops noticeably.
 
 The least amount of cycles is spent when:
-- "No music" as "Preferred device": This prevents MIDI/OPL synthesis of any kind.
+- "No music" as "Preferred device": This prevents MIDI/OPL synthesis of any
+   kind.
+- "Mute all" in "Volume" setting.
 - "output_rate" set to a DOS/Windows compatible value (default). Even if game
   uses 22050 Hz and your Falcon supports 22050 Hz, it is always faster to use
   11025 Hz!
@@ -427,16 +439,17 @@ multiples of 44100 Hz: 22050, 11025, ... so with the external clock there
 won't be the need to resample them.
 
 There's one caveat, though: it is important whether your replay frequency is
-equal to, a multiple of, or other than the desired one. Let's consider 44100
-and 22050 frequencies as an example (also applies to all the other
+equal to, a multiple of, or other than the desired one. Let's consider 22050
+and 11025 frequencies as an example (also applies to all the other
 frequencies):
 
-- If you set 44100 Hz and a game requests 44100 Hz => so called "copyConvert"
+- If you set 22050 Hz and a game requests 22050 Hz => so called "copyConvert"
   method will be used (fastest).
-- If you set 22050 Hz and a game requests 44100 Hz => so called "simpleConvert"
-  method will be used (skipping every second sample, second fastest).
-- If you set 44100 Hz and a game requests 22050 Hz => so called
-  "interpolateConvert" method will be used (slowest!).
+- If you set 11025 Hz and a game requests 22050 Hz => so called
+  "downsampleConvert" method will be used (skipping every second sample, second
+  fastest).
+- If you set 22050 Hz and a game requests 11025 Hz => so called "upsampleConvert"
+  method will be used (about as fast as "downsampleConvert").
 - Any other combination: "interpolateConvert" (slowest).
 
 So how do you know which frequency to set as "output_rate" ? This is where
@@ -444,8 +457,9 @@ So how do you know which frequency to set as "output_rate" ? This is where
 for each game which sample converters are being used and for what input/values.
 So you can easily verify whether the given game's demands match your setting.
 
-Unfortunately, currently per-game "output_rate" / "output_channels" is not
-possible but this may change in the future.
+Good news is that "output_rate", "output_channels", "audio_buffer_size" and
+even "print_rate" are now possible to set per-game so one can fine-tune every
+game separately.
 
 Slow GUI
 ~~~~~~~~
@@ -461,16 +475,25 @@ Changes to upstream
 -------------------
 
 There are a few features that have been disabled or changed and are not possible
-/ plausible to merge into upstream:
+/ plausible to merge into upstream (see the "patches" folder):
 
 - The aforementioned "print_rate" feature, too invasive for other platforms
+  (actually pending as PR now: https://github.com/scummvm/scummvm/pull/7365)
 
 - This port contains an implementation of much faster tooltips in the overlay.
   However, there is a minor rendering bug which sometimes corrupts the
   background. But since its impact is huge, I left it in.
 
-- This port contains an experimental / pending optimisations to the SCUMM
-  engine and audio mixing. I'll try to get them merged in the next release.
+- This port contains pending optimisations to the SCUMM engine (https://github.com/scummvm/scummvm/pull/7330)
+  and audio mixing (https://github.com/scummvm/scummvm/pull/7385). I'll try to
+  get them merged in the next release.
+
+- This port contains cherry-picked changes to GOB engine from master. Initially
+  2026.2.0 would contain only a fix to Gobliiins and Ween but literally days
+  after the release a proper fix has been found for all GOB games.
+
+Except the audio patch, the FireBee build contains those as well (without m68k
+assembly optimisations).
 
 
 Known issues

@@ -1,14 +1,22 @@
-commit bc5168b5929bb7ce41c04aab54d71b88db432666
-Author: Miro Kropacek <miro.kropacek@gmail.com>
-Date:   Sun Jun 4 14:50:49 2023 +0200
+From fef1ce248442e24d48a0e480619478fa84595919 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Sun, 4 Jun 2023 14:50:49 +0200
+Subject: [PATCH] Don't merge: tooltips
 
-    Don't merge: tooltips
+---
+ gui/ThemeEngine.cpp |  9 ++++---
+ gui/ThemeEngine.h   |  6 +++--
+ gui/Tooltip.cpp     | 66 +++++++++++++++++++++++++++++++++++++++++++--
+ gui/Tooltip.h       | 10 +++++++
+ gui/gui-manager.cpp |  5 ++--
+ gui/gui-manager.h   |  3 +++
+ 6 files changed, 90 insertions(+), 9 deletions(-)
 
 diff --git a/gui/ThemeEngine.cpp b/gui/ThemeEngine.cpp
-index 44d6c9487ed..cce47f9efdd 100644
+index a94292f9eaa..3e65d69508b 100644
 --- a/gui/ThemeEngine.cpp
 +++ b/gui/ThemeEngine.cpp
-@@ -916,7 +916,7 @@ bool ThemeEngine::loadThemeXML(const Common::String &themeId) {
+@@ -920,7 +920,7 @@ bool ThemeEngine::loadThemeXML(const Common::String &themeId) {
  /**********************************************************
   * Draw Date descriptors drawing functions
   *********************************************************/
@@ -17,7 +25,7 @@ index 44d6c9487ed..cce47f9efdd 100644
  	WidgetDrawData *drawData = _widgets[type];
  
  	if (!drawData)
-@@ -942,6 +942,9 @@ void ThemeEngine::drawDD(DrawData type, const Common::Rect &r, uint32 dynamic, b
+@@ -946,6 +946,9 @@ void ThemeEngine::drawDD(DrawData type, const Common::Rect &r, uint32 dynamic, b
  	// Cull the elements not in the clip rect
  	if (extendedRect.isEmpty()) {
  		return;
@@ -27,7 +35,7 @@ index 44d6c9487ed..cce47f9efdd 100644
  	}
  
  	if (forceRestore || drawData->_layer == kDrawLayerBackground)
-@@ -1177,7 +1180,7 @@ void ThemeEngine::drawScrollbar(const Common::Rect &r, int sliderY, int sliderHe
+@@ -1181,7 +1184,7 @@ void ThemeEngine::drawScrollbar(const Common::Rect &r, int sliderY, int sliderHe
  	drawDD(scrollState == kScrollbarStateSlider ? kDDScrollbarHandleHover : kDDScrollbarHandleIdle, r2);
  }
  
@@ -36,7 +44,7 @@ index 44d6c9487ed..cce47f9efdd 100644
  	if (!ready())
  		return;
  
-@@ -1195,7 +1198,7 @@ void ThemeEngine::drawDialogBackground(const Common::Rect &r, DialogBackground b
+@@ -1199,7 +1202,7 @@ void ThemeEngine::drawDialogBackground(const Common::Rect &r, DialogBackground b
  		break;
  
  	case kDialogBackgroundTooltip:
@@ -46,7 +54,7 @@ index 44d6c9487ed..cce47f9efdd 100644
  
  	case kDialogBackgroundDefault:
 diff --git a/gui/ThemeEngine.h b/gui/ThemeEngine.h
-index 940298eff25..a371c13dcd5 100644
+index a60171fe094..a4e615739f9 100644
 --- a/gui/ThemeEngine.h
 +++ b/gui/ThemeEngine.h
 @@ -53,6 +53,7 @@ class Dialog;
@@ -74,7 +82,7 @@ index 940298eff25..a371c13dcd5 100644
  
  	void drawText(const Common::Rect &r, const Common::U32String &str, WidgetStateInfo state = kStateEnabled,
  	              Graphics::TextAlign align = Graphics::kTextAlignCenter,
-@@ -712,7 +714,7 @@ protected:
+@@ -718,7 +720,7 @@ protected:
  	 *
  	 * These functions are called from all the Widget drawing methods.
  	 */
@@ -239,10 +247,10 @@ index 02de69aa7c9..da57fdb2973 100644
  
  void GuiManager::setupCursor() {
 diff --git a/gui/gui-manager.h b/gui/gui-manager.h
-index 0718f631c8b..e8b646ec46c 100644
+index 4562d007647..69b03dbd63c 100644
 --- a/gui/gui-manager.h
 +++ b/gui/gui-manager.h
-@@ -62,6 +62,7 @@ enum {
+@@ -63,6 +63,7 @@ enum {
  
  class Dialog;
  class ThemeEval;
@@ -250,7 +258,7 @@ index 0718f631c8b..e8b646ec46c 100644
  class GuiObject;
  
  #define g_gui	(GUI::GuiManager::instance())
-@@ -82,6 +83,7 @@ typedef Common::FixedStack<Dialog *> DialogStack;
+@@ -83,6 +84,7 @@ typedef Common::FixedStack<Dialog *> DialogStack;
   */
  class GuiManager : public Common::Singleton<GuiManager>, public CommandSender {
  	friend class Dialog;
@@ -258,7 +266,7 @@ index 0718f631c8b..e8b646ec46c 100644
  	friend class Common::Singleton<SingletonBaseType>;
  	GuiManager();
  	~GuiManager() override;
-@@ -159,6 +161,7 @@ protected:
+@@ -164,6 +166,7 @@ protected:
  	enum RedrawStatus {
  		kRedrawDisabled = 0,
  		kRedrawOpenDialog,
@@ -266,3 +274,6 @@ index 0718f631c8b..e8b646ec46c 100644
  		kRedrawCloseDialog,
  		kRedrawTopDialog,
  		kRedrawFull
+-- 
+2.43.0
+

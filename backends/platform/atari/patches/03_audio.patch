@@ -1,0 +1,2632 @@
+From 4183573ba46907166efa34870d30e6b20c13de54 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Thu, 26 Mar 2026 13:04:16 +1000
+Subject: [PATCH 01/12] AUDIO: Fix constness
+
+---
+ audio/mixer.cpp      | 46 ++++++++++++++++++++++----------------------
+ audio/mixer.h        | 22 ++++++++++-----------
+ audio/mixer_intern.h | 22 ++++++++++-----------
+ 3 files changed, 45 insertions(+), 45 deletions(-)
+
+diff --git a/audio/mixer.cpp b/audio/mixer.cpp
+index 4791628bbac..51ea508d56f 100644
+--- a/audio/mixer.cpp
++++ b/audio/mixer.cpp
+@@ -98,7 +98,7 @@ public:
+ 	 *
+ 	 * @return volume
+ 	 */
+-	byte getVolume();
++	byte getVolume() const;
+ 
+ 	/**
+ 	 * Sets the channel's balance setting.
+@@ -112,7 +112,7 @@ public:
+ 	 *
+ 	 * @return balance
+ 	 */
+-	int8 getBalance();
++	int8 getBalance() const;
+ 
+ 	/**
+ 	 * Sets the channel's left fader level.
+@@ -126,7 +126,7 @@ public:
+ 	 *
+ 	 * @return The channel's left fader level.
+ 	 */
+-	uint8 getFaderL();
++	uint8 getFaderL() const;
+ 
+ 	/**
+ 	 * Sets the channel's right fader level.
+@@ -140,7 +140,7 @@ public:
+ 	 *
+ 	 * @return The channel's right fader level.
+ 	 */
+-	uint8 getFaderR();
++	uint8 getFaderR() const;
+ 
+ 	/**
+ 	 * Set the channel's sample rate.
+@@ -154,7 +154,7 @@ public:
+ 	 *
+ 	 * @return The current sample rate of the channel.
+ 	 */
+-	uint32 getRate();
++	uint32 getRate() const;
+ 
+ 	/**
+ 	 * Reset the sample rate of the channel back to its
+@@ -171,7 +171,7 @@ public:
+ 	/**
+ 	 * Queries how long the channel has been playing.
+ 	 */
+-	Timestamp getElapsedTime();
++	Timestamp getElapsedTime() const;
+ 
+ 	/**
+ 	 * Replaces the channel's stream with a version that loops indefinitely.
+@@ -425,7 +425,7 @@ void MixerImpl::setChannelVolume(SoundHandle handle, byte volume) {
+ 	_channels[index]->setVolume(volume);
+ }
+ 
+-byte MixerImpl::getChannelVolume(SoundHandle handle) {
++byte MixerImpl::getChannelVolume(SoundHandle handle) const {
+ 	const int index = handle._val % NUM_CHANNELS;
+ 	if (!_channels[index] || _channels[index]->getHandle()._val != handle._val)
+ 		return 0;
+@@ -443,7 +443,7 @@ void MixerImpl::setChannelBalance(SoundHandle handle, int8 balance) {
+ 	_channels[index]->setBalance(balance);
+ }
+ 
+-int8 MixerImpl::getChannelBalance(SoundHandle handle) {
++int8 MixerImpl::getChannelBalance(SoundHandle handle) const {
+ 	const int index = handle._val % NUM_CHANNELS;
+ 	if (!_channels[index] || _channels[index]->getHandle()._val != handle._val)
+ 		return 0;
+@@ -461,7 +461,7 @@ void MixerImpl::setChannelFaderL(SoundHandle handle, uint8 faderL) {
+ 	_channels[index]->setFaderL(faderL);
+ }
+ 
+-uint8 MixerImpl::getChannelFaderL(SoundHandle handle) {
++uint8 MixerImpl::getChannelFaderL(SoundHandle handle) const {
+ 	const int index = handle._val % NUM_CHANNELS;
+ 	if (!_channels[index] || _channels[index]->getHandle()._val != handle._val)
+ 		return 0;
+@@ -479,7 +479,7 @@ void MixerImpl::setChannelFaderR(SoundHandle handle, uint8 faderR) {
+ 	_channels[index]->setFaderR(faderR);
+ }
+ 
+-uint8 MixerImpl::getChannelFaderR(SoundHandle handle) {
++uint8 MixerImpl::getChannelFaderR(SoundHandle handle) const {
+ 	const int index = handle._val % NUM_CHANNELS;
+ 	if (!_channels[index] || _channels[index]->getHandle()._val != handle._val)
+ 		return 0;
+@@ -497,7 +497,7 @@ void MixerImpl::setChannelRate(SoundHandle handle, uint32 rate) {
+ 	_channels[index]->setRate(rate);
+ }
+ 
+-uint32 MixerImpl::getChannelRate(SoundHandle handle) {
++uint32 MixerImpl::getChannelRate(SoundHandle handle) const {
+ 	const int index = handle._val % NUM_CHANNELS;
+ 	if (!_channels[index] || _channels[index]->getHandle()._val != handle._val)
+ 		return 0;
+@@ -515,11 +515,11 @@ void MixerImpl::resetChannelRate(SoundHandle handle) {
+ 	_channels[index]->resetRate();
+ }
+ 
+-uint32 MixerImpl::getSoundElapsedTime(SoundHandle handle) {
++uint32 MixerImpl::getSoundElapsedTime(SoundHandle handle) const {
+ 	return getElapsedTime(handle).msecs();
+ }
+ 
+-Timestamp MixerImpl::getElapsedTime(SoundHandle handle) {
++Timestamp MixerImpl::getElapsedTime(SoundHandle handle) const {
+ 	Common::StackLock lock(_mutex);
+ 
+ 	const int index = handle._val % NUM_CHANNELS;
+@@ -569,7 +569,7 @@ void MixerImpl::pauseHandle(SoundHandle handle, bool paused) {
+ 	_channels[index]->pause(paused);
+ }
+ 
+-bool MixerImpl::isSoundIDActive(int id) {
++bool MixerImpl::isSoundIDActive(int id) const {
+ 	Common::StackLock lock(_mutex);
+ 
+ #ifdef ENABLE_EVENTRECORDER
+@@ -582,7 +582,7 @@ bool MixerImpl::isSoundIDActive(int id) {
+ 	return false;
+ }
+ 
+-int MixerImpl::getSoundID(SoundHandle handle) {
++int MixerImpl::getSoundID(SoundHandle handle) const {
+ 	Common::StackLock lock(_mutex);
+ 	const int index = handle._val % NUM_CHANNELS;
+ 	if (_channels[index] && _channels[index]->getHandle()._val == handle._val)
+@@ -590,7 +590,7 @@ int MixerImpl::getSoundID(SoundHandle handle) {
+ 	return 0;
+ }
+ 
+-bool MixerImpl::isSoundHandleActive(SoundHandle handle) {
++bool MixerImpl::isSoundHandleActive(SoundHandle handle) const {
+ 	Common::StackLock lock(_mutex);
+ 
+ #ifdef ENABLE_EVENTRECORDER
+@@ -601,7 +601,7 @@ bool MixerImpl::isSoundHandleActive(SoundHandle handle) {
+ 	return _channels[index] && _channels[index]->getHandle()._val == handle._val;
+ }
+ 
+-bool MixerImpl::hasActiveChannelOfType(SoundType type) {
++bool MixerImpl::hasActiveChannelOfType(SoundType type) const {
+ 	Common::StackLock lock(_mutex);
+ 	for (int i = 0; i != NUM_CHANNELS; i++)
+ 		if (_channels[i] && _channels[i]->getType() == type)
+@@ -660,7 +660,7 @@ void Channel::setVolume(const byte volume) {
+ 	updateChannelVolumes();
+ }
+ 
+-byte Channel::getVolume() {
++byte Channel::getVolume() const {
+ 	return _volume;
+ }
+ 
+@@ -669,7 +669,7 @@ void Channel::setBalance(const int8 balance) {
+ 	updateChannelVolumes();
+ }
+ 
+-int8 Channel::getBalance() {
++int8 Channel::getBalance() const {
+ 	return _balance;
+ }
+ 
+@@ -678,7 +678,7 @@ void Channel::setFaderL(uint8 faderL) {
+ 	updateChannelVolumes();
+ }
+ 
+-uint8 Channel::getFaderL() {
++uint8 Channel::getFaderL() const {
+ 	return _faderL;
+ }
+ 
+@@ -687,7 +687,7 @@ void Channel::setFaderR(uint8 faderR) {
+ 	updateChannelVolumes();
+ }
+ 
+-uint8 Channel::getFaderR() {
++uint8 Channel::getFaderR() const {
+ 	return _faderR;
+ }
+ 
+@@ -696,7 +696,7 @@ void Channel::setRate(uint32 rate) {
+ 		_converter->setInputRate(rate);
+ }
+ 
+-uint32 Channel::getRate() {
++uint32 Channel::getRate() const {
+ 	if (_converter)
+ 		return _converter->getInputRate();
+ 
+@@ -756,7 +756,7 @@ void Channel::pause(bool paused) {
+ 	}
+ }
+ 
+-Timestamp Channel::getElapsedTime() {
++Timestamp Channel::getElapsedTime() const {
+ 	const uint32 rate = _mixer->getOutputRate();
+ 	uint32 delta = 0;
+ 
+diff --git a/audio/mixer.h b/audio/mixer.h
+index 4e34879c23a..2c6c35f07b2 100644
+--- a/audio/mixer.h
++++ b/audio/mixer.h
+@@ -192,7 +192,7 @@ public:
+ 	 *
+ 	 * @return True if the sound is active.
+ 	 */
+-	virtual bool isSoundIDActive(int id) = 0;
++	virtual bool isSoundIDActive(int id) const = 0;
+ 
+ 	/**
+ 	 * Get the sound ID for the given handle.
+@@ -201,7 +201,7 @@ public:
+ 	 *
+ 	 * @return Sound ID if the sound is active.
+ 	 */
+-	virtual int getSoundID(SoundHandle handle) = 0;
++	virtual int getSoundID(SoundHandle handle) const = 0;
+ 
+ 	/**
+ 	 * Check whether a sound with the given handle is active.
+@@ -210,7 +210,7 @@ public:
+ 	 *
+ 	 * @return True if the sound is active.
+ 	 */
+-	virtual bool isSoundHandleActive(SoundHandle handle) = 0;
++	virtual bool isSoundHandleActive(SoundHandle handle) const = 0;
+ 
+ 
+ 	/**
+@@ -243,7 +243,7 @@ public:
+ 	 *
+ 	 * @return The channel volume.
+ 	 */
+-	virtual byte getChannelVolume(SoundHandle handle) = 0;
++	virtual byte getChannelVolume(SoundHandle handle) const = 0;
+ 
+ 	/**
+ 	 * Set the channel balance for the given handle.
+@@ -261,7 +261,7 @@ public:
+ 	 *
+ 	 * @return The channel balance.
+ 	 */
+-	virtual int8 getChannelBalance(SoundHandle handle) = 0;
++	virtual int8 getChannelBalance(SoundHandle handle) const = 0;
+ 
+ 	/**
+ 	 * Set the channel's left fader level for the given handle.
+@@ -278,7 +278,7 @@ public:
+ 	 *
+ 	 * @return The channel's left fader level.
+ 	 */
+-	virtual uint8 getChannelFaderL(SoundHandle handle) = 0;
++	virtual uint8 getChannelFaderL(SoundHandle handle) const = 0;
+ 
+ 	/**
+ 	 * Set the channel's right fader level for the given handle.
+@@ -295,7 +295,7 @@ public:
+ 	 *
+ 	 * @return The channel's right fader level.
+ 	 */
+-	virtual uint8 getChannelFaderR(SoundHandle handle) = 0;
++	virtual uint8 getChannelFaderR(SoundHandle handle) const = 0;
+ 
+ 	/**
+ 	 * Set the sample rate for the given handle.
+@@ -312,7 +312,7 @@ public:
+ 	 *
+ 	 * @return The current sample rate of the channel.
+ 	*/
+-	virtual uint32 getChannelRate(SoundHandle handle) = 0;
++	virtual uint32 getChannelRate(SoundHandle handle) const = 0;
+ 
+ 	/**
+ 	 * Reset the sample rate of the channel back to its
+@@ -325,12 +325,12 @@ public:
+ 	/**
+ 	 * Get an approximation of for how long the channel has been playing.
+ 	 */
+-	virtual uint32 getSoundElapsedTime(SoundHandle handle) = 0;
++	virtual uint32 getSoundElapsedTime(SoundHandle handle) const = 0;
+ 
+ 	/**
+ 	 * Get an approximation of for how long the channel has been playing.
+ 	 */
+-	virtual Timestamp getElapsedTime(SoundHandle handle) = 0;
++	virtual Timestamp getElapsedTime(SoundHandle handle) const = 0;
+ 
+ 	/**
+ 	 * Replace the channel's stream with a version that loops indefinitely.
+@@ -347,7 +347,7 @@ public:
+ 	 *
+ 	 * @return True if any channels of the specified type are active.
+ 	 */
+-	virtual bool hasActiveChannelOfType(SoundType type) = 0;
++	virtual bool hasActiveChannelOfType(SoundType type) const = 0;
+ 
+ 	/**
+ 	 * Set the volume for the given sound type.
+diff --git a/audio/mixer_intern.h b/audio/mixer_intern.h
+index fea60437a33..6de9ba55998 100644
+--- a/audio/mixer_intern.h
++++ b/audio/mixer_intern.h
+@@ -106,32 +106,32 @@ public:
+ 	void pauseID(int id, bool paused) override;
+ 	void pauseHandle(SoundHandle handle, bool paused) override;
+ 
+-	bool isSoundIDActive(int id) override;
+-	int getSoundID(SoundHandle handle) override;
++	bool isSoundIDActive(int id) const override;
++	int getSoundID(SoundHandle handle) const override;
+ 
+-	bool isSoundHandleActive(SoundHandle handle) override;
++	bool isSoundHandleActive(SoundHandle handle) const override;
+ 
+ 	void muteSoundType(SoundType type, bool mute) override;
+ 	bool isSoundTypeMuted(SoundType type) const override;
+ 
+ 	void setChannelVolume(SoundHandle handle, byte volume) override;
+-	byte getChannelVolume(SoundHandle handle) override;
++	byte getChannelVolume(SoundHandle handle) const override;
+ 	void setChannelBalance(SoundHandle handle, int8 balance) override;
+-	int8 getChannelBalance(SoundHandle handle) override;
++	int8 getChannelBalance(SoundHandle handle) const override;
+ 	void setChannelFaderL(SoundHandle handle, uint8 scaleL) override;
+-	uint8 getChannelFaderL(SoundHandle handle) override;
++	uint8 getChannelFaderL(SoundHandle handle) const override;
+ 	void setChannelFaderR(SoundHandle handle, uint8 scaleR) override;
+-	uint8 getChannelFaderR(SoundHandle handle) override;
++	uint8 getChannelFaderR(SoundHandle handle) const override;
+ 	void setChannelRate(SoundHandle handle, uint32 rate) override;
+-	uint32 getChannelRate(SoundHandle handle) override;
++	uint32 getChannelRate(SoundHandle handle) const override;
+ 	void resetChannelRate(SoundHandle handle) override;
+ 
+-	uint32 getSoundElapsedTime(SoundHandle handle) override;
+-	Timestamp getElapsedTime(SoundHandle handle) override;
++	uint32 getSoundElapsedTime(SoundHandle handle) const override;
++	Timestamp getElapsedTime(SoundHandle handle) const override;
+ 
+ 	void loopChannel(SoundHandle handle) override;
+ 
+-	bool hasActiveChannelOfType(SoundType type) override;
++	bool hasActiveChannelOfType(SoundType type) const override;
+ 
+ 	void setVolumeForSoundType(SoundType type, int volume) override;
+ 	int getVolumeForSoundType(SoundType type) const override;
+-- 
+2.43.0
+
+
+From 386bfcc6e0886b9c156f26244c99f1e11df16edf Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Sun, 22 Mar 2026 22:24:54 +1000
+Subject: [PATCH 02/12] AUDIO: Input stream always works with int16
+
+So make it explicit in code.
+---
+ audio/rate.cpp | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/audio/rate.cpp b/audio/rate.cpp
+index 7f0c50f9250..5e3371dafed 100644
+--- a/audio/rate.cpp
++++ b/audio/rate.cpp
+@@ -56,10 +56,10 @@ private:
+ 	 * but only until some point (depends largely on cache size, target
+ 	 * processor and various other factors), at which it will decrease again.
+ 	 */
+-	st_sample_t _buffer[512];
++	int16 _buffer[512];
+ 
+ 	/** Current position inside the buffer */
+-	const st_sample_t *_bufferPos;
++	const int16 *_bufferPos;
+ 
+ 	/** Size of data currently loaded into the buffer */
+ 	int _bufferSize;
+@@ -71,10 +71,10 @@ private:
+ 	frac_t _outPosFrac;
+ 
+ 	/** Last sample(s) in the input stream (left/right channel) */
+-	st_sample_t _inLastL, _inLastR;
+-	
++	int16 _inLastL, _inLastR;
++
+ 	/** Current sample(s) in the input stream (left/right channel) */
+-	st_sample_t _inCurL, _inCurR;
++	int16 _inCurL, _inCurR;
+ 
+ 	int copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+ 	int simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+@@ -113,7 +113,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
+ 		}
+ 
+ 		// Mix the data into the output buffer
+-		st_sample_t inL, inR;
++		int16 inL, inR;
+ 		inL = *_bufferPos++;
+ 		inR = (inStereo ? *_bufferPos++ : inL);
+ 		_bufferSize -= (inStereo ? 2 : 1);
+@@ -171,7 +171,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
+ 			}
+ 		} while (_outPos >= 0);
+ 
+-		st_sample_t inL, inR;
++		int16 inL, inR;
+ 		inL = *_bufferPos++;
+ 		inR = (inStereo ? *_bufferPos++ : inL);
+ 
+@@ -237,10 +237,10 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(A
+ 		// still space in the output buffer.
+ 		while (_outPosFrac < (frac_t)FRAC_ONE_LOW && outBuffer < outEnd) {
+ 			// Interpolate
+-			st_sample_t inL, inR;
+-			inL = (st_sample_t)(_inLastL + (((_inCurL - _inLastL) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW));
++			int16 inL, inR;
++			inL = (int16)(_inLastL + (((_inCurL - _inLastL) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW));
+ 			inR = (inStereo ?
+-						(st_sample_t)(_inLastR + (((_inCurR - _inLastR) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW)) :
++						(int16)(_inLastR + (((_inCurR - _inLastR) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW)) :
+ 						inL);
+ 
+ 			st_sample_t outL, outR;
+-- 
+2.43.0
+
+
+From 18a03c19c14c842ebaaee471cba3946d5923795e Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Sun, 22 Mar 2026 23:25:14 +1000
+Subject: [PATCH 03/12] SCI32: Don't use Audio::st_sample_t for AudioStream
+ instances
+
+AudioStream always works with int16 so make it explicit. The only
+exception here is Audio32::writeAudioInternal() where the targetBuffer
+actually is expected to be of type Audio::st_sample_t but that is just
+Audio32 class taking advantage of an existing converter. It could easily
+take byte or void pointer as input.
+---
+ engines/sci/sound/audio32.cpp       | 20 ++++++++++----------
+ engines/sci/sound/audio32.h         |  6 +++---
+ engines/sci/video/robot_decoder.cpp | 12 ++++++------
+ engines/sci/video/robot_decoder.h   |  2 +-
+ 4 files changed, 20 insertions(+), 20 deletions(-)
+
+diff --git a/engines/sci/sound/audio32.cpp b/engines/sci/sound/audio32.cpp
+index b81df60a01f..0b21070ec7c 100644
+--- a/engines/sci/sound/audio32.cpp
++++ b/engines/sci/sound/audio32.cpp
+@@ -232,7 +232,7 @@ Audio32::~Audio32() {
+ #pragma mark -
+ #pragma mark AudioStream implementation
+ 
+-int Audio32::writeAudioInternal(Audio::AudioStream &sourceStream, Audio::RateConverter &converter, Audio::st_sample_t *targetBuffer, const int numSamples, const Audio::st_volume_t leftVolume, const Audio::st_volume_t rightVolume) {
++int Audio32::writeAudioInternal(Audio::AudioStream &sourceStream, Audio::RateConverter &converter, int16 *targetBuffer, const int numSamples, const Audio::st_volume_t leftVolume, const Audio::st_volume_t rightVolume) {
+ 	const int samplePairsToRead = numSamples >> 1;
+ 	const int samplePairsWritten = converter.convert(sourceStream, targetBuffer, samplePairsToRead, leftVolume, rightVolume);
+ 	return samplePairsWritten << 1;
+@@ -289,7 +289,7 @@ bool Audio32::channelShouldMix(const AudioChannel &channel) const {
+ // do all audio processing in real time, and we have streams, and we do not need
+ // to completely fill the audio buffer, the functionality of all these original
+ // functions is combined here and simplified.
+-int Audio32::readBuffer(Audio::st_sample_t *const buffer, const int numSamples) {
++int Audio32::readBuffer(int16 *const buffer, const int numSamples) {
+ 	Common::StackLock lock(_mutex);
+ 
+ 	if (_pausedAtTick != 0 || _numActiveChannels == 0) {
+@@ -307,7 +307,7 @@ int Audio32::readBuffer(Audio::st_sample_t *const buffer, const int numSamples)
+ 	// The caller of `readBuffer` is a rate converter, which reuses (without
+ 	// clearing) an intermediate buffer, so we need to zero the intermediate
+ 	// buffer to prevent mixing into audio data from the last callback.
+-	memset(buffer, 0, numSamples * sizeof(Audio::st_sample_t));
++	memset(buffer, 0, numSamples * sizeof(int16));
+ 
+ 	// This emulates the attenuated mixing mode of SSCI engine, which reduces
+ 	// the volume of the target buffer when each new channel is mixed in.
+@@ -413,12 +413,12 @@ int Audio32::readBuffer(Audio::st_sample_t *const buffer, const int numSamples)
+ 			if (numSamples > (int)_monitoredBuffer.size()) {
+ 				_monitoredBuffer.resize(numSamples);
+ 			}
+-			memset(_monitoredBuffer.data(), 0, _monitoredBuffer.size() * sizeof(Audio::st_sample_t));
++			memset(_monitoredBuffer.data(), 0, _monitoredBuffer.size() * sizeof(int16));
+ 			_numMonitoredSamples = writeAudioInternal(*channel.stream, *channel.converter, _monitoredBuffer.data(), numSamples, leftVolume, rightVolume);
+ 
+-			Audio::st_sample_t *sourceBuffer = _monitoredBuffer.data();
+-			Audio::st_sample_t *targetBuffer = buffer;
+-			const Audio::st_sample_t *const end = _monitoredBuffer.data() + _numMonitoredSamples;
++			int16 *sourceBuffer = _monitoredBuffer.data();
++			int16 *targetBuffer = buffer;
++			const int16 *const end = _monitoredBuffer.data() + _numMonitoredSamples;
+ 			while (sourceBuffer != end) {
+ 				Audio::clampedAdd(*targetBuffer++, *sourceBuffer++);
+ 			}
+@@ -1203,11 +1203,11 @@ bool Audio32::hasSignal() const {
+ 		return false;
+ 	}
+ 
+-	const Audio::st_sample_t *buffer = _monitoredBuffer.data();
+-	const Audio::st_sample_t *const end = _monitoredBuffer.data() + _numMonitoredSamples;
++	const int16 *buffer = _monitoredBuffer.data();
++	const int16 *const end = _monitoredBuffer.data() + _numMonitoredSamples;
+ 
+ 	while (buffer != end) {
+-		const Audio::st_sample_t sample = *buffer++;
++		const int16 sample = *buffer++;
+ 		if (sample > 1280 || sample < -1280) {
+ 			return true;
+ 		}
+diff --git a/engines/sci/sound/audio32.h b/engines/sci/sound/audio32.h
+index cfa8691d027..ee095294dea 100644
+--- a/engines/sci/sound/audio32.h
++++ b/engines/sci/sound/audio32.h
+@@ -196,7 +196,7 @@ private:
+ #pragma mark -
+ #pragma mark AudioStream implementation
+ public:
+-	int readBuffer(Audio::st_sample_t *buffer, const int numSamples) override;
++	int readBuffer(int16 *buffer, const int numSamples) override;
+ 	bool isStereo() const override { return true; }
+ 	int getRate() const override { return _mixer->getOutputRate(); }
+ 	bool endOfData() const override { return _numActiveChannels == 0; }
+@@ -219,7 +219,7 @@ private:
+ 	 * Mixes audio from the given source stream into the target buffer using the
+ 	 * given rate converter.
+ 	 */
+-	int writeAudioInternal(Audio::AudioStream &sourceStream, Audio::RateConverter &converter, Audio::st_sample_t *targetBuffer, const int numSamples, const Audio::st_volume_t leftVolume, const Audio::st_volume_t rightVolume);
++	int writeAudioInternal(Audio::AudioStream &sourceStream, Audio::RateConverter &converter, int16 *targetBuffer, const int numSamples, const Audio::st_volume_t leftVolume, const Audio::st_volume_t rightVolume);
+ 
+ #pragma mark -
+ #pragma mark Channel management
+@@ -627,7 +627,7 @@ private:
+ 	 * The data buffer holding decompressed audio data for the channel that will
+ 	 * be monitored for an audio signal.
+ 	 */
+-	Common::Array<Audio::st_sample_t> _monitoredBuffer;
++	Common::Array<int16> _monitoredBuffer;
+ 
+ 	/**
+ 	 * The number of valid audio samples in the signal monitoring buffer.
+diff --git a/engines/sci/video/robot_decoder.cpp b/engines/sci/video/robot_decoder.cpp
+index 7db361bd8fa..0da109dc2fa 100644
+--- a/engines/sci/video/robot_decoder.cpp
++++ b/engines/sci/video/robot_decoder.cpp
+@@ -299,7 +299,7 @@ RobotAudioStream::StreamState RobotAudioStream::getStatus() const {
+ 	return status;
+ }
+ 
+-int RobotAudioStream::readBuffer(Audio::st_sample_t *outBuffer, int numSamples) {
++int RobotAudioStream::readBuffer(int16 *outBuffer, int numSamples) {
+ 	Common::StackLock lock(_mutex);
+ 
+ 	if (_waiting) {
+@@ -307,7 +307,7 @@ int RobotAudioStream::readBuffer(Audio::st_sample_t *outBuffer, int numSamples)
+ 	}
+ 
+ 	assert(!((_writeHeadAbs - _readHeadAbs) & 1));
+-	const int maxNumSamples = (_writeHeadAbs - _readHeadAbs) / sizeof(Audio::st_sample_t);
++	const int maxNumSamples = (_writeHeadAbs - _readHeadAbs) / sizeof(int16);
+ 	numSamples = MIN(numSamples, maxNumSamples);
+ 
+ 	if (!numSamples) {
+@@ -316,22 +316,22 @@ int RobotAudioStream::readBuffer(Audio::st_sample_t *outBuffer, int numSamples)
+ 
+ 	interpolateMissingSamples(numSamples);
+ 
+-	Audio::st_sample_t *inBuffer = (Audio::st_sample_t *)(_loopBuffer + _readHead);
++	int16 *inBuffer = (int16 *)(_loopBuffer + _readHead);
+ 
+ 	assert(!((_loopBufferSize - _readHead) & 1));
+-	const int numSamplesToEnd = (_loopBufferSize - _readHead) / sizeof(Audio::st_sample_t);
++	const int numSamplesToEnd = (_loopBufferSize - _readHead) / sizeof(int16);
+ 
+ 	int numSamplesToRead = MIN(numSamples, numSamplesToEnd);
+ 	Common::copy(inBuffer, inBuffer + numSamplesToRead, outBuffer);
+ 
+ 	if (numSamplesToRead < numSamples) {
+-		inBuffer = (Audio::st_sample_t *)_loopBuffer;
++		inBuffer = (int16 *)_loopBuffer;
+ 		outBuffer += numSamplesToRead;
+ 		numSamplesToRead = numSamples - numSamplesToRead;
+ 		Common::copy(inBuffer, inBuffer + numSamplesToRead, outBuffer);
+ 	}
+ 
+-	const int32 numBytes = numSamples * sizeof(Audio::st_sample_t);
++	const int32 numBytes = numSamples * sizeof(int16);
+ 
+ 	_readHead += numBytes;
+ 	if (_readHead > _loopBufferSize) {
+diff --git a/engines/sci/video/robot_decoder.h b/engines/sci/video/robot_decoder.h
+index 226854c54f4..2df4985546c 100644
+--- a/engines/sci/video/robot_decoder.h
++++ b/engines/sci/video/robot_decoder.h
+@@ -433,7 +433,7 @@ private:
+ #pragma mark -
+ #pragma mark RobotAudioStream - AudioStream implementation
+ public:
+-	int readBuffer(Audio::st_sample_t *outBuffer, int numSamples) override;
++	int readBuffer(int16 *outBuffer, int numSamples) override;
+ 	bool isStereo() const override { return false; };
+ 	int getRate() const override { return 22050; };
+ 	bool endOfData() const override {
+-- 
+2.43.0
+
+
+From e479c1fb565081de0b7da2da5b9f4cd7a886fe7b Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Mon, 23 Mar 2026 00:25:10 +1000
+Subject: [PATCH 04/12] AUDIO: Add support for 32-bit sample size
+
+- RateConverter now accepts 32-bit input (although still with max 24-bit
+  values)
+
+- make clampedAdd suited for 8-24 bit samples
+---
+ audio/mixer.cpp               | 42 +++++++++++++++---------------
+ audio/mixer.h                 |  9 +++++++
+ audio/mixer_intern.h          |  4 ++-
+ audio/rate.cpp                | 29 +++++++++++++++++----
+ audio/rate.h                  | 49 ++++++++++++++++++-----------------
+ engines/sci/sound/audio32.cpp |  2 +-
+ 6 files changed, 83 insertions(+), 52 deletions(-)
+
+diff --git a/audio/mixer.cpp b/audio/mixer.cpp
+index 51ea508d56f..174fd8f515d 100644
+--- a/audio/mixer.cpp
++++ b/audio/mixer.cpp
+@@ -49,12 +49,13 @@ public:
+ 	 * Mixes the channel's samples into the given buffer.
+ 	 *
+ 	 * @param data buffer where to mix the data
+-	 * @param len  number of sample *pairs*. So a value of
+-	 *             10 means that the buffer contains twice 10 sample, each
+-	 *             16 bits, for a total of 40 bytes.
++	 * @param len  number of sample *pairs*. So a value of 10
++	 *             in stereo and 16-bit samples means that the
++	 *             buffer contains twice 10 sample, each 16 bits,
++	 *             for a total of 40 bytes.
+ 	 * @return number of sample pairs processed (which can still be silence!)
+ 	 */
+-	int mix(int16 *data, uint len);
++	int mix(byte *data, uint len);
+ 
+ 	/**
+ 	 * Queries whether the channel is still playing or not.
+@@ -226,8 +227,9 @@ private:
+ #pragma mark --- Mixer ---
+ #pragma mark -
+ 
+-MixerImpl::MixerImpl(uint sampleRate, bool stereo, uint outBufSize)
+-	: _mutex(), _sampleRate(sampleRate), _stereo(stereo), _outBufSize(outBufSize), _mixerReady(false), _handleSeed(0), _soundTypeSettings() {
++MixerImpl::MixerImpl(uint sampleRate, bool stereo, uint outBufSize, uint outBytesPerSample)
++	: _mutex(), _sampleRate(sampleRate), _stereo(stereo), _outBufSize(outBufSize), _outBytesPerSample(outBytesPerSample)
++	, _mixerReady(false), _handleSeed(0), _soundTypeSettings() {
+ 
+ 	assert(sampleRate > 0);
+ 
+@@ -258,6 +260,10 @@ uint MixerImpl::getOutputBufSize() const {
+ 	return _outBufSize;
+ }
+ 
++uint MixerImpl::getOutputBytesPerSample() const {
++	return _outBytesPerSample;
++}
++
+ void MixerImpl::insertChannel(SoundHandle *handle, Channel *chan) {
+ 	int index = -1;
+ 	for (int i = 0; i != NUM_CHANNELS; i++) {
+@@ -333,22 +339,16 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
+ 
+ 	Common::StackLock lock(_mutex);
+ 
+-	int16 *buf = (int16 *)samples;
+-
+ 	// Since the mixer callback has been called, the mixer must be ready...
+ 	_mixerReady = true;
+ 
+-	//  zero the buf
+-	memset(buf, 0, len);
++	// zero the sample buffer
++	memset(samples, 0, len);
+ 
+-	// we store 16-bit samples
+-	if (_stereo) {
+-		assert(len % 4 == 0);
+-		len >>= 2;
+-	} else {
+-		assert(len % 2 == 0);
+-		len >>= 1;
+-	}
++	// we store samples of size defined by the backend
++	const uint bytesPerFrame = _outBytesPerSample * (_stereo ? 2 : 1);
++	assert(len % bytesPerFrame == 0);
++	len /= bytesPerFrame;
+ 
+ 	// mix all channels
+ 	int res = 0, tmp;
+@@ -358,7 +358,7 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
+ 				delete _channels[i];
+ 				_channels[i] = nullptr;
+ 			} else if (!_channels[i]->isPaused()) {
+-				tmp = _channels[i]->mix(buf, len);
++				tmp = _channels[i]->mix(samples, len);
+ 
+ 				if (tmp > res)
+ 					res = tmp;
+@@ -793,7 +793,7 @@ void Channel::loop() {
+ 	}
+ }
+ 
+-int Channel::mix(int16 *data, uint len) {
++int Channel::mix(byte *data, uint len) {
+ 	assert(_stream);
+ 	assert(_converter);
+ 
+@@ -802,7 +802,7 @@ int Channel::mix(int16 *data, uint len) {
+ 		_samplesConsumed = _samplesDecoded;
+ 		_mixerTimeStamp = g_system->getMillis(true);
+ 		_pauseTime = 0;
+-		res = _converter->convert(*_stream, data, len, _volL, _volR);
++		res = _converter->convert(*_stream, data, _mixer->getOutputBytesPerSample(), len, _volL, _volR);
+ 		_samplesDecoded += res;
+ 	}
+ 
+diff --git a/audio/mixer.h b/audio/mixer.h
+index 2c6c35f07b2..7ec1745683f 100644
+--- a/audio/mixer.h
++++ b/audio/mixer.h
+@@ -390,6 +390,15 @@ public:
+ 	 * @return The number of samples processed at each audio callback.
+ 	 */
+ 	virtual uint getOutputBufSize() const = 0;
++
++	/**
++	 * Return the output sample size of the system.
++	 *
++	 * The return value is measured in bytes.
++	 *
++	 * @return The output sample size is bytes.
++	 */
++	virtual uint getOutputBytesPerSample() const = 0;
+ };
+ 
+ /** @} */
+diff --git a/audio/mixer_intern.h b/audio/mixer_intern.h
+index 6de9ba55998..5fc2e761709 100644
+--- a/audio/mixer_intern.h
++++ b/audio/mixer_intern.h
+@@ -66,6 +66,7 @@ private:
+ 	const uint _sampleRate;
+ 	const bool _stereo;
+ 	const uint _outBufSize;
++	const uint _outBytesPerSample;
+ 	bool _mixerReady;
+ 	uint32 _handleSeed;
+ 
+@@ -82,7 +83,7 @@ private:
+ 
+ public:
+ 
+-	MixerImpl(uint sampleRate, bool stereo = true, uint outBufSize = 0);
++	MixerImpl(uint sampleRate, bool stereo = true, uint outBufSize = 0, uint outBytesPerSample = 2);
+ 	~MixerImpl();
+ 
+ 	bool isReady() const override { Common::StackLock lock(_mutex); return _mixerReady; }
+@@ -139,6 +140,7 @@ public:
+ 	uint getOutputRate() const override;
+ 	bool getOutputStereo() const override;
+ 	uint getOutputBufSize() const override;
++	uint getOutputBytesPerSample() const override;
+ 
+ protected:
+ 	void insertChannel(SoundHandle *handle, Channel *chan);
+diff --git a/audio/rate.cpp b/audio/rate.cpp
+index 5e3371dafed..33311702844 100644
+--- a/audio/rate.cpp
++++ b/audio/rate.cpp
+@@ -76,15 +76,21 @@ private:
+ 	/** Current sample(s) in the input stream (left/right channel) */
+ 	int16 _inCurL, _inCurR;
+ 
++	template<typename st_sample_t>
+ 	int copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
++	template<typename st_sample_t>
+ 	int simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
++	template<typename st_sample_t>
+ 	int interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+ 
++	template<typename st_sample_t>
++	int convertForType(AudioStream &input, byte *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR);
++
+ public:
+ 	RateConverter_Impl(st_rate_t inputRate, st_rate_t outputRate);
+ 	virtual ~RateConverter_Impl() {}
+ 
+-	int convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r) override;
++	int convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r) override;
+ 
+ 	void setInputRate(st_rate_t inputRate) override { _inRate = inputRate; }
+ 	void setOutputRate(st_rate_t outputRate) override { _outRate = outputRate; }
+@@ -96,6 +102,7 @@ public:
+ };
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
++template<typename st_sample_t>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	st_sample_t *outStart, *outEnd;
+ 
+@@ -142,6 +149,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
++template<typename st_sample_t>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	// How much to increment _outPos by
+ 	frac_t outPos_inc = _inRate / _outRate;
+@@ -201,6 +209,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
++template<typename st_sample_t>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	// How much to increment _outPosFrac by
+ 	frac_t outPos_inc = (_inRate << FRAC_BITS_LOW) / _outRate;
+@@ -283,20 +292,30 @@ RateConverter_Impl<inStereo, outStereo, reverseStereo>::RateConverter_Impl(st_ra
+ 	_bufferPos(nullptr) {}
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
++template<typename st_sample_t>
++int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convertForType(AudioStream &input, byte *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	assert(input.isStereo() == inStereo);
+ 
+ 	if (_inRate == _outRate) {
+-		return copyConvert(input, outBuffer, numSamples, volL, volR);
++		return copyConvert<st_sample_t>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+ 	} else {
+ 		if ((_inRate % _outRate) == 0 && (_inRate < 65536)) {
+-			return simpleConvert(input, outBuffer, numSamples, volL, volR);
++			return simpleConvert<st_sample_t>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+ 		} else {
+-			return interpolateConvert(input, outBuffer, numSamples, volL, volR);
++			return interpolateConvert<st_sample_t>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+ 		}
+ 	}
+ }
+ 
++template<bool inStereo, bool outStereo, bool reverseStereo>
++int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
++	if (outBytesPerSample == sizeof(int32)) {
++		return convertForType<int32>(input, outBuffer, numSamples, volL, volR);
++	} else {
++		return convertForType<int16>(input, outBuffer, numSamples, volL, volR);
++	}
++}
++
+ RateConverter *makeRateConverter(st_rate_t inRate, st_rate_t outRate, bool inStereo, bool outStereo, bool reverseStereo) {
+ 	if (inStereo) {
+ 		if (outStereo) {
+diff --git a/audio/rate.h b/audio/rate.h
+index 4fc0213038d..1a61d07c854 100644
+--- a/audio/rate.h
++++ b/audio/rate.h
+@@ -35,34 +35,34 @@ namespace Audio {
+ 
+ class AudioStream;
+ 
+-typedef int16 st_sample_t;
+ typedef uint16 st_volume_t;
+ typedef uint32 st_size_t;
+ typedef uint32 st_rate_t;
+ 
+-/* Minimum and maximum values a sample can hold. */
+-enum {
+-	ST_SAMPLE_MAX = 0x7fffL,
+-	ST_SAMPLE_MIN = (-ST_SAMPLE_MAX - 1L)
+-};
++// This assumes that 'a' and 'b' are 24-bit samples at most
++template <typename T>
++static inline void clampedAdd(T& a, int b) {
++	constexpr unsigned long long highestBit = 1ULL << (sizeof(T) * 8 - 1);
++	constexpr int maxVal = (int)(highestBit - 1);
++	constexpr int minVal = ~maxVal;
+ 
+-static inline void clampedAdd(int16& a, int b) {
+ 	int val;
+ #ifdef OUTPUT_UNSIGNED_AUDIO
+-	val = (a ^ 0x8000) + b;
++	constexpr int signMask = (int)highestBit;
++	val = ((int)a ^ signMask) + b;
+ #else
+-	val = a + b;
++	val = (int)a + b;
+ #endif
+ 
+-	if (val > ST_SAMPLE_MAX)
+-		val = ST_SAMPLE_MAX;
+-	else if (val < ST_SAMPLE_MIN)
+-		val = ST_SAMPLE_MIN;
++	if (val > maxVal)
++		val = maxVal;
++	else if (val < minVal)
++		val = minVal;
+ 
+ #ifdef OUTPUT_UNSIGNED_AUDIO
+-	a = ((int16)val) ^ 0x8000;
++	a = (T)(val ^ signMask);
+ #else
+-	a = val;
++	a = (T)val;
+ #endif
+ }
+ 
+@@ -79,16 +79,17 @@ public:
+ 
+ 	/**
+ 	 * Convert the provided AudioStream to the target sample rate.
+-	 * 
+-	 * @param input			The AudioStream to read data from.
+-	 * @param outBuffer		The buffer that the resampled audio will be written to. Must have size of at least @p numSamples.
+-	 * @param numSamples	The desired number of samples to be written into the buffer.
+-	 * @param vol_l			Volume for left channel.
+-	 * @param vol_r			Volume for right channel.
+-	 * 
++	 *
++	 * @param input				The AudioStream to read data from.
++	 * @param outBuffer			The buffer that the resampled audio will be written to. Must have size of at least @p numSamples.
++	 * @param outBytesPerSample	The size of each output sample in bytes (e.g. sizeof(int16) or sizeof(int32)).
++	 * @param numSamples		The desired number of samples to be written into the buffer.
++	 * @param vol_l				Volume for left channel.
++	 * @param vol_r				Volume for right channel.
++	 *
+ 	 * @return Number of sample pairs written into the buffer.
+ 	 */
+-	virtual int convert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r) = 0;
++	virtual int convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r) = 0;
+ 
+ 	virtual void setInputRate(st_rate_t inputRate) = 0;
+ 	virtual void setOutputRate(st_rate_t outputRate) = 0;
+@@ -98,7 +99,7 @@ public:
+ 
+ 	/**
+ 	 * Does the internal buffer still have some leftover data?
+-	 * 
++	 *
+ 	 * @return True if we need to drain, false otherwise
+ 	 */
+ 	virtual bool needsDraining() const = 0;
+diff --git a/engines/sci/sound/audio32.cpp b/engines/sci/sound/audio32.cpp
+index 0b21070ec7c..ce160284650 100644
+--- a/engines/sci/sound/audio32.cpp
++++ b/engines/sci/sound/audio32.cpp
+@@ -234,7 +234,7 @@ Audio32::~Audio32() {
+ 
+ int Audio32::writeAudioInternal(Audio::AudioStream &sourceStream, Audio::RateConverter &converter, int16 *targetBuffer, const int numSamples, const Audio::st_volume_t leftVolume, const Audio::st_volume_t rightVolume) {
+ 	const int samplePairsToRead = numSamples >> 1;
+-	const int samplePairsWritten = converter.convert(sourceStream, targetBuffer, samplePairsToRead, leftVolume, rightVolume);
++	const int samplePairsWritten = converter.convert(sourceStream, (byte *)targetBuffer, sizeof(int16), samplePairsToRead, leftVolume, rightVolume);
+ 	return samplePairsWritten << 1;
+ }
+ 
+-- 
+2.43.0
+
+
+From cee252f7e59e51e0dbdbef386eb624d44ba7ba4d Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Mon, 23 Mar 2026 11:01:27 +1000
+Subject: [PATCH 05/12] AUDIO: RateConverter now supports unclamped mixing
+
+---
+ audio/mixer.cpp               |  2 +-
+ audio/rate.cpp                | 54 +++++++++++++++++++----------------
+ audio/rate.h                  | 43 ++++++++++++++++++++--------
+ engines/sci/sound/audio32.cpp |  2 +-
+ 4 files changed, 63 insertions(+), 38 deletions(-)
+
+diff --git a/audio/mixer.cpp b/audio/mixer.cpp
+index 174fd8f515d..015812d90ce 100644
+--- a/audio/mixer.cpp
++++ b/audio/mixer.cpp
+@@ -802,7 +802,7 @@ int Channel::mix(byte *data, uint len) {
+ 		_samplesConsumed = _samplesDecoded;
+ 		_mixerTimeStamp = g_system->getMillis(true);
+ 		_pauseTime = 0;
+-		res = _converter->convert(*_stream, data, _mixer->getOutputBytesPerSample(), len, _volL, _volR);
++		res = _converter->convert(*_stream, data, _mixer->getOutputBytesPerSample(), len, _volL, _volR, MIX_CLAMPED_ADD);
+ 		_samplesDecoded += res;
+ 	}
+ 
+diff --git a/audio/rate.cpp b/audio/rate.cpp
+index 33311702844..2b2a56da80b 100644
+--- a/audio/rate.cpp
++++ b/audio/rate.cpp
+@@ -76,21 +76,21 @@ private:
+ 	/** Current sample(s) in the input stream (left/right channel) */
+ 	int16 _inCurL, _inCurR;
+ 
+-	template<typename st_sample_t>
++	template<typename st_sample_t, MixMode mixMode>
+ 	int copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+-	template<typename st_sample_t>
++	template<typename st_sample_t, MixMode mixMode>
+ 	int simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+-	template<typename st_sample_t>
++	template<typename st_sample_t, MixMode mixMode>
+ 	int interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+ 
+-	template<typename st_sample_t>
++	template<typename st_sample_t, MixMode mixMode>
+ 	int convertForType(AudioStream &input, byte *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR);
+ 
+ public:
+ 	RateConverter_Impl(st_rate_t inputRate, st_rate_t outputRate);
+ 	virtual ~RateConverter_Impl() {}
+ 
+-	int convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r) override;
++	int convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r, MixMode mixMode) override;
+ 
+ 	void setInputRate(st_rate_t inputRate) override { _inRate = inputRate; }
+ 	void setOutputRate(st_rate_t outputRate) override { _outRate = outputRate; }
+@@ -102,7 +102,7 @@ public:
+ };
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-template<typename st_sample_t>
++template<typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	st_sample_t *outStart, *outEnd;
+ 
+@@ -131,15 +131,15 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
+ 
+ 		if (outStereo) {
+ 			// Output left channel
+-			clampedAdd(outBuffer[reverseStereo    ], outL);
++			processSample<mixMode>(outBuffer[reverseStereo    ], outL);
+ 
+ 			// Output right channel
+-			clampedAdd(outBuffer[reverseStereo ^ 1], outR);
++			processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
+ 
+ 			outBuffer += 2;
+ 		} else {
+ 			// Output mono channel
+-			clampedAdd(outBuffer[0], (outL + outR) / 2);
++			processSample<mixMode>(outBuffer[0], (outL + outR) / 2);
+ 
+ 			outBuffer += 1;
+ 		}
+@@ -149,7 +149,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-template<typename st_sample_t>
++template<typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	// How much to increment _outPos by
+ 	frac_t outPos_inc = _inRate / _outRate;
+@@ -192,15 +192,15 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
+ 
+ 		if (outStereo) {
+ 			// output left channel
+-			clampedAdd(outBuffer[reverseStereo    ], outL);
++			processSample<mixMode>(outBuffer[reverseStereo    ], outL);
+ 
+ 			// output right channel
+-			clampedAdd(outBuffer[reverseStereo ^ 1], outR);
++			processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
+ 
+ 			outBuffer += 2;
+ 		} else {
+ 			// output mono channel
+-			clampedAdd(outBuffer[0], (outL + outR) / 2);
++			processSample<mixMode>(outBuffer[0], (outL + outR) / 2);
+ 
+ 			outBuffer += 1;
+ 		}
+@@ -209,7 +209,7 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-template<typename st_sample_t>
++template<typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	// How much to increment _outPosFrac by
+ 	frac_t outPos_inc = (_inRate << FRAC_BITS_LOW) / _outRate;
+@@ -258,15 +258,15 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(A
+ 
+ 			if (outStereo) {
+ 				// Output left channel
+-				clampedAdd(outBuffer[reverseStereo    ], outL);
++				processSample<mixMode>(outBuffer[reverseStereo    ], outL);
+ 
+ 				// Output right channel
+-				clampedAdd(outBuffer[reverseStereo ^ 1], outR);
++				processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
+ 
+ 				outBuffer += 2;
+ 			} else {
+ 				// Output mono channel
+-				clampedAdd(outBuffer[0], (outL + outR) / 2);
++				processSample<mixMode>(outBuffer[0], (outL + outR) / 2);
+ 
+ 				outBuffer += 1;
+ 			}
+@@ -292,27 +292,33 @@ RateConverter_Impl<inStereo, outStereo, reverseStereo>::RateConverter_Impl(st_ra
+ 	_bufferPos(nullptr) {}
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-template<typename st_sample_t>
++template<typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convertForType(AudioStream &input, byte *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	assert(input.isStereo() == inStereo);
+ 
+ 	if (_inRate == _outRate) {
+-		return copyConvert<st_sample_t>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		return copyConvert<st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+ 	} else {
+ 		if ((_inRate % _outRate) == 0 && (_inRate < 65536)) {
+-			return simpleConvert<st_sample_t>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++			return simpleConvert<st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+ 		} else {
+-			return interpolateConvert<st_sample_t>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++			return interpolateConvert<st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+ 		}
+ 	}
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
++int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t volL, st_volume_t volR, MixMode mixMode) {
+ 	if (outBytesPerSample == sizeof(int32)) {
+-		return convertForType<int32>(input, outBuffer, numSamples, volL, volR);
++		if (mixMode == MIX_ADD)
++			return convertForType<int32, MIX_ADD>(input, outBuffer, numSamples, volL, volR);
++		else
++			return convertForType<int32, MIX_CLAMPED_ADD>(input, outBuffer, numSamples, volL, volR);
+ 	} else {
+-		return convertForType<int16>(input, outBuffer, numSamples, volL, volR);
++		if (mixMode == MIX_ADD)
++			return convertForType<int16, MIX_ADD>(input, outBuffer, numSamples, volL, volR);
++		else
++			return convertForType<int16, MIX_CLAMPED_ADD>(input, outBuffer, numSamples, volL, volR);
+ 	}
+ }
+ 
+diff --git a/audio/rate.h b/audio/rate.h
+index 1a61d07c854..cf59a8f5f0c 100644
+--- a/audio/rate.h
++++ b/audio/rate.h
+@@ -39,31 +39,49 @@ typedef uint16 st_volume_t;
+ typedef uint32 st_size_t;
+ typedef uint32 st_rate_t;
+ 
++enum MixMode {
++	MIX_ADD,
++	MIX_CLAMPED_ADD
++};
++
+ // This assumes that 'a' and 'b' are 24-bit samples at most
+-template <typename T>
+-static inline void clampedAdd(T& a, int b) {
++template <MixMode Mode, typename T>
++static inline void processSample(T& a, int b) {
+ 	constexpr unsigned long long highestBit = 1ULL << (sizeof(T) * 8 - 1);
+ 	constexpr int maxVal = (int)(highestBit - 1);
+ 	constexpr int minVal = ~maxVal;
+ 
+-	int val;
+ #ifdef OUTPUT_UNSIGNED_AUDIO
+ 	constexpr int signMask = (int)highestBit;
+-	val = ((int)a ^ signMask) + b;
++#endif
++
++	if (Mode == MIX_ADD) {
++		a += b;
++	} else if (Mode == MIX_CLAMPED_ADD) {
++		int val;
++#ifdef OUTPUT_UNSIGNED_AUDIO
++		val = ((int)a ^ signMask) + b;
+ #else
+-	val = (int)a + b;
++		val = (int)a + b;
+ #endif
+ 
+-	if (val > maxVal)
+-		val = maxVal;
+-	else if (val < minVal)
+-		val = minVal;
++		if (val > maxVal)
++			val = maxVal;
++		else if (val < minVal)
++			val = minVal;
+ 
+ #ifdef OUTPUT_UNSIGNED_AUDIO
+-	a = (T)(val ^ signMask);
++		a = (T)(val ^ signMask);
+ #else
+-	a = (T)val;
++		a = (T)val;
+ #endif
++	}
++}
++
++// Fallback for engine code
++template <typename T>
++static inline void clampedAdd(T& a, int b) {
++	processSample<MIX_CLAMPED_ADD>(a, b);
+ }
+ 
+ /**
+@@ -86,10 +104,11 @@ public:
+ 	 * @param numSamples		The desired number of samples to be written into the buffer.
+ 	 * @param vol_l				Volume for left channel.
+ 	 * @param vol_r				Volume for right channel.
++	 * @param mixMode			Sample mix mode for outBuffer.
+ 	 *
+ 	 * @return Number of sample pairs written into the buffer.
+ 	 */
+-	virtual int convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r) = 0;
++	virtual int convert(AudioStream &input, byte *outBuffer, uint outBytesPerSample, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r, MixMode mixMode) = 0;
+ 
+ 	virtual void setInputRate(st_rate_t inputRate) = 0;
+ 	virtual void setOutputRate(st_rate_t outputRate) = 0;
+diff --git a/engines/sci/sound/audio32.cpp b/engines/sci/sound/audio32.cpp
+index ce160284650..995d1dbf777 100644
+--- a/engines/sci/sound/audio32.cpp
++++ b/engines/sci/sound/audio32.cpp
+@@ -234,7 +234,7 @@ Audio32::~Audio32() {
+ 
+ int Audio32::writeAudioInternal(Audio::AudioStream &sourceStream, Audio::RateConverter &converter, int16 *targetBuffer, const int numSamples, const Audio::st_volume_t leftVolume, const Audio::st_volume_t rightVolume) {
+ 	const int samplePairsToRead = numSamples >> 1;
+-	const int samplePairsWritten = converter.convert(sourceStream, (byte *)targetBuffer, sizeof(int16), samplePairsToRead, leftVolume, rightVolume);
++	const int samplePairsWritten = converter.convert(sourceStream, (byte *)targetBuffer, sizeof(int16), samplePairsToRead, leftVolume, rightVolume, Audio::MIX_CLAMPED_ADD);
+ 	return samplePairsWritten << 1;
+ }
+ 
+-- 
+2.43.0
+
+
+From 08389997964241702206634b081df0c395b89e56 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Mon, 23 Mar 2026 12:30:00 +1000
+Subject: [PATCH 06/12] AUDIO: Make sample clamping optional
+
+---
+ audio/mixer.cpp      | 17 ++++++++++++++---
+ audio/mixer.h        |  7 +++++++
+ audio/mixer_intern.h |  4 +++-
+ 3 files changed, 24 insertions(+), 4 deletions(-)
+
+diff --git a/audio/mixer.cpp b/audio/mixer.cpp
+index 015812d90ce..0f6ab5298e9 100644
+--- a/audio/mixer.cpp
++++ b/audio/mixer.cpp
+@@ -227,8 +227,8 @@ private:
+ #pragma mark --- Mixer ---
+ #pragma mark -
+ 
+-MixerImpl::MixerImpl(uint sampleRate, bool stereo, uint outBufSize, uint outBytesPerSample)
+-	: _mutex(), _sampleRate(sampleRate), _stereo(stereo), _outBufSize(outBufSize), _outBytesPerSample(outBytesPerSample)
++MixerImpl::MixerImpl(uint sampleRate, bool stereo, uint outBufSize, uint outBytesPerSample, bool clamp)
++	: _mutex(), _sampleRate(sampleRate), _stereo(stereo), _outBufSize(outBufSize), _outBytesPerSample(outBytesPerSample), _clamp(clamp)
+ 	, _mixerReady(false), _handleSeed(0), _soundTypeSettings() {
+ 
+ 	assert(sampleRate > 0);
+@@ -264,6 +264,10 @@ uint MixerImpl::getOutputBytesPerSample() const {
+ 	return _outBytesPerSample;
+ }
+ 
++bool MixerImpl::getClamping() const {
++	return _clamp;
++}
++
+ void MixerImpl::insertChannel(SoundHandle *handle, Channel *chan) {
+ 	int index = -1;
+ 	for (int i = 0; i != NUM_CHANNELS; i++) {
+@@ -802,7 +806,14 @@ int Channel::mix(byte *data, uint len) {
+ 		_samplesConsumed = _samplesDecoded;
+ 		_mixerTimeStamp = g_system->getMillis(true);
+ 		_pauseTime = 0;
+-		res = _converter->convert(*_stream, data, _mixer->getOutputBytesPerSample(), len, _volL, _volR, MIX_CLAMPED_ADD);
++		res = _converter->convert(
++			*_stream,
++			data,
++			_mixer->getOutputBytesPerSample(),
++			len,
++			_volL,
++			_volR,
++			_mixer->getClamping() ? MIX_CLAMPED_ADD : MIX_ADD);
+ 		_samplesDecoded += res;
+ 	}
+ 
+diff --git a/audio/mixer.h b/audio/mixer.h
+index 7ec1745683f..9c15a99f831 100644
+--- a/audio/mixer.h
++++ b/audio/mixer.h
+@@ -399,6 +399,13 @@ public:
+ 	 * @return The output sample size is bytes.
+ 	 */
+ 	virtual uint getOutputBytesPerSample() const = 0;
++
++	/**
++	 * Return whether the mixer is expected to clamp outgoing samples.
++	 *
++	 * @return true if output is clamped, false if not.
++	 */
++	virtual bool getClamping() const = 0;
+ };
+ 
+ /** @} */
+diff --git a/audio/mixer_intern.h b/audio/mixer_intern.h
+index 5fc2e761709..2486d7ed172 100644
+--- a/audio/mixer_intern.h
++++ b/audio/mixer_intern.h
+@@ -67,6 +67,7 @@ private:
+ 	const bool _stereo;
+ 	const uint _outBufSize;
+ 	const uint _outBytesPerSample;
++	const bool _clamp;
+ 	bool _mixerReady;
+ 	uint32 _handleSeed;
+ 
+@@ -83,7 +84,7 @@ private:
+ 
+ public:
+ 
+-	MixerImpl(uint sampleRate, bool stereo = true, uint outBufSize = 0, uint outBytesPerSample = 2);
++	MixerImpl(uint sampleRate, bool stereo = true, uint outBufSize = 0, uint outBytesPerSample = 2, bool clamp = true);
+ 	~MixerImpl();
+ 
+ 	bool isReady() const override { Common::StackLock lock(_mutex); return _mixerReady; }
+@@ -141,6 +142,7 @@ public:
+ 	bool getOutputStereo() const override;
+ 	uint getOutputBufSize() const override;
+ 	uint getOutputBytesPerSample() const override;
++	bool getClamping() const override;
+ 
+ protected:
+ 	void insertChannel(SoundHandle *handle, Channel *chan);
+-- 
+2.43.0
+
+
+From 049fc6895d559226c1c8a56915ec515d46466a1a Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Sat, 28 Mar 2026 20:50:07 +1000
+Subject: [PATCH 07/12] AUDIO: Don't clamp muted channels
+
+---
+ audio/mixer.cpp | 22 +++++++++++++++-------
+ 1 file changed, 15 insertions(+), 7 deletions(-)
+
+diff --git a/audio/mixer.cpp b/audio/mixer.cpp
+index 0f6ab5298e9..cbb47186ae6 100644
+--- a/audio/mixer.cpp
++++ b/audio/mixer.cpp
+@@ -143,6 +143,11 @@ public:
+ 	 */
+ 	uint8 getFaderR() const;
+ 
++	/**
++	 * Queries whether the channel is silent, i.e. will produce no audio output.
++	 */
++	bool isSilent() const { return _volL == 0 && _volR == 0; }
++
+ 	/**
+ 	 * Set the channel's sample rate.
+ 	 *
+@@ -346,15 +351,13 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
+ 	// Since the mixer callback has been called, the mixer must be ready...
+ 	_mixerReady = true;
+ 
+-	// zero the sample buffer
+-	memset(samples, 0, len);
+-
+ 	// we store samples of size defined by the backend
+ 	const uint bytesPerFrame = _outBytesPerSample * (_stereo ? 2 : 1);
+ 	assert(len % bytesPerFrame == 0);
+-	len /= bytesPerFrame;
++	const uint numFrames = len / bytesPerFrame;
+ 
+-	// mix all channels
++	// mix all channels, zeroing the buffer lazily on first non-silent channel
++	bool zeroed = false;
+ 	int res = 0, tmp;
+ 	for (int i = 0; i != NUM_CHANNELS; i++)
+ 		if (_channels[i]) {
+@@ -362,14 +365,19 @@ int MixerImpl::mixCallback(byte *samples, uint len) {
+ 				delete _channels[i];
+ 				_channels[i] = nullptr;
+ 			} else if (!_channels[i]->isPaused()) {
+-				tmp = _channels[i]->mix(samples, len);
++				if (!_channels[i]->isSilent() && !zeroed) {
++					memset(samples, 0, len);
++					zeroed = true;
++				}
++				tmp = _channels[i]->mix(samples, numFrames);
+ 
+ 				if (tmp > res)
+ 					res = tmp;
+ 			}
+ 		}
+ 
+-	return res;
++	// optimisation: let the caller know that there's nothing to clamp
++	return (!_clamp && !zeroed) ? 0 : res;
+ }
+ 
+ void MixerImpl::stopAll() {
+-- 
+2.43.0
+
+
+From fa90652dff2efdec434ac3e5e9be58133d5ea25a Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Thu, 2 Apr 2026 10:55:08 +1000
+Subject: [PATCH 08/12] AUDIO: Template-optimize convert methods
+
+Also, introduce upscaleConvert for e.g. 11025, 22050 -> 44100
+conversions.
+---
+ audio/rate.cpp | 406 +++++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 295 insertions(+), 111 deletions(-)
+
+diff --git a/audio/rate.cpp b/audio/rate.cpp
+index 2b2a56da80b..ca63122eb60 100644
+--- a/audio/rate.cpp
++++ b/audio/rate.cpp
+@@ -76,12 +76,17 @@ private:
+ 	/** Current sample(s) in the input stream (left/right channel) */
+ 	int16 _inCurL, _inCurR;
+ 
+-	template<typename st_sample_t, MixMode mixMode>
+-	int copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+-	template<typename st_sample_t, MixMode mixMode>
+-	int simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
+-	template<typename st_sample_t, MixMode mixMode>
+-	int interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t vol_l, st_volume_t vol_r);
++	template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
++	int commonConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val, int outputSamples);
++
++	template<st_volume_t volL = static_cast<st_volume_t>(-1), st_volume_t volR = static_cast<st_volume_t>(-1), typename st_sample_t, MixMode mixMode>
++	int copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val);
++	template<st_volume_t volL = static_cast<st_volume_t>(-1), st_volume_t volR = static_cast<st_volume_t>(-1), typename st_sample_t, MixMode mixMode>
++	int downsampleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val);
++	template<st_volume_t volL = static_cast<st_volume_t>(-1), st_volume_t volR = static_cast<st_volume_t>(-1), typename st_sample_t, MixMode mixMode>
++	int upsampleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val);
++	template<st_volume_t volL = static_cast<st_volume_t>(-1), st_volume_t volR = static_cast<st_volume_t>(-1), typename st_sample_t, MixMode mixMode>
++	int interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val);
+ 
+ 	template<typename st_sample_t, MixMode mixMode>
+ 	int convertForType(AudioStream &input, byte *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR);
+@@ -102,12 +107,10 @@ public:
+ };
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-template<typename st_sample_t, MixMode mixMode>
+-int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+-	st_sample_t *outStart, *outEnd;
+-
+-	outStart = outBuffer;
+-	outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
++template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
++int RateConverter_Impl<inStereo, outStereo, reverseStereo>::commonConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val, int outputSamples) {
++	const st_sample_t *outStart = outBuffer;
++	const st_sample_t *outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
+ 
+ 	while (outBuffer < outEnd) {
+ 		// Check if we have to refill the buffer
+@@ -119,49 +122,108 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStr
+ 				return (outBuffer - outStart) / (outStereo ? 2 : 1);
+ 		}
+ 
+-		// Mix the data into the output buffer
+-		int16 inL, inR;
+-		inL = *_bufferPos++;
+-		inR = (inStereo ? *_bufferPos++ : inL);
+-		_bufferSize -= (inStereo ? 2 : 1);
+-
+-		st_sample_t outL, outR;
+-		outL = (inL * (int)volL) / Audio::Mixer::kMaxMixerVolume;
+-		outR = (inR * (int)volR) / Audio::Mixer::kMaxMixerVolume;
+-
+-		if (outStereo) {
+-			// Output left channel
+-			processSample<mixMode>(outBuffer[reverseStereo    ], outL);
+-
+-			// Output right channel
+-			processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
+-
+-			outBuffer += 2;
++		// Process as many samples as we can from the current buffer
++		const int count = MIN(
++			_bufferSize / (inStereo ? 2 : 1),
++			(int)(outEnd - outBuffer) / (outStereo ? 2 : 1) / outputSamples);
++		_bufferSize -= count * (inStereo ? 2 : 1);
++
++		if (volL | volR) {
++			// Mix the data into the output buffer
++			for (int i = 0; i < count; ++i) {
++				int16 inL, inR;
++
++				if (inStereo) {
++					if (volL != 0)
++						inL = *_bufferPos++;
++					else
++						_bufferPos++;
++
++					if (volR != 0)
++						inR = *_bufferPos++;
++					else
++						_bufferPos++;
++				} else {
++					if (volL != 0) {
++						inL = *_bufferPos++;
++						if (volR != 0)
++							inR = inL;
++					} else {
++						inR = *_bufferPos++;
++					}
++				}
++
++				st_sample_t outL, outR;
++
++				if (volL != 0) {
++					if (volL != Audio::Mixer::kMaxMixerVolume)
++						outL = (inL * (int)volL_val) / Audio::Mixer::kMaxMixerVolume;
++					else
++						outL = inL;
++				}
++
++				if (volR != 0) {
++					if (volR != Audio::Mixer::kMaxMixerVolume)
++						outR = (inR * (int)volR_val) / Audio::Mixer::kMaxMixerVolume;
++					else
++						outR = inR;
++				}
++
++				// TODO: could be unrolled
++				for (int j = 0; j < outputSamples; ++j) {
++					if (outStereo) {
++						// Output left channel
++						if (volL != 0)
++							processSample<mixMode>(outBuffer[reverseStereo    ], outL);
++
++						// Output right channel
++						if (volR != 0)
++							processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
++					} else {
++						// Output mono channel
++						st_sample_t monoOut;
++						if (volL != 0 && volR != 0)
++							monoOut = (outL + outR) / 2;
++						else if (volL != 0)
++							monoOut = outL / 2;
++						else if (volR != 0)
++							monoOut = outR / 2;
++						processSample<mixMode>(outBuffer[0], monoOut);
++					}
++					outBuffer += (outStereo ? 2 : 1);
++				}
++			}
+ 		} else {
+-			// Output mono channel
+-			processSample<mixMode>(outBuffer[0], (outL + outR) / 2);
+-
+-			outBuffer += 1;
++			_bufferPos += count * (inStereo ? 2 : 1);
++			outBuffer += count * outputSamples * (outStereo ? 2 : 1);
+ 		}
+ 	}
+-
+ 	return (outBuffer - outStart) / (outStereo ? 2 : 1);
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-template<typename st_sample_t, MixMode mixMode>
+-int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+-	// How much to increment _outPos by
+-	frac_t outPos_inc = _inRate / _outRate;
++template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
++int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val) {
++	return commonConvert<volL, volR, st_sample_t, mixMode>(input, outBuffer, numSamples, volL_val, volR_val, 1);
++}
+ 
+-	st_sample_t *outStart, *outEnd;
++template<bool inStereo, bool outStereo, bool reverseStereo>
++template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
++int RateConverter_Impl<inStereo, outStereo, reverseStereo>::downsampleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val) {
++	// How much to increment _outPos by
++	const frac_t outPos_inc = _inRate / _outRate;
+ 
+-	outStart = outBuffer;
+-	outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
++	const st_sample_t *outStart = outBuffer;
++	const st_sample_t *outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
+ 
+ 	while (outBuffer < outEnd) {
+ 		// Read enough input samples so that _outPos >= 0
+-		do {
++		while (_outPos >= 0) {
++			const int skip = MIN((int)_outPos + 1, _bufferSize / (inStereo ? 2 : 1));
++			_bufferPos += skip * (inStereo ? 2 : 1);
++			_bufferSize -= skip * (inStereo ? 2 : 1);
++			_outPos -= skip;
++
+ 			// Check if we have to refill the buffer
+ 			if (_bufferSize == 0) {
+ 				_bufferPos = _buffer;
+@@ -170,53 +232,102 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::simpleConvert(AudioS
+ 				if (_bufferSize <= 0)
+ 					return (outBuffer - outStart) / (outStereo ? 2 : 1);
+ 			}
++		}
+ 
+-			_bufferSize -= (inStereo ? 2 : 1);
+-			_outPos--;
+-
+-			if (_outPos >= 0) {
+-				_bufferPos += (inStereo ? 2 : 1);
++		// Process as many samples as we can from the current buffer
++		const int count = MIN(
++			_bufferSize / (inStereo ? 2 : 1) / outPos_inc,
++			(int)(outEnd - outBuffer) / (outStereo ? 2 : 1));
++		_bufferSize -= count * outPos_inc * (inStereo ? 2 : 1);
++		_outPos = outPos_inc - 1;
++
++		// Frame stride remaining after reading one frame
++		const int stride = (outPos_inc - 1) * (inStereo ? 2 : 1);
++
++		if (volL | volR) {
++			for (int i = 0; i < count; ++i) {
++				int16 inL, inR;
++
++				if (inStereo) {
++					if (volL != 0)
++						inL = *_bufferPos++;
++					else
++						_bufferPos++;
++
++					if (volR != 0)
++						inR = *_bufferPos++;
++					else
++						_bufferPos++;
++				} else {
++					if (volL != 0) {
++						inL = *_bufferPos++;
++						if (volR != 0)
++							inR = inL;
++					} else {
++						inR = *_bufferPos++;
++					}
++				}
++
++				_bufferPos += stride;
++
++				st_sample_t outL, outR;
++				if (volL != 0) {
++					if (volL != Audio::Mixer::kMaxMixerVolume)
++						outL = (inL * (int)volL_val) / Audio::Mixer::kMaxMixerVolume;
++					else
++						outL = inL;
++				}
++				if (volR != 0) {
++					if (volR != Audio::Mixer::kMaxMixerVolume)
++						outR = (inR * (int)volR_val) / Audio::Mixer::kMaxMixerVolume;
++					else
++						outR = inR;
++				}
++
++				if (outStereo) {
++					// Output left channel
++					if (volL != 0)
++						processSample<mixMode>(outBuffer[reverseStereo    ], outL);
++
++					// Output right channel
++					if (volR != 0)
++						processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
++				} else {
++					// Output mono channel
++					st_sample_t monoOut;
++					if (volL != 0 && volR != 0)
++						monoOut = (outL + outR) / 2;
++					else if (volL != 0)
++						monoOut = outL / 2;
++					else if (volR != 0)
++						monoOut = outR / 2;
++					processSample<mixMode>(outBuffer[0], monoOut);
++				}
++
++				outBuffer += (outStereo ? 2 : 1);
+ 			}
+-		} while (_outPos >= 0);
+-
+-		int16 inL, inR;
+-		inL = *_bufferPos++;
+-		inR = (inStereo ? *_bufferPos++ : inL);
+-
+-		// Increment output position
+-		_outPos += outPos_inc;
+-
+-		st_sample_t outL, outR;
+-		outL = (inL * (int)volL) / Audio::Mixer::kMaxMixerVolume;
+-		outR = (inR * (int)volR) / Audio::Mixer::kMaxMixerVolume;
+-
+-		if (outStereo) {
+-			// output left channel
+-			processSample<mixMode>(outBuffer[reverseStereo    ], outL);
+-
+-			// output right channel
+-			processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
+-
+-			outBuffer += 2;
+ 		} else {
+-			// output mono channel
+-			processSample<mixMode>(outBuffer[0], (outL + outR) / 2);
+-
+-			outBuffer += 1;
++			_bufferPos += count * outPos_inc * (inStereo ? 2 : 1);
++			outBuffer += count * (outStereo ? 2 : 1);
+ 		}
+ 	}
+ 	return (outBuffer - outStart) / (outStereo ? 2 : 1);
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+-template<typename st_sample_t, MixMode mixMode>
+-int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
++template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
++int RateConverter_Impl<inStereo, outStereo, reverseStereo>::upsampleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val) {
++	return commonConvert<volL, volR, st_sample_t, mixMode>(input, outBuffer, numSamples, volL_val, volR_val, _outRate / _inRate);
++}
++
++template<bool inStereo, bool outStereo, bool reverseStereo>
++template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
++int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val) {
+ 	// How much to increment _outPosFrac by
+-	frac_t outPos_inc = (_inRate << FRAC_BITS_LOW) / _outRate;
++	const frac_t outPos_inc = (_inRate << FRAC_BITS_LOW) / _outRate;
+ 
+-	st_sample_t *outStart, *outEnd;
+-	outStart = outBuffer;
+-	outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
++	const st_sample_t *outStart = outBuffer;
++	const st_sample_t *outEnd = outBuffer + numSamples * (outStereo ? 2 : 1);
+ 
+ 	while (outBuffer < outEnd) {
+ 		// Read enough input samples so that _outPosFrac < 0
+@@ -231,12 +342,21 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(A
+ 			}
+ 
+ 			_bufferSize -= (inStereo ? 2 : 1);
+-			_inLastL = _inCurL;
+-			_inCurL = *_bufferPos++;
++
++			if (volL != 0 || (!inStereo && volR != 0)) {
++				_inLastL = _inCurL;
++				_inCurL = *_bufferPos++;
++			} else {
++				_bufferPos++;
++			}
+ 
+ 			if (inStereo) {
+-				_inLastR = _inCurR;
+-				_inCurR = *_bufferPos++;
++				if (volR != 0) {
++					_inLastR = _inCurR;
++					_inCurR = *_bufferPos++;
++				} else {
++					_bufferPos++;
++				}
+ 			}
+ 
+ 			_outPosFrac -= FRAC_ONE_LOW;
+@@ -245,32 +365,58 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(A
+ 		// Loop as long as the _outPos trails behind, and as long as there is
+ 		// still space in the output buffer.
+ 		while (_outPosFrac < (frac_t)FRAC_ONE_LOW && outBuffer < outEnd) {
+-			// Interpolate
+-			int16 inL, inR;
+-			inL = (int16)(_inLastL + (((_inCurL - _inLastL) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW));
+-			inR = (inStereo ?
+-						(int16)(_inLastR + (((_inCurR - _inLastR) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW)) :
+-						inL);
+-
+-			st_sample_t outL, outR;
+-			outL = (inL * (int)volL) / Audio::Mixer::kMaxMixerVolume;
+-			outR = (inR * (int)volR) / Audio::Mixer::kMaxMixerVolume;
++			if (volL | volR) {
++				// Interpolate
++				int16 inL, inR;
+ 
+-			if (outStereo) {
+-				// Output left channel
+-				processSample<mixMode>(outBuffer[reverseStereo    ], outL);
++				if (volL != 0 || (!inStereo && volR != 0)) {
++					inL = (int16)(_inLastL + (((_inCurL - _inLastL) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW));
++				}
+ 
+-				// Output right channel
+-				processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
+-
+-				outBuffer += 2;
+-			} else {
+-				// Output mono channel
+-				processSample<mixMode>(outBuffer[0], (outL + outR) / 2);
+-
+-				outBuffer += 1;
++				if (volR != 0) {
++					inR = (inStereo ?
++						(int16)(_inLastR + (((_inCurR - _inLastR) * _outPosFrac + FRAC_HALF_LOW) >> FRAC_BITS_LOW)) :
++						inL);
++				}
++
++				st_sample_t outL, outR;
++				if (volL != 0) {
++					if (volL != Audio::Mixer::kMaxMixerVolume)
++						outL = (inL * (int)volL_val) / Audio::Mixer::kMaxMixerVolume;
++					else
++						outL = inL;
++				}
++
++				if (volR != 0) {
++					if (volR != Audio::Mixer::kMaxMixerVolume)
++						outR = (inR * (int)volR_val) / Audio::Mixer::kMaxMixerVolume;
++					else
++						outR = inR;
++				}
++
++				if (outStereo) {
++					// Output left channel
++					if (volL != 0)
++						processSample<mixMode>(outBuffer[reverseStereo    ], outL);
++
++					// Output right channel
++					if (volR != 0)
++						processSample<mixMode>(outBuffer[reverseStereo ^ 1], outR);
++				} else {
++					// Output mono channel
++					st_sample_t monoOut;
++					if (volL != 0 && volR != 0)
++						monoOut = (outL + outR) / 2;
++					else if (volL != 0)
++						monoOut = outL / 2;
++					else
++						monoOut = outR / 2;
++					processSample<mixMode>(outBuffer[0], monoOut);
++				}
+ 			}
+ 
++			outBuffer += (outStereo ? 2 : 1);
++
+ 			// Increment output position
+ 			_outPosFrac += outPos_inc;
+ 		}
+@@ -296,14 +442,52 @@ template<typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::convertForType(AudioStream &input, byte *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR) {
+ 	assert(input.isStereo() == inStereo);
+ 
++	constexpr auto kMax = Audio::Mixer::kMaxMixerVolume;
++
+ 	if (_inRate == _outRate) {
+-		return copyConvert<st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		if (volL == 0 && volR == 0)
++			return copyConvert<0, 0, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == 0 && volR == kMax)
++			return copyConvert<0, kMax, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == kMax && volR == 0)
++			return copyConvert<kMax, 0, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == kMax && volR == kMax)
++			return copyConvert<kMax, kMax, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else
++			return copyConvert<static_cast<st_volume_t>(-1), static_cast<st_volume_t>(-1), st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++	} else if ((_inRate % _outRate) == 0 && (_inRate < 65536)) {
++		if (volL == 0 && volR == 0)
++			return downsampleConvert<0, 0, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == 0 && volR == kMax)
++			return downsampleConvert<0, kMax, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == kMax && volR == 0)
++			return downsampleConvert<kMax, 0, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == kMax && volR == kMax)
++			return downsampleConvert<kMax, kMax, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else
++			return downsampleConvert<static_cast<st_volume_t>(-1), static_cast<st_volume_t>(-1), st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++	} else if ((_outRate % _inRate) == 0) {
++		if (volL == 0 && volR == 0)
++			return upsampleConvert<0, 0, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == 0 && volR == kMax)
++			return upsampleConvert<0, kMax, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == kMax && volR == 0)
++			return upsampleConvert<kMax, 0, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == kMax && volR == kMax)
++			return upsampleConvert<kMax, kMax, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else
++			return upsampleConvert<static_cast<st_volume_t>(-1), static_cast<st_volume_t>(-1), st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+ 	} else {
+-		if ((_inRate % _outRate) == 0 && (_inRate < 65536)) {
+-			return simpleConvert<st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+-		} else {
+-			return interpolateConvert<st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+-		}
++		if (volL == 0 && volR == 0)
++			return interpolateConvert<0, 0, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == 0 && volR == kMax)
++			return interpolateConvert<0, kMax, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == kMax && volR == 0)
++			return interpolateConvert<kMax, 0, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else if (volL == kMax && volR == kMax)
++			return interpolateConvert<kMax, kMax, st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
++		else
++			return interpolateConvert<static_cast<st_volume_t>(-1), static_cast<st_volume_t>(-1), st_sample_t, mixMode>(input, (st_sample_t *)outBuffer, numSamples, volL, volR);
+ 	}
+ }
+ 
+-- 
+2.43.0
+
+
+From 313524345de0664a9542566e5ee47f946683f6b4 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Thu, 26 Mar 2026 12:32:25 +1000
+Subject: [PATCH 09/12] AUDIO: Introduce print_rate
+
+This is useful on weaker platforms to fine-tune the mixer's frequency to
+given game.
+---
+ audio/rate.cpp | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+
+diff --git a/audio/rate.cpp b/audio/rate.cpp
+index ca63122eb60..a8c42426528 100644
+--- a/audio/rate.cpp
++++ b/audio/rate.cpp
+@@ -30,8 +30,21 @@
+ #include "audio/audiostream.h"
+ #include "audio/rate.h"
+ #include "audio/mixer.h"
++#include "common/config-manager.h"
++#include "common/debug.h"
+ #include "common/util.h"
+ 
++#ifdef ATARI
++	#ifdef DISABLE_TEXT_CONSOLE
++		// force debug outputs in this file even with disabled console
++		#include "backends/platform/atari/atari-debug.h"
++		#undef debug
++		#define debug atari_debug
++		#undef warning
++		#define warning atari_warning
++	#endif
++#endif
++
+ namespace Audio {
+ 
+ /**
+@@ -91,6 +104,20 @@ private:
+ 	template<typename st_sample_t, MixMode mixMode>
+ 	int convertForType(AudioStream &input, byte *outBuffer, st_size_t numSamples, st_volume_t volL, st_volume_t volR);
+ 
++	void printConvertType(const Common::String &name) const {
++		const Common::ConfigManager::Domain *activeDomain = ConfMan.getActiveDomain();
++		if (activeDomain && ConfMan.getBool("print_rate")) {
++			static st_rate_t previousInRate, previousOutRate;
++			if (previousInRate != _inRate || previousOutRate != _outRate) {
++				previousInRate = _inRate;
++				previousOutRate = _outRate;
++				debug("RateConverter_Impl::%s[%s]: inRate %d Hz (%s) => outRate %d Hz (%s)",
++					  name.c_str(), activeDomain->getValOrDefault("gameid").c_str(),
++					  _inRate, inStereo ? "stereo" : "mono", _outRate, outStereo ? "stereo" : "mono");
++			}
++		}
++	}
++
+ public:
+ 	RateConverter_Impl(st_rate_t inputRate, st_rate_t outputRate);
+ 	virtual ~RateConverter_Impl() {}
+@@ -204,12 +231,16 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::commonConvert(AudioS
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+ template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::copyConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val) {
++	printConvertType("copyConvert");
++
+ 	return commonConvert<volL, volR, st_sample_t, mixMode>(input, outBuffer, numSamples, volL_val, volR_val, 1);
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+ template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::downsampleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val) {
++	printConvertType("downsampleConvert");
++
+ 	// How much to increment _outPos by
+ 	const frac_t outPos_inc = _inRate / _outRate;
+ 
+@@ -317,12 +348,16 @@ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::downsampleConvert(Au
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+ template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::upsampleConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val) {
++	printConvertType("upsampleConvert");
++
+ 	return commonConvert<volL, volR, st_sample_t, mixMode>(input, outBuffer, numSamples, volL_val, volR_val, _outRate / _inRate);
+ }
+ 
+ template<bool inStereo, bool outStereo, bool reverseStereo>
+ template<st_volume_t volL, st_volume_t volR, typename st_sample_t, MixMode mixMode>
+ int RateConverter_Impl<inStereo, outStereo, reverseStereo>::interpolateConvert(AudioStream &input, st_sample_t *outBuffer, st_size_t numSamples, st_volume_t volL_val, st_volume_t volR_val) {
++	printConvertType("interpolateConvert");
++
+ 	// How much to increment _outPosFrac by
+ 	const frac_t outPos_inc = (_inRate << FRAC_BITS_LOW) / _outRate;
+ 
+-- 
+2.43.0
+
+
+From 45d92f00cea79a4a012873475b5726b27fe17906 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Mon, 23 Mar 2026 12:34:14 +1000
+Subject: [PATCH 10/12] BACKENDS: ATARI: Clamp at the end of mixing
+
+---
+ backends/mixer/atari/atari-mixer.cpp | 83 ++++++++++++++++------------
+ backends/mixer/atari/atari-mixer.h   |  3 +-
+ 2 files changed, 50 insertions(+), 36 deletions(-)
+
+diff --git a/backends/mixer/atari/atari-mixer.cpp b/backends/mixer/atari/atari-mixer.cpp
+index 5dbf04e29cf..aa399b2aad6 100644
+--- a/backends/mixer/atari/atari-mixer.cpp
++++ b/backends/mixer/atari/atari-mixer.cpp
+@@ -91,8 +91,8 @@ AtariMixerManager::~AtariMixerManager() {
+ 	Mfree(_atariSampleBuffer);
+ 	_atariSampleBuffer = _atariPhysicalSampleBuffer = _atariLogicalSampleBuffer = nullptr;
+ 
+-	delete[] _samplesBuf;
+-	_samplesBuf = nullptr;
++	delete[] _sampleBuf;
++	_sampleBuf = nullptr;
+ }
+ 
+ void AtariMixerManager::init() {
+@@ -141,9 +141,10 @@ void AtariMixerManager::init() {
+ 	Xbtimer(XB_TIMERA, 1<<3, 1, timerA);	// event count mode, count to '1'
+ 	Jenabint(MFP_TIMERA);
+ 
+-	_samplesBuf = new uint8[_samples * _outputChannels * 2];	// always 16-bit
++	_sampleBufSize = _samples * _outputChannels * 4;	// always 32-bit
++	_sampleBuf = new uint8[_sampleBufSize];
+ 
+-	_mixer = new Audio::MixerImpl(_outputRate, _outputChannels == 2, _samples);
++	_mixer = new Audio::MixerImpl(_outputRate, _outputChannels == 2, _samples, 4, false);
+ 	_mixer->setReady(true);
+ 
+ 	resumeAudio();
+@@ -193,7 +194,7 @@ void AtariMixerManager::update() {
+ 
+ 	if (muted || endOfPlayback) {
+ 		endOfPlayback = false;
+-		processed = _mixer->mixCallback(_samplesBuf, _samples * _outputChannels * 2);
++		processed = _mixer->mixCallback(_sampleBuf, _sampleBufSize);
+ 	}
+ 
+ 	if (processed > 0) {
+@@ -202,42 +203,54 @@ void AtariMixerManager::update() {
+ 		_atariLogicalSampleBuffer = tmp;
+ 
+ 		if (_downsample) {
+-			// use the trick with move.b (a7)+,dx which skips two bytes at once
+-			// basically supplying move.w (src)+,dx; asr.w #8,dx; move.b dx,(dst)+
+ 			__asm__ volatile(
+-				"	move.l	%%a7,%%d0\n"
+-				"	move.l	%0,%%a7\n"
+-				"	moveq	#0x0f,%%d1\n"
+-				"	and.l	%2,%%d1\n"
+-				"	neg.l	%%d1\n"
+-				"	lsr.l	#4,%2\n"
+-				"	jmp		(2f,%%pc,%%d1.l*2)\n"
+-				"1:	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"	move.b	(%%a7)+,(%1)+\n"
+-				"2:	dbra	%2,1b\n"
+-				"	move.l	%%d0,%%a7\n"
++				"	move.l	#32768,%%d2\n"
++				"	move.l	#65535,%%d3\n"
++				"	subq.l	#1,%2\n"
++				"1:	move.l	(%0)+,%%d0\n"
++				"	move.l	%%d0,%%d1\n"
++				"	add.l	%%d2,%%d1\n"
++				"	cmp.l	%%d3,%%d1\n"
++				"	bhi.b	3f\n"
++				"2:	asr.l	#8,%%d0\n"	// TODO: tweak (there were reports that >> 8 is too quiet)
++				"	move.b	%%d0,(%1)+\n"
++				"	dbra	%2,1b\n"
++				"	bra.b	4f\n"
++				"3:	tst.l	%%d0\n"
++				"	spl		%%d0\n"
++				"	ext.w	%%d0\n"
++				"	add.w	%%d2,%%d0\n"
++				"	bra.b	2b\n"
++				"4:\n"
+ 				: // outputs
+-				: "g"(_samplesBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels * 2/2) // inputs
+-				: "d0", "d1", "cc" AND_MEMORY
++				: "a"(_sampleBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels) // inputs
++				: "d0", "d1", "d2", "d3", "cc" AND_MEMORY
+ 				);
+ 			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2/2, 0, (_samples - processed) * _outputChannels * 2/2);
+ 			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2/2);
+ 		} else {
+-			memcpy(_atariPhysicalSampleBuffer, _samplesBuf, processed * _outputChannels * 2);
++			__asm__ volatile(
++				"	move.l	#32768,%%d2\n"
++				"	move.l	#65535,%%d3\n"
++				"	subq.l	#1,%2\n"
++				"1:	move.l	(%0)+,%%d0\n"
++				"	move.l	%%d0,%%d1\n"
++				"	add.l	%%d2,%%d1\n"
++				"	cmp.l	%%d3,%%d1\n"
++				"	bhi.b	3f\n"
++				"2:	move.w	%%d0,(%1)+\n"
++				"	dbra	%2,1b\n"
++				"	bra.b	4f\n"
++				"3:	tst.l	%%d0\n"
++				"	spl		%%d0\n"
++				"	ext.w	%%d0\n"
++				"	add.w	%%d2,%%d0\n"
++				"	bra.b	2b\n"
++				"4:\n"
++				: // outputs
++				: "a"(_sampleBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels) // inputs
++				: "d0", "d1", "d2", "d3", "cc" AND_MEMORY
++				);
+ 			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
+ 			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2);
+ 		}
+diff --git a/backends/mixer/atari/atari-mixer.h b/backends/mixer/atari/atari-mixer.h
+index 3957759137c..1b0fd119f40 100644
+--- a/backends/mixer/atari/atari-mixer.h
++++ b/backends/mixer/atari/atari-mixer.h
+@@ -46,7 +46,8 @@ private:
+ 	int _outputRate = 0;
+ 	int _outputChannels = 0;
+ 	int _samples = 0;
+-	uint8 *_samplesBuf = nullptr;
++	int _sampleBufSize = 0;
++	byte *_sampleBuf = nullptr;
+ 
+ 	byte *_atariSampleBuffer = nullptr;
+ 	byte *_atariPhysicalSampleBuffer = nullptr;
+-- 
+2.43.0
+
+
+From 50ee8a272460a55ad66f9edca013035da7ac4f7c Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Thu, 26 Mar 2026 14:29:25 +1000
+Subject: [PATCH 11/12] BACKENDS: ATARI: Allow setting output_rate & friends
+ per-game
+
+This also disables sample mixing while being in the launcher.
+---
+ backends/audiocd/default/default-audiocd.cpp | 16 +++---
+ backends/audiocd/default/default-audiocd.h   |  1 -
+ backends/audiocd/linux/linux-audiocd.cpp     |  2 +-
+ backends/audiocd/macosx/macosx-audiocd.cpp   |  4 +-
+ backends/audiocd/win32/win32-audiocd.cpp     |  2 +-
+ backends/graphics/atari/atari-graphics.cpp   |  4 +-
+ backends/mixer/atari/atari-mixer.cpp         | 60 ++++++++++++--------
+ backends/mixer/atari/atari-mixer.h           |  5 +-
+ backends/platform/atari/osystem_atari.cpp    | 17 +++++-
+ backends/platform/atari/osystem_atari.h      |  2 +
+ base/main.cpp                                |  9 +++
+ common/system.h                              | 14 +++++
+ 12 files changed, 92 insertions(+), 44 deletions(-)
+
+diff --git a/backends/audiocd/default/default-audiocd.cpp b/backends/audiocd/default/default-audiocd.cpp
+index 8bc4dca86da..21182643b50 100644
+--- a/backends/audiocd/default/default-audiocd.cpp
++++ b/backends/audiocd/default/default-audiocd.cpp
+@@ -35,9 +35,7 @@ DefaultAudioCDManager::DefaultAudioCDManager() {
+ 	_cd.numLoops = 0;
+ 	_cd.volume = Audio::Mixer::kMaxChannelVolume;
+ 	_cd.balance = 0;
+-	_mixer = g_system->getMixer();
+ 	_emulating = false;
+-	assert(_mixer);
+ }
+ 
+ DefaultAudioCDManager::~DefaultAudioCDManager() {
+@@ -128,8 +126,8 @@ bool DefaultAudioCDManager::play(int track, int numLoops, int startFrame, int du
+ 			repetitions. Finally, -1 means infinitely many
+ 			*/
+ 			_emulating = true;
+-			_mixer->playStream(soundType, &_handle,
+-			                        Audio::makeLoopingAudioStream(stream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops), -1, _cd.volume, _cd.balance);
++			g_system->getMixer()->playStream(soundType, &_handle,
++				Audio::makeLoopingAudioStream(stream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops), -1, _cd.volume, _cd.balance);
+ 			return true;
+ 		}
+ 	}
+@@ -162,7 +160,7 @@ bool DefaultAudioCDManager::playAbsolute(int startFrame, int numLoops, int durat
+ void DefaultAudioCDManager::stop() {
+ 	if (_emulating) {
+ 		// Audio CD emulation
+-		_mixer->stopHandle(_handle);
++		g_system->getMixer()->stopHandle(_handle);
+ 		_emulating = false;
+ 	}
+ }
+@@ -170,7 +168,7 @@ void DefaultAudioCDManager::stop() {
+ bool DefaultAudioCDManager::isPlaying() const {
+ 	// Audio CD emulation
+ 	if (_emulating)
+-		return _mixer->isSoundHandleActive(_handle);
++		return g_system->getMixer()->isSoundHandleActive(_handle);
+ 
+ 	// The default class only handles emulation
+ 	return false;
+@@ -181,7 +179,7 @@ void DefaultAudioCDManager::setVolume(byte volume) {
+ 
+ 	// Audio CD emulation
+ 	if (_emulating && isPlaying())
+-		_mixer->setChannelVolume(_handle, _cd.volume);
++		g_system->getMixer()->setChannelVolume(_handle, _cd.volume);
+ }
+ 
+ void DefaultAudioCDManager::setBalance(int8 balance) {
+@@ -189,13 +187,13 @@ void DefaultAudioCDManager::setBalance(int8 balance) {
+ 
+ 	// Audio CD emulation
+ 	if (_emulating && isPlaying())
+-		_mixer->setChannelBalance(_handle, _cd.balance);
++		g_system->getMixer()->setChannelBalance(_handle, _cd.balance);
+ }
+ 
+ void DefaultAudioCDManager::update() {
+ 	if (_emulating) {
+ 		// Check whether the audio track stopped playback
+-		if (!_mixer->isSoundHandleActive(_handle)) {
++		if (!g_system->getMixer()->isSoundHandleActive(_handle)) {
+ 			// FIXME: We do not update the numLoops parameter here (and in fact,
+ 			// currently can't do that). Luckily, only one engine ever checks
+ 			// this part of the AudioCD status, namely the SCUMM engine; and it
+diff --git a/backends/audiocd/default/default-audiocd.h b/backends/audiocd/default/default-audiocd.h
+index 28d76d8e214..fc53650bf34 100644
+--- a/backends/audiocd/default/default-audiocd.h
++++ b/backends/audiocd/default/default-audiocd.h
+@@ -79,7 +79,6 @@ protected:
+ 	bool _emulating;
+ 
+ 	Status _cd;
+-	Audio::Mixer *_mixer;
+ };
+ 
+ #endif
+diff --git a/backends/audiocd/linux/linux-audiocd.cpp b/backends/audiocd/linux/linux-audiocd.cpp
+index bf6015baa48..86816e279ea 100644
+--- a/backends/audiocd/linux/linux-audiocd.cpp
++++ b/backends/audiocd/linux/linux-audiocd.cpp
+@@ -320,7 +320,7 @@ bool LinuxAudioCDManager::play(int track, int numLoops, int startFrame, int dura
+ 	// Fake emulation since we're really playing an AudioStream
+ 	_emulating = true;
+ 
+-	_mixer->playStream(
++	g_system->getMixer()->playStream(
+ 	    soundType,
+ 	    &_handle,
+ 	    Audio::makeLoopingAudioStream(audioStream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops),
+diff --git a/backends/audiocd/macosx/macosx-audiocd.cpp b/backends/audiocd/macosx/macosx-audiocd.cpp
+index cd7c2e2d924..b10261569f5 100644
+--- a/backends/audiocd/macosx/macosx-audiocd.cpp
++++ b/backends/audiocd/macosx/macosx-audiocd.cpp
+@@ -252,8 +252,8 @@ bool MacOSXAudioCDManager::play(int track, int numLoops, int startFrame, int dur
+ 	// Fake emulation since we're really playing an AIFF file
+ 	_emulating = true;
+ 
+-	_mixer->playStream(soundType, &_handle,
+-	                   Audio::makeLoopingAudioStream(seekStream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops), -1, _cd.volume, _cd.balance);
++	g_system->getMixer()->playStream(soundType, &_handle,
++		Audio::makeLoopingAudioStream(seekStream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops), -1, _cd.volume, _cd.balance);
+ 	return true;
+ }
+ 
+diff --git a/backends/audiocd/win32/win32-audiocd.cpp b/backends/audiocd/win32/win32-audiocd.cpp
+index ae38c82a157..669e2ff95d0 100644
+--- a/backends/audiocd/win32/win32-audiocd.cpp
++++ b/backends/audiocd/win32/win32-audiocd.cpp
+@@ -294,7 +294,7 @@ bool Win32AudioCDManager::play(int track, int numLoops, int startFrame, int dura
+ 	// Fake emulation since we're really playing an AudioStream
+ 	_emulating = true;
+ 
+-	_mixer->playStream(
++	g_system->getMixer()->playStream(
+ 	    soundType,
+ 	    &_handle,
+ 	    Audio::makeLoopingAudioStream(audioStream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops),
+diff --git a/backends/graphics/atari/atari-graphics.cpp b/backends/graphics/atari/atari-graphics.cpp
+index 48fd626ce85..61cb799e068 100644
+--- a/backends/graphics/atari/atari-graphics.cpp
++++ b/backends/graphics/atari/atari-graphics.cpp
+@@ -1147,7 +1147,9 @@ void AtariGraphicsManager::copyRectToAtariSurface(AtariSurface &dstSurface,
+ 	const Common::Rect rect = AtariSurface::alignRect(x, y, x + w, y + h);
+ 
+ 	// TODO: mask the unaligned parts and copy the rest
+-	buf -= (x - rect.left);	// HACK: this assumes pointer to a complete buffer
++	// HACK: this assumes pointer to a complete buffer
++	// NOTE: unfortunately this shows the ScummVM logo shifted in 16 colours
++	buf -= (x - rect.left);
+ 
+ 	dstSurface.copyRectToSurface(buf, pitch, rect.left, rect.top, rect.width(), rect.height());
+ }
+diff --git a/backends/mixer/atari/atari-mixer.cpp b/backends/mixer/atari/atari-mixer.cpp
+index aa399b2aad6..bacaea26b04 100644
+--- a/backends/mixer/atari/atari-mixer.cpp
++++ b/backends/mixer/atari/atari-mixer.cpp
+@@ -64,19 +64,8 @@ AtariMixerManager::AtariMixerManager() : MixerManager() {
+ 	suspendAudio();
+ 
+ 	ConfMan.registerDefault("output_rate", DEFAULT_OUTPUT_RATE);
+-	_outputRate = ConfMan.getInt("output_rate");
+-	if (_outputRate <= 0)
+-		_outputRate = DEFAULT_OUTPUT_RATE;
+-
+ 	ConfMan.registerDefault("output_channels", DEFAULT_OUTPUT_CHANNELS);
+-	_outputChannels = ConfMan.getInt("output_channels");
+-	if (_outputChannels <= 0 || _outputChannels > 2)
+-		_outputChannels = DEFAULT_OUTPUT_CHANNELS;
+-
+ 	ConfMan.registerDefault("audio_buffer_size", DEFAULT_SAMPLES);
+-	_samples = ConfMan.getInt("audio_buffer_size");
+-	if (_samples <= 0)
+-		_samples = DEFAULT_SAMPLES;
+ 
+ 	g_system->getEventManager()->getEventDispatcher()->registerObserver(this, 10, false);
+ }
+@@ -86,16 +75,28 @@ AtariMixerManager::~AtariMixerManager() {
+ 
+ 	g_system->getEventManager()->getEventDispatcher()->unregisterObserver(this);
+ 
+-	AtariAudioShutdown();
+-
+-	Mfree(_atariSampleBuffer);
+-	_atariSampleBuffer = _atariPhysicalSampleBuffer = _atariLogicalSampleBuffer = nullptr;
+-
+-	delete[] _sampleBuf;
+-	_sampleBuf = nullptr;
++	deinit();
+ }
+ 
+ void AtariMixerManager::init() {
++	atari_debug("audio init");
++
++	assert(!_mixer);
++
++	// read either from game domain or from defaults
++	// but never write back so 22050 Hz will stay even on TT/stock Falcon
++	_outputRate = ConfMan.getInt("output_rate");
++	if (_outputRate <= 0)
++		_outputRate = DEFAULT_OUTPUT_RATE;
++
++	_outputChannels = ConfMan.getInt("output_channels");
++	if (_outputChannels <= 0 || _outputChannels > 2)
++		_outputChannels = DEFAULT_OUTPUT_CHANNELS;
++
++	_samples = ConfMan.getInt("audio_buffer_size");
++	if (_samples <= 0)
++		_samples = DEFAULT_SAMPLES;
++
+ 	AudioSpec desired, obtained;
+ 
+ 	desired.frequency = _outputRate;
+@@ -120,16 +121,10 @@ void AtariMixerManager::init() {
+ 	_samples = obtained.samples;
+ 	_downsample = (obtained.format == AudioFormatSigned8);
+ 
+-	ConfMan.setInt("output_rate", _outputRate, Common::ConfigManager::kApplicationDomain);
+-	ConfMan.setInt("output_channels", _outputChannels, Common::ConfigManager::kApplicationDomain);
+-	ConfMan.setInt("audio_buffer_size", _samples, Common::ConfigManager::kApplicationDomain);
+-
+ 	atari_debug("setting %d Hz mixing frequency (%d-bit, %s)",
+ 		  _outputRate, obtained.format == AudioFormatSigned8 ? 8 : 16, _outputChannels == 1 ? "mono" : "stereo");
+ 	atari_debug("sample buffer size: %d", _samples);
+ 
+-	ConfMan.flushToDisk();
+-
+ 	_atariSampleBuffer = (byte*)Mxalloc(obtained.size * 2, MX_STRAM);
+ 	if (!_atariSampleBuffer)
+ 		error("Failed to allocate memory in ST RAM");
+@@ -150,6 +145,23 @@ void AtariMixerManager::init() {
+ 	resumeAudio();
+ }
+ 
++void AtariMixerManager::deinit() {
++	atari_debug("audio deinit");
++
++	suspendAudio();
++
++	AtariAudioShutdown();
++
++	delete _mixer;
++	_mixer = nullptr;
++
++	Mfree(_atariSampleBuffer);
++	_atariSampleBuffer = _atariPhysicalSampleBuffer = _atariLogicalSampleBuffer = nullptr;
++
++	delete[] _sampleBuf;
++	_sampleBuf = nullptr;
++}
++
+ void AtariMixerManager::suspendAudio() {
+ 	atari_debug("suspendAudio");
+ 
+diff --git a/backends/mixer/atari/atari-mixer.h b/backends/mixer/atari/atari-mixer.h
+index 1b0fd119f40..f9820be2225 100644
+--- a/backends/mixer/atari/atari-mixer.h
++++ b/backends/mixer/atari/atari-mixer.h
+@@ -32,9 +32,10 @@
+ class AtariMixerManager : public MixerManager, Common::EventObserver {
+ public:
+ 	AtariMixerManager();
+-	virtual ~AtariMixerManager();
++	~AtariMixerManager() override;
+ 
+-	virtual void init() override;
++	void init() override;
++	void deinit();
+ 	void update();
+ 
+ 	void suspendAudio() override;
+diff --git a/backends/platform/atari/osystem_atari.cpp b/backends/platform/atari/osystem_atari.cpp
+index d9e36e61678..34ba244fe7b 100644
+--- a/backends/platform/atari/osystem_atari.cpp
++++ b/backends/platform/atari/osystem_atari.cpp
+@@ -335,13 +335,18 @@ void OSystem_Atari::initBackend() {
+ 	}
+ #endif
+ 
++	// init() will be called upon starting a new game
+ 	_mixerManager = new AtariMixerManager();
+-	// Setup and start mixer
+-	_mixerManager->init();
+ 
+ 	BaseBackend::initBackend();
+ }
+ 
++void OSystem_Atari::engineBeforeCreate() {
++	atari_debug("engineBeforeCreate");
++
++	((AtariMixerManager *)_mixerManager)->init();
++}
++
+ void OSystem_Atari::engineInit() {
+ 	//atari_debug("engineInit");
+ 
+@@ -354,6 +359,12 @@ void OSystem_Atari::engineDone() {
+ 	g_gameEngineActive = false;
+ }
+ 
++void OSystem_Atari::engineAfterDelete() {
++	atari_debug("engineAfterDelete");
++
++	((AtariMixerManager *)_mixerManager)->deinit();
++}
++
+ Common::MutexInternal *OSystem_Atari::createMutex() {
+ 	return new NullMutexInternal();
+ }
+@@ -386,7 +397,7 @@ void OSystem_Atari::getTimeAndDate(TimeDate &td, bool skipRecord) const {
+ Common::KeymapArray OSystem_Atari::getGlobalKeymaps() {
+ 	Common::KeymapArray globalMaps = BaseBackend::getGlobalKeymaps();
+ 
+-	Common::Keymap *keymap = ((AtariGraphicsManager*)_graphicsManager)->getKeymap();
++	Common::Keymap *keymap = ((AtariGraphicsManager *)_graphicsManager)->getKeymap();
+ 	globalMaps.push_back(keymap);
+ 
+ 	return globalMaps;
+diff --git a/backends/platform/atari/osystem_atari.h b/backends/platform/atari/osystem_atari.h
+index b45f4413b7f..f8691a38698 100644
+--- a/backends/platform/atari/osystem_atari.h
++++ b/backends/platform/atari/osystem_atari.h
+@@ -31,8 +31,10 @@ public:
+ 
+ 	void initBackend() override;
+ 
++	void engineBeforeCreate() override;
+ 	void engineInit() override;
+ 	void engineDone() override;
++	void engineAfterDelete() override;
+ 
+ 	Common::MutexInternal *createMutex() override;
+ 	uint32 getMillis(bool skipRecord = false) override;
+diff --git a/base/main.cpp b/base/main.cpp
+index e507766e6a2..017a296be86 100644
+--- a/base/main.cpp
++++ b/base/main.cpp
+@@ -215,6 +215,9 @@ static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const
+ 	// Create the game's MetaEngine.
+ 	MetaEngine &metaEngine = enginePlugin->get<MetaEngine>();
+ 	if (err.getCode() == Common::kNoError) {
++		// Inform backend that the engine is about to be created
++		system.engineBeforeCreate();
++
+ 		// Set default values for all of the custom engine options
+ 		// Apparently some engines query them in their constructor, thus we
+ 		// need to set this up before instance creation.
+@@ -249,6 +252,9 @@ static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const
+ 
+ 		metaEngine.deleteInstance(engine, game, meDescriptor);
+ 
++		// Inform backend that the engine has been deleted
++		system.engineAfterDelete();
++
+ 		return err;
+ 	}
+ 
+@@ -336,6 +342,9 @@ static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const
+ 	// Free up memory
+ 	metaEngine.deleteInstance(engine, game, meDescriptor);
+ 
++	// Inform backend that the engine has been deleted
++	system.engineAfterDelete();
++
+ 	// Reset the file/directory mappings
+ 	SearchMan.clear();
+ 
+diff --git a/common/system.h b/common/system.h
+index 3581ad89b22..5c6c6733fc6 100644
+--- a/common/system.h
++++ b/common/system.h
+@@ -326,6 +326,13 @@ public:
+ 	 */
+ 	bool backendInitialized() const { return _backendInitialized; }
+ 
++	/**
++	 * Allow the backend to perform creation of engine's dependencies.
++	 *
++	 * Called just before the engine is created.
++	 */
++	virtual void engineBeforeCreate() { }
++
+ 	/**
+ 	 * Allow the backend to perform engine-specific initialization.
+ 	 *
+@@ -340,6 +347,13 @@ public:
+ 	 */
+ 	virtual void engineDone() { }
+ 
++	/**
++	 * Allow the backend to perform deletion of engine's dependencies.
++	 *
++	 * Called after the engine is deleted.
++	 */
++	virtual void engineAfterDelete() { }
++
+ 	/**
+ 	 * Identify a task that ScummVM can perform.
+ 	 */
+-- 
+2.43.0
+
+
+From dbadfc4618b31f519df5cb12b663afbc6d57d744 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Thu, 26 Mar 2026 14:38:36 +1000
+Subject: [PATCH 12/12] BACKENDS: ATARI: Terminate playback early if processed
+ != _samples
+
+This saves the memset called afterwards.
+---
+ backends/mixer/atari/atari-mixer.cpp | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/backends/mixer/atari/atari-mixer.cpp b/backends/mixer/atari/atari-mixer.cpp
+index bacaea26b04..721a0f7fede 100644
+--- a/backends/mixer/atari/atari-mixer.cpp
++++ b/backends/mixer/atari/atari-mixer.cpp
+@@ -238,8 +238,7 @@ void AtariMixerManager::update() {
+ 				: "a"(_sampleBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels) // inputs
+ 				: "d0", "d1", "d2", "d3", "cc" AND_MEMORY
+ 				);
+-			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2/2, 0, (_samples - processed) * _outputChannels * 2/2);
+-			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2/2);
++			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + processed * _outputChannels * 2/2);
+ 		} else {
+ 			__asm__ volatile(
+ 				"	move.l	#32768,%%d2\n"
+@@ -263,8 +262,7 @@ void AtariMixerManager::update() {
+ 				: "a"(_sampleBuf), "a"(_atariPhysicalSampleBuffer), "d"(processed * _outputChannels) // inputs
+ 				: "d0", "d1", "d2", "d3", "cc" AND_MEMORY
+ 				);
+-			memset(_atariPhysicalSampleBuffer + processed * _outputChannels * 2, 0, (_samples - processed) * _outputChannels * 2);
+-			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + _samples * _outputChannels * 2);
++			Setbuffer(SR_PLAY, _atariPhysicalSampleBuffer, _atariPhysicalSampleBuffer + processed * _outputChannels * 2);
+ 		}
+ 
+ 		if (muted) {
+-- 
+2.43.0
+

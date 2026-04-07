@@ -23,10 +23,32 @@ then
 	LDFLAGS="$LDFLAGS -mfastcall"
 fi
 
-if [ -f ../backends/platform/atari/.patched ]
+BASE_BRANCH=release-2026.2.0
+BRANCH=firebee-patched
+
+if [ -d ../.git/rebase-apply ]; then
+	set +e
+	git -C .. am --abort
+	git -C .. checkout "$BASE_BRANCH"
+	git -C .. branch -D "$BRANCH"
+	set -e
+fi
+
+if git -C .. rev-parse --verify "$BRANCH" >/dev/null 2>&1
 then
-	echo "FireBee SDL target shouldn't contain any ATARI patches!"
-	exit 1
+	git -C .. checkout "$BRANCH"
+else
+	git -C .. checkout -b "$BRANCH" "$BASE_BRANCH"
+	for p in ../backends/platform/atari/patches/01_tooltips.patch \
+		 ../backends/platform/atari/patches/02_scumm.patch \
+		 ../backends/platform/atari/patches/04_gob.patch; do
+		if ! git -C .. am "${p#../}"; then
+			git -C .. am --abort
+			git -C .. checkout "$BASE_BRANCH"
+			git -C .. branch -D "$BRANCH"
+			exit 1
+		fi
+	done
 fi
 
 

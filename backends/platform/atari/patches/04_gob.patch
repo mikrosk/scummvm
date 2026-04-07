@@ -1,0 +1,1103 @@
+From 85ffe02d90b3cdc1dada682ecdd7281b6fdf2e61 Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Tue, 31 Mar 2026 23:31:33 +0200
+Subject: [PATCH 01/11] GOB: Really fix conditions for a VMD to be advanced by
+ updateVideos()
+
+- VMDs with with videos are not automatically advanced, unless an
+"autoUpdate" flag is set when opening the video. This flag depends on the
+flags passed to the playVmdOrMusic opcode.
+
+- Sound-only VMDs are generally advanced by updateVideo()
+
+- Some sound-only VMDs are not advanced automatically because they include
+an empty "video" frame with dimensions 0x0, which triggers an early return.
+
+- The "noWaitSound" is another condition to enter updateVideo(), but in
+in Adibou2/Adi4 it seems to be always set (independently of the "no wait"
+ sound flag 0x100 in the VMD file header).
+---
+ engines/gob/inter_v7.cpp    | 12 +++++++-----
+ engines/gob/videoplayer.cpp |  8 +++++---
+ engines/gob/videoplayer.h   |  1 +
+ video/coktel_decoder.cpp    | 15 ++++++++++++++-
+ video/coktel_decoder.h      |  3 +++
+ 5 files changed, 30 insertions(+), 9 deletions(-)
+
+diff --git a/engines/gob/inter_v7.cpp b/engines/gob/inter_v7.cpp
+index 284b779090c..313e91f1d84 100644
+--- a/engines/gob/inter_v7.cpp
++++ b/engines/gob/inter_v7.cpp
+@@ -769,8 +769,6 @@ void Inter_v7::o7_playVmdOrMusic() {
+ 			// if (video not in cache)
+ 			//   return;
+ 
+-			props.noWaitSound = true;
+-
+ 			props.lastFrame += 100;
+ 		}
+ 
+@@ -810,9 +808,13 @@ void Inter_v7::o7_playVmdOrMusic() {
+ 		props.noBlock = true;
+ 	}
+ 
+-	if (_vm->_vidPlayer->getSoundFlags() & 0x100) {
+-		props.noWaitSound = true;
+-	}
++	// if (_vm->_vidPlayer->getSoundFlags() & 0x100) {
++	// 	props.noWaitSound = true;
++	// }
++	// Actually, the noWaitSound flag seems to be always set (at least in Adibou/Adi4),
++	// independently of the "no wait" sound flag 0x100 in the VMD file header.
++
++	props.noWaitSound = true;
+ 
+ 	if (props.startFrame == -2 || props.startFrame == -3) {
+ 		props.startFrame = 0;
+diff --git a/engines/gob/videoplayer.cpp b/engines/gob/videoplayer.cpp
+index ce9662022a8..58769777349 100644
+--- a/engines/gob/videoplayer.cpp
++++ b/engines/gob/videoplayer.cpp
+@@ -51,7 +51,7 @@ VideoPlayer::Properties::Properties() : type(kVideoTypeTry), sprite(Draw::kFront
+ }
+ 
+ 
+-VideoPlayer::Video::Video() : decoder(nullptr), live(false), highColorMap(nullptr) {
++VideoPlayer::Video::Video() : decoder(nullptr), live(false), autoUpdate(false), highColorMap(nullptr) {
+ }
+ 
+ bool VideoPlayer::Video::isEmpty() const {
+@@ -188,6 +188,9 @@ int VideoPlayer::openVideo(bool primary, const Common::String &file, Properties
+ 		// Set the filename
+ 		video->fileName = file;
+ 
++		video->autoUpdate = (properties.flags & kFlagNoVideo) ||
++							(!(properties.flags & 0x200) && !(properties.flags & kFlagOtherSurface));
++
+ 		if (_vm->getGameType() == kGameTypeAdibou2 || _vm->getGameType() == kGameTypeAdi4)
+ 			_noCursorSwitch = true; // For Adibou2, we always want to see the cursor while a video is playing.
+ 		else
+@@ -591,8 +594,7 @@ void VideoPlayer::updateVideo(int slot, bool force) {
+ 	}
+ 
+ 	if (_vm->getGameType() == kGameTypeAdibou2 || _vm->getGameType() == kGameTypeAdi4) {
+-		if (video->decoder->hasVideo() &&
+-			!video->properties.noWaitSound)
++		if ((video->decoder->hasVideoData() && !video->autoUpdate) || !video->properties.noWaitSound)
+ 			return;
+ 
+ 		video->properties.startFrame = video->decoder->getCurFrame();
+diff --git a/engines/gob/videoplayer.h b/engines/gob/videoplayer.h
+index e164487c31c..f5a81186f52 100644
+--- a/engines/gob/videoplayer.h
++++ b/engines/gob/videoplayer.h
+@@ -184,6 +184,7 @@ private:
+ 		Properties properties;
+ 
+ 		bool live;
++		bool autoUpdate; ///< Should the video be automatically advanced by updateVideos()
+ 
+ 		Video();
+ 
+diff --git a/video/coktel_decoder.cpp b/video/coktel_decoder.cpp
+index db8d4517a04..480fb07b175 100644
+--- a/video/coktel_decoder.cpp
++++ b/video/coktel_decoder.cpp
+@@ -188,6 +188,10 @@ bool CoktelDecoder::hasVideo() const {
+ 	return true;
+ }
+ 
++bool CoktelDecoder::hasVideoData() const {
++	return hasVideo();
++}
++
+ bool CoktelDecoder::hasSound() const {
+ 	return _hasSound;
+ }
+@@ -1799,7 +1803,7 @@ VMDDecoder::VMDDecoder(Audio::Mixer *mixer, Audio::Mixer::SoundType soundType) :
+ 	_soundFlags(0), _soundFreq(0), _soundSliceSize(0), _soundSlicesCount(0),
+ 	_soundBytesPerSample(0), _soundStereo(0), _soundHeaderSize(0), _soundDataSize(0),
+ 	_soundLastFilledFrame(0), _audioFormat(kAudioFormat8bitRaw),
+-	_hasVideo(false), _videoCodec(0), _blitMode(0), _bytesPerPixel(0),
++	_hasVideo(false), _hasVideoData(false), _videoCodec(0), _blitMode(0), _bytesPerPixel(0),
+ 	_firstFramePos(0), _videoBufferSize(0), _externalCodec(false), _codec(0),
+ 	_subtitle(-1), _isPaletted(true), _autoStartSound(true), _oldStereoBuffer(nullptr) {
+ 
+@@ -2189,6 +2193,7 @@ bool VMDDecoder::readFrameTable(int &numFiles) {
+ 		_frames[i].offset = _stream->readUint32LE();
+ 	}
+ 
++	_hasVideoData = false;
+ 	_soundLastFilledFrame = 0;
+ 	for (uint16 i = 0; i < _frameCount; i++) {
+ 		bool separator = false;
+@@ -2199,6 +2204,9 @@ bool VMDDecoder::readFrameTable(int &numFiles) {
+ 			_frames[i].parts[j].field_1 = _stream->readByte();
+ 			_frames[i].parts[j].size    = _stream->readUint32LE();
+ 
++			if (_frames[i].parts[j].type == kPartTypeVideo)
++				_hasVideoData = true;
++
+ 			if (_frames[i].parts[j].type == kPartTypeAudio) {
+ 
+ 				_frames[i].parts[j].flags = _stream->readByte();
+@@ -2316,6 +2324,7 @@ void VMDDecoder::close() {
+ 	_oldStereoBuffer      = nullptr;
+ 
+ 	_hasVideo      = false;
++	_hasVideoData  = false;
+ 	_videoCodec    = 0;
+ 	_blitMode      = 0;
+ 	_bytesPerPixel = 0;
+@@ -3001,6 +3010,10 @@ bool VMDDecoder::hasVideo() const {
+ 	return _hasVideo;
+ }
+ 
++bool VMDDecoder::hasVideoData() const {
++	return _hasVideoData;
++}
++
+ bool VMDDecoder::isPaletted() const {
+ 	return _isPaletted;
+ }
+diff --git a/video/coktel_decoder.h b/video/coktel_decoder.h
+index 7747e6b631d..9b814744b66 100644
+--- a/video/coktel_decoder.h
++++ b/video/coktel_decoder.h
+@@ -122,6 +122,7 @@ public:
+ 
+ 	bool hasPalette() const;
+ 	virtual bool hasVideo() const;
++	virtual bool hasVideoData() const;
+ 
+ 	bool hasSound()       const;
+ 	bool isSoundEnabled() const;
+@@ -444,6 +445,7 @@ public:
+ 	int32 getSubtitleIndex() const;
+ 
+ 	bool hasVideo() const;
++	bool hasVideoData() const;
+ 	bool isPaletted() const;
+ 
+ 	bool loadStream(Common::SeekableReadStream *stream);
+@@ -548,6 +550,7 @@ private:
+ 
+ 	// Video properties
+ 	bool   _hasVideo;
++	bool   _hasVideoData; ///< True if at least a frame contains a "video" part (even with dimensions 0x0)
+ 	uint32 _videoCodec;
+ 	byte   _blitMode;
+ 	byte   _bytesPerPixel;
+-- 
+2.43.0
+
+
+From c06068493f58cfe262e009e7e7fae6bc212476b4 Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Sun, 22 Mar 2026 12:54:33 +0100
+Subject: [PATCH 02/11] GOB: Add support for more special keys in getKeyState()
+
+Added Enter, Ctrl, Shift, Alt, F1-F4
+---
+ engines/gob/util.cpp | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+
+diff --git a/engines/gob/util.cpp b/engines/gob/util.cpp
+index 9fe84a11d7a..a522acbbe7b 100644
+--- a/engines/gob/util.cpp
++++ b/engines/gob/util.cpp
+@@ -697,10 +697,31 @@ void Util::keyDown(const Common::Event &event) {
+ 		_keyState |= 0x0004;
+ 	else if (event.kbd.keycode == Common::KEYCODE_LEFT)
+ 		_keyState |= 0x0008;
++	else if (event.kbd.keycode == Common::KEYCODE_RETURN ||
++	         event.kbd.keycode == Common::KEYCODE_KP_ENTER)
++		_keyState |= 0x0010;
+ 	else if (event.kbd.keycode == Common::KEYCODE_SPACE)
+ 		_keyState |= 0x0020;
+ 	else if (event.kbd.keycode == Common::KEYCODE_ESCAPE)
+ 		_keyState |= 0x0040;
++	else if (event.kbd.keycode == Common::KEYCODE_LCTRL ||
++	         event.kbd.keycode == Common::KEYCODE_RCTRL)
++		_keyState |= 0x0080;
++	else if (event.kbd.keycode == Common::KEYCODE_LSHIFT)
++		_keyState |= 0x0100;
++	else if (event.kbd.keycode == Common::KEYCODE_RSHIFT)
++		_keyState |= 0x0200;
++	else if (event.kbd.keycode == Common::KEYCODE_LALT ||
++	         event.kbd.keycode == Common::KEYCODE_RALT)
++		_keyState |= 0x0400;
++	else if (event.kbd.keycode == Common::KEYCODE_F1)
++		_keyState |= 0x0800;
++	else if (event.kbd.keycode == Common::KEYCODE_F2)
++		_keyState |= 0x1000;
++	else if (event.kbd.keycode == Common::KEYCODE_F3)
++		_keyState |= 0x2000;
++	else if (event.kbd.keycode == Common::KEYCODE_F4)
++		_keyState |= 0x4000;
+ }
+ 
+ void Util::keyUp(const Common::Event &event) {
+@@ -712,10 +733,31 @@ void Util::keyUp(const Common::Event &event) {
+ 		_keyState &= ~0x0004;
+ 	else if (event.kbd.keycode == Common::KEYCODE_LEFT)
+ 		_keyState &= ~0x0008;
++	else if (event.kbd.keycode == Common::KEYCODE_RETURN ||
++	         event.kbd.keycode == Common::KEYCODE_KP_ENTER)
++		_keyState &= ~0x0010;
+ 	else if (event.kbd.keycode == Common::KEYCODE_SPACE)
+ 		_keyState &= ~0x0020;
+ 	else if (event.kbd.keycode == Common::KEYCODE_ESCAPE)
+ 		_keyState &= ~0x0040;
++	else if (event.kbd.keycode == Common::KEYCODE_LCTRL ||
++	         event.kbd.keycode == Common::KEYCODE_RCTRL)
++		_keyState &= ~0x0080;
++	else if (event.kbd.keycode == Common::KEYCODE_LSHIFT)
++		_keyState &= ~0x0100;
++	else if (event.kbd.keycode == Common::KEYCODE_RSHIFT)
++		_keyState &= ~0x0200;
++	else if (event.kbd.keycode == Common::KEYCODE_LALT ||
++	         event.kbd.keycode == Common::KEYCODE_RALT)
++		_keyState &= ~0x0400;
++	else if (event.kbd.keycode == Common::KEYCODE_F1)
++		_keyState &= ~0x0800;
++	else if (event.kbd.keycode == Common::KEYCODE_F2)
++		_keyState &= ~0x1000;
++	else if (event.kbd.keycode == Common::KEYCODE_F3)
++		_keyState &= ~0x2000;
++	else if (event.kbd.keycode == Common::KEYCODE_F4)
++		_keyState &= ~0x4000;
+ }
+ 
+ } // End of namespace Gob
+-- 
+2.43.0
+
+
+From 717fe661daa1b265efaa08cce0ed5ae19babdb6f Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Tue, 31 Mar 2026 23:56:41 +0200
+Subject: [PATCH 03/11] GOB: Separate o7_keyFunc opcode for Adibou2/Adi4 games
+ and later
+
+- Implement missing "command = -2" case
+- Fix "command = -1" (no blitInvalidated, fix hotspot label flickering
+issues in Adi4)
+---
+ engines/gob/inter.h      |  1 +
+ engines/gob/inter_v1.cpp | 29 ++----------------
+ engines/gob/inter_v7.cpp | 66 ++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 70 insertions(+), 26 deletions(-)
+
+diff --git a/engines/gob/inter.h b/engines/gob/inter.h
+index 715075161a3..fcdf026d009 100644
+--- a/engines/gob/inter.h
++++ b/engines/gob/inter.h
+@@ -780,6 +780,7 @@ protected:
+ 	void o7_vmdGetSoundBuffer();
+ 	void o7_vmdReleaseSoundBuffer();
+ 
++	void o7_keyFunc(OpFuncParams &params);
+ 	void o7_loadCursor(OpFuncParams &params);
+ 	void o7_printText(OpFuncParams &params);
+ 	void o7_fillRect(OpFuncParams &params);
+diff --git a/engines/gob/inter_v1.cpp b/engines/gob/inter_v1.cpp
+index 34cfc9f22d9..6bf4732d757 100644
+--- a/engines/gob/inter_v1.cpp
++++ b/engines/gob/inter_v1.cpp
+@@ -1386,26 +1386,12 @@ void Inter_v1::o1_keyFunc(OpFuncParams &params) {
+ 		break;
+ 
+ 	case -1:
+-		if (_vm->getGameType() != kGameTypeAdibou2 && _vm->getGameType() != kGameTypeAdi4)
+-			break;
+-		// fall through
++		break;
++
+ 	case 1:
+-		if (_vm->getGameType() != kGameTypeFascination &&
+-				_vm->getGameType() != kGameTypeAdibou2 &&
+-				_vm->getGameType() != kGameTypeAdi4)
++		if (_vm->getGameType() != kGameTypeFascination)
+ 			_vm->_util->forceMouseUp(true);
+ 
+-		// FIXME This is a hack to fix an issue with "text" tool in Adibou2 paint game.
+-		// keyFunc() is called twice in a loop before testing its return value.
+-		// If the first keyFunc call catches the key event, the second call will reset
+-		// the key buffer, and the loop continues.
+-		// Strangely in the original game it seems that the event is always caught by the
+-		// second keyFunc.
+-		if (_vm->getGameType() == kGameTypeAdibou2 &&
+-				(_vm->_game->_script->pos() == 18750 || _vm->_game->_script->pos() == 18955) &&
+-				_vm->isCurrentTot("palette.tot"))
+-			break;
+-
+ 		key = _vm->_game->checkKeys(&_vm->_global->_inter_mouseX,
+ 				&_vm->_global->_inter_mouseY, &_vm->_game->_mouseButtons, 0);
+ 		storeKey(key);
+@@ -1436,15 +1422,6 @@ void Inter_v1::o1_keyFunc(OpFuncParams &params) {
+ 			_vm->_util->delay(cmd);
+ 			_noBusyWait = true;
+ 		} else {
+-			if (_vm->getGameType() == kGameTypeAdibou2 || _vm->getGameType() == kGameTypeAdi4) {
+-				// The engine calls updateLive() every 100ms while waiting there
+-				while (cmd > 100) {
+-					_vm->_vidPlayer->updateVideos();
+-					_vm->_util->longDelay(100);
+-					cmd -= 100;
+-				}
+-			}
+-
+ 			_vm->_util->longDelay(cmd);
+ 		}
+ 		break;
+diff --git a/engines/gob/inter_v7.cpp b/engines/gob/inter_v7.cpp
+index 313e91f1d84..b0f32927fea 100644
+--- a/engines/gob/inter_v7.cpp
++++ b/engines/gob/inter_v7.cpp
+@@ -45,6 +45,7 @@
+ #include "gob/dataio.h"
+ #include "gob/inter.h"
+ #include "gob/game.h"
++#include "gob/hotspots.h"
+ #include "gob/script.h"
+ #include "gob/expression.h"
+ #include "gob/videoplayer.h"
+@@ -140,6 +141,7 @@ void Inter_v7::setupOpcodesDraw() {
+ void Inter_v7::setupOpcodesFunc() {
+ 	Inter_Playtoons::setupOpcodesFunc();
+ 	OPCODEFUNC(0x03, o7_loadCursor);
++	OPCODEFUNC(0x14, o7_keyFunc);
+ 	OPCODEFUNC(0x11, o7_printText);
+ 	OPCODEFUNC(0x33, o7_fillRect);
+ 	OPCODEFUNC(0x34, o7_drawLine);
+@@ -175,6 +177,70 @@ void Inter_v7::o7_draw0x0C() {
+ 	WRITE_VAR(11, 0);
+ }
+ 
++void Inter_v7::o7_keyFunc(OpFuncParams &params) {
++	if (!_vm->_vidPlayer->isPlayingLive()) {
++		_vm->_draw->forceBlit();
++		_vm->_video->retrace();
++	}
++
++	int16 cmd = _vm->_game->_script->readInt16();
++
++	if (cmd >= 0)
++		_vm->_draw->blitInvalidated();
++
++	handleBusyWait();
++
++	int16 key = 0;
++
++	switch (cmd) {
++	case 0:
++		_vm->_draw->blitCursor();
++		key = _vm->_game->_hotspots->check(0, 0);
++		storeKey(key);
++		break;
++
++	case -1:
++	case 1:
++		// FIXME This is a hack to fix an issue with "text" tool in Adibou2 paint game.
++		// keyFunc() is called twice in a loop before testing its return value.
++		// If the first keyFunc call catches the key event, the second call will reset
++		// the key buffer, and the loop continues.
++		// Strangely in the original game it seems that the event is always caught by the
++		// second keyFunc.
++		if (_vm->getGameType() == kGameTypeAdibou2 &&
++				(_vm->_game->_script->pos() == 18750 || _vm->_game->_script->pos() == 18955) &&
++				_vm->isCurrentTot("palette.tot"))
++			break;
++
++		key = _vm->_game->checkKeys(&_vm->_global->_inter_mouseX,
++				&_vm->_global->_inter_mouseY, &_vm->_game->_mouseButtons, 0);
++		storeKey(key);
++		break;
++
++	case -2:
++	case 2:
++		// Read keyboard state as a bitmask.
++		// cmd == -2 also calls storeKey; cmd == 2 does not.
++		_vm->_util->processInput(true);
++		key = _vm->_util->getKeyState();
++		WRITE_VAR(0, key);
++		_vm->_util->clearKeyBuf();
++		if (cmd == -2)
++			storeKey(key);
++		break;
++
++	default:
++		// For long delays, call updateVideos every 100ms
++		while (cmd > 100) {
++			_vm->_vidPlayer->updateVideos();
++			_vm->_util->longDelay(100);
++			cmd -= 100;
++		}
++		_vm->_util->longDelay(cmd);
++		break;
++	}
++}
++
+ void Inter_v7::o7_loadCursor(OpFuncParams &params) {
+ 	int16 id = _vm->_game->_script->readInt16();
+ 
+-- 
+2.43.0
+
+
+From 6ae06130daf64965050435754bec52a36bf803de Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Sun, 22 Mar 2026 22:32:57 +0100
+Subject: [PATCH 04/11] GOB: Fix a cursor flickering issue in Adi4
+
+---
+ engines/gob/game.cpp | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/engines/gob/game.cpp b/engines/gob/game.cpp
+index 353e79beca9..4e3187c5f1b 100644
+--- a/engines/gob/game.cpp
++++ b/engines/gob/game.cpp
+@@ -563,8 +563,16 @@ void Game::playTot(int32 function) {
+ 
+ 	if (function <= 0) {
+ 		while (!_vm->shouldQuit()) {
+-			if (_vm->_inter->_variables)
++			if (_vm->_inter->_variables && _vm->getGameType() != kGameTypeAdi4) {
++				// Display a wait cursor when loading a TOT file in memory.
++				// The original had a cache system for TOT files (not implemented in ScummVM).
++				// If the TOT file was already in the cache, the wait cursor was not be displayed.
++				// We disable this in Adi4, as it cause cursor flickering when some small helper
++				// TOT files are repeatedly loaded. The flickering was not present in the original,
++				// maybe because those very ephemeral cursor changes were squashed by the Win32
++				// cursor API.
+ 				_vm->_draw->animateCursor(4);
++			}
+ 
+ 			if (function != -1) {
+ 				_vm->_inter->initControlVars(1);
+-- 
+2.43.0
+
+
+From 43b1f312270022254f81f3d8f8ab662c29a679f0 Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Sun, 22 Mar 2026 23:05:03 +0100
+Subject: [PATCH 05/11] GOB: Fix a sprite transparency issue in Adi4
+
+Fixes a sprite transparency visible in the child's class name label in
+the character selection screen.
+---
+ engines/gob/video_v6.cpp | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/engines/gob/video_v6.cpp b/engines/gob/video_v6.cpp
+index 7a31529caa2..7495eb3bcfb 100644
+--- a/engines/gob/video_v6.cpp
++++ b/engines/gob/video_v6.cpp
+@@ -45,7 +45,15 @@ char Video_v6::spriteUncompressor(byte *sprBuf, int16 srcWidth, int16 srcHeight,
+ 	    int16 x, int16 y, int16 transp, Surface &destDesc) {
+ 
+ 	if ((sprBuf[0] == 1) && (sprBuf[1] == 3)) {
+-		drawPacked(sprBuf, x, y, destDesc);
++		if (transp != 0) {
++			int16 width = READ_LE_UINT16(sprBuf + 2);
++			int16 height = READ_LE_UINT16(sprBuf + 4);
++			Surface tempSurf(width, height, destDesc.getBPP());
++			drawPacked(sprBuf, 0, 0, tempSurf);
++			destDesc.blit(tempSurf, 0, 0, width - 1, height - 1, x, y, 0);
++		} else {
++			drawPacked(sprBuf, x, y, destDesc);
++		}
+ 		return 1;
+ 	}
+ 
+-- 
+2.43.0
+
+
+From 03d6e03eaaf64b81133a7d4b39a5d49ac164ff80 Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Sun, 22 Mar 2026 23:08:01 +0100
+Subject: [PATCH 06/11] GOB: Add bounds check in Font::drawLetterRaw
+
+Fix a crash in Adi4 score screen, where scripts try to draw text beyond
+a surface's bounds.
+---
+ engines/gob/video.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/engines/gob/video.cpp b/engines/gob/video.cpp
+index 1fca42ea216..9f637fbfb09 100644
+--- a/engines/gob/video.cpp
++++ b/engines/gob/video.cpp
+@@ -105,6 +105,9 @@ void Font::drawLetterRaw(Surface &surf, uint8 c, uint16 x, uint16 y,
+ 	if (c == '\r' || c == '\n')
+ 		return;
+ 
++	if (x >= surf.getWidth() || y >= surf.getHeight())
++		return;
++
+ 	const byte *src = getCharData(c);
+ 	if (!src) {
+ 		warning("Font::drawLetter(): getCharData() == 0");
+-- 
+2.43.0
+
+
+From f9549480648a26a4b834b9b595fc8d5daafa772f Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Tue, 31 Mar 2026 09:26:32 +0200
+Subject: [PATCH 07/11] GOB: Move video doubling out of the VMD decoder, to the
+ engine side
+
+---
+ engines/gob/videoplayer.cpp | 88 +++++++++++++++++++++++++++--------
+ engines/gob/videoplayer.h   |  4 ++
+ video/coktel_decoder.cpp    | 91 ++-----------------------------------
+ video/coktel_decoder.h      |  6 ---
+ 4 files changed, 79 insertions(+), 110 deletions(-)
+
+diff --git a/engines/gob/videoplayer.cpp b/engines/gob/videoplayer.cpp
+index 58769777349..5f7e8fe260c 100644
+--- a/engines/gob/videoplayer.cpp
++++ b/engines/gob/videoplayer.cpp
+@@ -51,7 +51,7 @@ VideoPlayer::Properties::Properties() : type(kVideoTypeTry), sprite(Draw::kFront
+ }
+ 
+ 
+-VideoPlayer::Video::Video() : decoder(nullptr), live(false), autoUpdate(false), highColorMap(nullptr) {
++VideoPlayer::Video::Video() : decoder(nullptr), doubleVideoDestX(0), doubleVideoDestY(0), doubleVideo(false), live(false), autoUpdate(false), highColorMap(nullptr) {
+ }
+ 
+ bool VideoPlayer::Video::isEmpty() const {
+@@ -64,6 +64,10 @@ void VideoPlayer::Video::close() {
+ 	decoder = nullptr;
+ 	fileName.clear();
+ 	surface.reset();
++	tmpSurfDouble.reset();
++	doubleVideoDestX = 0;
++	doubleVideoDestY = 0;
++	doubleVideo = false;
+ 
+ 	tmpSurfBppConversion.reset();
+ 	delete highColorMap;
+@@ -258,10 +262,20 @@ int VideoPlayer::openVideo(bool primary, const Common::String &file, Properties
+ 				if (properties.sprite == Draw::kBackSurface)
+ 					video->surface = _vm->_draw->_backSurface;
+ 
++				video->doubleVideo = _vm->_draw->_renderFlags & RENDERFLAG_DOUBLEVIDEO;
++				if (video->doubleVideo) {
++					video->doubleVideo = true;
++					video->tmpSurfDouble = _vm->_video->initSurfDesc(
++						video->decoder->getWidth(), video->decoder->getHeight(), 0, 0);
++				}
++
++				Surface *decodeTarget = video->doubleVideo ? video->tmpSurfDouble.get() : video->surface.get();
++
+ 				if (video->decoder->isPaletted() && video->surface->getBPP() > 1) {
++					// The decoder will write into the temporary surface used for high color conversion
+ 					video->tmpSurfBppConversion.reset(new Graphics::Surface());
+-					video->tmpSurfBppConversion->create(video->surface->getWidth(),
+-														video->surface->getHeight(),
++					video->tmpSurfBppConversion->create(decodeTarget->getWidth(),
++														decodeTarget->getHeight(),
+ 														video->decoder->getPixelFormat());
+ 
+ 					if (!video->highColorMap)
+@@ -276,7 +290,14 @@ int VideoPlayer::openVideo(bool primary, const Common::String &file, Properties
+ 													 video->tmpSurfBppConversion->w,
+ 													 video->tmpSurfBppConversion->h,
+ 													 video->tmpSurfBppConversion->format.bytesPerPixel);
++				} else if (video->doubleVideo) {
++					// The decoder will write into the temporary surface used for doubling pixels
++					video->decoder->setSurfaceMemory(video->tmpSurfDouble->getData(),
++													 video->tmpSurfDouble->getWidth(),
++													 video->tmpSurfDouble->getHeight(),
++													 video->tmpSurfDouble->getBPP());
+ 				} else {
++					// The decoder will write into the target surface
+ 					video->decoder->setSurfaceMemory(video->surface->getData(),
+ 													 video->surface->getWidth(),
+ 													 video->surface->getHeight(),
+@@ -301,7 +322,13 @@ int VideoPlayer::openVideo(bool primary, const Common::String &file, Properties
+ 		}
+ 	}
+ 
+-	video->decoder->setXY(properties.x, properties.y);
++	if (video->doubleVideo) {
++		video->doubleVideoDestX = (properties.x > 0) ? properties.x : 0;
++		video->doubleVideoDestY = (properties.y > 0) ? properties.y : 0;
++		video->decoder->setXY(0, 0);
++	} else {
++		video->decoder->setXY(properties.x, properties.y);
++	}
+ 
+ 	if (primary)
+ 		_needBlit = (properties.flags & kFlagUseBackSurfaceContent) && (properties.sprite == Draw::kFrontSurface);
+@@ -451,9 +478,6 @@ bool VideoPlayer::play(int slot, Properties &properties) {
+ 		//       Except for Urban Runner, Bambou and Adibou2 where it leads to glitches
+ 		properties.breakKey = kShortKeyEscape;
+ 
+-	if (_vm->_draw->_renderFlags & RENDERFLAG_DOUBLEVIDEO)
+-		video->decoder->setDouble(true);
+-
+ 	while (!lastFrameReached(*video, properties)) {
+ 
+ 		if ((_vm->getGameType() == kGameTypeAdibou2 || _vm->getGameType() == kGameTypeAdi4) && video->live) {
+@@ -493,9 +517,6 @@ bool VideoPlayer::play(int slot, Properties &properties) {
+ 			waitEndFrame(slot);
+ 	}
+ 
+-	if (_vm->_draw->_renderFlags & RENDERFLAG_DOUBLEVIDEO)
+-		video->decoder->setDouble(false);
+-
+ 	evalBgShading(*video);
+ 
+ 	return true;
+@@ -724,17 +745,31 @@ bool VideoPlayer::playFrame(int slot, Properties &properties) {
+ 
+ 	const Graphics::Surface *surface = video->decoder->decodeNextFrame();
+ 	if (surface != nullptr && surface->w > 0 && surface->h > 0 && video->decoder->isPaletted() && video->surface && video->surface->getBPP() > 1) {
++		// High color conversion from paletted
++		Surface *bppTarget = (video->doubleVideo && video->tmpSurfDouble) ?
++			video->tmpSurfDouble.get() : video->surface.get();
+ 		int16 x = 0;
+ 		int16 y = 0;
+ 		int16 width = 0;
+ 		int16 height = 0;
+ 		if (video->decoder->getFrameCoords(video->decoder->getCurFrame(), x, y, width, height)
+ 				&& x >= 0 && y >= 0 && width > 0 && height > 0) {
+-			Graphics::crossBlitMap(video->surface->getData(x, y), static_cast<const byte *>(surface->getBasePtr(x, y)),
+-								   video->surface->getWidth() * video->surface->getBPP(),
++			Graphics::crossBlitMap(bppTarget->getData(x, y), static_cast<const byte *>(surface->getBasePtr(x, y)),
++								   bppTarget->getWidth() * bppTarget->getBPP(),
+ 								   surface->pitch,
+ 								   width, height,
+-								   video->surface->getBPP(), video->highColorMap);
++								   bppTarget->getBPP(), video->highColorMap);
++		}
++	}
++
++	if (video->doubleVideo && video->tmpSurfDouble && video->surface) {
++		// Double the video
++		const Common::List<Common::Rect> &rects = video->decoder->getDirtyRects();
++		for (Common::List<Common::Rect>::const_iterator rect = rects.begin(); rect != rects.end(); ++rect) {
++			video->surface->blitScaled(*video->tmpSurfDouble,
++				rect->left, rect->top, rect->right - 1, rect->bottom - 1,
++				video->doubleVideoDestX + rect->left * 2,
++				video->doubleVideoDestY + rect->top * 2, 2);
+ 		}
+ 	}
+ 
+@@ -778,15 +813,32 @@ bool VideoPlayer::playFrame(int slot, Properties &properties) {
+ 
+ 		if (video->surface == _vm->_draw->_backSurface) {
+ 
+-			for (Common::List<Common::Rect>::const_iterator rect = dirtyRects.begin(); rect != dirtyRects.end(); ++rect)
+-				_vm->_draw->invalidateRect(rect->left + ignoreBorder, rect->top, rect->right - 1, rect->bottom - 1);
++			for (Common::List<Common::Rect>::const_iterator rect = dirtyRects.begin(); rect != dirtyRects.end(); ++rect) {
++				if (video->doubleVideo) {
++					_vm->_draw->invalidateRect(
++						video->doubleVideoDestX + (rect->left + ignoreBorder) * 2,
++						video->doubleVideoDestY + rect->top * 2,
++						video->doubleVideoDestX + rect->right * 2 - 1,
++						video->doubleVideoDestY + rect->bottom * 2 - 1);
++				} else {
++					_vm->_draw->invalidateRect(rect->left + ignoreBorder, rect->top, rect->right - 1, rect->bottom - 1);
++				}
++			}
+ 			if (!video->live)
+ 				_vm->_draw->blitInvalidated();
+ 
+ 		} else if (video->surface == _vm->_draw->_frontSurface) {
+-			for (Common::List<Common::Rect>::const_iterator rect = dirtyRects.begin(); rect != dirtyRects.end(); ++rect)
+-				_vm->_video->dirtyRectsAdd(rect->left + ignoreBorder, rect->top, rect->right - 1, rect->bottom - 1);
+-
++			for (Common::List<Common::Rect>::const_iterator rect = dirtyRects.begin(); rect != dirtyRects.end(); ++rect) {
++				if (video->doubleVideo) {
++					_vm->_video->dirtyRectsAdd(
++						video->doubleVideoDestX + (rect->left + ignoreBorder) * 2,
++						video->doubleVideoDestY + rect->top * 2,
++						video->doubleVideoDestX + rect->right * 2 - 1,
++						video->doubleVideoDestY + rect->bottom * 2 - 1);
++				} else {
++					_vm->_video->dirtyRectsAdd(rect->left + ignoreBorder, rect->top, rect->right - 1, rect->bottom - 1);
++				}
++			}
+ 		}
+ 
+ 		if (!video->live && ((video->decoder->getCurFrame() - 1) == properties.startFrame))
+diff --git a/engines/gob/videoplayer.h b/engines/gob/videoplayer.h
+index f5a81186f52..c563d514c74 100644
+--- a/engines/gob/videoplayer.h
++++ b/engines/gob/videoplayer.h
+@@ -178,11 +178,15 @@ private:
+ 		Common::String fileName;
+ 
+ 		SurfacePtr surface;
++		SurfacePtr tmpSurfDouble; ///< Intermediate 1x surface for video doubling
++		int16 doubleVideoDestX;   ///< Saved destination X on target surface for the doubled video
++		int16 doubleVideoDestY;   ///< Saved destination Y on target surface for the doubled video
+ 		Common::SharedPtr<Graphics::Surface> tmpSurfBppConversion;
+ 		uint32 *highColorMap;
+ 
+ 		Properties properties;
+ 
++		bool doubleVideo; ///< Should the video be doubled (each pixel drawn as a 2x2 block)
+ 		bool live;
+ 		bool autoUpdate; ///< Should the video be automatically advanced by updateVideos()
+ 
+diff --git a/video/coktel_decoder.cpp b/video/coktel_decoder.cpp
+index 480fb07b175..13a6cbdb6c0 100644
+--- a/video/coktel_decoder.cpp
++++ b/video/coktel_decoder.cpp
+@@ -58,7 +58,7 @@ CoktelDecoder::State::State() : flags(0), speechId(0) {
+ CoktelDecoder::CoktelDecoder(Audio::Mixer *mixer, Audio::Mixer::SoundType soundType) :
+ 	_mixer(mixer), _soundType(soundType), _width(0), _height(0), _x(0), _y(0),
+ 	_defaultX(0), _defaultY(0), _features(0), _nbFramesPastEnd(0), _frameCount(0), _palette(256), _paletteDirty(false),
+-	_isDouble(false), _ownSurface(true), _frameRate(12), _hasSound(false),
++	_ownSurface(true), _frameRate(12), _hasSound(false),
+ 	_soundEnabled(false), _soundStage(kSoundNone), _audioStream(0), _startTime(0),
+ 	_pauseStartTime(0), _isPaused(false) {
+ 
+@@ -160,10 +160,6 @@ void CoktelDecoder::setXY() {
+ 	setXY(_defaultX, _defaultY);
+ }
+ 
+-void CoktelDecoder::setDouble(bool isDouble) {
+-	_isDouble = isDouble;
+-}
+-
+ void CoktelDecoder::setFrameRate(Common::Rational frameRate) {
+ 	_frameRate = frameRate;
+ }
+@@ -495,29 +491,6 @@ void CoktelDecoder::renderBlockWhole(Graphics::Surface &dstSurf, const byte *src
+ 	}
+ }
+ 
+-void CoktelDecoder::renderBlockWholeDouble(Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect) {
+-	Common::Rect srcRect = rect;
+-
+-	rect.clip(dstSurf.w / 2, dstSurf.h / 2);
+-
+-	byte *dst = (byte *)dstSurf.getBasePtr(2 * rect.left, 2 * rect.top);
+-	byte bpp = dstSurf.format.bytesPerPixel;
+-	for (int i = 0; i < rect.height(); i++) {
+-		// Each pixel on the source row is written twice to the destination row
+-		for (int j = 0; j < rect.width(); j++) {
+-			memcpy(dst + 2 * j * bpp, src + j * bpp, bpp);
+-			memcpy(dst + (2 * j + 1) * bpp, src + j * bpp, bpp);
+-		}
+-		dst += dstSurf.pitch;
+-
+-		// Then, the whole row is written again to the destination
+-		memcpy(dst, dst - dstSurf.pitch, 2 * rect.width() * bpp);
+-		dst += dstSurf.pitch;
+-
+-		src += srcRect.width() * bpp;
+-	}
+-}
+-
+ // A quarter-wide whole, completely filled block
+ void CoktelDecoder::renderBlockWhole4X(Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect) {
+ 	Common::Rect srcRect = rect;
+@@ -600,48 +573,6 @@ void CoktelDecoder::renderBlockSparse(Graphics::Surface &dstSurf, const byte *sr
+ 	}
+ }
+ 
+-void CoktelDecoder::renderBlockSparseDouble(Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect) {
+-	Common::Rect srcRect = rect;
+-
+-	rect.clip(dstSurf.w / 2, dstSurf.h / 2);
+-
+-	byte *dst = (byte *)dstSurf.getBasePtr(2 * rect.left, 2 * rect.top);
+-	for (int i = 0; i < rect.height(); i++) {
+-		byte *dstRow = dst;
+-		int16 pixWritten = 0;
+-
+-		// Each pixel on the source row is written twice to the destination row
+-		while (pixWritten < srcRect.width()) {
+-			int16 pixCount = *src++;
+-
+-			if (pixCount & 0x80) { // Data
+-				int16 copyCount;
+-
+-				pixCount = MIN<int16>((pixCount & 0x7F) + 1, srcRect.width() - pixWritten);
+-				copyCount = CLIP<int16>(rect.width() - pixWritten, 0, pixCount);
+-
+-				for (int j = 0; j < copyCount; j++) {
+-					dstRow[2 * j] = src[j];
+-					dstRow[2 * j + 1] = src[j];
+-				}
+-
+-				pixWritten += pixCount;
+-				dstRow += 2 * pixCount;
+-				src += pixCount;
+-			} else { // "Hole"
+-				pixWritten += pixCount + 1;
+-				dstRow += 2 * (pixCount + 1); // The hole size is doubled in the destination
+-			}
+-		}
+-
+-		dst += dstSurf.pitch;
+-		// Then, the whole row is written again to the destination
+-		memcpy(dst, dst - dstSurf.pitch, 2 * rect.width());
+-		dst += dstSurf.pitch;
+-	}
+-}
+-
+-
+ // A half-high sparse block
+ void CoktelDecoder::renderBlockSparse2Y(Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect) {
+ 	warning("renderBlockSparse2Y");
+@@ -1585,15 +1516,9 @@ bool IMDDecoder::renderFrame(Common::Rect &rect) {
+ 
+ 	// Evaluate the block type
+ 	if (type == 0x01) {
+-		if (_isDouble)
+-			renderBlockSparseDouble(_surface, dataPtr, rect);
+-		else
+-			renderBlockSparse(_surface, dataPtr, rect);
++		renderBlockSparse(_surface, dataPtr, rect);
+ 	} else if (type == 0x02) {
+-		if (_isDouble)
+-			renderBlockWholeDouble(_surface, dataPtr, rect);
+-		else
+-			renderBlockWhole(_surface, dataPtr, rect);
++		renderBlockWhole(_surface, dataPtr, rect);
+ 	} else if (type == 0x42)
+ 		renderBlockWhole4X (_surface, dataPtr, rect);
+ 	else if ((type & 0x0F) == 0x02)
+@@ -2569,15 +2494,9 @@ bool VMDDecoder::renderFrame(Common::Rect &rect) {
+ 
+ 	// Evaluate the block type
+ 	if      (type == 0x01) {
+-		if (_isDouble)
+-			renderBlockSparseDouble(*surface, dataPtr, *blockRect);
+-		else
+-			renderBlockSparse(*surface, dataPtr, *blockRect);
++		renderBlockSparse(*surface, dataPtr, *blockRect);
+ 	} else if (type == 0x02) {
+-		if (_isDouble)
+-			renderBlockWholeDouble(*surface, dataPtr, *blockRect);
+-		else
+-			renderBlockWhole(*surface, dataPtr, *blockRect);
++		renderBlockWhole(*surface, dataPtr, *blockRect);
+ 	} else if (type == 0x03)
+ 		renderBlockRLE     (*surface, dataPtr, *blockRect);
+ 	else if (type == 0x42)
+diff --git a/video/coktel_decoder.h b/video/coktel_decoder.h
+index 9b814744b66..20f5dadfb59 100644
+--- a/video/coktel_decoder.h
++++ b/video/coktel_decoder.h
+@@ -105,8 +105,6 @@ public:
+ 	/** Draw the video at the default position. */
+ 	void setXY();
+ 
+-	void setDouble(bool isDouble); // double the size of the video, to accommodate higher resolutions
+-
+ 	/** Override the video's frame rate. */
+ 	void setFrameRate(Common::Rational frameRate);
+ 	/** Get the video's frame rate. */
+@@ -246,8 +244,6 @@ protected:
+ 	Graphics::Palette _palette;
+ 	bool _paletteDirty;
+ 
+-	bool _isDouble;
+-
+ 	bool    _ownSurface;
+ 	Graphics::Surface _surface;
+ 
+@@ -276,11 +272,9 @@ protected:
+ 
+ 	// Block rendering
+ 	void renderBlockWhole       (Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect);
+-	void renderBlockWholeDouble (Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect);
+ 	void renderBlockWhole4X     (Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect);
+ 	void renderBlockWhole2Y     (Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect);
+ 	void renderBlockSparse      (Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect);
+-	void renderBlockSparseDouble(Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect);
+ 	void renderBlockSparse2Y    (Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect);
+ 	void renderBlockRLE         (Graphics::Surface &dstSurf, const byte *src, Common::Rect &rect);
+ 
+-- 
+2.43.0
+
+
+From e107ce329751ec36e3a2515d4041a2a3c49f0531 Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Tue, 31 Mar 2026 09:41:32 +0200
+Subject: [PATCH 08/11] GOB: Video flag 0x40 also means "double video" for some
+ games
+
+Fix doubled video in the Conquest of Space activity in Adi4.
+
+This 0x40 had a different meaning (kFlagUseBackSurfaceContent), it is
+unclear when it became "double video" instead. For now, we apply the
+doubling effect for Adi4 only.
+---
+ engines/gob/videoplayer.cpp |  7 +++++--
+ engines/gob/videoplayer.h   | 13 +++++++------
+ 2 files changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/engines/gob/videoplayer.cpp b/engines/gob/videoplayer.cpp
+index 5f7e8fe260c..c41689dd6f3 100644
+--- a/engines/gob/videoplayer.cpp
++++ b/engines/gob/videoplayer.cpp
+@@ -262,7 +262,10 @@ int VideoPlayer::openVideo(bool primary, const Common::String &file, Properties
+ 				if (properties.sprite == Draw::kBackSurface)
+ 					video->surface = _vm->_draw->_backSurface;
+ 
+-				video->doubleVideo = _vm->_draw->_renderFlags & RENDERFLAG_DOUBLEVIDEO;
++				video->doubleVideo = (_vm->_draw->_renderFlags & RENDERFLAG_DOUBLEVIDEO) ||
++									 ((properties.flags & kFlagUseBackSurfaceContentOrDoubleVideo) &&
++									  _vm->getGameType() == kGameTypeAdi4); // TODO: May be needed by other games
++
+ 				if (video->doubleVideo) {
+ 					video->doubleVideo = true;
+ 					video->tmpSurfDouble = _vm->_video->initSurfDesc(
+@@ -331,7 +334,7 @@ int VideoPlayer::openVideo(bool primary, const Common::String &file, Properties
+ 	}
+ 
+ 	if (primary)
+-		_needBlit = (properties.flags & kFlagUseBackSurfaceContent) && (properties.sprite == Draw::kFrontSurface);
++		_needBlit = (properties.flags & kFlagUseBackSurfaceContentOrDoubleVideo) && (properties.sprite == Draw::kFrontSurface);
+ 
+ 	properties.hasSound = video->decoder->hasSound();
+ 
+diff --git a/engines/gob/videoplayer.h b/engines/gob/videoplayer.h
+index c563d514c74..8048b85e374 100644
+--- a/engines/gob/videoplayer.h
++++ b/engines/gob/videoplayer.h
+@@ -50,12 +50,13 @@ class DataStream;
+ class VideoPlayer {
+ public:
+ 	enum Flags {
+-		kFlagNone                  = 0x000000,
+-		kFlagUseBackSurfaceContent = 0x000040, ///< Use the back surface as a video "base".
+-		kFlagFrontSurface          = 0x000080, ///< Draw directly into the front surface.
+-		kFlagNoVideo               = 0x000100, ///< Only sound.
+-		kFlagOtherSurface          = 0x000800, ///< Draw into a specific sprite.
+-		kFlagScreenSurface         = 0x400000  ///< Draw into a newly created sprite of screen dimensions.
++		kFlagNone                               = 0x000000,
++		kFlagUseBackSurfaceContentOrDoubleVideo = 0x000040, ///< Use the back surface as a video "base".
++		// In later version of the engine, this 0x40 flag indicates instead that the video should be doubled.
++		kFlagFrontSurface                       = 0x000080, ///< Draw directly into the front surface.
++		kFlagNoVideo                            = 0x000100, ///< Only sound.
++		kFlagOtherSurface                       = 0x000800, ///< Draw into a specific sprite.
++		kFlagScreenSurface                      = 0x400000  ///< Draw into a newly created sprite of screen dimensions.
+ 	};
+ 
+ 	/** Video format. */
+-- 
+2.43.0
+
+
+From 8e4ebc45ba95dd8dbadec90b7382f0afe996978b Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Fri, 27 Mar 2026 14:52:26 +0100
+Subject: [PATCH 09/11] GOB: Ensure animated cursors are updated during
+ blocking video play
+
+---
+ engines/gob/videoplayer.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/engines/gob/videoplayer.cpp b/engines/gob/videoplayer.cpp
+index c41689dd6f3..0d91e671318 100644
+--- a/engines/gob/videoplayer.cpp
++++ b/engines/gob/videoplayer.cpp
+@@ -488,6 +488,8 @@ bool VideoPlayer::play(int slot, Properties &properties) {
+ 									video->decoder->getNbFramesPastEnd();
+ 		}
+ 
++		_vm->_draw->updateAnimatedCursor();
++
+ 		bool playFrameResult = playFrame(slot, properties);
+ 		if ((_vm->getGameType() == kGameTypeAdibou2 || _vm->getGameType() == kGameTypeAdi4) &&
+ 				!playFrameResult &&
+-- 
+2.43.0
+
+
+From f4ac8e6300a3f6f3d22e4532070cec38701d4726 Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Tue, 31 Mar 2026 23:10:02 +0200
+Subject: [PATCH 10/11] GOB: Add a missing dirty rect update in o7_loadImage
+
+Fix the Adibou2 intro screen not being blitted when removing a
+dubious forced blit o1_keyFunc.
+---
+ engines/gob/inter_v7.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/engines/gob/inter_v7.cpp b/engines/gob/inter_v7.cpp
+index b0f32927fea..669888c5f51 100644
+--- a/engines/gob/inter_v7.cpp
++++ b/engines/gob/inter_v7.cpp
+@@ -1115,6 +1115,9 @@ void Inter_v7::o7_loadImage() {
+ 		warning("o7_loadImage(): Failed to load image \"%s\"", file.c_str());
+ 		return;
+ 	}
++
++	if (spriteIndex == Draw::kBackSurface)
++		_vm->_draw->dirtiedRect(spriteIndex, x, y, x + width - 1, y + height - 1);
+ }
+ 
+ void Inter_v7::o7_copyDataToClipboard() {
+-- 
+2.43.0
+
+
+From f2b1bc43cfc747dbafa81fd066808cb1e9b14685 Mon Sep 17 00:00:00 2001
+From: Simon Delamarre <simon.delamarre14@gmail.com>
+Date: Tue, 31 Mar 2026 23:14:23 +0200
+Subject: [PATCH 11/11] GOB: Finally remove forced blit from o1_keyFunc
+
+See PR 7341 and bugtracker #14574
+
+The Adibou2 regression that lead to a revert of a previous version of
+this change (5aab749cfde1871b18d85a50b002e4f2b9a42f32) have now been
+identified and fixed (in 0571a33675f6b33dce195e153dc67436b31ae5fe).
+---
+ engines/gob/inter_v1.cpp | 5 -----
+ engines/gob/inter_v7.cpp | 5 -----
+ 2 files changed, 10 deletions(-)
+
+diff --git a/engines/gob/inter_v1.cpp b/engines/gob/inter_v1.cpp
+index 6bf4732d757..18936403f40 100644
+--- a/engines/gob/inter_v1.cpp
++++ b/engines/gob/inter_v1.cpp
+@@ -1348,11 +1348,6 @@ void Inter_v1::o1_palLoad(OpFuncParams &params) {
+ }
+ 
+ void Inter_v1::o1_keyFunc(OpFuncParams &params) {
+-	if (_vm->getGameType() != kGameTypeWeen && !_vm->_vidPlayer->isPlayingLive()) {
+-		_vm->_draw->forceBlit();
+-		_vm->_video->retrace();
+-	}
+-
+ 	animPalette();
+ 	_vm->_draw->blitInvalidated();
+ 
+diff --git a/engines/gob/inter_v7.cpp b/engines/gob/inter_v7.cpp
+index 669888c5f51..938c925030a 100644
+--- a/engines/gob/inter_v7.cpp
++++ b/engines/gob/inter_v7.cpp
+@@ -178,11 +178,6 @@ void Inter_v7::o7_draw0x0C() {
+ }
+ 
+ void Inter_v7::o7_keyFunc(OpFuncParams &params) {
+-	if (!_vm->_vidPlayer->isPlayingLive()) {
+-		_vm->_draw->forceBlit();
+-		_vm->_video->retrace();
+-	}
+-
+ 	int16 cmd = _vm->_game->_script->readInt16();
+ 
+ 	if (cmd >= 0)
+-- 
+2.43.0
+
