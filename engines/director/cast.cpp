@@ -346,11 +346,11 @@ bool Cast::loadConfig() {
 		return false;
 	}
 	Common::SeekableReadStreamEndian *stream = nullptr;
-	const char *chunkTag = "VWCF";
-	stream = _castArchive->getMovieResourceIfPresent(MKTAG('V', 'W', 'C', 'F'));
+	const char *chunkTag = "DRCF";
+	stream = _castArchive->getMovieResourceIfPresent(MKTAG('D', 'R', 'C', 'F'));
 	if (!stream) {
-		stream = _castArchive->getMovieResourceIfPresent(MKTAG('D', 'R', 'C', 'F'));
-		chunkTag = "DRCF";
+		chunkTag = "VWCF";
+		stream = _castArchive->getMovieResourceIfPresent(MKTAG('V', 'W', 'C', 'F'));
 	}
 	if (!stream) {
 		warning("Cast::loadConfig(): Wrong format. VWCF resource missing");
