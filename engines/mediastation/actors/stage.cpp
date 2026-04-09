@@ -66,24 +66,24 @@ void StageActor::readParameter(Chunk &chunk, ActorHeaderSectionType paramType) {
 	}
 }
 
-void StageActor::preload(const Common::Rect &rect) {
+void StageActor::preload(const Common::Rect &rect, bool fireStepEvent) {
 	if (cylindricalX()) {
-		preloadTest(rect, kWrapLeft);
+		preloadTest(rect, kWrapLeft, fireStepEvent);
 	}
 	if (cylindricalY()) {
-		preloadTest(rect, kWrapTop);
+		preloadTest(rect, kWrapUp, fireStepEvent);
 	}
 	if (cylindricalX() && cylindricalY()) {
-		preloadTest(rect, kWrapLeftTop);
+		preloadTest(rect, kWrapLeftUp, fireStepEvent);
 	}
-	preloadTest(rect, kWrapNone);
+	preloadTest(rect, kWrapNone, fireStepEvent);
 }
 
-void StageActor::preloadTest(const Common::Rect &rect, CylindricalWrapMode wrapMode) {
+void StageActor::preloadTest(const Common::Rect &rect, CylindricalWrapMode wrapMode, bool fireStepEvent) {
 	for (SpatialEntity *entity : _children) {
 		entity->setAdjustedBounds(wrapMode);
 		if (!entity->isRectInMemory(rect) && !entity->isLoading()) {
-			entity->preload(rect);
+			entity->preload(rect, fireStepEvent);
 		}
 	}
 }
@@ -94,10 +94,10 @@ bool StageActor::isRectInMemory(const Common::Rect &rect) {
 		result = isRectInMemoryTest(rect, kWrapLeft);
 	}
 	if (result && cylindricalY()) {
-		result = isRectInMemoryTest(rect, kWrapTop);
+		result = isRectInMemoryTest(rect, kWrapUp);
 	}
 	if (result && cylindricalY() && cylindricalX()) {
-		result = isRectInMemoryTest(rect, kWrapLeftTop);
+		result = isRectInMemoryTest(rect, kWrapLeftUp);
 	}
 	if (result) {
 		result = isRectInMemoryTest(rect, kWrapNone);
@@ -108,7 +108,7 @@ bool StageActor::isRectInMemory(const Common::Rect &rect) {
 bool StageActor::isRectInMemoryTest(const Common::Rect &rect, CylindricalWrapMode wrapMode) {
 	for (SpatialEntity *entity : _children) {
 		entity->setAdjustedBounds(wrapMode);
-		if (!entity->isRectInMemory(rect)) {
+		if (entity->isVisible() && !entity->isRectInMemory(rect)) {
 			return false;
 		}
 	}
@@ -171,10 +171,13 @@ void StageActor::drawUsingStage(DisplayContext &displayContext) {
 }
 
 void StageActor::invalidateRect(const Common::Rect &rect) {
+	Common::Point origin = _boundingBox.origin();
+	Common::Rect rectRelativeToParent = rect;
+	rectRelativeToParent.translate(origin.x, origin.y);
+
 	if (_parentStage != nullptr) {
-		Common::Point origin = _boundingBox.origin();
-		Common::Rect rectRelativeToParent = rect;
-		rectRelativeToParent.translate(origin.x, origin.y);
+		debugC(8, kDebugGraphics, "[%s] %s: (%d, %d, %d, %d) -> (%d, %d, %d, %d)",
+				debugName(), __func__, PRINT_RECT(rect), PRINT_RECT(rectRelativeToParent));
 
 		if (_cameras.size() == 0) {
 			_parentStage->invalidateRect(rectRelativeToParent);
@@ -182,7 +185,8 @@ void StageActor::invalidateRect(const Common::Rect &rect) {
 			invalidateUsingCameras(rectRelativeToParent);
 		}
 	} else {
-		warning("[%s] %s: Attempt to invalidate rect without a parent stage", debugName(), __func__);
+		debugC(5, kDebugGraphics, "[%s] %s (%d, %d, %d, %d): Attempt to invalidate rect (%d, %d, %d, %d) without a parent stage",
+			debugName(), __func__, PRINT_RECT(_boundingBox), PRINT_RECT(rectRelativeToParent));
 	}
 }
 
@@ -454,7 +458,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalY()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapTop);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapUp);
 		if (handledEvents != 0) {
 			eventMask &= ~handledEvents;
 			result |= handledEvents;
@@ -462,7 +466,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalY()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapBottom);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapDown);
 		if (handledEvents != 0) {
 			eventMask &= ~handledEvents;
 			result |= handledEvents;
@@ -470,7 +474,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalY() && cylindricalX()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapLeftTop);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapLeftUp);
 		if (handledEvents != 0) {
 			eventMask &= ~handledEvents;
 			result |= handledEvents;
@@ -478,7 +482,7 @@ uint16 StageActor::findActorToAcceptMouseEventsObject(
 	}
 
 	if ((eventMask != 0) && cylindricalY() && cylindricalX()) {
-		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapRightBottom);
+		handledEvents = queryChildrenAboutMouseEvents(point, eventMask, state, kWrapRightDown);
 		if (handledEvents != 0) {
 			result |= handledEvents;
 		}

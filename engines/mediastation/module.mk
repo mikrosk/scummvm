@@ -5,6 +5,7 @@ MODULE_OBJS = \
 	actors/camera.o \
 	actors/canvas.o \
 	actors/cursor.o \
+	actors/diskimage.o \
 	actors/document.o \
 	actors/font.o \
 	actors/hotspot.o \

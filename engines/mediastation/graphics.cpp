@@ -80,7 +80,9 @@ void Clip::addToRegion(const Common::Rect &rect) {
 }
 
 bool Clip::clipIntersectsRect(const Common::Rect &rect) {
-	return _region.intersects(rect);
+	Common::Rect adjustedRect = rect;
+	adjustedRect.translate(-_bounds.origin().x, -_bounds.origin().y);
+	return _region.intersects(adjustedRect);
 }
 
 void Clip::intersectWithRegion(const Common::Rect &rect) {

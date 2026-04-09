@@ -49,7 +49,7 @@ enum ActorType {
 	kActorTypeLKZazu = 0x000f,
 	kActorTypeLKConstellations = 0x0010,
 	kActorTypeDocument = 0x0011,
-	kActorTypeImageSet = 0x001d,
+	kActorTypeDiskImage = 0x001d,
 	kActorTypeCursor = 0x000c, // CSR
 	kActorTypePrinter = 0x0019, // PRT
 	kActorTypeMovie = 0x0016, // MOV
@@ -99,6 +99,14 @@ enum ActorHeaderSectionType {
 	kActorHeaderScaleY = 0x77d,
 	kActorHeaderActorName = 0x0bb8,
 	kStreamMovieProxyInfo = 0x06ac,
+
+	// DISK IMAGE ACTOR FIELDS.
+	kActorHeaderDiskImageMaxStrips = 0x774,
+	kActorHeaderDiskImageStripWidth = 0x775,
+	kActorHeaderDiskImageUnk1 = 0x776,
+	kActorHeaderDiskImageMaxImages = 0x777,
+	kActorHeaderDiskImageStripInfo = 0x778,
+	kActorHeaderDiskImageUnkRect = 0x779,
 
 	// PATH FIELDS.
 	kActorHeaderStartPoint = 0x060e,
@@ -234,8 +242,9 @@ public:
 	virtual ScriptValue callMethod(BuiltInMethod methodId, Common::Array<ScriptValue> &args) override;
 	virtual void readParameter(Chunk &chunk, ActorHeaderSectionType paramType) override;
 	virtual void loadIsComplete() override;
-	virtual void preload(const Common::Rect &rect) {};
+	virtual void preload(const Common::Rect &rect, bool fireStepEvent = true) {};
 	virtual bool isRectInMemory(const Common::Rect &rect) { return true; }
+	virtual bool isReadyToDraw(DisplayContext &displayContext) { return true; }
 	virtual bool isLoading() { return false; }
 
 	virtual bool isSpatialActor() const override { return true; }
@@ -271,14 +280,15 @@ public:
 	StageActor *getParentStage() const { return _parentStage; }
 
 	virtual void invalidateLocalBounds();
-	virtual void setAdjustedBounds(CylindricalWrapMode alignmentMode);
+	virtual void setAdjustedBounds(CylindricalWrapMode wrapMode);
 
 protected:
 	uint _stageId = 0;
 	int _zIndex = 0;
 	double _dissolveFactor = 1.0;
-	double _scaleX = 0.0;
-	double _scaleY = 0.0;
+
+	double _parallaxFactorX = 0.0;
+	double _parallaxFactorY = 0.0;
 	Common::Rect _boundingBox;
 	Common::Rect _originalBoundingBox;
 	bool _isVisible = false;

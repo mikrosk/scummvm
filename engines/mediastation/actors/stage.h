@@ -34,15 +34,15 @@ namespace MediaStation {
 // Cylindrical wrapping allows content on a stage to wrap around like a cylinder - for example, when you scroll past the
 // right edge, content from the left edge appears, creating the illusion of an infinite looping world.
 enum CylindricalWrapMode : int {
-	kWrapNone = 0,        // No offset (default)
-	kWrapRight = 1,       // Right wrap (X + extent.x)
-	kWrapBottom = 2,      // Bottom wrap (Y + extent.y)
-	kWrapLeftTop = 3,     // Left + Top wrap (X - extent.x, Y - extent.y)
-	kWrapLeft = 4,        // Left wrap (X - extent.x)
-	kWrapRightBottom = 5, // Right + Bottom wrap (X + extent.x, Y + extent.y)
-	kWrapTop = 6,         // Top wrap (Y - extent.y)
-	kWrapLeftBottom = 7,  // Left + Bottom wrap (X - extent.x, Y + extent.y)
-	kWrapRightTop = 8     // Right + Top wrap (X + extent.x, Y - extent.y)
+	kWrapNone = 0,
+	kWrapRight = 1,
+	kWrapDown = 2,
+	kWrapRightDown = 3,
+	kWrapLeft = 4,
+	kWrapUp = 5,
+	kWrapLeftUp = 6,
+	kWrapLeftDown = 7,
+	kWrapRightUp = 8
 };
 
 class CameraActor;
@@ -56,7 +56,7 @@ public:
 
 	virtual ScriptValue callMethod(BuiltInMethod methodId, Common::Array<ScriptValue> &args) override;
 	virtual void readParameter(Chunk &chunk, ActorHeaderSectionType paramType) override;
-	virtual void preload(const Common::Rect &rect) override;
+	virtual void preload(const Common::Rect &rect, bool fireStepEvent = true) override;
 	virtual bool isVisible() const override { return _children.size() > 0; }
 	virtual bool isRectInMemory(const Common::Rect &rect) override;
 
@@ -113,7 +113,7 @@ protected:
 	void addActorToStage(uint actorId);
 	void removeActorFromStage(uint actorId);
 	bool isRectInMemoryTest(const Common::Rect &rect, CylindricalWrapMode wrapMode);
-	void preloadTest(const Common::Rect &rect, CylindricalWrapMode wrapMode);
+	void preloadTest(const Common::Rect &rect, CylindricalWrapMode wrapMode, bool fireStepEvent);
 
 	bool assertHasNoParent(const SpatialEntity *entity);
 	bool assertHasParentThatIsNotMe(const SpatialEntity *entity) { return !assertIsMyChild(entity); }

@@ -39,7 +39,7 @@ ScriptValue DocumentActor::callMethod(BuiltInMethod methodId, Common::Array<Scri
 		g_engine->quitGame();
 		break;
 
-	case kDocumentContextLoadInProgressMethod: {
+	case kIsLoadingMethod: {
 		ARGCOUNTCHECK(1);
 		uint contextId = args[0].asActorId();
 		bool isLoading = g_engine->getDocument()->isContextLoadInProgress(contextId);

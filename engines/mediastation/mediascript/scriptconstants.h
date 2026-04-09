@@ -147,12 +147,12 @@ enum BuiltInMethod {
 	kSetMousePositionMethod = 0x129,
 	// It isn't clear what the difference is meant to be
 	// between these two, as the code looks the same for both.
-	kGetXScaleMethod1 = 0x16E,
-	kGetXScaleMethod2 = 0x17E,
-	kSetScaleMethod = 0x16F,
-	kSetXScaleMethod = 0x17F,
-	kGetYScaleMethod = 0x180,
-	kSetYScaleMethod = 0x181,
+	kGetParallaxFactorXMethod1 = 0x16E,
+	kGetParallaxFactorXMethod2 = 0x17E,
+	kSetParallaxFactorMethod = 0x16F,
+	kSetParallaxFactorXMethod = 0x17F,
+	kGetParallaxFactorYMethod = 0x180,
+	kSetParallaxFactorYMethod = 0x181,
 	kStartCachingMethod = 0x113,
 	kIsCachingMethod = 0x114,
 	kPauseMethod = 0xD0,
@@ -220,7 +220,7 @@ enum BuiltInMethod {
 	// DOCUMENT METHODS.
 	kDocumentBranchToScreenMethod = 0xC9,
 	kDocumentQuitMethod = 0xD9,
-	kDocumentContextLoadInProgressMethod = 0x169,
+	kIsLoadingMethod = 0x169,
 	kDocumentSetMultipleStreamsMethod = 0x174,
 	kDocumentSetMultipleSoundsMethod = 0x175,
 	kDocumentLoadContextMethod = 0x176,
@@ -290,6 +290,12 @@ enum BuiltInMethod {
 
 	// CURSOR METHODS.
 	kCursorSetMethod = 0xC8,
+
+	// DISK IMAGE ACTOR METHODS.
+	kPreloadMethod = 0x166,
+	kPurgeMethod = 0x167,
+	kStopLoadMethod = 0x168,
+	kIsRectInMemoryMethod = 0x16A,
 };
 const char *builtInMethodToStr(BuiltInMethod method);
 
@@ -319,6 +325,8 @@ enum EventType {
 	kPathStoppedEvent = 0x21,
 	kTextInputEvent = 0x25,
 	kTextErrorEvent = 0x26,
+	kDiskImageActorStepEvent = 0x27,
+	kDiskImageActorEndEvent = 0x28,
 	kCameraPanStepEvent = 0x29,
 	kCameraPanEndEvent = 0x2A,
 	kCameraPanAbortEvent = 0x2B,

@@ -118,7 +118,7 @@ ScriptValue CameraActor::callMethod(BuiltInMethod methodId, Common::Array<Script
 
 	case kStartPanMethod: {
 		ARGCOUNTCHECK(3);
-		int16 deltaX = static_cast<uint16>(args[0].asFloat());
+		int16 deltaX = static_cast<int16>(args[0].asFloat());
 		int16 deltaY = static_cast<int16>(args[1].asFloat());
 		double duration = args[2].asFloatOrTime();
 		_nextViewportOrigin = Common::Point(deltaX, deltaY) + _currentViewportOrigin;
@@ -276,6 +276,7 @@ void CameraActor::addToStage() {
 	if (_parentStage != nullptr) {
 		_parentStage->addCamera(this);
 		invalidateLocalBounds();
+		_addedToStage = true;
 	}
 }
 
@@ -338,6 +339,7 @@ void CameraActor::drawUsingCamera(DisplayContext &destContext, const Common::Arr
 			if (_overlayImage == nullptr) {
 				// Draw this image directly to the provided display context.
 				debugC(6, kDebugGraphics, "(no overlay)");
+				invalidateLocalBounds();
 				drawObject(destContext, destContext, entityToDraw);
 			} else {
 				// Draw this image to our internal display context, so we can apply the
@@ -345,6 +347,8 @@ void CameraActor::drawUsingCamera(DisplayContext &destContext, const Common::Arr
 				debugC(6, kDebugGraphics, "(overlay)");
 				drawObject(destContext, _childrenWithOverlayContext, entityToDraw);
 			}
+		} else {
+			debugC(6, kDebugGraphics, "(not visible)");
 		}
 	}
 
@@ -367,19 +371,70 @@ void CameraActor::drawObject(DisplayContext &sourceContext, DisplayContext &dest
 		return;
 	}
 
+	// Draw object without any wrapping.
 	objectToDraw->setAdjustedBounds(kWrapNone);
 	Common::Rect visibleBounds = objectToDraw->getBbox();
 	if (sourceContext.rectIsInClip(visibleBounds)) {
 		objectToDraw->draw(destContext);
 	}
 
+	// Draw object with only cylindrical X wrapping if required.
 	if (_parentStage->cylindricalX()) {
-		warning("[%s] %s: CylindricalX not handled yet", debugName(), __func__);
+		objectToDraw->setAdjustedBounds(kWrapRight);
+		visibleBounds = objectToDraw->getBbox();
+		if (sourceContext.rectIsInClip(visibleBounds)) {
+			objectToDraw->draw(destContext);
+		}
+
+		objectToDraw->setAdjustedBounds(kWrapLeft);
+		visibleBounds = objectToDraw->getBbox();
+		if (sourceContext.rectIsInClip(visibleBounds)) {
+			objectToDraw->draw(destContext);
+		}
 	}
 
+	// Draw object with only cylindrical Y wrapping if required.
 	if (_parentStage->cylindricalY()) {
-		warning("[%s] %s: CylindricalY not handled yet", debugName(), __func__);
+		objectToDraw->setAdjustedBounds(kWrapDown);
+		visibleBounds = objectToDraw->getBbox();
+		if (sourceContext.rectIsInClip(visibleBounds)) {
+			objectToDraw->draw(destContext);
+		}
+
+		objectToDraw->setAdjustedBounds(kWrapUp);
+		visibleBounds = objectToDraw->getBbox();
+		if (sourceContext.rectIsInClip(visibleBounds)) {
+			objectToDraw->draw(destContext);
+		}
 	}
+
+	// Draw object with both cylindrical X and cylindrical Y wrapping if required.
+	if (_parentStage->cylindricalX() && _parentStage->cylindricalY()) {
+		objectToDraw->setAdjustedBounds(kWrapRightDown);
+		visibleBounds = objectToDraw->getBbox();
+		if (sourceContext.rectIsInClip(visibleBounds)) {
+			objectToDraw->draw(destContext);
+		}
+
+		objectToDraw->setAdjustedBounds(kWrapLeftUp);
+		visibleBounds = objectToDraw->getBbox();
+		if (sourceContext.rectIsInClip(visibleBounds)) {
+			objectToDraw->draw(destContext);
+		}
+
+		objectToDraw->setAdjustedBounds(kWrapLeftDown);
+		visibleBounds = objectToDraw->getBbox();
+		if (sourceContext.rectIsInClip(visibleBounds)) {
+			objectToDraw->draw(destContext);
+		}
+
+		objectToDraw->setAdjustedBounds(kWrapRightUp);
+		visibleBounds = objectToDraw->getBbox();
+		if (sourceContext.rectIsInClip(visibleBounds)) {
+			objectToDraw->draw(destContext);
+		}
+	}
+
 	objectToDraw->setAdjustedBounds(kWrapNone);
 }
 
@@ -496,12 +551,8 @@ void CameraActor::timerEvent() {
 			if (continuePan()) {
 				if (cameraWithinStage(_nextViewportOrigin)) {
 					adjustCameraViewport(_nextViewportOrigin);
-
-					// The original had logic to pre-load the items that were going to be scrolled
-					// into view next, but since we load actors more all-at-once, we don't actually need this.
-					// The calls that would be made are kept commented out.
-					// Common::Rect advanceRect = getAdvanceRect();
-					// _parentStage->preload(advanceRect);
+					Common::Rect advanceRect = getAdvanceRect();
+					_parentStage->preload(advanceRect, false);
 				} else {
 					runScriptResponseIfExists(kCameraPanAbortEvent);
 					stopPan();
@@ -519,13 +570,13 @@ void CameraActor::timerEvent() {
 				} else {
 					Common::Rect currentBounds = getBbox();
 					Common::Rect preloadBounds(_nextViewportOrigin, currentBounds.width(), currentBounds.height());
-					_parentStage->preload(preloadBounds);
+					_parentStage->preload(preloadBounds, false);
 				}
 			}
 		} else {
 			Common::Rect currentBounds = getBbox();
 			Common::Rect preloadBounds(_nextViewportOrigin, currentBounds.width(), currentBounds.height());
-			_parentStage->preload(preloadBounds);
+			_parentStage->preload(preloadBounds, false);
 		}
 	}
 }
@@ -566,12 +617,25 @@ void CameraActor::adjustCameraViewport(Common::Point &viewportToAdjust) {
 		return;
 	}
 
+	Common::Point stageExtent = _parentStage->extent();
+
+	// Normalize viewport position for cylindrical wrapping.
+	// When the viewport scrolls beyond the stage boundaries,
+	// wrap it back to the opposite edge to create seamless infinite scrolling.
 	if (_parentStage->cylindricalX()) {
-		warning("[%s] %s: CylindricalX not handled yet", debugName(), __func__);
+		if (viewportToAdjust.x >= stageExtent.x) {
+			viewportToAdjust.x -= stageExtent.x;
+		} else if (viewportToAdjust.x < 0) {
+			viewportToAdjust.x += stageExtent.x;
+		}
 	}
 
 	if (_parentStage->cylindricalY()) {
-		warning("[%s] %s: CylindricalY not handled yet", debugName(), __func__);
+		if (viewportToAdjust.y >= stageExtent.y) {
+			viewportToAdjust.y -= stageExtent.y;
+		} else if (viewportToAdjust.y < 0) {
+			viewportToAdjust.y += stageExtent.y;
+		}
 	}
 }
 
@@ -598,34 +662,32 @@ void CameraActor::calcNewViewportOrigin() {
 }
 
 bool CameraActor::cameraWithinStage(const Common::Point &candidate) {
+	bool result = true;
 	if (_parentStage == nullptr) {
-		return true;
+		return result;
 	}
 
-	bool result = true;
 	// We can only be out of horizontal bounds if we have a requested delta and
-	// are not doing X axis wrapping.
+	// are not doing X wrapping.
 	bool canBeOutOfHorizontalBounds = !_parentStage->cylindricalX() && _panDelta.x != 0;
 	if (canBeOutOfHorizontalBounds) {
 		int16 candidateRightBoundary = getBbox().width() + candidate.x;
 		bool cameraPastRightBoundary = _parentStage->extent().x < candidateRightBoundary;
-		if (cameraPastRightBoundary) {
-			result = false;
-		} else if (candidate.x < 0) {
+		bool cameraPastLeftBoundary = candidate.x < 0;
+		if (cameraPastRightBoundary || cameraPastLeftBoundary) {
 			result = false;
 		}
 		debugC(6, kDebugCamera, "[%s] %s: %s [rightBoundary: %d, extent: %d]", debugName(), __func__, result ? "true" : "false", candidateRightBoundary, _parentStage->extent().x);
 	}
 
 	// We can only be out of vertical bounds if we have a requested delta and
-	// are not doing Y axis wrapping.
+	// are not doing Y wrapping.
 	bool canBeOutOfVerticalBounds = !_parentStage->cylindricalY() && _panDelta.y != 0;
 	if (canBeOutOfVerticalBounds) {
 		int16 candidateBottomBoundary = getBbox().height() + candidate.y;
 		bool cameraPastBottomBoundary = _parentStage->extent().y < candidateBottomBoundary;
-		if (cameraPastBottomBoundary) {
-			result = false;
-		} else if (candidate.y < 0) {
+		bool cameraPastTopBoundary = candidate.y < 0;
+		if (cameraPastBottomBoundary || cameraPastTopBoundary) {
 			result = false;
 		}
 		debugC(6, kDebugCamera, "[%s] %s: %s [bottomBoundary: %d, extent: %d]", debugName(), __func__, result ? "true" : "false", candidateBottomBoundary, _parentStage->extent().y);
@@ -658,6 +720,48 @@ double CameraActor::percentComplete() {
 
 	percentValue = CLIP<double>(percentValue, 0.0, 1.0);
 	return percentValue;
+}
+
+Common::Rect CameraActor::getAdvanceRect() {
+	Common::Rect viewportBounds = getViewportBounds();
+	Common::Point viewportBoundsOrigin = viewportBounds.origin();
+	int16 viewportWidth = viewportBounds.width();
+	int16 viewportHeight = viewportBounds.height();
+
+	// These constants seem to be set for smooth streaming from CD-ROM, but disk
+	// image actors also rely on a properly large advance rect for strip loading.
+	// Divisor for calculating horizontal preload expansion in the pan direction.
+	const double HORIZONTAL_PRELOAD_EXPANSION_FACTOR = 2.25;
+	// Multiplier for vertical preload expansion.
+	const int16 VERTICAL_PRELOAD_EXPANSION_FACTOR = 2;
+
+	// Handle horizontal panning.
+	if (_panDelta.x < 0) {
+		// We're panning left, so expand the advance rect leftward.
+		int16 quotient = viewportWidth / HORIZONTAL_PRELOAD_EXPANSION_FACTOR;
+		viewportBoundsOrigin.x -= quotient;
+		viewportWidth += quotient;
+	} else if (_panDelta.x > 0) {
+		// We're panning right, so expand the advance rect rightward.
+		int16 quotient = viewportWidth / HORIZONTAL_PRELOAD_EXPANSION_FACTOR;
+		viewportWidth += quotient;
+	}
+
+	// Handle vertical panning.
+	if (_panDelta.y < 0) {
+		// We're panning up, so expand the advance rect upward.
+		int16 quotient = viewportHeight / HORIZONTAL_PRELOAD_EXPANSION_FACTOR;
+		viewportBoundsOrigin.y -= quotient;
+		viewportHeight *= VERTICAL_PRELOAD_EXPANSION_FACTOR;
+	} else if (_panDelta.y > 0) {
+		// We're panning down, so expand the advance rect downward.
+		viewportHeight *= VERTICAL_PRELOAD_EXPANSION_FACTOR;
+	}
+
+	// Construct and return the advance rect with the adjusted origin and dimensions.
+	adjustCameraViewport(viewportBoundsOrigin);
+	Common::Rect advanceRect(viewportBoundsOrigin, viewportWidth, viewportHeight);
+	return advanceRect;
 }
 
 } // End of namespace MediaStation

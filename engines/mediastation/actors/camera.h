@@ -100,6 +100,7 @@ private:
 	void adjustCameraViewport(Common::Point &viewportToAdjust);
 	void calcNewViewportOrigin();
 	double percentComplete();
+	Common::Rect getAdvanceRect();
 };
 
 } // End of namespace MediaStation

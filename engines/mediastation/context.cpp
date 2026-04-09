@@ -29,6 +29,7 @@
 #include "mediastation/actors/camera.h"
 #include "mediastation/actors/canvas.h"
 #include "mediastation/actors/cursor.h"
+#include "mediastation/actors/diskimage.h"
 #include "mediastation/actors/palette.h"
 #include "mediastation/actors/image.h"
 #include "mediastation/actors/path.h"
@@ -158,6 +159,10 @@ void MediaStationEngine::readCreateActorData(Chunk &chunk) {
 
 	case kActorTypeCursor:
 		actor = new CursorActor();
+		break;
+
+	case kActorTypeDiskImage:
+		actor = new DiskImageActor();
 		break;
 
 	default:

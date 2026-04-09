@@ -58,7 +58,7 @@ const char *actorTypeToStr(ActorType type) {
 		return "LKConstellations";
 	case kActorTypeDocument:
 		return "Document";
-	case kActorTypeImageSet:
+	case kActorTypeDiskImage:
 		return "ImageSet";
 	case kActorTypeMovie:
 		return "Movie";
@@ -333,35 +333,35 @@ ScriptValue SpatialEntity::callMethod(BuiltInMethod methodId, Common::Array<Scri
 		break;
 	}
 
-	case kGetXScaleMethod1:
-	case kGetXScaleMethod2:
+	case kGetParallaxFactorXMethod1:
+	case kGetParallaxFactorXMethod2:
 		ARGCOUNTCHECK(0);
-		returnValue.setToFloat(_scaleX);
+		returnValue.setToFloat(_parallaxFactorX);
 		break;
 
-	case kSetScaleMethod:
+	case kSetParallaxFactorMethod:
 		ARGCOUNTCHECK(1);
 		invalidateLocalBounds();
-		_scaleX = _scaleY = args[0].asFloat();
+		_parallaxFactorX = _parallaxFactorY = args[0].asFloat();
 		invalidateLocalBounds();
 		break;
 
-	case kSetXScaleMethod:
+	case kSetParallaxFactorXMethod:
 		ARGCOUNTCHECK(1);
 		invalidateLocalBounds();
-		_scaleX = args[0].asFloat();
+		_parallaxFactorX = args[0].asFloat();
 		invalidateLocalBounds();
 		break;
 
-	case kGetYScaleMethod:
+	case kGetParallaxFactorYMethod:
 		ARGCOUNTCHECK(0);
-		returnValue.setToFloat(_scaleY);
+		returnValue.setToFloat(_parallaxFactorY);
 		break;
 
-	case kSetYScaleMethod:
+	case kSetParallaxFactorYMethod:
 		ARGCOUNTCHECK(1);
 		invalidateLocalBounds();
-		_scaleY = args[0].asFloat();
+		_parallaxFactorY = args[0].asFloat();
 		invalidateLocalBounds();
 		break;
 
@@ -378,9 +378,11 @@ void SpatialEntity::readParameter(Chunk &chunk, ActorHeaderSectionType paramType
 		setAdjustedBounds(kWrapNone);
 		break;
 
-	case kActorHeaderDissolveFactor:
-		_dissolveFactor = chunk.readTypedDouble();
+	case kActorHeaderDissolveFactor: {
+		double dissolveFactor = chunk.readTypedDouble();
+		setDissolveFactor(dissolveFactor);
 		break;
+	}
 
 	case kActorHeaderZIndex:
 		_zIndex = chunk.readTypedGraphicUnit();
@@ -395,15 +397,15 @@ void SpatialEntity::readParameter(Chunk &chunk, ActorHeaderSectionType paramType
 		break;
 
 	case kActorHeaderScaleXAndY:
-		_scaleX = _scaleY = chunk.readTypedDouble();
+		_parallaxFactorX = _parallaxFactorY = chunk.readTypedDouble();
 		break;
 
 	case kActorHeaderScaleX:
-		_scaleX = chunk.readTypedDouble();
+		_parallaxFactorX = chunk.readTypedDouble();
 		break;
 
 	case kActorHeaderScaleY:
-		_scaleY = chunk.readTypedDouble();
+		_parallaxFactorY = chunk.readTypedDouble();
 		break;
 
 	default:
@@ -512,7 +514,7 @@ void SpatialEntity::setDissolveFactor(double dissolveFactor) {
 
 void SpatialEntity::invalidateLocalBounds() {
 	if (_parentStage != nullptr) {
-		_parentStage->setAdjustedBounds(kWrapNone);
+		setAdjustedBounds(kWrapNone);
 		_parentStage->invalidateRect(getBbox());
 	}
 }
@@ -523,7 +525,7 @@ void SpatialEntity::invalidateLocalZIndex() {
 	}
 }
 
-void SpatialEntity::setAdjustedBounds(CylindricalWrapMode alignmentMode) {
+void SpatialEntity::setAdjustedBounds(CylindricalWrapMode wrapMode) {
 	_boundingBox = _originalBoundingBox;
 	if (_parentStage == nullptr) {
 		return;
@@ -531,70 +533,113 @@ void SpatialEntity::setAdjustedBounds(CylindricalWrapMode alignmentMode) {
 
 	Common::Point offset(0, 0);
 	Common::Point stageExtent = _parentStage->extent();
-	switch (alignmentMode) {
-	case kWrapRight: {
+
+	// Calculate position offset for cylindrical wrapping.
+	switch (wrapMode) {
+	case kWrapRight:
 		offset.x = stageExtent.x;
 		offset.y = 0;
 		break;
-	}
 
-	case kWrapLeft: {
+	case kWrapDown:
+		offset.x = 0;
+		offset.y = stageExtent.y;
+		break;
+
+	case kWrapRightDown:
+		offset.x = stageExtent.x;
+		offset.y = stageExtent.y;
+		break;
+
+	case kWrapLeft:
 		offset.x = -stageExtent.x;
 		offset.y = 0;
 		break;
-	}
 
-	case kWrapBottom: {
-		offset.x = 0;
-		offset.y = stageExtent.y;
-		break;
-	}
-
-	case kWrapLeftTop: {
+	case kWrapUp:
 		offset.x = 0;
 		offset.y = -stageExtent.y;
 		break;
-	}
 
-	case kWrapTop: {
-		offset.x = stageExtent.x;
-		offset.y = stageExtent.y;
-		break;
-	}
-
-	case kWrapRightBottom: {
+	case kWrapLeftUp:
 		offset.x = -stageExtent.x;
 		offset.y = -stageExtent.y;
 		break;
-	}
 
-	case kWrapRightTop: {
+	case kWrapLeftDown:
 		offset.x = -stageExtent.x;
 		offset.y = stageExtent.y;
 		break;
-	}
 
-	case kWrapLeftBottom: {
+	case kWrapRightUp:
 		offset.x = stageExtent.x;
 		offset.y = -stageExtent.y;
 		break;
-	}
 
 	case kWrapNone:
 	default:
 		// No offset adjustment.
 		break;
 	}
+	_boundingBox.translate(-offset.x, -offset.y);
 
-	if (alignmentMode != kWrapNone) {
-		// TODO: Implement this once we have a title that actually uses it.
-		warning("[%s] %s: Wrapping mode %d not handled yet: (%d, %d, %d, %d) -= (%d, %d)", debugName(),  __func__,
-			static_cast<uint>(alignmentMode), PRINT_RECT(_boundingBox), offset.x, offset.y);
+	// Apply parallax scrolling if parallax factors are set.
+	// This simulates depth by adjusting position based on distance from viewport center.
+	// parallax 0.0 means no parallax (ignores camera movement).
+	// parallax 1.0 means neutral depth (moves with camera at focal plane).
+	// parallax >1.0 means appears closer (moves more than camera).
+	// parallax <1.0 means appears farther (moves less than camera).
+	bool hasHorizontalParallax = _parallaxFactorX != 0.0;
+	bool hasVerticalParallax = _parallaxFactorY != 0.0;
+	if (!hasHorizontalParallax && !hasVerticalParallax) {
+		return;
 	}
 
-	if (_scaleX != 0.0 || _scaleY != 0.0) {
-		// TODO: Implement this once we have a title that actually uses it.
-		warning("[%s] %s: Scale not handled yet (scaleX: %f, scaleY: %f)", debugName(), __func__, _scaleX, _scaleY);
+	// Transform camera viewport to object's local coordinate space (inside any stages).
+	CameraActor *currentCamera = _parentStage->getCurrentCamera();
+	if (currentCamera == nullptr) {
+		return;
+	}
+
+	Common::Rect viewportBounds = currentCamera->getViewportBounds();
+	Common::Rect localViewport = viewportBounds;
+	Common::Point accumulatedOffset = viewportBounds.origin();
+	StageActor *currentStage = _parentStage;
+	while (currentStage != nullptr && currentStage != currentCamera->getParentStage()) {
+		Common::Rect parentBounds = currentStage->getBbox();
+		accumulatedOffset -= parentBounds.origin();
+		currentStage = currentStage->getParentStage();
+	}
+	localViewport.moveTo(accumulatedOffset.x, accumulatedOffset.y);
+
+	if (_boundingBox.intersects(localViewport)) {
+		// Apply horizontal parallax.
+		int16 parallaxAdjustedLeft = _boundingBox.left;
+		if (hasHorizontalParallax) {
+			// Calculate offset from viewport center to object center.
+			int16 viewportHalfWidth = localViewport.width() / 2;
+			int16 boundsHalfWidth = _boundingBox.width() / 2;
+			int centerOffset = (_boundingBox.left + boundsHalfWidth) - (localViewport.left + viewportHalfWidth);
+
+			// Multiply by parallax factor to simulate depth.
+			double parallaxOffset = static_cast<double>(centerOffset) * _parallaxFactorX;
+			parallaxAdjustedLeft += static_cast<int16>(parallaxOffset);
+		}
+
+		// Apply vertical parallax.
+		int16 parallaxAdjustedTop = _boundingBox.top;
+		if (hasVerticalParallax) {
+			// Calculate offset from viewport center to object center.
+			int16 viewportHalfHeight = localViewport.height() / 2;
+			int16 boundsHalfHeight = _boundingBox.height() / 2;
+			int centerOffset = (_boundingBox.top + boundsHalfHeight) - (localViewport.top + viewportHalfHeight);
+
+			// Multiply by parallax factor to simulate depth.
+			double parallaxOffset = static_cast<double>(centerOffset) * _parallaxFactorY;
+			parallaxAdjustedTop += static_cast<int16>(parallaxOffset);
+		}
+
+		_boundingBox.moveTo(parallaxAdjustedLeft, parallaxAdjustedTop);
 	}
 }
 

@@ -273,17 +273,17 @@ const char *builtInMethodToStr(BuiltInMethod method) {
 		return "SetMultipleSounds/IsPaused";
 	case kSetMousePositionMethod:
 		return "SetMousePosition";
-	case kGetXScaleMethod1:
-	case kGetXScaleMethod2:
-		return "GetXScale";
-	case kSetScaleMethod:
-		return "SetScale";
-	case kSetXScaleMethod:
-		return "SetXScale";
-	case kGetYScaleMethod:
-		return "GetYScale";
-	case kSetYScaleMethod:
-		return "SetYScale";
+	case kGetParallaxFactorXMethod1:
+	case kGetParallaxFactorXMethod2:
+		return "GetParallaxFactorX";
+	case kSetParallaxFactorMethod:
+		return "SetParallaxFactor";
+	case kSetParallaxFactorXMethod:
+		return "SetParallaxFactorX";
+	case kGetParallaxFactorYMethod:
+		return "GetParallaxFactorY";
+	case kSetParallaxFactorYMethod:
+		return "SetParallaxFactorY";
 	case kMovieResetMethod:
 		return "MovieReset";
 	case kSetCurrentClipMethod:
@@ -348,8 +348,8 @@ const char *builtInMethodToStr(BuiltInMethod method) {
 		return "BranchToScreen";
 	case kDocumentQuitMethod:
 		return "Quit";
-	case kDocumentContextLoadInProgressMethod:
-		return "ContextLoadInProgress";
+	case kIsLoadingMethod:
+		return "IsLoading";
 	case kDocumentContextIsLoadedMethod:
 		return "IsLoaded";
 	case kPathSetDurationMethod:
@@ -442,6 +442,14 @@ const char *builtInMethodToStr(BuiltInMethod method) {
 		return "PrependList";
 	case kSortMethod:
 		return "Sort";
+	case kPreloadMethod:
+		return "Preload";
+	case kPurgeMethod:
+		return "Purge";
+	case kStopLoadMethod:
+		return "StopLoad";
+	case kIsRectInMemoryMethod:
+		return "IsRectInMemory";
 	default:
 		return "UNKNOWN";
 	}
@@ -501,6 +509,10 @@ const char *eventTypeToStr(EventType type) {
 		return "TextInput";
 	case kTextErrorEvent:
 		return "TextError";
+	case kDiskImageActorStepEvent:
+		return "DiskImageActorStep";
+	case kDiskImageActorEndEvent:
+		return "DiskImageActorEnd";
 	case kCameraPanStepEvent:
 		return "CameraPanStep";
 	case kCameraPanAbortEvent:
