@@ -22,8 +22,6 @@
 #ifndef PHOENIXVR_MATH_H
 #define PHOENIXVR_MATH_H
 
-#include <math.h>
-
 namespace PhoenixVR {
 static constexpr auto kTau = static_cast<float>(M_PI * 2);
 static constexpr auto kPi = static_cast<float>(M_PI);
