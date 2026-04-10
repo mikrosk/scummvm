@@ -26,6 +26,7 @@ MODULE_OBJS := \
 	mt32gm.o \
 	musicplugin.o \
 	null.o \
+	rate.o \
 	sid.o \
 	ym2149.o \
 	timestamp.o \
@@ -71,14 +72,6 @@ MODULE_OBJS := \
 	softsynth/pcspk.o \
 	softsynth/ay8912.o \
 	softsynth/ym2149.o
-
-ifndef USE_M68K_SOUND_ASM
-MODULE_OBJS += \
-	rate.o
-else
-MODULE_OBJS += \
-	rateM68K.o
-endif
 
 ifndef DISABLE_NUKED_OPL
 MODULE_OBJS += \
