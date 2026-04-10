@@ -20,6 +20,7 @@
  */
 
 #include "common/memstream.h"
+#include "common/str.h"
 
 #include "mediastation/mediascript/function.h"
 #include "mediastation/debugchannels.h"
@@ -203,6 +204,7 @@ ScriptValue FunctionManager::call(uint functionId, Common::Array<ScriptValue> &a
 		break;
 
 	case kGetRegistryFunction:
+		FUNCARGCHECK(3);
 		script_GetRegistry(args, returnValue);
 		break;
 
@@ -232,6 +234,10 @@ ScriptValue FunctionManager::call(uint functionId, Common::Array<ScriptValue> &a
 
 	case kDrawingFunction:
 		script_Drawing(args, returnValue);
+		break;
+
+	case kCheckersFunction:
+		script_Checkers(args, returnValue);
 		break;
 
 	case kLegacy_DebugPrintFunction:
@@ -415,8 +421,8 @@ void FunctionManager::script_GetUniqueRandom(Common::Array<ScriptValue> &args, S
 
 void FunctionManager::script_CurrentRunTime(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
 	// The current runtime is expected to be returned in seconds.
-	const uint MILLISECONDS_IN_ONE_SECOND = 1000;
-	double runtimeInSeconds = g_system->getMillis() / MILLISECONDS_IN_ONE_SECOND;
+	const uint32 MILLISECONDS_IN_ONE_SECOND = 1000;
+	double runtimeInSeconds = g_system->getMillis() / static_cast<double>(MILLISECONDS_IN_ONE_SECOND);
 	returnValue.setToFloat(runtimeInSeconds);
 }
 
@@ -535,19 +541,25 @@ void FunctionManager::script_GetAudioVolume(Common::Array<ScriptValue> &args, Sc
 }
 
 void FunctionManager::script_SystemLanguagePreference(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: SystemLanguagePreference");
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::script_SetRegistry(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: SetRegistry");
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::script_GetRegistry(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: GetRegistry");
+	// Even though this is basically still stubbed out, we need to set a return value or we will get errors.
+	returnValue = args[2];
+	Common::String registryName = args[0].asString();
+	if (registryName.size() != 0) {
+		// TODO: Get the registry (saved game content) with this name.
+		warning("STUB: %s: %s", __func__, registryName.c_str());
+	}
 }
 
 void FunctionManager::script_SetProfile(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: SetProfile");
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::script_DebugPrint(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
@@ -567,27 +579,31 @@ void FunctionManager::script_DebugPrint(Common::Array<ScriptValue> &args, Script
 }
 
 void FunctionManager::script_MazeGenerate(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: MazeGenerate");
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::script_MazeApplyMoveMask(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: MazeApplyMoveMask");
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::script_MazeSolve(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: MazeSolve");
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::script_BeginTimedInterval(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: BeginTimedInterval");
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::script_EndTimedInterval(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: EndTimedInterval");
+	warning("STUB: %s", __func__);
+}
+
+void FunctionManager::script_Checkers(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::script_Drawing(Common::Array<ScriptValue> &args, ScriptValue &returnValue) {
-	warning("STUB: Drawing");
+	warning("STUB: %s", __func__);
 }
 
 void FunctionManager::deleteFunctionsForContext(uint contextId) {

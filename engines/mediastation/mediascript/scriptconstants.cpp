@@ -158,6 +158,8 @@ const char *builtInFunctionToStr(BuiltInFunction function) {
 		return "BeginTimedInterval";
 	case kEndTimedIntervalFunction:
 		return "EndTimedInterval";
+	case kCheckersFunction:
+		return "Checkers";
 	case kDrawingFunction:
 		return "Drawing";
 	case kLegacy_RandomFunction:

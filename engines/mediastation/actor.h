@@ -131,8 +131,8 @@ enum ActorHeaderSectionType {
 	kActorHeaderTextCursorIsVisible = 0x262,
 	kActorHeaderTextConstrainToWidth = 0x263,
 	kActorHeaderTextOverwriteMode = 0x264,
-	kActorHeaderTextAcceptedCharRange = 0x265,
-	kActorHeaderTextAcceptedCharRangeWithOffset = 0x0266,
+	kActorHeaderTextAcceptedCharRangeWithOffset = 0x265,
+	kActorHeaderTextAcceptedCharRange = 0x0266,
 
 	// SPRITE FIELDS.
 	kActorHeaderSpriteClip = 0x03e9,

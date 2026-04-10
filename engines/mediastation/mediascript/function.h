@@ -90,6 +90,9 @@ private:
 	void script_BeginTimedInterval(Common::Array<ScriptValue> &args, ScriptValue &returnValue);
 	void script_EndTimedInterval(Common::Array<ScriptValue> &args, ScriptValue &returnValue);
 
+	// Hercules.
+	void script_Checkers(Common::Array<ScriptValue> &args, ScriptValue &returnValue);
+
 	// IBM/Crayola.
 	void script_Drawing(Common::Array<ScriptValue> &args, ScriptValue &returnValue);
 };
