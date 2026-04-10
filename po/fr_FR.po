@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.8.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-08 20:02+0000\n"
+"POT-Creation-Date: 2026-04-10 14:39+0000\n"
 "PO-Revision-Date: 2026-04-09 23:22+0000\n"
 "Last-Translator: Purple T <ZEONK@hotmail.com>\n"
 "Language-Team: French <https://translations.scummvm.org/projects/scummvm/"
@@ -337,7 +337,7 @@ msgstr ""
 #: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4365
 #: engines/sherlock/metaengine.cpp:638 engines/sherlock/metaengine.cpp:1244
 #: engines/sludge/event.cpp:144 engines/toon/toon.cpp:1550
-#: engines/zvision/zvision.cpp:321
+#: engines/zvision/zvision.cpp:326
 msgid "Yes"
 msgstr "Oui"
 
@@ -355,7 +355,7 @@ msgstr "Oui"
 #: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4365
 #: engines/sherlock/metaengine.cpp:643 engines/sherlock/metaengine.cpp:1250
 #: engines/sludge/event.cpp:144 engines/toon/toon.cpp:1550
-#: engines/zvision/zvision.cpp:322
+#: engines/zvision/zvision.cpp:327
 msgid "No"
 msgstr "Non"
 
@@ -9524,7 +9524,8 @@ msgstr "Clics sécurisés :"
 
 #: engines/glk/dialogs.cpp:289
 msgid "Safely apply clicks while input is pending"
-msgstr "Applique les clics en toute sécurité pendant qu'une saisie est en cours"
+msgstr ""
+"Applique les clics en toute sécurité pendant qu'une saisie est en cours"
 
 #. I18N: This is setting for number of text columns
 #: engines/glk/dialogs.cpp:292
@@ -17204,7 +17205,7 @@ msgstr "Extraire une pièce"
 msgid "Preferences"
 msgstr "Préférences"
 
-#: engines/zvision/zvision.cpp:301
+#: engines/zvision/zvision.cpp:306
 msgid ""
 "Before playing this game, you'll need to copy the required fonts into "
 "ScummVM's extras directory, or into the game directory. On Windows, you'll "
@@ -17223,7 +17224,7 @@ msgstr ""
 "polices que vous avez choisi, par exemple LiberationMono, LiberationSans et "
 "LiberationSerif."
 
-#: engines/zvision/zvision.cpp:316
+#: engines/zvision/zvision.cpp:321
 msgid ""
 "MIDI playback is not available, or else improperly configured. Zork Nemesis "
 "contains several music puzzles which require MIDI audio in order to be "

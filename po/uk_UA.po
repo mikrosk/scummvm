@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.9.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-08 20:02+0000\n"
+"POT-Creation-Date: 2026-04-10 14:39+0000\n"
 "PO-Revision-Date: 2026-04-06 17:30+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Ukrainian <https://translations.scummvm.org/projects/scummvm/"
@@ -337,7 +337,7 @@ msgstr "Інше хмарне сховище вже є активним. Чи в
 #: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4365
 #: engines/sherlock/metaengine.cpp:638 engines/sherlock/metaengine.cpp:1244
 #: engines/sludge/event.cpp:144 engines/toon/toon.cpp:1550
-#: engines/zvision/zvision.cpp:321
+#: engines/zvision/zvision.cpp:326
 msgid "Yes"
 msgstr "Так"
 
@@ -355,7 +355,7 @@ msgstr "Так"
 #: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4365
 #: engines/sherlock/metaengine.cpp:643 engines/sherlock/metaengine.cpp:1250
 #: engines/sludge/event.cpp:144 engines/toon/toon.cpp:1550
-#: engines/zvision/zvision.cpp:322
+#: engines/zvision/zvision.cpp:327
 msgid "No"
 msgstr "Ні"
 
@@ -16950,7 +16950,7 @@ msgstr "Дістати монету"
 msgid "Preferences"
 msgstr "Уподобання"
 
-#: engines/zvision/zvision.cpp:301
+#: engines/zvision/zvision.cpp:306
 msgid ""
 "Before playing this game, you'll need to copy the required fonts into "
 "ScummVM's extras directory, or into the game directory. On Windows, you'll "
@@ -16967,7 +16967,7 @@ msgstr ""
 "завантажити Liberation Fonts. Вам будуть потрібні всі шрифти з пакету, який "
 "ви оберете, тобто, LiberationMono, LiberationSans та LiberationSerif."
 
-#: engines/zvision/zvision.cpp:316
+#: engines/zvision/zvision.cpp:321
 msgid ""
 "MIDI playback is not available, or else improperly configured. Zork Nemesis "
 "contains several music puzzles which require MIDI audio in order to be "
