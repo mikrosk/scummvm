@@ -4147,6 +4147,7 @@ static const DirectorGameDescription gameDescriptions[] = {
 
 	// Mac executable is Derrat Sorcerum™ v1.0.3
 	MACGAME1("derratsorcerum", "", "xn--Derrat Sorcerum v1.0.3 -tnf/xn--Derrat Sorcerum v1.0.3-h40n", "tr:107ae11bce211dc0abd62d9f43184b27", 483506, 404),
+	MACGAME1("derratsorcerum", "", "xn--Derrat Sorcerum v1.0.3 -3b39j/xn--Derrat Sorcerum v1.0.3-jj93j", "tr:107ae11bce211dc0abd62d9f43184b27", 483506, 404),
 	MACDEMO1("derratsorcerum", "Demo", "Derrat Sorcerum Demo v1.0.3", "a546ef2b921a9b48fd93928f1a505f22", 483506, 404),
 
 	// Both Mac and Win versions require installation to extract executable
