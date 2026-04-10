@@ -1,14 +1,14 @@
-commit bc5168b5929bb7ce41c04aab54d71b88db432666
+commit edb1791e25fc15aeda40c0b3ab236b98b0574eab
 Author: Miro Kropacek <miro.kropacek@gmail.com>
 Date:   Sun Jun 4 14:50:49 2023 +0200
 
     Don't merge: tooltips
 
 diff --git a/gui/ThemeEngine.cpp b/gui/ThemeEngine.cpp
-index 44d6c9487ed..cce47f9efdd 100644
+index bfb97cdd425..9c3ba964451 100644
 --- a/gui/ThemeEngine.cpp
 +++ b/gui/ThemeEngine.cpp
-@@ -916,7 +916,7 @@ bool ThemeEngine::loadThemeXML(const Common::String &themeId) {
+@@ -917,7 +917,7 @@ bool ThemeEngine::loadThemeXML(const Common::String &themeId) {
  /**********************************************************
   * Draw Date descriptors drawing functions
   *********************************************************/
@@ -17,7 +17,7 @@ index 44d6c9487ed..cce47f9efdd 100644
  	WidgetDrawData *drawData = _widgets[type];
  
  	if (!drawData)
-@@ -942,6 +942,9 @@ void ThemeEngine::drawDD(DrawData type, const Common::Rect &r, uint32 dynamic, b
+@@ -943,6 +943,9 @@ void ThemeEngine::drawDD(DrawData type, const Common::Rect &r, uint32 dynamic, b
  	// Cull the elements not in the clip rect
  	if (extendedRect.isEmpty()) {
  		return;
@@ -27,7 +27,7 @@ index 44d6c9487ed..cce47f9efdd 100644
  	}
  
  	if (forceRestore || drawData->_layer == kDrawLayerBackground)
-@@ -1177,7 +1180,7 @@ void ThemeEngine::drawScrollbar(const Common::Rect &r, int sliderY, int sliderHe
+@@ -1178,7 +1181,7 @@ void ThemeEngine::drawScrollbar(const Common::Rect &r, int sliderY, int sliderHe
  	drawDD(scrollState == kScrollbarStateSlider ? kDDScrollbarHandleHover : kDDScrollbarHandleIdle, r2);
  }
  
@@ -36,7 +36,7 @@ index 44d6c9487ed..cce47f9efdd 100644
  	if (!ready())
  		return;
  
-@@ -1195,7 +1198,7 @@ void ThemeEngine::drawDialogBackground(const Common::Rect &r, DialogBackground b
+@@ -1196,7 +1199,7 @@ void ThemeEngine::drawDialogBackground(const Common::Rect &r, DialogBackground b
  		break;
  
  	case kDialogBackgroundTooltip:
@@ -46,7 +46,7 @@ index 44d6c9487ed..cce47f9efdd 100644
  
  	case kDialogBackgroundDefault:
 diff --git a/gui/ThemeEngine.h b/gui/ThemeEngine.h
-index 940298eff25..a371c13dcd5 100644
+index eba9e29cf04..40b1de5698c 100644
 --- a/gui/ThemeEngine.h
 +++ b/gui/ThemeEngine.h
 @@ -53,6 +53,7 @@ class Dialog;
@@ -74,7 +74,7 @@ index 940298eff25..a371c13dcd5 100644
  
  	void drawText(const Common::Rect &r, const Common::U32String &str, WidgetStateInfo state = kStateEnabled,
  	              Graphics::TextAlign align = Graphics::kTextAlignCenter,
-@@ -712,7 +714,7 @@ protected:
+@@ -744,7 +746,7 @@ protected:
  	 *
  	 * These functions are called from all the Widget drawing methods.
  	 */
@@ -84,27 +84,27 @@ index 940298eff25..a371c13dcd5 100644
  	                bool elipsis, Graphics::TextAlign alignH = Graphics::kTextAlignLeft,
  	                TextAlignVertical alignV = kTextAlignVTop, int deltax = 0,
 diff --git a/gui/Tooltip.cpp b/gui/Tooltip.cpp
-index 79f0f9db91a..b08cc9939bc 100644
+index ed81d7665b1..8890e362ba4 100644
 --- a/gui/Tooltip.cpp
 +++ b/gui/Tooltip.cpp
-@@ -23,6 +23,7 @@
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "common/util.h"
++#include "graphics/VectorRenderer.h"
  #include "gui/widget.h"
  #include "gui/dialog.h"
  #include "gui/gui-manager.h"
-+#include "graphics/VectorRenderer.h"
- 
- #include "gui/Tooltip.h"
- #include "gui/ThemeEval.h"
-@@ -31,7 +32,7 @@ namespace GUI {
- 
+@@ -29,7 +30,7 @@
+ namespace GUI {
  
  Tooltip::Tooltip() :
--	Dialog(-1, -1, -1, -1), _maxWidth(-1), _parent(nullptr), _xdelta(0), _ydelta(0), _xpadding(0), _ypadding(0) {
-+	Dialog(-1, -1, -1, -1), _maxWidth(-1), _parent(nullptr), _xdelta(0), _ydelta(0), _xpadding(0), _ypadding(0), _firstDraw(true) {
- 
+-	Dialog(-1, -1, -1, -1), _maxWidth(-1), _widget(nullptr), _xdelta(0), _ydelta(0), _xpadding(0), _ypadding(0) {
++	Dialog(-1, -1, -1, -1), _maxWidth(-1), _widget(nullptr), _xdelta(0), _ydelta(0), _xpadding(0), _ypadding(0), _firstDraw(true) {
  	_backgroundType = GUI::ThemeEngine::kDialogBackgroundTooltip;
  }
-@@ -71,7 +72,40 @@ void Tooltip::drawDialog(DrawLayer layerToDraw) {
+ 
+@@ -68,7 +69,40 @@ void Tooltip::drawDialog(DrawLayer layerToDraw) {
  	int num = 0;
  	int h = g_gui.theme()->getFontHeight(ThemeEngine::kFontStyleTooltip) + 2;
  
@@ -146,7 +146,7 @@ index 79f0f9db91a..b08cc9939bc 100644
  
  	int16 textX = _x + 1 + _xpadding;
  	if (g_gui.useRTL()) {
-@@ -98,4 +132,32 @@ void Tooltip::drawDialog(DrawLayer layerToDraw) {
+@@ -95,6 +129,34 @@ void Tooltip::drawDialog(DrawLayer layerToDraw) {
  	}
  }
  
@@ -178,9 +178,11 @@ index 79f0f9db91a..b08cc9939bc 100644
 +	}
 +}
 +
- }
+ void Tooltip::handleMouseDown(int x, int y, int button, int clickCount) {
+ 	close();
+ 	_widget->handleMouseDown(x + (getAbsX() - _widget->getAbsX()), y + (getAbsY() - _widget->getAbsY()), button, clickCount);
 diff --git a/gui/Tooltip.h b/gui/Tooltip.h
-index 2f188764ff3..40caa7a1be4 100644
+index f3e9e9950a7..4fb1a935c90 100644
 --- a/gui/Tooltip.h
 +++ b/gui/Tooltip.h
 @@ -23,7 +23,9 @@
@@ -193,17 +195,17 @@ index 2f188764ff3..40caa7a1be4 100644
  #include "gui/dialog.h"
  
  namespace GUI {
-@@ -43,6 +45,9 @@ public:
- 
+@@ -41,6 +43,9 @@ public:
  	void receivedFocus(int x = -1, int y = -1) override {}
+ 
  protected:
 +	void open() override;
 +	void close() override;
 +
- 	void handleMouseDown(int x, int y, int button, int clickCount) override {
- 		close();
- 		_parent->handleMouseDown(x + (getAbsX() - _parent->getAbsX()), y + (getAbsY() - _parent->getAbsY()), button, clickCount);
-@@ -72,6 +77,11 @@ protected:
+ 	void handleKeyDown(Common::KeyState state) override;
+ 	void handleKeyUp(Common::KeyState state) override;
+ 	void handleMouseDown(int x, int y, int button, int clickCount) override;
+@@ -53,6 +58,11 @@ protected:
  	int _xpadding, _ypadding;
  
  	Common::U32StringArray _wrappedLines;
@@ -239,10 +241,10 @@ index 02de69aa7c9..da57fdb2973 100644
  
  void GuiManager::setupCursor() {
 diff --git a/gui/gui-manager.h b/gui/gui-manager.h
-index 0718f631c8b..e8b646ec46c 100644
+index 4562d007647..69b03dbd63c 100644
 --- a/gui/gui-manager.h
 +++ b/gui/gui-manager.h
-@@ -62,6 +62,7 @@ enum {
+@@ -63,6 +63,7 @@ enum {
  
  class Dialog;
  class ThemeEval;
@@ -250,7 +252,7 @@ index 0718f631c8b..e8b646ec46c 100644
  class GuiObject;
  
  #define g_gui	(GUI::GuiManager::instance())
-@@ -82,6 +83,7 @@ typedef Common::FixedStack<Dialog *> DialogStack;
+@@ -83,6 +84,7 @@ typedef Common::FixedStack<Dialog *> DialogStack;
   */
  class GuiManager : public Common::Singleton<GuiManager>, public CommandSender {
  	friend class Dialog;
@@ -258,7 +260,7 @@ index 0718f631c8b..e8b646ec46c 100644
  	friend class Common::Singleton<SingletonBaseType>;
  	GuiManager();
  	~GuiManager() override;
-@@ -159,6 +161,7 @@ protected:
+@@ -164,6 +166,7 @@ protected:
  	enum RedrawStatus {
  		kRedrawDisabled = 0,
  		kRedrawOpenDialog,
