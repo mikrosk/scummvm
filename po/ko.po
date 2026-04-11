@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-10 19:13+0000\n"
-"PO-Revision-Date: 2026-04-08 18:22+0000\n"
+"PO-Revision-Date: 2026-04-11 09:22+0000\n"
 "Last-Translator: Hoseok Seo <ddinghoya@gmail.com>\n"
 "Language-Team: Korean <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/ko/>\n"
@@ -9231,7 +9231,7 @@ msgstr "수직 테두리 크기"
 
 #: engines/glk/dialogs.cpp:250
 msgid "Caret:"
-msgstr ""
+msgstr "캐럿:"
 
 #: engines/glk/dialogs.cpp:250
 msgid "Color of the cursor"
@@ -9267,115 +9267,97 @@ msgid "Style for URLs if they appear in-game"
 msgstr "게임 내에 URL이 표시되는 스타일"
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Change shadow type"
 msgid "Caret shape:"
-msgstr "그림자 유형 변경"
+msgstr "캐럿 형상:"
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Show mouse cursor"
 msgid "Shape of the cursor"
-msgstr "마우스 커서 표시"
+msgstr "커서 모양"
 
 #: engines/glk/dialogs.cpp:286
-#, fuzzy
-#| msgid "Quit prompt"
 msgid "More prompt:"
-msgstr "프롬프트 종료"
+msgstr "더 많은 프롬프트:"
 
 #: engines/glk/dialogs.cpp:286
 msgid ""
 "Custom marker in place of the \"More...\" marker for eg. \"continue\". Leave "
 "it blank to use the game's default"
 msgstr ""
+"\"더 보기...\" 표시 대신 \"계속\"과 같은 사용자 지정 표시를 입력할 수 "
+"있습니다. 게임의 기본 표시를 사용하려면 비워 두기"
 
 #: engines/glk/dialogs.cpp:288
-#, fuzzy
-#| msgid "Hide hints"
 msgid "Style hints:"
-msgstr "힌트 숨기기"
+msgstr "스타일 힌트:"
 
 #: engines/glk/dialogs.cpp:288
 msgid "Let the game suggest text styling options"
-msgstr ""
+msgstr "게임에서 텍스트 스타일 옵션 제안"
 
 #: engines/glk/dialogs.cpp:289
-#, fuzzy
-#| msgid "Left click"
 msgid "Safe clicks:"
-msgstr "왼쪽 클릭"
+msgstr "안전한 클릭:"
 
 #: engines/glk/dialogs.cpp:289
 msgid "Safely apply clicks while input is pending"
-msgstr ""
+msgstr "입력이 대기 중인 동안 안전하게 클릭 적용"
 
 #. I18N: This is setting for number of text columns
 #: engines/glk/dialogs.cpp:292
-#, fuzzy
-#| msgid "Volume controls"
 msgid "Column count:"
-msgstr "볼륨 조작"
+msgstr "컬럼 개수:"
 
 #: engines/glk/dialogs.cpp:292
 msgid "Number of columns"
-msgstr ""
+msgstr "컬럼의 개수"
 
 #. I18N: This is setting for number of text rows
 #: engines/glk/dialogs.cpp:294
 msgid "Rows count:"
-msgstr ""
+msgstr "행 수:"
 
 #: engines/glk/dialogs.cpp:294
 msgid "Number of rows"
-msgstr ""
+msgstr "행 수"
 
 #: engines/glk/dialogs.cpp:296
 msgid "Lock columns:"
-msgstr ""
+msgstr "컬럼 잠금:"
 
 #: engines/glk/dialogs.cpp:296
 msgid "Check it to manually change the column count"
-msgstr ""
+msgstr "열 개수를 수동으로 변경하려면 해당 옵션 선택"
 
 #: engines/glk/dialogs.cpp:297
-#, fuzzy
-#| msgid "Block low"
 msgid "Lock rows:"
-msgstr "하단 막기"
+msgstr "행 잠금:"
 
 #: engines/glk/dialogs.cpp:297
 msgid "Check it to manually change the row count"
-msgstr ""
+msgstr "행 개수를 수동으로 변경하려면 해당 항목 선택"
 
 #. I18N: This is a setting for enabling text justification
 #: engines/glk/dialogs.cpp:301
 msgid "Justify:"
-msgstr ""
+msgstr "정렬:"
 
 #: engines/glk/dialogs.cpp:302
-#, fuzzy
-#| msgid "Enable short transitions"
 msgid "Enable text justification"
-msgstr "짧은 전환을 활성화"
+msgstr "텍스트 정렬 활성화"
 
 #. I18N: These is setting for type of text quote symbols
 #: engines/glk/dialogs.cpp:305
-#, fuzzy
-#| msgid "Graphics mode:"
 msgid "Typographic quotes:"
-msgstr "그래픽 모드:"
+msgstr "타이포그래피 관련 인용구:"
 
 #: engines/glk/dialogs.cpp:306
-#, fuzzy
-#| msgid "Color graphics"
 msgid "Choose typographic quotes"
-msgstr "컬러 그래픽"
+msgstr "타이포그래피 인용구 선택"
 
 #: engines/glk/dialogs.cpp:307 engines/glk/dialogs.cpp:320
 #: engines/glk/dialogs.cpp:332
 msgid "Off"
-msgstr ""
+msgstr "끔"
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
 #: engines/glk/dialogs.cpp:309 engines/mohawk/dialogs.cpp:366
@@ -9385,180 +9367,166 @@ msgstr "보통"
 #. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
 #: engines/glk/dialogs.cpp:311
 msgid "Rabid"
-msgstr ""
+msgstr "격렬한"
 
 #. I18N: This is a setting for forcing all input to be in uppercase
 #: engines/glk/dialogs.cpp:314
 msgid "Caps:"
-msgstr ""
+msgstr "대문자:"
 
 #: engines/glk/dialogs.cpp:314
 msgid "Force uppercase input"
-msgstr ""
+msgstr "강제 대문자 입력"
 
 #. I18N: This is a setting for type of text dash symbols
 #: engines/glk/dialogs.cpp:317
 msgid "Dashes:"
-msgstr ""
+msgstr "대시:"
 
 #. I18N: This is a setting for type of text dash symbols
 #: engines/glk/dialogs.cpp:319
 msgid "Types of dashes"
-msgstr ""
+msgstr "대시의 유형"
 
 #. I18N: This is a setting for using normal typographic dashes, which are like in most books, with the em dash being the longest and the en dash being half of it
 #: engines/glk/dialogs.cpp:322
 msgid "Em dashes"
-msgstr ""
+msgstr "엠 대시"
 
 #. I18N: This is a setting for using "en+em" dashes, which are like normal typographic dashes but with the en dash being the same length as the em dash, like in some comic books
 #: engines/glk/dialogs.cpp:324
 msgid "En+Em dashes"
-msgstr ""
+msgstr "엔+엠 대시"
 
 #: engines/glk/dialogs.cpp:326
-#, fuzzy
-#| msgid "Preferences"
 msgid "User experience"
-msgstr "환경설정"
+msgstr "사용자 경험"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:329
-#, fuzzy
-#| msgid "Space"
 msgid "Spaces:"
-msgstr "Space 키"
+msgstr "스페이스:"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:331
 msgid "Types of spaces"
-msgstr ""
+msgstr "스페이스의 유형"
 
 #. I18N: This is a setting for compressing double spaces into single ones in text
 #: engines/glk/dialogs.cpp:334
 msgid "Compress double spaces"
-msgstr ""
+msgstr "이중 스페이스 압축"
 
 #. I18N: This is a setting for expanding single spaces into double ones in text
 #: engines/glk/dialogs.cpp:336
 msgid "Expand single spaces"
-msgstr ""
+msgstr "단일 스페이스 확장"
 
 #: engines/glk/dialogs.cpp:338
-#, fuzzy
-#| msgid "Graphics"
 msgid "Graphics:"
-msgstr "그래픽"
+msgstr "그래픽:"
 
 #: engines/glk/dialogs.cpp:338
 msgid "Turn graphics on/off"
-msgstr ""
+msgstr "그래픽 켬/끔"
 
 #: engines/glk/dialogs.cpp:340
-#, fuzzy
-#| msgid "Window"
 msgid "Window margin"
-msgstr "윈도우"
+msgstr "윈도우 여백"
 
 #: engines/glk/dialogs.cpp:341
 msgid "Horizontal margin for window"
-msgstr ""
+msgstr "윈도우 가로 여백"
 
 #: engines/glk/dialogs.cpp:342
 msgid "Vertical margin for window"
-msgstr ""
+msgstr "윈도우 세로 여백"
 
 #: engines/glk/dialogs.cpp:344
-#, fuzzy
-#| msgid "Window"
 msgid "Window padding"
-msgstr "윈도우"
+msgstr "윈도우 패딩"
 
 #: engines/glk/dialogs.cpp:345
 msgid "Horizontal padding for window"
-msgstr ""
+msgstr "윈도우 가로 패딩"
 
 #: engines/glk/dialogs.cpp:346
 msgid "Vertical padding for window"
-msgstr ""
+msgstr "윈도우 세로 패딩"
 
 #: engines/glk/dialogs.cpp:348
-#, fuzzy
-#| msgid "Next action"
 msgid "Text margin"
-msgstr "다음 행동"
+msgstr "텍스트 여백"
 
 #: engines/glk/dialogs.cpp:349
 msgid "Horizontal margin for text"
-msgstr ""
+msgstr "텍스트 가로 여백"
 
 #: engines/glk/dialogs.cpp:350
 msgid "Vertical margin for text"
-msgstr ""
+msgstr "텍스트 세로 여백"
 
 #. I18N: This is a setting for leading, which is the vertical distance between text rows
 #: engines/glk/dialogs.cpp:353
-#, fuzzy
-#| msgid "Loading '%s'"
 msgid "Leading:"
-msgstr "'%s' 불러오는 중"
+msgstr "리딩:"
 
 #: engines/glk/dialogs.cpp:354
 msgid "Vertical distance between text rows. Valid inputs - 12, 16, 22 etc."
-msgstr ""
+msgstr "텍스트 행 사이의 세로 거리입니다. 유효한 입력값 - 12, 16, 22 등."
 
 #. I18N: This is a setting for baseline, which is the invisible horizontal line on which text sits
 #: engines/glk/dialogs.cpp:356
 msgid "Baseline:"
-msgstr ""
+msgstr "베이스라인:"
 
 #: engines/glk/dialogs.cpp:357
 msgid ""
 "Invisible horizontal line on which text sits. Valid inputs - 8, 16 etc. as "
 "per your font size"
 msgstr ""
+"텍스트가 놓이는 보이지 않는 가로선입니다. 유효한 입력값 - 글꼴 크기에 따라 "
+"8, 16 등"
 
 #. I18N: Font size scaling for the monospace text font
 #: engines/glk/dialogs.cpp:360
 msgid "Monosize:"
-msgstr ""
+msgstr "모노크기:"
 
 #: engines/glk/dialogs.cpp:361
 msgid "Font size scaling for the monospace text font"
-msgstr ""
+msgstr "고정폭 글꼴의 글꼴 크기 조정"
 
 #. I18N: Font size scaling for the proportional text font
 #: engines/glk/dialogs.cpp:363
 msgid "Propsize:"
-msgstr ""
+msgstr "비례크기:"
 
 #: engines/glk/dialogs.cpp:364
 msgid "Font size scaling for the proportional text font"
-msgstr ""
+msgstr "비례 텍스트 글꼴의 글꼴 크기 조정"
 
 #. I18N: This is a section for settings related to the "More..." prompt in text windows
 #: engines/glk/dialogs.cpp:367
 msgid "More"
-msgstr ""
+msgstr "더 보기"
 
 #. I18N: This is a setting for alignment of the "More..." prompt in text windows
 #: engines/glk/dialogs.cpp:369
 msgid "Align:"
-msgstr ""
+msgstr "조정:"
 
 #: engines/glk/dialogs.cpp:370
 msgid "Alignment of the \"More...\" marker on the window"
-msgstr ""
+msgstr "윈도우에 있는 \"더 보기...\" 표시의 조정"
 
 #: engines/glk/dialogs.cpp:375
-#, fuzzy
-#| msgid "SoundFont:"
 msgid "Font:"
-msgstr "사운드폰트:"
+msgstr "글꼴:"
 
 #: engines/glk/dialogs.cpp:375
 msgid "Font for the \"More...\" marker"
-msgstr ""
+msgstr "\"더 보기...\" 표시용 글꼴"
 
 #: engines/glk/glulx/glulx.cpp:81
 msgid "This is too short to be a valid Glulx file."
@@ -10848,10 +10816,8 @@ msgid "Replace a colored gem with bars for hit points and spell points."
 msgstr "색깔 있는 보석을 히트 포인트와 주문 포인트를 나타내는 바로 대체합니다."
 
 #: engines/mm/metaengine.cpp:183
-#, fuzzy
-#| msgid "Might and Magic 1"
 msgid "Might and Magic"
-msgstr "마이트 앤 매직 1"
+msgstr "마이트 앤 매직"
 
 #: engines/mm/mm1/metaengine.cpp:55
 msgid "View party member 1"
@@ -10962,10 +10928,8 @@ msgid "Might and Magic 1 - Minimal Keys"
 msgstr "마이트 앤 매직 1 - 최소한의 키"
 
 #: engines/mm/mm1/metaengine.cpp:150
-#, fuzzy
-#| msgid "Might and Magic 1 - Menus"
 msgid "Might and Magic 1 - Main"
-msgstr "마이트 앤 매직 1 - 메뉴"
+msgstr "마이트 앤 매직 1 - 메인"
 
 #: engines/mm/mm1/metaengine.cpp:151
 msgid "Might and Magic 1 - Party"
@@ -15410,7 +15374,7 @@ msgstr "빠른 저장 %d 불러오기 중"
 #: engines/ultima/nuvie/nuvie.cpp:408
 #, c-format
 msgid "saving quick save %d"
-msgstr "빠른 저장 %d 저장 중"
+msgstr "빠른 세이브 %d 저장 중"
 
 #: engines/ultima/nuvie/metaengine.cpp:41
 msgid "Original Save"
@@ -16016,8 +15980,8 @@ msgid ""
 "directories have been copied from the CD.  More instructions are on the "
 "wiki: https://wiki.scummvm.org/index.php?title=Crusader:_No_Remorse."
 msgstr ""
-"크루세이더 인트로 무비 파일이 없습니다. CD에서 FLICS 및 SOUND 디렉터리가 복사"
-"되었는지 확인하세요.  자세한 내용은 위키에 나와 있습니다: https://"
+"크루세이더 인트로 영상 파일 누락 - FLICS 및 SOUND 디렉토리가 CD에서 "
+"복사되었는지 확인하십시오.  자세한 지침은 위키를 참조하세요: https://"
 "wiki.scummvm.org/index.php?title=Crusader:_No_Remorse"
 
 #: engines/ultima/ultima8/games/u8_game.cpp:104
