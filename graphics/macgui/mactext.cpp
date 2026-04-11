@@ -287,6 +287,7 @@ MacText::~MacText() {
 	g_system->getTimerManager()->removeTimerProc(&cursorTimerHandler);
 
 	_borderSurface.free();
+	_borderMaskSurface.free();
 
 	delete _cursorRect;
 	delete _cursorSurface;
@@ -335,6 +336,13 @@ void MacText::resizeScrollBar(int w, int h) {
 		_borderSurface.clear(_wm->_colorGreen);
 	}
 	_scrollBorder.blitBorderInto(_borderSurface, kWindowBorderScrollbar | kWindowBorderActive);
+
+	_borderMaskSurface.free();
+	_borderMaskSurface.create(w, h, _wm->_pixelformat);
+	if (_wm->_pixelformat.bytesPerPixel == 1) {
+		_borderMaskSurface.clear(_wm->_colorGreen);
+	}
+	_scrollBorder.blitBorderInto(_borderMaskSurface, kWindowBorderScrollbar | kWindowBorderActive, true, 0xff);
 }
 
 // this func returns the fg color of the first character we met in text

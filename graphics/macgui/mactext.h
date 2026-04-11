@@ -235,6 +235,7 @@ protected:
 	bool _scrollBar;
 	MacWindowBorder _scrollBorder;
 	ManagedSurface _borderSurface;
+	ManagedSurface _borderMaskSurface;
 
 	int _selEnd;
 	int _selStart;
