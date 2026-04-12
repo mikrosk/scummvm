@@ -39,4 +39,8 @@ void WWIntro_demo1::runIntro() {
 	bool continueFl = introPt1();
 }
 
+bool WWIntro_demo1::introPt1() {
+	return false;
+}
+
 } // End of namespace WaynesWorld
