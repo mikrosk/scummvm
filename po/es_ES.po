@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.4.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-12 17:14+0000\n"
-"PO-Revision-Date: 2026-04-09 14:09+0000\n"
+"PO-Revision-Date: 2026-04-12 18:52+0000\n"
 "Last-Translator: IlDucci <pajaroloco_2@hotmail.com>\n"
 "Language-Team: Spanish <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/es/>\n"
@@ -26,10 +26,9 @@ msgstr "Audio de Apple Macintosh"
 
 #. I18N: built with <compiler>
 #: gui/about.cpp:113
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#, c-format
 msgid "(built with %s)"
-msgstr "(compilada el %s con %s)"
+msgstr "(compilada con %s)"
 
 #. I18N: built on <build date> with <compiler>
 #: gui/about.cpp:116
@@ -9585,24 +9584,18 @@ msgid "Choose typographic quotes"
 msgstr "Selecciona las comillas tipográficas que se usarán"
 
 #: engines/glk/dialogs.cpp:307
-#, fuzzy
-#| msgid "Off"
 msgctxt "quotes"
 msgid "Off"
-msgstr "No"
+msgstr "Desactivar"
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
 #: engines/glk/dialogs.cpp:309
-#, fuzzy
-#| msgid "Normal"
 msgctxt "quotes"
 msgid "Normal"
-msgstr "Normal"
+msgstr "Normales"
 
 #. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
 #: engines/glk/dialogs.cpp:311
-#, fuzzy
-#| msgid "Rabid"
 msgctxt "quotes"
 msgid "Rabid"
 msgstr "A varias alturas"
@@ -11356,32 +11349,24 @@ msgstr ""
 "podrás navegar más rápidamente por el juego."
 
 #: engines/mohawk/dialogs.cpp:364
-#, fuzzy
-#| msgid "Disabled"
 msgctxt "riven-transition"
 msgid "Disabled"
-msgstr "Desactivado"
+msgstr "Desactivadas"
 
 #: engines/mohawk/dialogs.cpp:365
-#, fuzzy
-#| msgid "Fastest"
 msgctxt "riven-transition"
 msgid "Fastest"
-msgstr "Rápido"
+msgstr "Rápidas"
 
 #: engines/mohawk/dialogs.cpp:366
-#, fuzzy
-#| msgid "Normal"
 msgctxt "riven-transition"
 msgid "Normal"
-msgstr "Normal"
+msgstr "Normales"
 
 #: engines/mohawk/dialogs.cpp:367
-#, fuzzy
-#| msgid "Best"
 msgctxt "riven-transition"
 msgid "Best"
-msgstr "Mejor"
+msgstr "Mejores"
 
 #: engines/mohawk/dialogs.cpp:456
 msgid "Fix audio pops/clicks"
