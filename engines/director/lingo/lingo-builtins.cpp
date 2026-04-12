@@ -837,6 +837,11 @@ void LB::b_value(int nargs) {
 	ScriptContext *sc = g_lingo->_compiler->compileAnonymous(code, kLPPTrimGarbage);
 	if (!sc) {
 		warning("b_value(): Failed to parse expression \"%s\", returning void", expr.c_str());
+
+		if (debugChannelSet(-1, kDebugLingoStrict)) {
+			error("Uncaught Lingo error");
+		}
+
 		g_lingo->pushVoid();
 		return;
 	}
