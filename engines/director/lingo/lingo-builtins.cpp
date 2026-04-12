@@ -1916,6 +1916,11 @@ void LB::b_do(int nargs) {
 	ScriptContext *sc = g_lingo->_compiler->compileAnonymous(code);
 	if (!sc) {
 		warning("b_do(): compilation failed, ignoring");
+
+		if (debugChannelSet(-1, kDebugLingoStrict)) {
+			error("Uncaught Lingo error");
+		}
+
 		return;
 	} else if (!sc->_eventHandlers.contains(kEventGeneric)) {
 		warning("b_do(): compiled code did not return handler, ignoring");
