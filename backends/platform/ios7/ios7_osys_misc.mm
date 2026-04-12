@@ -143,16 +143,13 @@ Common::U32String OSystem_iOS7::getTextFromClipboard() {
 	if (str == nil)
 		return Common::U32String();
 
-	// If translations are supported, use the current TranslationManager charset and otherwise
-	// use ASCII. If the string cannot be represented using the requested encoding we get a null
-	// pointer below, which is fine as ScummVM would not know what to do with the string anyway.
 #ifdef SCUMM_LITTLE_ENDIAN
 	NSStringEncoding stringEncoding = NSUTF32LittleEndianStringEncoding;
 #else
 	NSStringEncoding stringEncoding = NSUTF32BigEndianStringEncoding;
 #endif
 	NSUInteger textLength = [str length];
-	uint32 *text = new uint32[textLength];
+	Common::u32char_type_t *text = new Common::u32char_type_t[textLength];
 
 	if (![str getBytes:text maxLength:4*textLength usedLength:NULL encoding: stringEncoding options:0 range:NSMakeRange(0, textLength) remainingRange:NULL]) {
 		delete[] text;
