@@ -108,8 +108,13 @@ void AboutDialog::buildLines() {
 	version += gScummVMVersion;
 	addLine(version);
 
+	#ifdef RELEASE_BUILD
+	// I18N: built with <compiler>
+	Common::U32String date = Common::U32String::format(_("(built with %s)"), gScummVMCompiler);
+	#else
 	// I18N: built on <build date> with <compiler>
 	Common::U32String date = Common::U32String::format(_("(built on %s with %s)"), gScummVMBuildDate, gScummVMCompiler);
+	#endif
 	addLine(Common::U32String("C2") + date);
 
 	for (i = 0; i < ARRAYSIZE(copyright_text); i++)
@@ -327,8 +332,8 @@ void AboutDialog::drawDialog(DrawLayer layerToDraw) {
 		Common::U32String renderStr(strLineItrBegin, strLineItrEnd);
 		if (!renderStr.empty())
 			// Center the text line within the _textRect
-			g_gui.theme()->drawText(Common::Rect(_x + _textRect.left + _xOff, y, _x + _textRect.right - _xOff, y + g_gui.theme()->getFontHeight()), 
-									renderStr, state, align, ThemeEngine::kTextInversionNone, 0, false, 
+			g_gui.theme()->drawText(Common::Rect(_x + _textRect.left + _xOff, y, _x + _textRect.right - _xOff, y + g_gui.theme()->getFontHeight()),
+									renderStr, state, align, ThemeEngine::kTextInversionNone, 0, false,
 									ThemeEngine::kFontStyleBold, ThemeEngine::kFontColorNormal, true, _textDrawableArea);
 		y += _lineHeight;
 	}
