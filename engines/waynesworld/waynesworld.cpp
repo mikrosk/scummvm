@@ -178,8 +178,15 @@ Common::Error WaynesWorldEngine::run() {
 	}
 
 	if (_loadSaveSlot < 0) {
-		runIntro();
+		if (_gameDescription->flags & ADGF_DEMO)
+			intro = new WWIntro_demo1(this);
+		else
+			intro = new WWIntro_full(this);
+		intro->runIntro();
+		delete intro;
+		intro = nullptr;
 	}
+
 	_introOngoing = false;
 	_fontWW = new GFTFont();
 	_fontWWInv = new GFTFont();
