@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.10.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 15:28+0000\n"
+"POT-Creation-Date: 2026-04-12 16:27+0000\n"
 "PO-Revision-Date: 2026-03-06 15:22+0000\n"
 "Last-Translator: Antoniou Athanasios <a.antoniou79@gmail.com>\n"
 "Language-Team: Greek <https://translations.scummvm.org/projects/scummvm/"
@@ -5101,7 +5101,7 @@ msgid "Magnify Mode Off"
 msgstr "Η Λειτουργία Μεγέθυνσης Απενεργοποιήθηκε"
 
 #: backends/platform/android/android.cpp:930
-#: backends/platform/ios7/ios7_osys_misc.mm:249
+#: backends/platform/ios7/ios7_osys_misc.mm:246
 msgid "Getting help"
 msgstr "Πηγές βοήθειας"
 
@@ -5151,8 +5151,8 @@ msgstr ""
 "οδηγό για το παιχνίδι. Καλή σας τύχη!\n"
 
 #: backends/platform/android/android.cpp:942
-#: backends/platform/ios7/ios7_osys_misc.mm:261
-#: backends/platform/ios7/ios7_osys_misc.mm:357
+#: backends/platform/ios7/ios7_osys_misc.mm:258
+#: backends/platform/ios7/ios7_osys_misc.mm:354
 msgid "Touch Controls"
 msgstr "Χειρισμός Αφής"
 
@@ -5304,8 +5304,8 @@ msgstr ""
 "\n"
 
 #: backends/platform/android/android.cpp:1001
-#: backends/platform/ios7/ios7_osys_misc.mm:336
-#: backends/platform/ios7/ios7_osys_misc.mm:380
+#: backends/platform/ios7/ios7_osys_misc.mm:333
+#: backends/platform/ios7/ios7_osys_misc.mm:377
 msgid "Adding Games"
 msgstr "Προσθήκη Παιχνιδιών"
 
@@ -5592,7 +5592,7 @@ msgstr "Χρήση ελαχιστοποιημένης διάταξης gamepad"
 msgid "Show keyboard function bar"
 msgstr "Εμφάνιση μπάρας λειτουργίας πληκτρολογίου"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:252
+#: backends/platform/ios7/ios7_osys_misc.mm:249
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -5633,7 +5633,7 @@ msgstr ""
 "κολλήσει στην πρόοδο σας σε ένα παιχνίδι, σκεφτείτε να κοιτάξετε κάποιον "
 "οδηγό για το παιχνίδι. Καλή τύχη!\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:264
+#: backends/platform/ios7/ios7_osys_misc.mm:261
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5790,11 +5790,11 @@ msgstr ""
 "  ![Keyboard icon](keyboard.png \"Keyboard icon\"){w=10em}\n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:314
+#: backends/platform/ios7/ios7_osys_misc.mm:311
 msgid "External keyboard"
 msgstr "Εξωτερικό πληκτρολόγιο"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:317
+#: backends/platform/ios7/ios7_osys_misc.mm:314
 msgid ""
 "## Use of keyboard\n"
 "External keyboards are supported and from iOS 13.4 most of the special keys, "
@@ -5841,7 +5841,7 @@ msgstr ""
 "| `CMD + RIGHT`     | END               \n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:339
+#: backends/platform/ios7/ios7_osys_misc.mm:336
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5881,7 +5881,7 @@ msgstr ""
 "Για περισσότερες πληροφορίες διαβάστε την [τεκμηρίωση για iOS](https://"
 "docs.scummvm.org/en/latest/other_platforms/ios.html).\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:360
+#: backends/platform/ios7/ios7_osys_misc.mm:357
 msgid ""
 "## Touch actions \n"
 "\n"
@@ -5925,7 +5925,7 @@ msgstr ""
 "πληκτρολόγιο, πατήστε το κουμπί Πίσω/Μενού (Back/Menu).\n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:383
+#: backends/platform/ios7/ios7_osys_misc.mm:380
 msgid ""
 "## Adding Games \n"
 "\n"

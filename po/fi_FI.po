@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.6.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 15:28+0000\n"
+"POT-Creation-Date: 2026-04-12 16:27+0000\n"
 "PO-Revision-Date: 2026-02-07 15:22+0000\n"
 "Last-Translator: Timo Mikkolainen <tmikkola@gmail.com>\n"
 "Language-Team: Finnish <https://translations.scummvm.org/projects/scummvm/"
@@ -5037,7 +5037,7 @@ msgid "Magnify Mode Off"
 msgstr "Suurennustila poissa"
 
 #: backends/platform/android/android.cpp:930
-#: backends/platform/ios7/ios7_osys_misc.mm:249
+#: backends/platform/ios7/ios7_osys_misc.mm:246
 msgid "Getting help"
 msgstr "Apua"
 
@@ -5082,8 +5082,8 @@ msgstr ""
 "pelin läpipeluuohjeen. Onnea matkaan!\n"
 
 #: backends/platform/android/android.cpp:942
-#: backends/platform/ios7/ios7_osys_misc.mm:261
-#: backends/platform/ios7/ios7_osys_misc.mm:357
+#: backends/platform/ios7/ios7_osys_misc.mm:258
+#: backends/platform/ios7/ios7_osys_misc.mm:354
 msgid "Touch Controls"
 msgstr "Kosketuskontrollit"
 
@@ -5296,8 +5296,8 @@ msgstr ""
 "\n"
 
 #: backends/platform/android/android.cpp:1001
-#: backends/platform/ios7/ios7_osys_misc.mm:336
-#: backends/platform/ios7/ios7_osys_misc.mm:380
+#: backends/platform/ios7/ios7_osys_misc.mm:333
+#: backends/platform/ios7/ios7_osys_misc.mm:377
 msgid "Adding Games"
 msgstr "Pelien lisääminen"
 
@@ -5605,7 +5605,7 @@ msgstr "Käytä vähimmäistä peliohjaimen nappien asettelumallia"
 msgid "Show keyboard function bar"
 msgstr "Näytä näppäimistön funktiorivi"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:252
+#: backends/platform/ios7/ios7_osys_misc.mm:249
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -5643,7 +5643,7 @@ msgstr ""
 "pirullisen vaikeita. Jos olet pelissä jumissa, voit etsiä käsiisi pelin "
 "läpipeluuohjeen. Onnea matkaan!\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:264
+#: backends/platform/ios7/ios7_osys_misc.mm:261
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5794,11 +5794,11 @@ msgstr ""
 "  ![Näppäimistökuvake](keyboard.png \"Näppäimistökuvake\"){w=10em}\n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:314
+#: backends/platform/ios7/ios7_osys_misc.mm:311
 msgid "External keyboard"
 msgstr "Ulkoinen näppäimistö"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:317
+#: backends/platform/ios7/ios7_osys_misc.mm:314
 msgid ""
 "## Use of keyboard\n"
 "External keyboards are supported and from iOS 13.4 most of the special keys, "
@@ -5843,7 +5843,7 @@ msgstr ""
 "| `CMD + OIKEA`     | END               \n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:339
+#: backends/platform/ios7/ios7_osys_misc.mm:336
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5881,7 +5881,7 @@ msgstr ""
 "Lue [iOS-dokumentaatiomme](https://docs.scummvm.org/en/latest/"
 "other_platforms/ios.html) jos haluat tietää lisää.\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:360
+#: backends/platform/ios7/ios7_osys_misc.mm:357
 msgid ""
 "## Touch actions \n"
 "\n"
@@ -5921,7 +5921,7 @@ msgstr ""
 "Näppäimistö piiloutuu painamalla Takaisin/Valikko-nappia.\n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:383
+#: backends/platform/ios7/ios7_osys_misc.mm:380
 msgid ""
 "## Adding Games \n"
 "\n"

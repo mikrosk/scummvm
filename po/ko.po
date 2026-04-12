@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 15:28+0000\n"
+"POT-Creation-Date: 2026-04-12 16:27+0000\n"
 "PO-Revision-Date: 2026-04-11 09:22+0000\n"
 "Last-Translator: Hoseok Seo <ddinghoya@gmail.com>\n"
 "Language-Team: Korean <https://translations.scummvm.org/projects/scummvm/"
@@ -4918,7 +4918,7 @@ msgid "Magnify Mode Off"
 msgstr "돋보기 모드 끔"
 
 #: backends/platform/android/android.cpp:930
-#: backends/platform/ios7/ios7_osys_misc.mm:249
+#: backends/platform/ios7/ios7_osys_misc.mm:246
 msgid "Getting help"
 msgstr "도움 받기"
 
@@ -4964,8 +4964,8 @@ msgstr ""
 "행운을 빕니다!\n"
 
 #: backends/platform/android/android.cpp:942
-#: backends/platform/ios7/ios7_osys_misc.mm:261
-#: backends/platform/ios7/ios7_osys_misc.mm:357
+#: backends/platform/ios7/ios7_osys_misc.mm:258
+#: backends/platform/ios7/ios7_osys_misc.mm:354
 msgid "Touch Controls"
 msgstr "터치 조작"
 
@@ -5101,8 +5101,8 @@ msgstr ""
 "\n"
 
 #: backends/platform/android/android.cpp:1001
-#: backends/platform/ios7/ios7_osys_misc.mm:336
-#: backends/platform/ios7/ios7_osys_misc.mm:380
+#: backends/platform/ios7/ios7_osys_misc.mm:333
+#: backends/platform/ios7/ios7_osys_misc.mm:377
 msgid "Adding Games"
 msgstr "게임 추가"
 
@@ -5374,7 +5374,7 @@ msgstr "최소한의 게임패드 레이아웃을 사용"
 msgid "Show keyboard function bar"
 msgstr "키보드 기능바 표시"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:252
+#: backends/platform/ios7/ios7_osys_misc.mm:249
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -5410,7 +5410,7 @@ msgstr ""
 "때로는 정신이 아찔할 정도로 까다롭습니다. 게임에 막혔다면 게임 연습을 확인해 "
 "보세요. 행운을 빕니다!\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:264
+#: backends/platform/ios7/ios7_osys_misc.mm:261
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5551,11 +5551,11 @@ msgstr ""
 "  ![Keyboard icon](keyboard.png \"Keyboard icon\"){w=10em}\n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:314
+#: backends/platform/ios7/ios7_osys_misc.mm:311
 msgid "External keyboard"
 msgstr "외부 키보드"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:317
+#: backends/platform/ios7/ios7_osys_misc.mm:314
 msgid ""
 "## Use of keyboard\n"
 "External keyboards are supported and from iOS 13.4 most of the special keys, "
@@ -5600,7 +5600,7 @@ msgstr ""
 "| `CMD + RIGHT`     | END               \n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:339
+#: backends/platform/ios7/ios7_osys_misc.mm:336
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5636,7 +5636,7 @@ msgstr ""
 "자세한 내용은 [iOS 설명서](https://docs.scummvm.org/en/latest/"
 "other_platforms/ios.html)를 참조하세요.\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:360
+#: backends/platform/ios7/ios7_osys_misc.mm:357
 msgid ""
 "## Touch actions \n"
 "\n"
@@ -5676,7 +5676,7 @@ msgstr ""
 "려면 뒤로/메뉴 버튼을 누릅니다.\n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:383
+#: backends/platform/ios7/ios7_osys_misc.mm:380
 msgid ""
 "## Adding Games \n"
 "\n"

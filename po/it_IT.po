@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.3.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 15:28+0000\n"
+"POT-Creation-Date: 2026-04-12 16:27+0000\n"
 "PO-Revision-Date: 2026-04-09 23:22+0000\n"
 "Last-Translator: Walter Agazzi <walter.agazzi@protonmail.com>\n"
 "Language-Team: Italian <https://translations.scummvm.org/projects/scummvm/"
@@ -5019,7 +5019,7 @@ msgid "Magnify Mode Off"
 msgstr "Vista Ingrandita disattivata"
 
 #: backends/platform/android/android.cpp:930
-#: backends/platform/ios7/ios7_osys_misc.mm:249
+#: backends/platform/ios7/ios7_osys_misc.mm:246
 msgid "Getting help"
 msgstr "Ottenere aiuto"
 
@@ -5066,8 +5066,8 @@ msgstr ""
 "cercare qualche guida online. Buona fortuna!\n"
 
 #: backends/platform/android/android.cpp:942
-#: backends/platform/ios7/ios7_osys_misc.mm:261
-#: backends/platform/ios7/ios7_osys_misc.mm:357
+#: backends/platform/ios7/ios7_osys_misc.mm:258
+#: backends/platform/ios7/ios7_osys_misc.mm:354
 msgid "Touch Controls"
 msgstr "Controlli Touch"
 
@@ -5212,8 +5212,8 @@ msgstr ""
 "\n"
 
 #: backends/platform/android/android.cpp:1001
-#: backends/platform/ios7/ios7_osys_misc.mm:336
-#: backends/platform/ios7/ios7_osys_misc.mm:380
+#: backends/platform/ios7/ios7_osys_misc.mm:333
+#: backends/platform/ios7/ios7_osys_misc.mm:377
 msgid "Adding Games"
 msgstr "Aggiungere Giochi"
 
@@ -5488,7 +5488,7 @@ msgstr "Gamepad con layout minimale"
 msgid "Show keyboard function bar"
 msgstr "Mostra barra funzioni della tastiera"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:252
+#: backends/platform/ios7/ios7_osys_misc.mm:249
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -5527,7 +5527,7 @@ msgstr ""
 "complicati, talvolta a livelli impensabili. Se rimani bloccato, prova a "
 "cercare qualche guida online. Buona fortuna!\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:264
+#: backends/platform/ios7/ios7_osys_misc.mm:261
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5674,11 +5674,11 @@ msgstr ""
 "  ![Icona tastiera](keyboard.png \"Icona Tastiera\"){w=10em}\n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:314
+#: backends/platform/ios7/ios7_osys_misc.mm:311
 msgid "External keyboard"
 msgstr "Tastiera esterna"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:317
+#: backends/platform/ios7/ios7_osys_misc.mm:314
 msgid ""
 "## Use of keyboard\n"
 "External keyboards are supported and from iOS 13.4 most of the special keys, "
@@ -5724,7 +5724,7 @@ msgstr ""
 "| `CMD + DESTRA`    | FINE               \n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:339
+#: backends/platform/ios7/ios7_osys_misc.mm:336
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5762,7 +5762,7 @@ msgstr ""
 "Consulta la nostra [Documentazione iOS](https://docs.scummvm.org/en/latest/"
 "other_platforms/ios.html) per ulteriori informazioni.\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:360
+#: backends/platform/ios7/ios7_osys_misc.mm:357
 msgid ""
 "## Touch actions \n"
 "\n"
@@ -5802,7 +5802,7 @@ msgstr ""
 "Per nascondere la tastiera virtuale, premi il tasto Indietro/Menu.\n"
 "\n"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:383
+#: backends/platform/ios7/ios7_osys_misc.mm:380
 msgid ""
 "## Adding Games \n"
 "\n"

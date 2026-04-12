@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.6.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 15:28+0000\n"
+"POT-Creation-Date: 2026-04-12 16:27+0000\n"
 "PO-Revision-Date: 2026-04-11 00:22+0000\n"
 "Last-Translator: Xaviu <xaviu@xaviu.com>\n"
 "Language-Team: Catalan <https://translations.scummvm.org/projects/scummvm/"
@@ -4886,7 +4886,7 @@ msgid "Magnify Mode Off"
 msgstr "Mode d'ampliació desactivat"
 
 #: backends/platform/android/android.cpp:930
-#: backends/platform/ios7/ios7_osys_misc.mm:249
+#: backends/platform/ios7/ios7_osys_misc.mm:246
 msgid "Getting help"
 msgstr "Obtenció d'ajuda"
 
@@ -4913,8 +4913,8 @@ msgid ""
 msgstr ""
 
 #: backends/platform/android/android.cpp:942
-#: backends/platform/ios7/ios7_osys_misc.mm:261
-#: backends/platform/ios7/ios7_osys_misc.mm:357
+#: backends/platform/ios7/ios7_osys_misc.mm:258
+#: backends/platform/ios7/ios7_osys_misc.mm:354
 msgid "Touch Controls"
 msgstr "Controls tàctils"
 
@@ -4988,8 +4988,8 @@ msgid ""
 msgstr ""
 
 #: backends/platform/android/android.cpp:1001
-#: backends/platform/ios7/ios7_osys_misc.mm:336
-#: backends/platform/ios7/ios7_osys_misc.mm:380
+#: backends/platform/ios7/ios7_osys_misc.mm:333
+#: backends/platform/ios7/ios7_osys_misc.mm:377
 msgid "Adding Games"
 msgstr "Afegir jocs"
 
@@ -5227,7 +5227,7 @@ msgstr "Usa una disposició mínima del teclat"
 msgid "Show keyboard function bar"
 msgstr "Mostra la barra de funcions del teclat"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:252
+#: backends/platform/ios7/ios7_osys_misc.mm:249
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -5248,7 +5248,7 @@ msgid ""
 "checking out a game walkthrough. Good luck!\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:264
+#: backends/platform/ios7/ios7_osys_misc.mm:261
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5322,11 +5322,11 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:314
+#: backends/platform/ios7/ios7_osys_misc.mm:311
 msgid "External keyboard"
 msgstr "Teclat extern"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:317
+#: backends/platform/ios7/ios7_osys_misc.mm:314
 msgid ""
 "## Use of keyboard\n"
 "External keyboards are supported and from iOS 13.4 most of the special keys, "
@@ -5351,7 +5351,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:339
+#: backends/platform/ios7/ios7_osys_misc.mm:336
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5372,7 +5372,7 @@ msgid ""
 "other_platforms/ios.html) for more information.\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:360
+#: backends/platform/ios7/ios7_osys_misc.mm:357
 msgid ""
 "## Touch actions \n"
 "\n"
@@ -5394,7 +5394,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:383
+#: backends/platform/ios7/ios7_osys_misc.mm:380
 msgid ""
 "## Adding Games \n"
 "\n"
