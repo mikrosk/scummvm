@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.9.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 16:27+0000\n"
+"POT-Creation-Date: 2026-04-12 17:14+0000\n"
 "PO-Revision-Date: 2026-04-06 17:30+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Ukrainian <https://translations.scummvm.org/projects/scummvm/"
@@ -1961,7 +1961,7 @@ msgstr "3D рендерер гри:"
 msgid "3D Anti-aliasing:"
 msgstr "ЗD згладжування:"
 
-#: gui/options.cpp:1731 engines/mohawk/dialogs.cpp:364
+#: gui/options.cpp:1731
 msgid "Disabled"
 msgstr "Вимкнено"
 
@@ -9486,18 +9486,26 @@ msgstr "Типографічні лапки:"
 msgid "Choose typographic quotes"
 msgstr "Виберіть стиль типографічних лапкок"
 
-#: engines/glk/dialogs.cpp:307 engines/glk/dialogs.cpp:320
-#: engines/glk/dialogs.cpp:332
+#: engines/glk/dialogs.cpp:307
+#, fuzzy
+#| msgid "Off"
+msgctxt "quotes"
 msgid "Off"
 msgstr "Вимкнені"
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
-#: engines/glk/dialogs.cpp:309 engines/mohawk/dialogs.cpp:366
+#: engines/glk/dialogs.cpp:309
+#, fuzzy
+#| msgid "Normal"
+msgctxt "quotes"
 msgid "Normal"
 msgstr "Нормальний"
 
 #. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
 #: engines/glk/dialogs.cpp:311
+#, fuzzy
+#| msgid "Rabid"
+msgctxt "quotes"
 msgid "Rabid"
 msgstr "Особливі"
 
@@ -9519,6 +9527,10 @@ msgstr "Тире:"
 #: engines/glk/dialogs.cpp:319
 msgid "Types of dashes"
 msgstr "Типи тире"
+
+#: engines/glk/dialogs.cpp:320 engines/glk/dialogs.cpp:332
+msgid "Off"
+msgstr "Вимкнені"
 
 #. I18N: This is a setting for using normal typographic dashes, which are like in most books, with the em dash being the longest and the en dash being half of it
 #: engines/glk/dialogs.cpp:322
@@ -11219,11 +11231,31 @@ msgstr ""
 "Задає швидкість переходів між екранами. Вимикання переходів дозволить вам "
 "швидше пересуватися у грі."
 
+#: engines/mohawk/dialogs.cpp:364
+#, fuzzy
+#| msgid "Disabled"
+msgctxt "riven-transition"
+msgid "Disabled"
+msgstr "Вимкнено"
+
 #: engines/mohawk/dialogs.cpp:365
+#, fuzzy
+#| msgid "Fastest"
+msgctxt "riven-transition"
 msgid "Fastest"
 msgstr "Найшвидші"
 
-#: engines/mohawk/dialogs.cpp:367 engines/scumm/dialogs.cpp:1582
+#: engines/mohawk/dialogs.cpp:366
+#, fuzzy
+#| msgid "Normal"
+msgctxt "riven-transition"
+msgid "Normal"
+msgstr "Нормальний"
+
+#: engines/mohawk/dialogs.cpp:367
+#, fuzzy
+#| msgid "Best"
+msgctxt "riven-transition"
 msgid "Best"
 msgstr "Найкраще"
 
@@ -12691,6 +12723,10 @@ msgstr "Хороша"
 #: engines/scumm/dialogs.cpp:1582
 msgid "Better"
 msgstr "Краща"
+
+#: engines/scumm/dialogs.cpp:1582
+msgid "Best"
+msgstr "Найкраще"
 
 #: engines/scumm/dialogs.cpp:1583
 #, c-format

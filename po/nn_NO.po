@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.3.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 16:27+0000\n"
+"POT-Creation-Date: 2026-04-12 17:14+0000\n"
 "PO-Revision-Date: 2023-12-14 14:28+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Norwegian Nynorsk <https://translations.scummvm.org/projects/"
@@ -1901,7 +1901,7 @@ msgstr "GUI-teiknar:"
 msgid "3D Anti-aliasing:"
 msgstr "Kantutjevna"
 
-#: gui/options.cpp:1731 engines/mohawk/dialogs.cpp:364
+#: gui/options.cpp:1731
 #, fuzzy
 msgid "Disabled"
 msgstr "Deaktivert GFX"
@@ -9516,19 +9516,21 @@ msgstr "Grafikkmodus:"
 msgid "Choose typographic quotes"
 msgstr "Grafikk"
 
-#: engines/glk/dialogs.cpp:307 engines/glk/dialogs.cpp:320
-#: engines/glk/dialogs.cpp:332
+#: engines/glk/dialogs.cpp:307
+msgctxt "quotes"
 msgid "Off"
 msgstr ""
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
-#: engines/glk/dialogs.cpp:309 engines/mohawk/dialogs.cpp:366
+#: engines/glk/dialogs.cpp:309
 #, fuzzy
+msgctxt "quotes"
 msgid "Normal"
 msgstr "OpenGL Normal"
 
 #. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
 #: engines/glk/dialogs.cpp:311
+msgctxt "quotes"
 msgid "Rabid"
 msgstr ""
 
@@ -9549,6 +9551,10 @@ msgstr ""
 #. I18N: This is a setting for type of text dash symbols
 #: engines/glk/dialogs.cpp:319
 msgid "Types of dashes"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:320 engines/glk/dialogs.cpp:332
+msgid "Off"
 msgstr ""
 
 #. I18N: This is a setting for using normal typographic dashes, which are like in most books, with the em dash being the longest and the en dash being half of it
@@ -11318,12 +11324,26 @@ msgid ""
 "enable you to navigate more quickly through the game."
 msgstr ""
 
+#: engines/mohawk/dialogs.cpp:364
+#, fuzzy
+msgctxt "riven-transition"
+msgid "Disabled"
+msgstr "Deaktivert GFX"
+
 #: engines/mohawk/dialogs.cpp:365
 #, fuzzy
+msgctxt "riven-transition"
 msgid "Fastest"
 msgstr "Rask modus"
 
-#: engines/mohawk/dialogs.cpp:367 engines/scumm/dialogs.cpp:1582
+#: engines/mohawk/dialogs.cpp:366
+#, fuzzy
+msgctxt "riven-transition"
+msgid "Normal"
+msgstr "OpenGL Normal"
+
+#: engines/mohawk/dialogs.cpp:367
+msgctxt "riven-transition"
 msgid "Best"
 msgstr ""
 
@@ -12808,6 +12828,10 @@ msgstr ""
 
 #: engines/scumm/dialogs.cpp:1582
 msgid "Better"
+msgstr ""
+
+#: engines/scumm/dialogs.cpp:1582
+msgid "Best"
 msgstr ""
 
 #: engines/scumm/dialogs.cpp:1583
