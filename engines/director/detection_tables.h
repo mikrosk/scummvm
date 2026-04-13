@@ -9852,24 +9852,33 @@ static const DirectorGameDescription gameDescriptions[] = {
 	MACGAME1("vjg", "Quarters screensaver", "Data/scrnsave/mac/Quarters (800x600)", "0944b962ebb00f4b5d5149d220f8449b", 228719, 700),
 	WINGAME1t("vjg", "Quarters screensaver", "Data/scrnsave/pc/Quarters.exe", "fb759c6bf4b009ddf9f7fe74c2dbdac4", 2696814, 700),
 
-	MACGAME1("webmaster", "", "Webmaster",		"rt:40ccf1c4502f22aa1deb2662fcc71fa9", 128041, 702),
+	// FIXME: Missing release, language and region information
 	WINGAME2("webmaster", "", "Webmaster.exe",  "t:b757ff13f0f10c94b1b9fc5f2ceac6ec", 1820594,
-							  "Data/chaos.dxr", "d:1d3e9f04eb1ba627d8b0bba826a042f4",  556601, 702),
+							  "Data/chaos.dxr", "d:1d3e9f04eb1ba627d8b0bba826a042f4", 556601, 702),
 
 	// German: "Webmaster: Fantastische Abenteuer in der Welt des Internets",
-	// developed by IJsfontein, published by Tivola, disc pressing timestamp "11/00"
+	// developed by IJsfontein, published by Tivola, disc pressing timestamp "11/00", PC/Mac Hybrid
 	WINGAME2_l("webmaster", "", "Webmaster.exe",  "t:b757ff13f0f10c94b1b9fc5f2ceac6ec", 1820594,
 								"Data/chaos.dxr", "d:a61309dc913a5f99041dbcd60372fb2e", 556781, Common::DE_DEU, 702),
 
+	MACGAME2_l("webmaster", "", "Webmaster",      "rt:40ccf1c4502f22aa1deb2662fcc71fa9", 128041,
+								"Data/chaos.dxr", "d:a61309dc913a5f99041dbcd60372fb2e",  556781, Common::DE_DEU, 702),
+
 	// US variant
-	// developed by IJsfontein, published by Tivola, disc pressing timestamp "01/01"
+	// developed by IJsfontein, published by Tivola, disc pressing timestamp "01/01", PC/Mac Hybrid
 	WINGAME2_l("webmaster", "", "Webmaster.exe",  "t:b757ff13f0f10c94b1b9fc5f2ceac6ec", 1820594,
 								"Data/chaos.dxr", "d:a974288bad555038af8a0791b1ae0292", 556715, Common::EN_ANY, 702),
 
+	MACGAME2_l("webmaster", "", "Webmaster",      "rt:40ccf1c4502f22aa1deb2662fcc71fa9", 128041,
+								"Data/chaos.dxr", "d:a974288bad555038af8a0791b1ae0292",  556715, Common::EN_ANY, 702),
+
 	// French: "Webmaster: le maître d'internet"
-	// developed by IJsfontein, published by Multimédia Gallimard
+	// developed by IJsfontein, published by Multimédia Gallimard, PC/Mac Hybrid
 	WINGAME2_l("webmaster", "", "Webmaster.exe",  "t:e1e8d498214e8ffc50f65973c510962b", 178102,
 								"Data/chaos.dxr", "d:a8857ee87e3435190a880e3f45085212", 436488, Common::FR_FRA, 702),
+
+	MACGAME2_l("webmaster", "", "Webmaster",      "rt:234290fb0eae69c9beae5efb69c0c4ce", 35113,
+								"Data/chaos.dxr", "d:a8857ee87e3435190a880e3f45085212",  436488, Common::FR_FRA, 702),
 
 	// Published by The Wine CD Corp (1999)
 	// Windows version needs installation
