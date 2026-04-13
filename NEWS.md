@@ -17,6 +17,10 @@ For a more comprehensive changelog of the latest experimental code, see:
  MM:
    - Reworked keymapper for MM1.
 
+ SLUDGE:
+   - Added two more games to detection, "Sam and Max Flintlocked" and
+	   "Full Moon".
+
 
 #### 2026.2.0 "Railmonicon" (2026-03-28)
 
