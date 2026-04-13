@@ -32,6 +32,13 @@ class WaynesWorldEngine;
 class GxlArchive;
 class WWSurface;
 
+struct Frame {
+	const char *filename;
+	int x;
+	int y;
+	int delay;
+};
+
 class WWIntro {
 protected:
 	WaynesWorldEngine *_vm;
@@ -48,6 +55,9 @@ public:
 	WWSurface *_demoPt2Surface = nullptr;
 
 protected:
+	GxlArchive *_oanGxl = nullptr;
+
+	bool initOanGxl();
 	void wwEffect(int arg0, int arg1, bool flag);
 };
 
@@ -59,8 +69,6 @@ public:
 	void runIntro() override;
 
 private:
-	GxlArchive *_oanGxl = nullptr;
-
 	int _startOawPos = 0;
 	int _startOagPos = 0;
 	int _startOaoPos = 0;
@@ -72,7 +80,6 @@ private:
 	int _old_argGHead1Index = -1;
 
 	bool introPt1();
-	bool introPt2();
 	bool introPt3(bool flag);
 	bool introPt4();
 	void introPt5();

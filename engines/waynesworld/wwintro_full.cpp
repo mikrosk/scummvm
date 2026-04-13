@@ -39,7 +39,7 @@ void WWIntro_full::runIntro() {
 	bool continueFl = introPt1();
 
 	if (continueFl)
-		continueFl = introPt2();
+		continueFl = initOanGxl();
 
 	if (continueFl)
 		continueFl = introPt3(false);
@@ -185,17 +185,6 @@ bool WWIntro_full::introPt1() {
 	if (_vm->_escPressed) {
 		return false;
 	}
-
-	return true;
-}
-
-bool WWIntro_full::introPt2() {
-	_vm->paletteFadeOut(0, 256, 64);
-
-	_oanGxl = new GxlArchive("oan");
-	_vm->loadPalette(_oanGxl, "backg2.pcx");
-	_demoPt2Surface = new WWSurface(320, 200);
-	_vm->_midi->stopSong();
 
 	return true;
 }

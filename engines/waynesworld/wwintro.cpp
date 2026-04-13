@@ -32,6 +32,17 @@ namespace WaynesWorld {
 WWIntro::WWIntro(WaynesWorldEngine *vm) : _vm(vm) {
 }
 
+bool WWIntro::initOanGxl() {
+	_vm->paletteFadeOut(0, 256, 64);
+
+	_oanGxl = new GxlArchive("oan");
+	_vm->loadPalette(_oanGxl, "backg2.pcx");
+	_demoPt2Surface = new WWSurface(320, 200);
+	_vm->_midi->stopSong();
+
+	return true;
+}
+
 void WWIntro::wwEffect(int arg0, int arg1, bool flag) {
 	int xmult = 0;
 	int ymult = 0;
