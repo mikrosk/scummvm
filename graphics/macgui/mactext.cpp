@@ -223,6 +223,11 @@ void MacText::init(uint32 fgcolor, uint32 bgcolor, int maxWidth, TextAlign textA
 		}
 	}
 
+	_charMaskSurface = new ManagedSurface(_dims.width(), _dims.height(), Graphics::PixelFormat::createFormatCLUT8());
+	_charMaskSurface->clear(0);
+	_glyphMaskSurface = new ManagedSurface(_dims.width(), _dims.height(), Graphics::PixelFormat::createFormatCLUT8());
+	_glyphMaskSurface->clear(0);
+
 	_selEnd = -1;
 	_selStart = -1;
 
@@ -288,10 +293,14 @@ MacText::~MacText() {
 
 	_borderSurface.free();
 	_borderMaskSurface.free();
+	_charMaskSurface->free();
+	_glyphMaskSurface->free();
 
 	delete _cursorRect;
 	delete _cursorSurface;
 	delete _cursorSurface2;
+	delete _charMaskSurface;
+	delete _glyphMaskSurface;
 }
 
 WindowClick MacText::isInScrollBar(int x, int y) const {
@@ -945,26 +954,32 @@ void MacText::removeLastLine() {
 	_canvas._textMaxHeight -= h;
 }
 
+void MacText::drawStep(ManagedSurface *g, ManagedSurface *src, ManagedSurface *border, int x, int y, int w, int h, int xoff, int yoff, uint32 tcolor) {
+	if (x + w < src->w || y + h < src->h)
+		g->fillRect(Common::Rect(x + xoff, y + yoff, x + w + xoff, y + h + yoff), tcolor);
+
+	// blit shadow surface first
+	if (_canvas._textShadow)
+		g->blitFrom(*src, Common::Rect(MIN<int>(src->w, x), MIN<int>(src->h, y), MIN<int>(src->w, x + w), MIN<int>(src->h, y + h)), Common::Point(xoff + _canvas._textShadow, yoff + _canvas._textShadow));
+
+	g->simpleBlitFrom(*_canvas._surface, Common::Rect(MIN<int>(src->w, x), MIN<int>(src->h, y), MIN<int>(src->w, x + w), MIN<int>(src->h, y + h)), Common::Point(xoff, yoff));
+
+	if (_scrollBar && _scrollBorder.hasBorder(kWindowBorderScrollbar)) {
+		uint32 transcolor = (_wm->_pixelformat.bytesPerPixel == 1) ? _wm->_colorGreen : 0;
+
+		g->transBlitFrom(*border, Common::Rect(0, 0, border->w, border->h), Common::Point(0, 0), transcolor);
+	}
+}
+
 void MacText::draw(ManagedSurface *g, int x, int y, int w, int h, int xoff, int yoff) {
 	if (_canvas._text.empty())
 		return;
 
 	render();
 
-	if (x + w < _canvas._surface->w || y + h < _canvas._surface->h)
-		g->fillRect(Common::Rect(x + xoff, y + yoff, x + w + xoff, y + h + yoff), _canvas._tbgcolor);
-
-	// blit shadow surface first
-	if (_canvas._textShadow)
-		g->blitFrom(*_canvas._shadowSurface, Common::Rect(MIN<int>(_canvas._surface->w, x), MIN<int>(_canvas._surface->h, y), MIN<int>(_canvas._surface->w, x + w), MIN<int>(_canvas._surface->h, y + h)), Common::Point(xoff + _canvas._textShadow, yoff + _canvas._textShadow));
-
-	g->simpleBlitFrom(*_canvas._surface, Common::Rect(MIN<int>(_canvas._surface->w, x), MIN<int>(_canvas._surface->h, y), MIN<int>(_canvas._surface->w, x + w), MIN<int>(_canvas._surface->h, y + h)), Common::Point(xoff, yoff));
-
-	if (_scrollBar && _scrollBorder.hasBorder(kWindowBorderScrollbar)) {
-		uint32 transcolor = (_wm->_pixelformat.bytesPerPixel == 1) ? _wm->_colorGreen : 0;
-
-		g->transBlitFrom(_borderSurface, Common::Rect(0, 0, _borderSurface.w, _borderSurface.h), Common::Point(0, 0), transcolor);
-	}
+	drawStep(g, _canvas._surface, &_borderSurface, x, y, w, h, xoff, yoff, _canvas._tbgcolor);
+	drawStep(_glyphMaskSurface, _canvas._glyphMask, &_borderMaskSurface, x, y, w, h, xoff, yoff, 0);
+	drawStep(_charMaskSurface, _canvas._charBoxMask, &_borderMaskSurface, x, y, w, h, xoff, yoff, 0);
 
 	_contentIsDirty = false;
 	_cursorDirty = false;

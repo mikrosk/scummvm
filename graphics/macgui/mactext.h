@@ -68,6 +68,7 @@ public:
 
 	void render();
 	void undrawCursor();
+	void drawStep(ManagedSurface *g, ManagedSurface *src,  ManagedSurface *border, int x, int y, int w, int h, int xoff, int yoff, uint32 transcolor);
 	void draw(ManagedSurface *g, int x, int y, int w, int h, int xoff, int yoff);
 	bool draw(ManagedSurface *g, bool forceRedraw = false) override;
 	bool draw(bool forceRedraw = false) override;
@@ -75,8 +76,8 @@ public:
 	void drawToPoint(ManagedSurface *g, Common::Point dstPoint);
 
 	ManagedSurface *getSurface() { return _canvas._surface; }
-	ManagedSurface *getGlyphMask() { return _canvas._glyphMask; }
-	ManagedSurface *getCharBoxMask() { return _canvas._charBoxMask; }
+	ManagedSurface *getGlyphMask() { return _glyphMaskSurface; }
+	ManagedSurface *getCharBoxMask() { return _charMaskSurface; }
 
 	int getInterLinear() { return _canvas._interLinear; }
 	void setInterLinear(int interLinear);
@@ -248,6 +249,9 @@ protected:
 private:
 	ManagedSurface *_cursorSurface;
 	ManagedSurface *_cursorSurface2;
+
+	ManagedSurface *_glyphMaskSurface;
+	ManagedSurface *_charMaskSurface;
 
 	int _editableRow;
 
