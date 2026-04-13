@@ -35,7 +35,7 @@ then
 	--host=${PLATFORM} \
 	--enable-release \
 	--enable-verbose-build \
-	--disable-engine=hugo,director,cine,ultima
+	--disable-engine=hugo,director,cine,ultima,pink,wage
 fi
 
 make -j$(getconf _NPROCESSORS_CONF) atarifulldist

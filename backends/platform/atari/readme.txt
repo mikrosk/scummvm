@@ -515,6 +515,13 @@ Known issues
       https://bugs.scummvm.org/ticket/14790
     - This prevents adding the 15 MB ultima.dat to the release archive.
     - https://wiki.scummvm.org/index.php?title=Ultima
+  - Macintosh engines
+    - Director, Pink, WAGE: explicitly disabled
+    - MacVenture, MTropolis, Colony: implicitly disabled (due to unmet
+      dependencies)
+    - classicmacfonts.dat, macgui.dat: explicitly deleted
+    - SCUMM's mac versions: not supported (but compiled in)
+    - SCI's mac font support: not supported (but compiled in)
 
 - When using FreeMiNT, ScummVM requires a recent kernel (>= 2021), otherwise
   keyboard handling won't work properly.
