@@ -143,8 +143,4 @@ bool WWIntro_demo1::introPt1() {
 	return true;
 }
 
-bool WWIntro_demo1::introPt1() {
-	return false;
-}
-
 } // End of namespace WaynesWorld
