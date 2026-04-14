@@ -372,6 +372,8 @@ Common::Error ChamberEngine::init() {
 		}
 	}
 
+	exitGame();
+
 	return Common::kNoError;
 }
 
