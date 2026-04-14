@@ -75,7 +75,7 @@ public:
 	void drawToPoint(ManagedSurface *g, Common::Rect srcRect, Common::Point dstPoint);
 	void drawToPoint(ManagedSurface *g, Common::Point dstPoint);
 
-	ManagedSurface *getSurface() { return _canvas._surface; }
+	ManagedSurface *getRawSurface() { return _canvas._surface; }
 	ManagedSurface *getGlyphMask() { return _glyphMaskSurface; }
 	ManagedSurface *getCharBoxMask() { return _charMaskSurface; }
 
