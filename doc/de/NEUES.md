@@ -17,6 +17,10 @@ Umfangreichere Informationen über die Änderungen des aktuellen Codes findest D
  MM:
    - Verbesserte Unterstützung für Tastenkürzel in MM1.
 
+ SLUDGE:
+   - Zwei weitere Spiele wurden zur Erkennungs-Datenbank hinzugefügt:
+     "Sam and Max Flintlocked" und "Full Moon".
+
 
 #### 2026.2.0 "Railmonicon" (28.03.2026)
 
