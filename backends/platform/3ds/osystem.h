@@ -33,6 +33,7 @@
 #include "backends/graphics/graphics.h"
 #include "backends/log/log.h"
 #include "backends/platform/3ds/sprite.h"
+#include "common/events.h"
 #include "common/rect.h"
 #include "common/queue.h"
 #include "common/ustr.h"
