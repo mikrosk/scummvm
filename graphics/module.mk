@@ -28,20 +28,6 @@ MODULE_OBJS := \
 	korfont.o \
 	larryScale.o \
 	maccursor.o \
-	macgui/datafiles.o \
-	macgui/macbutton.o \
-	macgui/macdialog.o \
-	macgui/macfontmanager.o \
-	macgui/macmenu.o \
-	macgui/macpopupmenu.o \
-	macgui/mactext.o \
-	macgui/mactext-canvas.o \
-	macgui/mactext-md.o \
-	macgui/mactextwindow.o \
-	macgui/macwidget.o \
-	macgui/macwindow.o \
-	macgui/macwindowborder.o \
-	macgui/macwindowmanager.o \
 	managed_surface.o \
 	nine_patch.o \
 	opengl/context.o \
@@ -124,6 +110,24 @@ MODULE_OBJS += \
 	mfc/libs/events.o \
 	mfc/libs/resources.o \
 	mfc/libs/settings.o
+endif
+
+ifdef USE_MACGUI
+MODULE_OBJS += \
+	macgui/datafiles.o \
+	macgui/macbutton.o \
+	macgui/macdialog.o \
+	macgui/macfontmanager.o \
+	macgui/macmenu.o \
+	macgui/macpopupmenu.o \
+	macgui/mactext.o \
+	macgui/mactext-canvas.o \
+	macgui/mactext-md.o \
+	macgui/mactextwindow.o \
+	macgui/macwidget.o \
+	macgui/macwindow.o \
+	macgui/macwindowborder.o \
+	macgui/macwindowmanager.o
 endif
 
 ifdef USE_TINYGL

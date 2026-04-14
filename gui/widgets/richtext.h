@@ -38,7 +38,9 @@ class ScrollBarWidget;
 class RichTextWidget : public Widget, public CommandSender {
 protected:
 	Graphics::ManagedSurface *_cachedTextSurface = nullptr;
+#ifdef USE_MACGUI
 	Graphics::MacText *_txtWnd = nullptr;
+#endif
 	Graphics::ManagedSurface *_surface = nullptr;
 	Common::U32String _text;
 

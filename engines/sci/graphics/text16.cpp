@@ -832,6 +832,7 @@ void GfxText16::kernelTextColors(int argc, reg_t *argv) {
 	}
 }
 
+#ifdef USE_MACGUI
 // This function is roughly equivalent to RTextSizeMac.
 // (SCI1.1 Mac interpreters include function names.)
 // The results of this function determine the size of SCI message boxes over
@@ -978,6 +979,7 @@ void GfxText16::macDraw(const Common::String &text, Common::Rect rect, TextAlign
 		i += (lineCharCount - 1);
 	}
 }
+#endif
 
 // This function mimics classic Mac's TEdit text wrapping behavior in a style
 // similar to GfxText16::GetLongest() that we use for SCI text measurement.

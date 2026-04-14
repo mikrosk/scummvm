@@ -101,7 +101,9 @@ SciEngine::SciEngine(OSystem *syst, const ADGameDescription *desc, SciGameId gam
 	_gfxScreen(nullptr),
 	_gfxText16(nullptr),
 	_gfxTransitions(nullptr),
+#ifdef USE_MACGUI
 	_gfxMacFontManager(nullptr),
+#endif
 	_gfxMacIconBar(nullptr),
 #ifdef ENABLE_SCI32
 	_gfxControls32(nullptr),
@@ -256,7 +258,9 @@ SciEngine::~SciEngine() {
 	//_console deleted by Engine
 	delete _guestAdditions;
 	delete _features;
+#ifdef USE_MACGUI
 	delete _gfxMacFontManager;
+#endif
 	delete _gfxMacIconBar;
 
 	delete _eventMan;
@@ -611,7 +615,11 @@ void SciEngine::initGraphics() {
 		_gfxTransitions = new GfxTransitions(_gfxScreen, _gfxPalette16);
 		_gfxPaint16 = new GfxPaint16(_resMan, _gamestate->_segMan, _gfxCache, _gfxPorts, _gfxCoordAdjuster, _gfxScreen, _gfxPalette16, _gfxTransitions, _audio);
 		_gfxAnimate = new GfxAnimate(_gamestate, _scriptPatcher, _gfxCache, _gfxCompare, _gfxPorts, _gfxPaint16, _gfxScreen, _gfxPalette16, _gfxCursor, _gfxTransitions);
+#ifdef USE_MACGUI
 		_gfxText16 = new GfxText16(_gfxCache, _gfxPorts, _gfxPaint16, _gfxScreen, _gfxMacFontManager);
+#else
+		_gfxText16 = new GfxText16(_gfxCache, _gfxPorts, _gfxPaint16, _gfxScreen, nullptr);
+#endif
 		_gfxControls16 = new GfxControls16(_gamestate->_segMan, _gfxPorts, _gfxPaint16, _gfxText16, _gfxScreen);
 		_gfxMenu = new GfxMenu(_eventMan, _gamestate->_segMan, _gfxPorts, _gfxPaint16, _gfxText16, _gfxScreen, _gfxCursor);
 
@@ -873,7 +881,11 @@ bool SciEngine::hasParser() const {
 }
 
 bool SciEngine::hasMacFonts() const {
+#ifdef USE_MACGUI
 	return _gfxMacFontManager != nullptr;
+#else
+	return false;
+#endif
 }
 
 bool SciEngine::hasMacIconBar() const {
@@ -1060,13 +1072,16 @@ void SciEngine::loadMacFonts() {
 	case GID_SQ1:
 		// These Mac games have fonts in the resource fork of their executable
 		// along with a SCI to Mac font mapping table.
+#ifdef USE_MACGUI
 		if (_macExecutable.hasResFork()) {
 			_gfxMacFontManager = new GfxMacFontManager(&_macExecutable);
 			if (!_gfxMacFontManager->hasFonts()) {
 				delete _gfxMacFontManager;
 				_gfxMacFontManager = nullptr;
 			}
-		} else {
+		} else
+#endif
+		{
 			Common::Path filename = _resMan->getMacExecutableName();
 			warning("Macintosh executable \"%s\" not found, using SCI fonts", filename.toString().c_str());
 		}
@@ -1075,12 +1090,14 @@ void SciEngine::loadMacFonts() {
 	case GID_QFG1VGA:
 		// These Mac games have interpreters that are hard-coded to use Palatino.
 		// Attempt to load Palatino from classicmacfonts.dat.
+#ifdef USE_MACGUI
 		_gfxMacFontManager = new GfxMacFontManager();
 		if (!_gfxMacFontManager->hasFonts()) {
 			warning("Classic Macintosh fonts not found, using SCI fonts");
 			delete _gfxMacFontManager;
 			_gfxMacFontManager = nullptr;
 		}
+#endif
 		break;
 	default:
 		break;

@@ -41,15 +41,6 @@ MODULE_OBJS := \
 	imuse/drivers/pcspk.o \
 	input.o \
 	ks_check.o \
-	macgui/macgui.o \
-	macgui/macgui_dialogwindow.o \
-	macgui/macgui_impl.o \
-	macgui/macgui_indy3.o \
-	macgui/macgui_loom.o \
-	macgui/macgui_strings.o \
-	macgui/macgui_v5.o \
-	macgui/macgui_v6.o \
-	macgui/macgui_widgets.o \
 	metaengine.o \
 	midiparser_ro.o \
 	object.o \
@@ -95,6 +86,19 @@ MODULE_OBJS := \
 	util.o \
 	vars.o \
 	verbs.o
+
+ifdef USE_MACGUI
+MODULE_OBJS += \
+	macgui/macgui.o \
+	macgui/macgui_dialogwindow.o \
+	macgui/macgui_impl.o \
+	macgui/macgui_indy3.o \
+	macgui/macgui_loom.o \
+	macgui/macgui_strings.o \
+	macgui/macgui_v5.o \
+	macgui/macgui_v6.o \
+	macgui/macgui_widgets.o
+endif
 
 ifdef USE_IMGUI
 MODULE_OBJS += \

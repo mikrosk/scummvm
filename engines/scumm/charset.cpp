@@ -1663,6 +1663,7 @@ void CharsetRendererPCE::setDrawCharIntern(uint16 chr) {
 }
 #endif
 
+#ifdef USE_MACGUI
 CharsetRendererMac::CharsetRendererMac(ScummEngine *vm, const Common::Path &fontFile)
 	: CharsetRendererCommon(vm), _lastTop(0) {
 
@@ -1981,6 +1982,7 @@ void CharsetRendererMac::setColor(byte color, bool) {
 	_shadowColor = 255;
 	_color &= 0x0F;
 }
+#endif // USE_MACGUI
 
 #ifdef ENABLE_SCUMM_7_8
 CharsetRendererV7::CharsetRendererV7(ScummEngine *vm) : CharsetRendererClassic(vm, vm->_useCJKMode && vm->_language != Common::JA_JPN ? 1 : 0),

@@ -1028,7 +1028,9 @@ void ScummEngine_v2::setBuiltinCursor(int idx) {
 			*(hotspot - _cursor.width * (3 + i) + i) = color;
 			*(hotspot + _cursor.width * (3 + i) + i) = color;
 		}
-	} else if (_macGui) {
+	}
+#ifdef USE_MACGUI
+	else if (_macGui) {
 		int width, height, hotspotX, hotspotY, animate;
 
 		_macGui->setupCursor(width, height, hotspotX, hotspotY, animate);
@@ -1039,7 +1041,9 @@ void ScummEngine_v2::setBuiltinCursor(int idx) {
 		_cursor.hotspotY = hotspotY;
 
 		return;
-	} else {
+	}
+#endif
+	else {
 		_cursor.width = 23;
 		_cursor.height = 21;
 		_cursor.hotspotX = 11;
@@ -1094,8 +1098,10 @@ void ScummEngine_v2::setBuiltinCursor(int idx) {
 void ScummEngine_v2::setSnailCursor() {
 	// When running Maniac Mansion as a Macintosh game, there is no snail
 	// cursor. Only the regular arrow cursor.
+#ifdef USE_MACGUI
 	if (_macGui)
 		return;
+#endif
 
 	// Monkey Island (Sega CD) has an animated wait cursor for the original pause menu.
 	// Only enable it when enabled from the game options dialog.
@@ -1216,6 +1222,7 @@ void ScummEngine_v5::resetCursors() {
 }
 
 void ScummEngine_v5::setBuiltinCursor(int idx) {
+#ifdef USE_MACGUI
 	if (_macGui) {
 		int width, height, hotspotX, hotspotY, animate;
 
@@ -1229,6 +1236,7 @@ void ScummEngine_v5::setBuiltinCursor(int idx) {
 
 		return;
 	}
+#endif
 
 	if (_game.platform == Common::kPlatformSegaCD) {
 	if (_cursor.animate == 2) {

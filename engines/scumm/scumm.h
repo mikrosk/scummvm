@@ -1490,8 +1490,10 @@ protected:
 
 	void mac_markScreenAsDirty(int x, int y, int w, int h);
 	void mac_drawStripToScreen(VirtScreen *vs, int top, int x, int y, int width, int height);
+#ifdef USE_MACGUI
 	void mac_drawIndy3TextBox();
 	void mac_undrawIndy3TextBox();
+#endif
 	void mac_undrawIndy3CreditsText();
 	void mac_drawBufferToScreen(const byte *buffer, int pitch, int x, int y, int width, int height, bool epxRectangleExpansion = true);
 	void mac_updateCompositeBuffer(const byte *buffer, int pitch, int x, int y, int width, int height);
@@ -1502,7 +1504,9 @@ protected:
 	void mac_scaleCursor(byte *&outCursor, int &outHotspotX, int &outHotspotY, int &outWidth, int &outHeight);
 	void mac_toggleSmoothing();
 
+#ifdef USE_MACGUI
 	Common::KeyState mac_showOldStyleBannerAndPause(const char *msg, int32 waitTime);
+#endif
 
 	const byte *postProcessDOSGraphics(VirtScreen *vs, int &pitch, int &x, int &y, int &width, int &height) const;
 	const byte *ditherVGAtoEGA(int &pitch, int &x, int &y, int &width, int &height) const;
@@ -1676,7 +1680,9 @@ public:
 	bool _useGammaCorrection = true;
 
 	Graphics::Surface *_macScreen = nullptr;
+#ifdef USE_MACGUI
 	MacGui *_macGui = nullptr;
+#endif
 	bool _useMacGraphicsSmoothing = true;
 	byte _completeScreenBuffer[320 * 200];
 

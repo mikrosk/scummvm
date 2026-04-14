@@ -527,7 +527,9 @@ ScummEngine::~ScummEngine() {
 		delete _macScreen;
 	}
 
+#ifdef USE_MACGUI
 	delete _macGui;
+#endif
 
 #ifndef DISABLE_TOWNS_DUAL_LAYER_MODE
 	delete _townsScreen;
@@ -1370,6 +1372,7 @@ Common::Error ScummEngine::init() {
 						gameName, (_game.id == GID_MONKEY2 || _game.version > 6) ? _s("The Mac GUI") : _s("The music and the Mac GUI")));
 				dialog.runModal();
 			} else if (isUsingOriginalGUI() || _game.id == GID_INDY3 || _game.id == GID_LOOM) {
+#ifdef USE_MACGUI
 				// FIXME: THIS IS A TEMPORARY WORKAROUND!
 				// The reason why we are initializing the Mac GUI even without original GUI active
 				// is because the engine will attempt to load Mac fonts from resources... using the
@@ -1385,12 +1388,17 @@ Common::Error ScummEngine::init() {
 					resource.close();
 				}
 				_macGui = new MacGui(this, macResourceFile);
+#endif
 			}
 
 			// Maniac Mansion doesn't use the text surface, but it's easier to
 			// pretend that it does.
 
-			if (_game.id == GID_INDY3 || _game.id == GID_LOOM || (_game.id == GID_MANIAC && _macGui))
+			if (_game.id == GID_INDY3 || _game.id == GID_LOOM
+#ifdef USE_MACGUI
+				|| (_game.id == GID_MANIAC && _macGui)
+#endif
+			)
 				_textSurfaceMultiplier = 2;
 		}
 
@@ -1418,12 +1426,14 @@ Common::Error ScummEngine::init() {
 
 		memset(_completeScreenBuffer, 0, 320 * 200);
 
+#ifdef USE_MACGUI
 		if (_macGui) {
 			if (!_macGui->initialize()) {
 				delete _macGui;
 				_macGui = nullptr;
 			}
 		}
+#endif
 	}
 
 	// Initialize backend
@@ -1866,9 +1876,12 @@ void ScummEngine::setupCharsetRenderer(const Common::Path &macFontFile) {
 #endif
 		if (_game.platform == Common::kPlatformFMTowns)
 			_charset = new CharsetRendererTownsV3(this);
-		else if (_game.platform == Common::kPlatformMacintosh && !macFontFile.empty()) {
+		else
+#ifdef USE_MACGUI
+		if (_game.platform == Common::kPlatformMacintosh && !macFontFile.empty()) {
 			_charset = new CharsetRendererMac(this, macFontFile);
 		} else
+#endif
 			_charset = new CharsetRendererV3(this);
 #ifdef ENABLE_SCUMM_7_8
 	} else if (_game.version == 7) {
@@ -1946,10 +1959,12 @@ void ScummEngine::resetScumm() {
 		_macScreen->fillRect(Common::Rect(_macScreen->w, _macScreen->h), 0);
 	}
 
+#ifdef USE_MACGUI
 	if (_macGui) {
 		_macGui->clearTextArea();
 		_macGui->reset();
 	}
+#endif
 
 	if ((_game.id == GID_MANIAC) && (_game.platform == Common::kPlatformC64)) {
 		initScreens(9, 145); // The main virtual screen is offset lower by one pixel
@@ -2779,8 +2794,10 @@ Common::Error ScummEngine::go() {
 			// chance to update the screen. That way, it can draw
 			// things over the regular graphics, if needed.
 
+#ifdef USE_MACGUI
 			if (_macGui)
 				_macGui->update(delta);
+#endif
 
 			if (_game.heversion >= 60) {
 				((SoundHE *)_sound)->feedMixer();
@@ -2827,8 +2844,10 @@ void ScummEngine::waitForTimer(int quarterFrames, bool freezeMacGui) {
 		towns_updateGfx();
 #endif
 
+#ifdef USE_MACGUI
 		if (_macGui && !freezeMacGui)
 			_macGui->updateWindowManager();
+#endif
 
 		_system->updateScreen();
 		cur = _system->getMillis();

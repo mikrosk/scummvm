@@ -601,8 +601,10 @@ void ScummEngine::checkExecVerbs() {
 
 		// The Mac version of Last Crusade handles verb shortcut keys on
 		// its own, so that is also disabled here.
+#ifdef USE_MACGUI
 		if (_macGui && _macGui->isVerbGuiActive())
 			ignoreVerbKeys = true;
+#endif
 
 		/* Check keypresses */
 		if (!ignoreVerbKeys) {
@@ -677,8 +679,10 @@ void ScummEngine::checkExecVerbs() {
 		if (!zone)
 			return;
 
+#ifdef USE_MACGUI
 		if (_macGui && _macGui->isVerbGuiActive() && zone->number == kVerbVirtScreen)
 			return;
+#endif
 
 		over = findVerbAtPos(_mouse.x, _mouse.y);
 		if (over != 0) {
@@ -1124,8 +1128,10 @@ void ScummEngine::drawVerb(int verb, int mode, Common::TextToSpeechManager::Acti
 	int pixelYOffset = (_game.platform == Common::kPlatformC64) ? (_game.id == GID_ZAK ? 2 : 1) : 0;
 	int pixelXOffset = (_game.platform == Common::kPlatformC64) ? 1 : 0;
 
+#ifdef USE_MACGUI
 	if (_macGui && _game.id == GID_INDY3)
 		return;
+#endif
 
 	if (!verb)
 		return;
@@ -1193,8 +1199,10 @@ void ScummEngine::drawVerb(int verb, int mode, Common::TextToSpeechManager::Acti
 }
 
 void ScummEngine::restoreVerbBG(int verb) {
+#ifdef USE_MACGUI
 	if (_macGui && _game.id == GID_INDY3)
 		return;
+#endif
 
 	VerbSlot *vs;
 

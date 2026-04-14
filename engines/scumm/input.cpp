@@ -112,8 +112,10 @@ void ScummEngine::parseEvent(Common::Event event) {
 	// TODO: Don't allow menu while message banner is active. Don't allow
 	// message banner while menu is active.
 
+#ifdef USE_MACGUI
 	if (_macGui && _macGui->handleEvent(event))
 		return;
+#endif
 
 	switch (event.type) {
 	case Common::EVENT_CUSTOM_ENGINE_ACTION_START:
@@ -303,6 +305,7 @@ void ScummEngine::parseEvent(Common::Event event) {
 				getEventManager()->resetQuit();
 				getEventManager()->resetReturnToLauncher();
 				if (!_messageBannerActive) {
+#ifdef USE_MACGUI
 					if (_macGui) {
 						if (!(ConfMan.hasKey("confirm_exit") && ConfMan.getBool("confirm_exit")) ||
 							_macGui->runQuitDialog()) {
@@ -315,7 +318,9 @@ void ScummEngine::parseEvent(Common::Event event) {
 								quitGame();
 							}
 						}
-					} else {
+					} else
+#endif
+					{
 						queryQuit(exitType);
 					}
 					_closeBannerAndQueryQuitFlag = false;
@@ -1074,11 +1079,14 @@ void ScummEngine::processKeyboard(Common::KeyState lastKeyHit) {
 		restartKeyPressed &= !isSegaCD && !isNES;
 
 		if (restartKeyPressed) {
+#ifdef USE_MACGUI
 			if (_macGui) {
 				if (_macGui->runRestartDialog()) {
 					restart();
 				}
-			} else {
+			} else
+#endif
+			{
 				queryRestart();
 			}
 
@@ -1230,9 +1238,13 @@ void ScummEngine::processKeyboard(Common::KeyState lastKeyHit) {
 			if (isSegaCD) {
 				// We map the GMM to F5, while SPACE (which acts as our pause button) calls the original menu...
 				openMainMenuDialog();
-			} else if (_macGui) {
+			}
+#ifdef USE_MACGUI
+			else if (_macGui) {
 				openMainMenuDialog(); // Mac games have their own menu so let's just call the GMM...
-			} else  {
+			}
+#endif
+			else  {
 				showMainMenu();
 			}
 			return;
@@ -1250,9 +1262,12 @@ void ScummEngine::processKeyboard(Common::KeyState lastKeyHit) {
 		if (enhancementEnabled(kEnhUIUX) && _game.id == GID_LOOM &&
 			mainmenuKeyEnabled && (lastKeyHit.keycode == Common::KEYCODE_d && lastKeyHit.hasFlags(Common::KBD_CTRL))) {
 			// Drafts menu
+#ifdef USE_MACGUI
 			if (_macGui) {
 				_macGui->runDraftsInventory();
-			} else {
+			} else
+#endif
+			{
 				showDraftsInventory();
 			}
 		}
@@ -1294,7 +1309,11 @@ void ScummEngine::processKeyboard(Common::KeyState lastKeyHit) {
 			} else if (_game.version >= 4 && lastKeyHit.keycode == Common::KEYCODE_j && lastKeyHit.hasFlags(Common::KBD_SHIFT)) {
 				if (_game.version == 4) {
 					showOldStyleBannerAndPause(getGUIString(gsRecalJoystick), 2, 90);
+#ifdef USE_MACGUI
 				} else if (!_macGui) {
+#else
+				} else {
+#endif
 					showBannerAndPause(0, 90, getGUIString(gsRecalJoystick));
 				}
 				return;
@@ -1308,7 +1327,11 @@ void ScummEngine::processKeyboard(Common::KeyState lastKeyHit) {
 			if (_game.version >= 4 && lastKeyHit.keycode == Common::KEYCODE_m && lastKeyHit.hasFlags(Common::KBD_SHIFT)) {
 				if (_game.version == 4) {
 					showOldStyleBannerAndPause(getGUIString(gsMouseMode), 2, 90);
+#ifdef USE_MACGUI
 				} else if (!_macGui) {
+#else
+				} else {
+#endif
 					showBannerAndPause(0, 90, getGUIString(gsMouseMode));
 				}
 				return;

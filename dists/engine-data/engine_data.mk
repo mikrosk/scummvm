@@ -84,6 +84,11 @@ endif
 ifdef USE_FREETYPE2
 DIST_FILES_LIST += dists/engine-data/fonts.dat
 endif
+ifdef USE_MACGUI
+DIST_FILES_LIST += dists/engine-data/classicmacfonts.dat
+DIST_FILES_LIST += dists/engine-data/helpdialog.zip
+DIST_FILES_LIST += dists/engine-data/macgui.dat
+endif
 ifdef USE_IMGUI
 DIST_FILES_LIST += dists/engine-data/fonts-imgui.dat
 endif

@@ -35,8 +35,7 @@ atarilitedist: $(EXECUTABLE)
 	$(CP) $(DIST_FILES_ENGINEDATA) $(DIST_FILES_ENGINEDATA_BIG) ${LITE_DATA}
 
 	# remove unused files
-	$(RM) ${LITE_DATA}/helpdialog.zip
-	$(RM) $(addsuffix .dat, $(addprefix ${LITE_DATA}/, achievements classicmacfonts encoding macgui))
+	$(RM) $(addsuffix .dat, $(addprefix ${LITE_DATA}/, achievements encoding))
 
 	# rename remaining files still not fitting into the 8+3 limit (this has to be supported by the backend, too)
 	! [ -f ${LITE_DATA}/supernova.dat ] || mv ${LITE_DATA}/supernova.dat ${LITE_DATA}/supernov.dat
@@ -66,8 +65,7 @@ atarifulldist: $(EXECUTABLE)
 	$(CP) $(DIST_FILES_ENGINEDATA) $(DIST_FILES_ENGINEDATA_BIG) ${FULL_DATA}
 
 	# remove unused files
-	$(RM) ${FULL_DATA}/helpdialog.zip
-	$(RM) $(addsuffix .dat, $(addprefix ${FULL_DATA}/, achievements classicmacfonts encoding hadesch_translations macgui prince_translation))
+	$(RM) $(addsuffix .dat, $(addprefix ${FULL_DATA}/, achievements encoding hadesch_translations prince_translation))
 
 	# rename remaining files still not fitting into the 8+3 limit (this has to be supported by the backend, too)
 	! [ -f ${FULL_DATA}/cryomni3d.dat ] || mv ${FULL_DATA}/cryomni3d.dat ${FULL_DATA}/cryomni3.dat
@@ -111,8 +109,7 @@ fbdist: $(EXECUTABLE)
 	$(CP) $(DIST_FILES_ENGINEDATA) $(DIST_FILES_ENGINEDATA_BIG) ${FB_DATA}
 
 	# remove unused files
-	$(RM) ${FB_DATA}/helpdialog.zip
-	$(RM) $(addsuffix .dat, $(addprefix ${FB_DATA}/, achievements classicmacfonts encoding hadesch_translations macgui prince_translation))
+	$(RM) $(addsuffix .dat, $(addprefix ${FB_DATA}/, achievements encoding hadesch_translations prince_translation))
 
 	$(MKDIR) ${FB_THEMES}
 	$(CP) $(DIST_FILES_THEMES) ${FB_THEMES}

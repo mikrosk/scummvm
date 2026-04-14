@@ -50,7 +50,6 @@ MODULE_OBJS := \
 	graphics/cursor.o \
 	graphics/fontkorean.o \
 	graphics/fontsjis.o \
-	graphics/macfont.o \
 	graphics/maciconbar.o \
 	graphics/menu.o \
 	graphics/paint16.o \
@@ -103,6 +102,10 @@ MODULE_OBJS := \
 	sound/drivers/pc9801.o \
 	video/seq_decoder.o
 
+ifdef USE_MACGUI
+MODULE_OBJS += \
+	graphics/macfont.o
+endif
 
 ifdef ENABLE_SCI32
 MODULE_OBJS += \

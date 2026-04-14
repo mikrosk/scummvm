@@ -102,7 +102,9 @@ GuiManager::GuiManager() : CommandSender(nullptr), _redrawStatus(kRedrawDisabled
 
 GuiManager::~GuiManager() {
 	delete _theme;
+#ifdef USE_MACGUI
 	delete _wm;
+#endif
 }
 
 void GuiManager::initIconsSet() {
@@ -962,6 +964,7 @@ void GuiManager::initTextToSpeech() {
 	ttsMan->setVoice(voice);
 }
 
+#ifdef USE_MACGUI
 Graphics::MacWindowManager *GuiManager::getWM() {
 	if (_wm)
 		return _wm;
@@ -977,6 +980,7 @@ Graphics::MacWindowManager *GuiManager::getWM() {
 
 	return _wm;
 }
+#endif
 
 void GuiManager::emptyTrash(Dialog *const activeDialog) {
 	Common::List<GuiObjectTrashItem>::iterator it = _guiObjectTrash.begin();

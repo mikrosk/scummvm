@@ -1215,7 +1215,11 @@ void ScummEngine::displayDialog() {
 			(uint16)numberOfWaits);
 	}
 
+#ifdef USE_MACGUI
 	bool createTextBox = (_macGui && _game.id == GID_INDY3);
+#else
+	bool createTextBox = false;
+#endif
 	bool drawTextBox = false;
 
 #ifdef USE_TTS
@@ -1253,8 +1257,10 @@ void ScummEngine::displayDialog() {
 		_charset->_top = _nextTop;
 
 		if (createTextBox) {
-			if (!_keepText)
+#ifdef USE_MACGUI
+			if (!_keepText && _macGui)
 				_macGui->initTextAreaForActor(a, _charset->getColor());
+#endif
 			createTextBox = false;
 			drawTextBox = true;
 		}
@@ -1321,8 +1327,10 @@ void ScummEngine::displayDialog() {
 	}
 #endif
 
+#ifdef USE_MACGUI
 	if (drawTextBox)
 		mac_drawIndy3TextBox();
+#endif
 
 #ifndef DISABLE_TOWNS_DUAL_LAYER_MODE
 	if (_game.platform == Common::kPlatformFMTowns && (c == 0 || c == 2 || c == 3))

@@ -52,8 +52,10 @@ void ScummEngine::mac_markScreenAsDirty(int x, int y, int w, int h) {
 void ScummEngine::mac_drawStripToScreen(VirtScreen *vs, int top, int x, int y, int width, int height) {
 	// The verb screen is completely replaced with a custom GUI. While
 	// it is active, all other drawing to that area is suspended.
+#ifdef USE_MACGUI
 	if (_macGui && vs->number == kVerbVirtScreen && _macGui->isVerbGuiActive())
 		return;
+#endif
 
 	const byte *pixels = vs->getPixels(x, top);
 	const byte *ts = (byte *)_textSurface.getBasePtr(x * 2, y * 2);
@@ -115,6 +117,7 @@ void ScummEngine::mac_drawStripToScreen(VirtScreen *vs, int top, int x, int y, i
 	_system->copyRectToScreen(_macScreen->getBasePtr(x * 2, y * 2 + _macScreenDrawOffset * 2), _macScreen->pitch, x * 2, y * 2 + _macScreenDrawOffset * 2, width * 2, height * 2);
 }
 
+#ifdef USE_MACGUI
 void ScummEngine::mac_drawIndy3TextBox() {
 	Graphics::Surface *s = _macGui->textArea();
 
@@ -152,6 +155,7 @@ void ScummEngine::mac_undrawIndy3TextBox() {
 
 	mac_markScreenAsDirty(x, y, w, h);
 }
+#endif
 
 void ScummEngine::mac_undrawIndy3CreditsText() {
 	// Set _masMask to make the text clear, and _textScreenID to ensure
@@ -365,6 +369,7 @@ void ScummEngine::mac_toggleSmoothing() {
 		updateCursor();
 }
 
+#ifdef USE_MACGUI
 Common::KeyState ScummEngine::mac_showOldStyleBannerAndPause(const char *msg, int32 waitTime) {
 	char bannerMsg[512];
 
@@ -388,6 +393,7 @@ Common::KeyState ScummEngine::mac_showOldStyleBannerAndPause(const char *msg, in
 
 	return ks;
 }
+#endif
 
 } // End of namespace Scumm
 

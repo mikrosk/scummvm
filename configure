@@ -234,6 +234,7 @@ _translation=yes
 _backend=sdl
 _16bit=auto
 _highres=auto
+_macgui=yes
 _savegame_timestamp=auto
 _dynamic_modules=no
 _elf_loader=no
@@ -326,6 +327,7 @@ add_feature fribidi "FriBidi" "_fribidi"
 add_feature freetype2 "FreeType2" "_freetype2"
 add_feature highres "high resolution" "_highres"
 add_feature jpeg "JPEG" "_jpeg"
+add_feature macgui "Mac GUI" "_macgui"
 add_feature mad "MAD" "_mad"
 add_feature opengl_game_classic "OpenGL (classic)" "_opengl_game_classic"
 add_feature opengl_game_shaders "OpenGL with shaders" "_opengl_game_shaders"
@@ -1025,6 +1027,7 @@ Optional Features:
   --disable-16bit          don't enable 16bit color support
   --disable-highres        don't enable support for high resolution
                            engines >320x240
+  --disable-macgui         don't build Mac GUI support
   --disable-savegame-timestamp don't use timestamps for blank savegame
                                descriptions
   --disable-scalers        exclude scalers
@@ -1275,6 +1278,8 @@ for ac_option in $@; do
 	--disable-16bit)              _16bit=no              ;;
 	--enable-highres)             _highres=yes           ;;
 	--disable-highres)            _highres=no            ;;
+	--enable-macgui)              _macgui=yes            ;;
+	--disable-macgui)             _macgui=no             ;;
 	--disable-savegame-timestamp) _savegame_timestamp=no ;;
 	--disable-scalers)            _build_scalers=no      ;;
 	--disable-hq-scalers)         _build_hq_scalers=no   ;;
@@ -4247,6 +4252,7 @@ case $_backend in
 		_libmpcdec=no
 		_build_scalers=no
 		_build_aspect=no
+		_macgui=no
 		;;
 	dc)
 		append_var INCLUDES '-I$(srcdir)/backends/platform/dc'
@@ -5336,6 +5342,11 @@ define_in_config_if_yes "$_16bit" 'USE_RGB_COLOR'
 # Check whether High resolution graphics support is requested
 #
 define_in_config_if_yes "$_highres" 'USE_HIGHRES'
+
+#
+# Check whether Mac GUI support is requested
+#
+define_in_config_if_yes "$_macgui" 'USE_MACGUI'
 
 #
 # Check whether save games use the current time as default description

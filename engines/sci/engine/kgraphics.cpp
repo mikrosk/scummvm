@@ -378,12 +378,15 @@ reg_t kTextSize(EngineState *s, int argc, reg_t *argv) {
 	const bool useMacFonts = g_sci->hasMacFonts() && (argc < 6);
 	if (!useMacFonts) {
 		g_sci->_gfxText16->kernelTextSize(splitText.c_str(), languageSplitter, font, maxWidth, &textWidth, &textHeight);
-	} else {
+	}
+#ifdef USE_MACGUI
+	else {
 		// Mac games with native fonts always use them for sizing unless a sixth
 		// parameter is passed to indicate that SCI font sizing should be used.
 		// Only LSL5 is known to pass this parameter in Dialog:setSize.
 		g_sci->_gfxText16->macTextSize(splitText, font, g_sci->_gfxText16->GetFontId(), maxWidth, &textWidth, &textHeight);
 	}
+#endif
 
 	debugC(kDebugLevelStrings, "GetTextSize '%s' -> %dx%d", text.c_str(), textWidth, textHeight);
 	dest[2] = make_reg(0, textHeight);

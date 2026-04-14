@@ -477,9 +477,11 @@ Common::KeyState ScummEngine::showOldStyleBannerAndPause(const char *msg, int co
 		return showBannerAndPause(0, waitTime, msg);
 	}
 
+#ifdef USE_MACGUI
 	if (_macScreen) {
 		return mac_showOldStyleBannerAndPause(msg, waitTime);
 	}
+#endif
 
 	char bannerMsg[512];
 	int bannerMsgWidth, bannerMsgHeight;

@@ -84,8 +84,10 @@ public:
 	void kernelTextFonts(int argc, reg_t *argv);
 	void kernelTextColors(int argc, reg_t *argv);
 
+#ifdef USE_MACGUI
 	void macTextSize(const Common::String &text, GuiResourceId sciFontId, GuiResourceId origSciFontId, int16 maxWidth, int16 *textWidth, int16 *textHeight);
 	void macDraw(const Common::String &text, Common::Rect rect, TextAlignment alignment, GuiResourceId sciFontId, GuiResourceId origSciFontId, int16 color);
+#endif
 private:
 	void init();
 	bool SwitchToFont1001OnKorean(const char *text, uint16 languageSplitter);

@@ -291,6 +291,7 @@ public:
 #endif
 };
 
+#ifdef USE_MACGUI
 class CharsetRendererMac : public CharsetRendererCommon {
 protected:
 	const Graphics::Font *_font = nullptr;
@@ -318,6 +319,7 @@ public:
 	void printChar(int chr, bool ignoreCharsetMask) override;
 	void setColor(byte color, bool) override;
 };
+#endif
 
 #ifdef ENABLE_SCUMM_7_8
 class CharsetRendererV7 : public CharsetRendererClassic, public GlyphRenderer_v7 {

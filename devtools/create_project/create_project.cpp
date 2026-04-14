@@ -1226,6 +1226,7 @@ const Feature s_features[] = {
 	{          "basic-net",                 "USE_BASIC_NET", false, true,  "Basic network support" },
 	{              "cloud",                     "USE_CLOUD", false, true,  "Cloud integration support" },
 	{               "enet",                      "USE_ENET", false, true,  "ENet networking support" },
+	{             "macgui",                    "USE_MACGUI", false, true,  "Mac GUI support" },
 	{        "translation",               "USE_TRANSLATION", false, true,  "Translation support" },
 	{             "vkeybd",                 "ENABLE_VKEYBD", false, false, "Virtual keyboard support"},
 	{      "eventrecorder",          "ENABLE_EVENTRECORDER", false, false, "Event recorder support"},

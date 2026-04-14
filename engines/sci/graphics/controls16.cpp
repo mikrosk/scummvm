@@ -348,9 +348,12 @@ void GfxControls16::kernelDrawButton(Common::Rect rect, reg_t obj, const char *t
 
 		if (!g_sci->hasMacFonts()) {
 			_text16->Box(text, languageSplitter, _screen->gfxDriver()->driverBasedTextRendering(), rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
-		} else {
+		}
+#ifdef USE_MACGUI
+		else {
 			_text16->macDraw(text, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId, _text16->GetFontId(), 0);
 		}
+#endif
 		_ports->textGreyedOutput(false);
 
 		// Fix for Korean fan translation, see comment above.
@@ -376,6 +379,7 @@ void GfxControls16::kernelDrawButton(Common::Rect rect, reg_t obj, const char *t
 			_paint16->invertRectViaXOR(rect);
 		else
 			_paint16->invertRect(rect);
+#ifdef USE_MACGUI
 		if (g_sci->hasMacFonts()) {
 			// Mac scripts set a flag to tell the interpreter to draw white text when inverted.
 			// Note that KQ6 does not do this because it includes the PC version of the script,
@@ -385,6 +389,7 @@ void GfxControls16::kernelDrawButton(Common::Rect rect, reg_t obj, const char *t
 			_text16->macDraw(text, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId, _text16->GetFontId(), textColor);
 			rect.grow(1);
 		}
+#endif
 		_paint16->bitsShow(rect);
 	}
 }
@@ -399,9 +404,12 @@ void GfxControls16::kernelDrawText(Common::Rect rect, reg_t obj, const char *tex
 		if (!g_sci->hasMacFonts()) {
 			// The PC-98 versions set the 'show` argument here (unlike normal DOS versions).
 			_text16->Box(text, languageSplitter, _screen->gfxDriver()->driverBasedTextRendering(), rect, alignment, fontId);
-		} else {
+		}
+#ifdef USE_MACGUI
+		else {
 			_text16->macDraw(text, rect, alignment, fontId, _text16->GetFontId(), 0);
 		}
+#endif
 		if (style & SCI_CONTROLS_STYLE_SELECTED) {
 			_paint16->frameRect(rect);
 		}

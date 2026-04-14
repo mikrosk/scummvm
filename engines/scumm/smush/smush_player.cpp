@@ -1345,10 +1345,12 @@ void SmushPlayer::play(const char *filename, int32 speed, int32 offset, int32 st
 			break;
 		}
 
+#ifdef USE_MACGUI
 		if (_vm->_macGui) {
 			_vm->_macGui->updateWindowManager();
 			_vm->_system->updateScreen();
 		}
+#endif
 
 		_vm->_system->delayMillis(10);
 	}

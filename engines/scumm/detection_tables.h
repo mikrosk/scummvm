@@ -172,14 +172,18 @@ static const GameSettings gameVariantsTable[] = {
 	{"indyzak", "FM-TOWNS",    0, GID_ZAK, 3, 0, MDT_TOWNS, GF_OLD256 | GF_AUDIOTRACKS, Common::kPlatformFMTowns, GUIO6(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_MIDITOWNS, GAMEOPTION_TRIM_FMTOWNS_TO_200_PIXELS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 
 	{"indy3", "EGA",      "ega", GID_INDY3, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB, 0, UNK, GUIO7(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_RENDERCGA, GUIO_RENDERAMIGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
+#ifdef USE_MACGUI
 	{"indy3", "Mac",      "ega", GID_INDY3, 3, 0, MDT_MACINTOSH,             0, UNK, GUIO7(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_RENDERMACINTOSHBW, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GUIO_NOASPECT, GAMEOPTION_TTS)},
+#endif
 	{"indy3", "No AdLib", "ega", GID_INDY3, 3, 0, MDT_PCSPK | MDT_PCJR,             0, UNK, GUIO6(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_RENDERCGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"indy3", "VGA",      "vga", GID_INDY3, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB, GF_OLD256 | GF_FEW_LOCALS,                  Common::kPlatformDOS, GUIO5(GUIO_NOSPEECH, GUIO_NOMIDI, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"indy3", "Steam",  "steam", GID_INDY3, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB, GF_OLD256 | GF_FEW_LOCALS, UNK, GUIO5(GUIO_NOSPEECH, GUIO_NOMIDI, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"indy3", "FM-TOWNS",     0, GID_INDY3, 3, 0, MDT_TOWNS,             GF_OLD256 | GF_FEW_LOCALS | GF_AUDIOTRACKS, Common::kPlatformFMTowns, GUIO7(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_MIDITOWNS, GAMEOPTION_TRIM_FMTOWNS_TO_200_PIXELS, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 
 	{"loom", "EGA",      "ega", GID_LOOM, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO7(GUIO_NOSPEECH, GUIO_RENDERCGA, GUIO_RENDERAMIGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_COPY_PROTECTION, GAMEOPTION_TTS)},
+#ifdef USE_MACGUI
 	{"loom", "Mac",      "ega", GID_LOOM, 3, 0, MDT_PCSPK | MDT_PCJR,                                  0, UNK, GUIO7(GUIO_NOSPEECH, GUIO_RENDERMACINTOSHBW, GUIO_NOMIDI, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GUIO_NOASPECT, GAMEOPTION_TTS)},
+#endif
 	{"loom", "No AdLib", "ega", GID_LOOM, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS,                        0, UNK, GUIO5(GUIO_NOSPEECH, GUIO_NOMIDI, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"loom", "PC-Engine",    0, GID_LOOM, 3, 0, MDT_NONE,                         GF_AUDIOTRACKS | GF_OLD256 | GF_16BIT_COLOR, Common::kPlatformPCEngine, GUIO4(GUIO_NOSPEECH, GUIO_NOMIDI, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_TTS)},
 	{"loom", "FM-TOWNS",     0, GID_LOOM, 3, 0, MDT_TOWNS,                        GF_AUDIOTRACKS | GF_OLD256, Common::kPlatformFMTowns, GUIO7(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_MIDITOWNS, GUIO_NOASPECT, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
@@ -196,7 +200,9 @@ static const GameSettings gameVariantsTable[] = {
 	{"monkey", "Demo",     "ega", GID_MONKEY_EGA, 4, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB,            GF_16COLOR | GF_DEMO,     Common::kPlatformDOS, GUIO8(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_RENDERHERCGREEN, GUIO_RENDERHERCAMBER, GUIO_RENDERCGA, GUIO_RENDERAMIGA, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"monkey", "CD",           0, GID_MONKEY,     5, 0, MDT_ADLIB,                        GF_AUDIOTRACKS, UNK, GUIO6(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_RENDEREGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"monkey", "SE",           0, GID_MONKEY,     5, 0, MDT_ADLIB,                        GF_AUDIOTRACKS | GF_DOUBLEFINE_PAK, UNK, GUIO7(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_RENDEREGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_USE_REMASTERED_AUDIO, GAMEOPTION_TTS)},
+#ifdef USE_MACGUI
 	{"monkey", "Mac",          0, GID_MONKEY,     5, 0, MDT_MACINTOSH,                    0, UNK, GUIO7(GUIO_NOSPEECH, GUIO_NOMIDI, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_COPY_PROTECTION, GUIO_NOASPECT, GAMEOPTION_TTS)},
+#endif
 	{"monkey", "FM-TOWNS",     0, GID_MONKEY,     5, 0, MDT_TOWNS,                        GF_AUDIOTRACKS, Common::kPlatformFMTowns, GUIO7(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_MIDITOWNS, GAMEOPTION_TRIM_FMTOWNS_TO_200_PIXELS, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"monkey", "SEGA",         0, GID_MONKEY,     5, 0, MDT_NONE,                         GF_AUDIOTRACKS, Common::kPlatformSegaCD, GUIO5(GUIO_NOSPEECH, GUIO_NOMIDI, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"monkey", "SE Talkie",    0, GID_MONKEY,     5, 0, MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, GF_AUDIOTRACKS | GF_ULTIMATE_TALKIE, UNK, GUIO3(GUIO_RENDEREGA, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
@@ -204,15 +210,19 @@ static const GameSettings gameVariantsTable[] = {
 	{"monkey2", "SE", 0, GID_MONKEY2, 5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, GF_DOUBLEFINE_PAK, UNK, GUIO7(GUIO_NOSPEECH, GUIO_RENDEREGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_COPY_PROTECTION, GAMEOPTION_USE_REMASTERED_AUDIO, GAMEOPTION_TTS)},
 	{"monkey2", "Demo", 0, GID_MONKEY2,  5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, GF_DEMO, UNK, GUIO3(GUIO_NOSPEECH, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_TTS)},
 	{"monkey2", "Amiga", 0, GID_MONKEY2,  5, 0, MDT_AMIGA, 0, Common::kPlatformAmiga, GUIO6(GUIO_NOSPEECH, GUIO_MIDIAMIGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_COPY_PROTECTION, GAMEOPTION_TTS)},
+#ifdef USE_MACGUI
 	{"monkey2", "Mac", 0, GID_MONKEY2,  5, 0, MDT_MACINTOSH, 0, UNK, GUIO6(GUIO_NOSPEECH, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_COPY_PROTECTION, GUIO_NOASPECT, GAMEOPTION_TTS)},
+#endif
 	{"monkey2", "FM-TOWNS", 0, GID_MONKEY2,  5, 0, MDT_PCSPK | MDT_TOWNS | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, Common::kPlatformFMTowns, GUIO8(GUIO_NOSPEECH, GUIO_MIDITOWNS, GUIO_MIDIADLIB, GUIO_MIDIMT32, GAMEOPTION_TRIM_FMTOWNS_TO_200_PIXELS, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"monkey2", "SE Talkie",0, GID_MONKEY2,  5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, GF_ULTIMATE_TALKIE, UNK, GUIO3(GUIO_RENDEREGA, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"atlantis", "", 0, GID_INDY4,    5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO4(GUIO_RENDEREGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"atlantis", "Steam", "steam", GID_INDY4,    5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO4(GUIO_RENDEREGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 	{"atlantis", "Floppy", 0, GID_INDY4,    5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO6(GUIO_NOSPEECH, GUIO_RENDEREGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_COPY_PROTECTION, GAMEOPTION_TTS)},
 	{"atlantis", "Amiga", 0, GID_INDY4,  5, 0, MDT_AMIGA, 0, Common::kPlatformAmiga, GUIO6(GUIO_NOSPEECH, GUIO_MIDIAMIGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_COPY_PROTECTION, GAMEOPTION_TTS)},
+#ifdef USE_MACGUI
 	{"atlantis", "Mac", 0, GID_INDY4,    5, 0, 0, 0, UNK, GUIO4(GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GUIO_NOASPECT, GAMEOPTION_TTS)},
 	{"atlantis", "Mac Floppy", 0, GID_INDY4,    5, 0, 0, 0, UNK, GUIO6(GUIO_NOSPEECH, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_COPY_PROTECTION, GUIO_NOASPECT, GAMEOPTION_TTS)},
+#endif
 	{"atlantis", "FM-TOWNS", 0, GID_INDY4,    5, 0, MDT_TOWNS | MDT_ADLIB, 0, Common::kPlatformFMTowns, GUIO6(GUIO_MIDITOWNS, GUIO_MIDIADLIB, GAMEOPTION_TRIM_FMTOWNS_TO_200_PIXELS, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
 
 	{"tentacle", "", 0, GID_TENTACLE, 6, 0, MDT_ADLIB | MDT_MIDI | MDT_PREFER_GM, GF_USE_KEY, UNK, GUIO4(GUIO_RENDEREGA, GAMEOPTION_ENHANCEMENTS, GAMEOPTION_ORIGINALGUI, GAMEOPTION_TTS)},
@@ -429,7 +439,9 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 
 	{ "indy3", "%02d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
 	{ "indy3", "%02d.LFL", kGenRoomNumSteam, UNK_LANG, Common::kPlatformWindows, "Steam" },
+#ifdef USE_MACGUI
 	{ "indy3", "%02d.LFL", kGenRoomNumSteam, UNK_LANG, Common::kPlatformMacintosh, "Steam" },
+#endif
 
 	{ "indyloom", "%02d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
 	{ "indyzak", "%02d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
@@ -438,7 +450,9 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "loom", "%02d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
 	{ "loom", "%03d.LFL", kGenRoomNum, UNK_LANG, UNK, "VGA" },	// Loom CD
 	{ "loom", "%03d.LFL", kGenRoomNumSteam, UNK_LANG, Common::kPlatformWindows, "Steam" },
+#ifdef USE_MACGUI
 	{ "loom", "%03d.LFL", kGenRoomNumSteam, UNK_LANG, Common::kPlatformMacintosh, "Steam" },
+#endif
 
 	{ "pass", "%03d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
 
@@ -458,20 +472,28 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "atlantis", "playfate.%03d", kGenDiskNum, UNK_LANG, UNK, 0 },
 	{ "atlantis", "indy4.%03d", kGenDiskNum, Common::JA_JPN, Common::kPlatformFMTowns, "FM-TOWNS" },
 	{ "atlantis", "indydemo.%03d", kGenDiskNum, Common::JA_JPN, Common::kPlatformFMTowns, "FM-TOWNS" },
+#ifdef USE_MACGUI
 	{ "atlantis", "Fate of Atlantis Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
+#endif
 	{ "atlantis", "atlantis.%03d", kGenDiskNumSteam, UNK_LANG, Common::kPlatformWindows, "Steam" },
+#ifdef USE_MACGUI
 	{ "atlantis", "atlantis.%03d", kGenDiskNumSteam, UNK_LANG, Common::kPlatformMacintosh, "Steam" },
+#endif
 
 	{ "tentacle", "tentacle.%03d", kGenDiskNum, UNK_LANG, UNK, 0 },
 	{ "tentacle", "tenta.cle", kGenUnchanged, UNK_LANG, UNK, "Remastered" },	// Classic version within the remastered one
 	{ "tentacle", "dottdemo.%03d", kGenDiskNum, UNK_LANG, UNK, 0 },
+#ifdef USE_MACGUI
 	{ "tentacle", "Day of the Tentacle Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "tentacle", "Day of the Tentacle Demo Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
+#endif
 
 	{ "samnmax", "samnmax.%03d", kGenDiskNum, UNK_LANG, UNK, 0 },
 	{ "samnmax", "samnmax.sm%d", kGenDiskNum, UNK_LANG, UNK, 0 },
+#ifdef USE_MACGUI
 	{ "samnmax", "Sam & Max Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "samnmax", "Sam & Max Demo Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
+#endif
 	{ "samnmax", "ramnmax.%03d", kGenDiskNum, Common::RU_RUS, UNK, 0 }, // Used in some releases of Russian Sam'n'Max
 	{ "samnmax", "samdemo.%03d", kGenDiskNum, UNK_LANG, UNK, 0 },
 	{ "samnmax", "snmdemo.sm%d", kGenDiskNum, UNK_LANG, UNK, 0 },
@@ -480,19 +502,25 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 
 	{ "dig", "dig.la%d", kGenDiskNum, UNK_LANG, UNK, 0 },
 	{ "dig", "thedig.la%d", kGenDiskNum, UNK_LANG, UNK, "Demo" }, // Used by an alternate version of the demo
+#ifdef USE_MACGUI
 	{ "dig", "The Dig Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "dig", "The Dig Demo Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, "Demo" },
+#endif
 	{ "dig", "dig.la%d", kGenDiskNumSteam, UNK_LANG, Common::kPlatformWindows, "Steam" },
+#ifdef USE_MACGUI
 	{ "dig", "dig.la%d", kGenDiskNumSteam, UNK_LANG, Common::kPlatformMacintosh, "Steam" },
+#endif
 
 	{ "ft", "ft.la%d", kGenDiskNum, UNK_LANG, UNK, 0 },
 	{ "ft", "full.data", kGenUnchanged, UNK_LANG, UNK, "Remastered" },	// Classic version within the remastered one
 	{ "ft", "ft.%03d", kGenDiskNum, UNK_LANG, UNK, "Demo" },    // Used by PC version of Full Throttle demo
 	{ "ft", "ftdemo.la%d", kGenDiskNum, UNK_LANG, UNK, "Demo" },
+#ifdef USE_MACGUI
 	{ "ft", "Full Throttle Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "ft", "Full Throttle Demo Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, "Demo" },
 	{ "ft", "Vollgas Data", kGenUnchanged, Common::DE_DEU, Common::kPlatformMacintosh, 0 },
 	{ "ft", "Vollgas Demo Data", kGenUnchanged, Common::DE_DEU, Common::kPlatformMacintosh, "Demo" },
+#endif
 
 	{ "comi", "comi.la%d", kGenDiskNum, UNK_LANG, UNK, 0 },
 

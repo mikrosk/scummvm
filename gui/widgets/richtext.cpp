@@ -36,6 +36,7 @@
 
 namespace GUI {
 
+#ifdef USE_MACGUI
 const Graphics::TTFMap ttfFamily[] = {
 	{"NotoSans-Regular.ttf", Graphics::kMacFontRegular},
 	{"NotoSans-Bold.ttf", Graphics::kMacFontBold},
@@ -43,6 +44,7 @@ const Graphics::TTFMap ttfFamily[] = {
 	{"NotoSerif-Bold-Italic.ttf", Graphics::kMacFontBold | Graphics::kMacFontItalic},
 	{nullptr, 0}
 };
+#endif
 
 RichTextWidget::RichTextWidget(GuiObject *boss, int x, int y, int w, int h, bool scale, const Common::U32String &text, const Common::U32String &tooltip)
 	: Widget(boss, x, y, w, h, scale, tooltip), CommandSender(nullptr)  {
@@ -85,7 +87,9 @@ void RichTextWidget::init() {
 
 
 RichTextWidget::~RichTextWidget() {
+#ifdef USE_MACGUI
 	delete _txtWnd;
+#endif
 
 	if (_surface)
 		_surface->free();
@@ -114,6 +118,7 @@ void RichTextWidget::handleMouseUp(int x, int y, int button, int clickCount) {
 
 	_mouseDownY = _mouseDownStartY = 0;
 
+#ifdef USE_MACGUI
 	if (!_txtWnd)
 		return;
 
@@ -121,9 +126,11 @@ void RichTextWidget::handleMouseUp(int x, int y, int button, int clickCount) {
 
 	if (link.hasPrefixIgnoreCase("http"))
 		g_system->openUrl(link);
+#endif
 }
 
 void RichTextWidget::handleMouseMoved(int x, int y, int button) {
+#ifdef USE_MACGUI
 	if (_txtWnd) {
 		Common::String link = _txtWnd->getMouseLink(x - _innerMargin + _scrolledX, y - _innerMargin + _scrolledY).encode();
 
@@ -154,13 +161,16 @@ void RichTextWidget::handleMouseMoved(int x, int y, int button) {
 	_verticalScroll->checkBounds(_verticalScroll->_currentPos);
 
 	markAsDirty();
+#endif
 }
 
 void RichTextWidget::handleTooltipUpdate(int x, int y) {
+#ifdef USE_MACGUI
 	if (!_txtWnd)
 		return;
 
 	_tooltip = _txtWnd->getMouseLink(x - _innerMargin + _scrolledX, y - _innerMargin + _scrolledY);
+#endif
 }
 
 void RichTextWidget::handleCommand(CommandSender *sender, uint32 cmd, uint32 data) {
@@ -183,6 +193,7 @@ void RichTextWidget::recalc() {
 	_textHeight = MAX(1, _h - 2 * _innerMargin);
 	_limitH = _textHeight;
 
+#ifdef USE_MACGUI
 	// Workaround: Currently Graphics::MacText::setMaxWidth does not work well.
 	// There is a known limitation that the size is skipped when the text contains table,
 	// and there is also an issue with the font.
@@ -225,9 +236,11 @@ void RichTextWidget::recalc() {
 		_verticalScroll->setVisible(_verticalScroll->_numEntries > _limitH); //show when there is something to scroll
 		_verticalScroll->recalc();
 	}
+#endif
 }
 
 void RichTextWidget::createWidget() {
+#ifdef USE_MACGUI
 	Graphics::MacWindowManager *wm = g_gui.getWM();
 
 	uint8 bgR, bgG, bgB;
@@ -309,6 +322,7 @@ void RichTextWidget::createWidget() {
 	_verticalScroll->setSize(_scrollbarWidth, _h - 1);
 	_verticalScroll->setVisible(_verticalScroll->_numEntries > _limitH); //show when there is something to scroll
 	_verticalScroll->recalc();
+#endif
 }
 
 void RichTextWidget::reflowLayout() {
@@ -318,18 +332,21 @@ void RichTextWidget::reflowLayout() {
 }
 
 void RichTextWidget::ensureWidget() {
+#ifdef USE_MACGUI
 	if (_txtWnd)
 		return;
 	createWidget();
+#endif
 }
 
 void RichTextWidget::drawWidget() {
 	ensureWidget();
 
+	g_gui.theme()->drawWidgetBackground(Common::Rect(_x, _y, _x + _w, _y + _h), ThemeEngine::kWidgetBackgroundPlain);
+
+#ifdef USE_MACGUI
 	if (!_txtWnd)
 		recalc();
-
-	g_gui.theme()->drawWidgetBackground(Common::Rect(_x, _y, _x + _w, _y + _h), ThemeEngine::kWidgetBackgroundPlain);
 
 	uint8 bgR, bgG, bgB;
 	uint32 bg;
@@ -350,6 +367,14 @@ void RichTextWidget::drawWidget() {
 		_txtWnd->draw(_surface, 0, _scrolledY, _textWidth, _textHeight, 0, 0);
 
 	g_gui.theme()->drawManagedSurface(Common::Point(_x + _innerMargin, _y + _innerMargin), *_surface, Graphics::ALPHA_OPAQUE);
+#else
+	// Fallback: render plain text using the theme font
+	g_gui.theme()->drawText(
+		Common::Rect(_x + _innerMargin, _y + _innerMargin, _x + _w - _scrollbarWidth - _innerMargin, _y + _h - _innerMargin),
+		_text, ThemeEngine::kStateEnabled, Graphics::kTextAlignLeft,
+		ThemeEngine::kTextInversionNone, 0, true, ThemeEngine::kFontStyleNormal,
+		ThemeEngine::kFontColorNormal, true, Common::Rect(_x + _innerMargin, _y + _innerMargin, _x + _w - _scrollbarWidth - _innerMargin, _y + _h - _innerMargin));
+#endif
 }
 
 void RichTextWidget::draw() {

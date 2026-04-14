@@ -893,8 +893,10 @@ bool ScummEngine::loadState(int slot, bool compat, Common::String &filename) {
 		_macScreen->fillRect(Common::Rect(_macScreen->w, _macScreen->h), 0);
 	clearTextSurface();
 
+#ifdef USE_MACGUI
 	if (_macGui)
 		_macGui->resetAfterLoad();
+#endif
 
 	_lastCodePtr = nullptr;
 	_drawObjectQueNr = 0;
@@ -2214,13 +2216,21 @@ void ScummEngine_v5::saveLoadWithSerializer(Common::Serializer &s) {
 	// invisible after loading.
 
 	if (s.isLoading() && _game.platform == Common::kPlatformMacintosh) {
-		if ((_game.id == GID_LOOM && !_macCursorFile.empty()) || _macGui) {
+		if ((_game.id == GID_LOOM && !_macCursorFile.empty())
+#ifdef USE_MACGUI
+			|| _macGui
+#endif
+		) {
 			setBuiltinCursor(0);
 		}
 
 		// Also reset Mac cursors if the original GUI isn't enabled for games
 		// which replace cursors that override the default cursor palette - bug #15520.
-		if (_game.version == 5 && !_macGui) {
+		if (_game.version == 5
+#ifdef USE_MACGUI
+			&& !_macGui
+#endif
+		) {
 			setBuiltinCursor(0);
 		}
 	}
