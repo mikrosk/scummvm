@@ -49,6 +49,11 @@ void SoundManager::playSound(const char *filename, bool flag) {
 
 	_filename = Common::String(filename);
 
+	if (strcmpi(filename + (_filename.size() - 3), "ABT") == 0) {
+		warning("ABT files not supported yet");
+		return;
+	}
+
 	Common::File fd;
 	if (!fd.open(Common::Path(filename))) {
 		error("playSound : Enable to open %s", filename);

@@ -36,13 +36,18 @@ WWIntro_demo1::~WWIntro_demo1() {
 }
 
 void WWIntro_demo1::runIntro() {
+	// continueFl is used like in the full version, but for the moment it's not possible to skip (demo is not interactive)
 	bool continueFl = initOanGxl();
 
 	if (continueFl)
-		introPt1();
+		continueFl = introPt1();
 
 	if (continueFl)
-		introPt2();
+		continueFl = introPt3();
+
+	if (continueFl)
+		continueFl = introPt4();
+
 }
 
 bool WWIntro_demo1::introPt1() {
@@ -146,7 +151,7 @@ bool WWIntro_demo1::introPt1() {
 	return true;
 }
 
-bool WWIntro_demo1::introPt2() {
+bool WWIntro_demo1::introPt3() {
 	// sub1 - Parameter is always 'true' so it has been removed and the code simplified
 	_vm->paletteFadeOut(0, 256, 64);
 	_vm->_screen->clear(0);
@@ -185,6 +190,86 @@ bool WWIntro_demo1::introPt2() {
 	introPt3_clean();
 
 	return true;
+}
+
+bool WWIntro_demo1::introPt4() {
+	bool retVal = true;
+
+	introPt4_init();
+	if (!introPt4_intro()) {
+		retVal = false;
+	}
+
+	introPt4_cleanup();
+	return retVal;
+}
+
+void WWIntro_demo1::introPt4_init() {
+	_vm->_fontWW = new GFTFont();
+	_vm->_fontWW->loadFromFile("ww.gft");
+
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(30);
+
+	_introBackg1Image = new WWSurface(320, 170);
+	_vm->drawImageToSurface(_oanGxl, "backg1.pcx", _introBackg1Image, 0, 0);
+	_introWbodyImage[0] = new WWSurface(145, 118);
+	_vm->drawImageToSurface(_oanGxl, "wbody0.pcx", _introWbodyImage[0], 0, 0);
+	_introGbodyImage = new WWSurface(160, 149);
+	_vm->drawImageToSurface(_oanGxl, "gbody0.pcx", _introGbodyImage, 0, 0);
+
+	// The original is overwriting the song name (default metal1.xmi) instead of setting the musicIndex.
+	_vm->_musicIndex = 2; // metal2.xmi
+	_vm->changeMusic();
+
+	for (int i = 0; i < 8; ++i) {
+		_introWhead1[i] = new WWSurface(98, 71);
+		Common::String filename = Common::String::format("whead1%d.pcx", i);
+		_vm->drawImageToSurface(_oanGxl, filename.c_str(), _introWhead1[i], 0, 0);
+	}
+
+	for (int i = 0; i < 11; ++i) {
+		_introGhead1[i] = new WWSurface(138, 80);
+		Common::String filename = Common::String::format("ghead1%d.pcx", i);
+		_vm->drawImageToSurface(_oanGxl, filename.c_str(), _introGhead1[i], 0, 0);
+	}
+	
+	_vm->drawImageToScreen(_oanGxl, "backg1.pcx", 0, 15);
+	_vm->paletteFadeIn(0, 256, 2);
+}
+
+bool WWIntro_demo1::introPt4_intro() {
+	_vm->_sound->playSound("ok.abt", false);
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 20; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+
+		++_startOawPos;
+	}
+
+	return true;
+}
+
+void WWIntro_demo1::introPt4_cleanup() {
+	delete _vm->_fontWW;
+	_vm->_fontWW = nullptr;
+	delete _introBackg1Image;
+	_introBackg1Image = nullptr;
+	for (int i = 0; i < 5; ++i) {
+		delete _introWbodyImage[i];
+		_introWbodyImage[i] = nullptr;
+	}
+	delete _introGbodyImage;
+	_introGbodyImage = nullptr;
+	for (int i = 0; i < 7; ++i) {
+		delete _introWhead1[i];
+		_introWhead1[i] = nullptr;
+	}
+	for (int i = 0; i < 11; ++i) {
+		delete _introGhead1[i];
+		_introGhead1[i] = nullptr;
+	}
 }
 
 } // End of namespace WaynesWorld

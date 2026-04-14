@@ -46,6 +46,17 @@ protected:
 	WWSurface *_outlineSurface = nullptr;
 	WWSurface *_logoSurface = nullptr;
 	WWSurface *_backg2Surface = nullptr;
+	WWSurface *_introBackg1Image = nullptr;
+	WWSurface *_introWhead1[8] = {nullptr};
+	WWSurface *_introWbodyImage[5] = {nullptr};
+	WWSurface *_introGhead1[11] = {nullptr};
+	WWSurface *_introGbodyImage = nullptr;
+	
+	int _oldRefreshBackgFl = -1;
+	int _oldWBodyIndex = -1;
+	int _oldGBodyIndex = -1;
+	int _oldWHead1Index = -1;
+	int _oldGHead1Index = -1;
 
 public:
 	WWIntro(WaynesWorldEngine *vm);
@@ -56,12 +67,20 @@ public:
 
 protected:
 	GxlArchive *_oanGxl = nullptr;
+	int _startOawPos = 0;
+	int _startOagPos = 0;
+	int _startOaoPos = 0;
+
 
 	bool initOanGxl();
 	void wwEffect(int arg0, int arg1, bool flag = false);
 	void setColor236(int index);
+	void sub2FEFB(int arg_refreshBackgFl, int arg_wBodyIndex, int arg_gBodyIndex, int arg_wHead1Index, int arg_gHead1Index, int arg_TextId);
 	void introPt3_init();
 	void introPt3_clean();
+
+private:
+	void sub3009A(int textId);
 };
 
 class WWIntro_full : public WWIntro {
@@ -72,25 +91,12 @@ public:
 	void runIntro() override;
 
 private:
-	int _startOawPos = 0;
-	int _startOagPos = 0;
-	int _startOaoPos = 0;
-
-	int _old_arg_refreshBackgFl = -1;
-	int _old_arg_wBodyIndex = -1;
-	int _old_arg_gBodyIndex = -1;
-	int _old_argWHead1Index = -1;
-	int _old_argGHead1Index = -1;
-
 	bool introPt1();
 	bool introPt3(bool flag);
 	bool introPt4();
-	void introPt5();
+	void cleanOanGxl();
 	void introPt6();
 	void introPt7();
-
-	void sub3009A(int textId);
-	void sub2FEFB(int arg_refreshBackgFl, int arg_wBodyIndex, int arg_gBodyIndex, int arg_wHead1Index, int arg_gHead1Index, int arg_TextId);
 
 	void introPt4_init();
 	bool introPt4_intro();
@@ -101,12 +107,6 @@ private:
 	bool introPt4_caller4();
 	void introPt4_cleanup();
 	bool introPt4_playGuitar();
-
-	WWSurface *_introBackg1Image = nullptr;
-	WWSurface *_introWbodyImage[5] = {nullptr};
-	WWSurface *_introGbodyImage = nullptr;
-	WWSurface *_introWhead1[8] = {nullptr};
-	WWSurface *_introGhead1[11] = {nullptr};
 };
 
 class WWIntro_demo1 : public WWIntro {
@@ -118,7 +118,11 @@ public:
 
 private:
 	bool introPt1();
-	bool introPt2();
+	bool introPt3();
+	bool introPt4();
+	void introPt4_init();
+	bool introPt4_intro();
+	void introPt4_cleanup();
 };
 } // End of namespace WaynesWorld
 

@@ -115,6 +115,78 @@ void WWIntro::setColor236(int index) {
 	g_system->getPaletteManager()->setPalette((const byte *)&newColor, 236, 1);
 }
 
+void WWIntro::sub3009A(int textId) {
+	int startPos;
+	byte textColor;
+	int textType = 0;
+	Common::String filename;
+
+	switch (textId) {
+	case 0:
+		filename = "oaw";
+		startPos = _startOawPos;
+		textColor = 147;
+		break;
+	case 1:
+		filename = "oag";
+		startPos = _startOagPos;
+		textColor = 41;
+		break;
+	default:
+		filename = "oao";
+		startPos = _startOaoPos;
+		++_startOaoPos;
+		textColor = 11;
+		textType = 1;
+		break;
+	}
+
+	Common::String displayTxt = _vm->loadString(filename.c_str(), startPos, 0);
+
+	if (textType && !(_vm->_gameDescription->flags & ADGF_DEMO))
+		_vm->_fontWW->drawText(_demoPt2Surface, displayTxt.c_str(), 0, 187, textColor);
+	else
+		_vm->_fontWW->drawText(_demoPt2Surface, displayTxt.c_str(), 0, 2, textColor);
+}
+
+void WWIntro::sub2FEFB(int arg_refreshBackgFl, int arg_wBodyIndex, int arg_gBodyIndex, int arg_wHead1Index, int arg_gHead1Index, int arg_TextId) {
+	_demoPt2Surface->fillRect(0, 0, 319, 14, 0);
+	_demoPt2Surface->fillRect(0, 185, 319, 199, 0);
+
+	if (arg_refreshBackgFl != _oldRefreshBackgFl) {
+		_demoPt2Surface->clear(0);
+		_demoPt2Surface->drawSurface(_introBackg1Image, 0, 15);
+		_oldRefreshBackgFl = arg_refreshBackgFl;
+	}
+
+	if (arg_wBodyIndex != _oldWBodyIndex) {
+		_demoPt2Surface->drawSurface(_introWbodyImage[arg_wBodyIndex], 0, 21);
+		_oldWBodyIndex = arg_wBodyIndex;
+	}
+
+	if (arg_gBodyIndex != _oldGBodyIndex) {
+		_demoPt2Surface->drawSurface(_introGbodyImage, 160, 25);
+		_oldGBodyIndex = arg_gBodyIndex;
+	}
+
+	if (arg_wHead1Index != _oldWHead1Index) {
+		_demoPt2Surface->drawSurface(_introWhead1[arg_wHead1Index], 12, 22);
+		_oldWHead1Index = arg_wHead1Index;
+	}
+
+	if (arg_gHead1Index != _oldGHead1Index) {
+		_demoPt2Surface->drawSurface(_introGhead1[arg_gHead1Index], 182, 21);
+		_oldGHead1Index = arg_gHead1Index;
+	}
+
+	if (arg_TextId != -1) {
+		sub3009A(arg_TextId);
+	}
+
+	_vm->_screen->drawSurface(_demoPt2Surface, 0, 0);
+	_vm->waitMillis(170);
+}
+
 void WWIntro::introPt3_init() {
 	_backg2Surface = new WWSurface(320, 170);
 	_logoSurface = new WWSurface(226, 134);

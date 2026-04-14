@@ -50,7 +50,7 @@ void WWIntro_full::runIntro() {
 	if (continueFl)
 		continueFl = introPt3(false);
 
-	introPt5();
+	cleanOanGxl();
 
 	if (continueFl)
 		introPt6();
@@ -271,7 +271,7 @@ bool WWIntro_full::introPt4() {
 	return retVal;
 }
 
-void WWIntro_full::introPt5() {
+void WWIntro_full::cleanOanGxl() {
 	delete _oanGxl;
 	_oanGxl = nullptr;
 }
@@ -340,78 +340,6 @@ void WWIntro_full::introPt7() {
 	_vm->_screen->clear(0);
 }
 
-void WWIntro_full::sub3009A(int textId) {
-	int startPos;
-	int textColor;
-	int textType = 0;
-	Common::String filename;
-
-	switch (textId) {
-	case 0:
-		filename = "oaw";
-		startPos = _startOawPos;
-		textColor = 147;
-		break;
-	case 1:
-		filename = "oag";
-		startPos = _startOagPos;
-		textColor = 41;
-		break;
-	default:
-		filename = "oao";
-		startPos = _startOaoPos;
-		++_startOaoPos;
-		textColor = 11;
-		textType = 1;
-		break;
-	}
-
-	Common::String displayTxt = _vm->loadString(filename.c_str(), startPos, 0);
-
-	if (textType)
-		_vm->_fontWW->drawText(_demoPt2Surface, displayTxt.c_str(), 0, 187, textColor);
-	else
-		_vm->_fontWW->drawText(_demoPt2Surface, displayTxt.c_str(), 0, 2, textColor);
-}
-
-void WWIntro_full::sub2FEFB(int arg_refreshBackgFl, int arg_wBodyIndex, int arg_gBodyIndex, int arg_wHead1Index, int arg_gHead1Index, int arg_TextId) {
-	_demoPt2Surface->fillRect(0, 0, 319, 14, 0);
-	_demoPt2Surface->fillRect(0, 185, 319, 199, 0);
-
-	if (arg_refreshBackgFl != _old_arg_refreshBackgFl) {
-		_demoPt2Surface->clear(0);
-		_demoPt2Surface->drawSurface(_introBackg1Image, 0, 15);
-		_old_arg_refreshBackgFl = arg_refreshBackgFl;
-	}
-
-	if (arg_wBodyIndex != _old_arg_wBodyIndex) {
-		_demoPt2Surface->drawSurface(_introWbodyImage[arg_wBodyIndex], 0, 21);
-		_old_arg_wBodyIndex = arg_wBodyIndex;
-	}
-
-	if (arg_gBodyIndex != _old_arg_gBodyIndex) {
-		_demoPt2Surface->drawSurface(_introGbodyImage, 160, 25);
-		_old_arg_gBodyIndex = arg_gBodyIndex;
-	}
-
-	if (arg_wHead1Index != _old_argWHead1Index) {
-		_demoPt2Surface->drawSurface(_introWhead1[arg_wHead1Index], 12, 22);
-		_old_argWHead1Index = arg_wHead1Index;
-	}
-
-	if (arg_gHead1Index != _old_argGHead1Index) {
-		_demoPt2Surface->drawSurface(_introGhead1[arg_gHead1Index], 182, 21);
-		_old_argGHead1Index = arg_gHead1Index;
-	}
-
-	if (arg_TextId != -1) {
-		sub3009A(arg_TextId);
-	}
-
-	_vm->_screen->drawSurface(_demoPt2Surface, 0, 0);
-	_vm->waitMillis(170);
-}
-
 void WWIntro_full::introPt4_init() {
 	_vm->_fontWW = new GFTFont();
 	_vm->_fontWW->loadFromFile("ww.gft");
@@ -419,7 +347,7 @@ void WWIntro_full::introPt4_init() {
 	while (_vm->_sound->isSFXPlaying())
 		_vm->waitMillis(30);
 
-	_vm->_musicIndex = 2;
+	_vm->_musicIndex = 2; // metal2.xmi
 	_vm->changeMusic();
 
 	_introBackg1Image = new WWSurface(320, 170);
@@ -801,9 +729,7 @@ bool WWIntro_full::introPt4_caller3() {
 	}
 	++_startOawPos;
 	++_startOagPos;
-	_vm->_sound->playSound("sv46.snd", false);
-	while (_vm->_sound->isSFXPlaying())
-		_vm->waitMillis(30);
+	_vm->_sound->playSound("sv46.snd", true);
 
 	for (int j = 0; j < 2; ++j) {
 		for (int i = 0; i < 15; ++i) {
@@ -893,15 +819,9 @@ bool WWIntro_full::introPt4_caller4() {
 		++_startOagPos;
 	}
 
-	_vm->_sound->playSound("sv37.snd", false);
-	while (_vm->_sound->isSFXPlaying())
-		_vm->waitMillis(30);
+	_vm->_sound->playSound("sv37.snd", true);
+	_vm->_sound->playSound("sv24.snd", true);
 	
-	_vm->_sound->playSound("sv24.snd", false);
-	
-	while (_vm->_sound->isSFXPlaying())
-		_vm->waitMillis(30);
-
 	for (int i = 0; i < 15; ++i) {
 		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
 		if (_vm->_escPressed) {
@@ -985,9 +905,7 @@ bool WWIntro_full::introPt4_caller4() {
 		}
 	}
 
-	_vm->_sound->playSound("sv45.snd", false);
-	while (_vm->_sound->isSFXPlaying())
-		_vm->waitMillis(30);
+	_vm->_sound->playSound("sv45.snd", true);
 
 	for (int j = 0; j < 3; ++j) {
 		for (int i = 0; i < 8; ++i) {
