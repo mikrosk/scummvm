@@ -27,6 +27,7 @@
 #include "backends/audiocd/default/default-audiocd.h"
 #include "backends/fs/fs-factory.h"
 #include "audio/mixer_intern.h"
+#include "common/events.h"
 #include "common/language.h"
 #include "common/platform.h"
 #ifdef DYNAMIC_MODULES
