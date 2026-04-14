@@ -421,9 +421,9 @@ ImGuiImage getTextID(CastMember *castMember) {
 	// Make a temporary channel to blit the shape from
 	Channel *channel = new Channel(nullptr, sprite);
 
-	Graphics::MacWidget *widget = castMember->createWidget(bbox, channel, kTextSprite);
+	Graphics::MacText *widget = (Graphics::MacText *)castMember->createWidget(bbox, channel, kTextSprite);
 	Graphics::Surface surface;
-	surface.copyFrom(*widget->getSurface());
+	surface.copyFrom(*widget->getRawSurface());
 
 	if (debugChannelSet(8, kDebugImages)) {
 		Common::String prepend = "text";
@@ -947,7 +947,7 @@ void setSelectedChannel(int channel) {
 		_state->_selectedChannel = channel;
 
 		if (channel > 0) {
-			_state->_scrollToChannel = true; 
+			_state->_scrollToChannel = true;
 			_state->_w.channels = true;
 		}
 	}
