@@ -223,8 +223,8 @@ void MacText::init(uint32 fgcolor, uint32 bgcolor, int maxWidth, TextAlign textA
 		}
 	}
 
-	_charMaskSurface = new ManagedSurface(_dims.width(), _dims.height(), Graphics::PixelFormat::createFormatCLUT8());
-	_charMaskSurface->clear(0);
+	_charBoxMaskSurface = new ManagedSurface(_dims.width(), _dims.height(), Graphics::PixelFormat::createFormatCLUT8());
+	_charBoxMaskSurface->clear(0);
 	_glyphMaskSurface = new ManagedSurface(_dims.width(), _dims.height(), Graphics::PixelFormat::createFormatCLUT8());
 	_glyphMaskSurface->clear(0);
 
@@ -293,13 +293,13 @@ MacText::~MacText() {
 
 	_borderSurface.free();
 	_borderMaskSurface.free();
-	_charMaskSurface->free();
+	_charBoxMaskSurface->free();
 	_glyphMaskSurface->free();
 
 	delete _cursorRect;
 	delete _cursorSurface;
 	delete _cursorSurface2;
-	delete _charMaskSurface;
+	delete _charBoxMaskSurface;
 	delete _glyphMaskSurface;
 }
 
@@ -347,10 +347,9 @@ void MacText::resizeScrollBar(int w, int h) {
 	_scrollBorder.blitBorderInto(_borderSurface, kWindowBorderScrollbar | kWindowBorderActive);
 
 	_borderMaskSurface.free();
-	_borderMaskSurface.create(w, h, _wm->_pixelformat);
-	if (_wm->_pixelformat.bytesPerPixel == 1) {
-		_borderMaskSurface.clear(_wm->_colorGreen);
-	}
+	_borderMaskSurface.create(w, h, Graphics::PixelFormat::createFormatCLUT8());
+	_borderMaskSurface.clear(0);
+
 	_scrollBorder.blitBorderInto(_borderMaskSurface, kWindowBorderScrollbar | kWindowBorderActive, true, 0xff);
 }
 
@@ -660,41 +659,6 @@ void MacText::render() {
 		_canvas.render(0, _canvas._text.size());
 
 		_fullRefresh = false;
-
-#if 0
-		byte pal[256 * 3];
-		Common::DumpFile out;
-		Common::Path filename(Common::String::format("z-%p-1-image.png", (void *)this));
-		if (out.open(filename)) {
-			warning("Wrote: %s", filename.toString().c_str());
-			_canvas._surface->grabPalette(pal, 0, 256);
-			Image::writePNG(out, _canvas._surface->rawSurface(), pal);
-			out.flush();
-			out.close();
-		}
-
-		// set b/w palette for mask
-		memset(pal, 0, sizeof(pal));
-		pal[0xff * 3 + 0] = 0xff;
-		pal[0xff * 3 + 1] = 0xff;
-		pal[0xff * 3 + 2] = 0xff;
-
-		filename = Common::Path(Common::String::format("z-%p-2-glyphMask.png", (void *)this));
-		if (out.open(filename)) {
-			warning("Wrote: %s", filename.toString().c_str());
-			Image::writePNG(out, _canvas._glyphMask->rawSurface(), pal);
-			out.flush();
-			out.close();
-		}
-
-		filename = Common::Path(Common::String::format("z-%p-3-charBoxMask.png", (void *)this));
-		if (out.open(filename)) {
-			warning("Wrote: %s", filename.toString().c_str());
-			Image::writePNG(out, _canvas._charBoxMask->rawSurface(), pal);
-			out.flush();
-			out.close();
-		}
-#endif
 	}
 }
 
@@ -954,7 +918,7 @@ void MacText::removeLastLine() {
 	_canvas._textMaxHeight -= h;
 }
 
-void MacText::drawStep(ManagedSurface *g, ManagedSurface *src, ManagedSurface *border, int x, int y, int w, int h, int xoff, int yoff, uint32 tcolor) {
+void MacText::drawStep(ManagedSurface *g, ManagedSurface *src, ManagedSurface *border, int x, int y, int w, int h, int xoff, int yoff, uint32 tcolor, uint32 btcolor) {
 	if (x + w < src->w || y + h < src->h)
 		g->fillRect(Common::Rect(x + xoff, y + yoff, x + w + xoff, y + h + yoff), tcolor);
 
@@ -962,13 +926,10 @@ void MacText::drawStep(ManagedSurface *g, ManagedSurface *src, ManagedSurface *b
 	if (_canvas._textShadow)
 		g->blitFrom(*src, Common::Rect(MIN<int>(src->w, x), MIN<int>(src->h, y), MIN<int>(src->w, x + w), MIN<int>(src->h, y + h)), Common::Point(xoff + _canvas._textShadow, yoff + _canvas._textShadow));
 
-	g->simpleBlitFrom(*_canvas._surface, Common::Rect(MIN<int>(src->w, x), MIN<int>(src->h, y), MIN<int>(src->w, x + w), MIN<int>(src->h, y + h)), Common::Point(xoff, yoff));
+	g->simpleBlitFrom(*src, Common::Rect(MIN<int>(src->w, x), MIN<int>(src->h, y), MIN<int>(src->w, x + w), MIN<int>(src->h, y + h)), Common::Point(xoff, yoff));
 
-	if (_scrollBar && _scrollBorder.hasBorder(kWindowBorderScrollbar)) {
-		uint32 transcolor = (_wm->_pixelformat.bytesPerPixel == 1) ? _wm->_colorGreen : 0;
-
-		g->transBlitFrom(*border, Common::Rect(0, 0, border->w, border->h), Common::Point(0, 0), transcolor);
-	}
+	if (_scrollBar && _scrollBorder.hasBorder(kWindowBorderScrollbar))
+		g->transBlitFrom(*border, Common::Rect(0, 0, border->w, border->h), Common::Point(0, 0), btcolor);
 }
 
 void MacText::draw(ManagedSurface *g, int x, int y, int w, int h, int xoff, int yoff) {
@@ -977,12 +938,75 @@ void MacText::draw(ManagedSurface *g, int x, int y, int w, int h, int xoff, int 
 
 	render();
 
-	drawStep(g, _canvas._surface, &_borderSurface, x, y, w, h, xoff, yoff, _canvas._tbgcolor);
-	drawStep(_glyphMaskSurface, _canvas._glyphMask, &_borderMaskSurface, x, y, w, h, xoff, yoff, 0);
-	drawStep(_charMaskSurface, _canvas._charBoxMask, &_borderMaskSurface, x, y, w, h, xoff, yoff, 0);
+	drawStep(g, _canvas._surface, &_borderSurface, x, y, w, h, xoff, yoff, _canvas._tbgcolor, (_wm->_pixelformat.bytesPerPixel == 1) ? _wm->_colorGreen : 0);
+
+	drawStep(_glyphMaskSurface, _canvas._glyphMask, &_borderMaskSurface, x, y, w, h, xoff, yoff, 0, 0);
+	drawStep(_charBoxMaskSurface, _canvas._charBoxMask, &_borderMaskSurface, x, y, w, h, xoff, yoff, 0, 0);
 
 	_contentIsDirty = false;
 	_cursorDirty = false;
+
+#if 0
+	byte pal[256 * 3];
+	Common::DumpFile out;
+	Common::Path filename(Common::String::format("z-%p-1-image.png", (void *)this));
+	if (out.open(filename)) {
+		warning("Wrote: %s", filename.toString().c_str());
+		_canvas._surface->grabPalette(pal, 0, 256);
+		Image::writePNG(out, _composeSurface->rawSurface(), pal);
+		out.flush();
+		out.close();
+	}
+
+	// set b/w palette for mask
+	for (int i = 0; i < 256; i++) {
+		pal[i * 3 + 0] = i;
+		pal[i * 3 + 1] = i;
+		pal[i * 3 + 2] = i;
+	}
+
+	filename = Common::Path(Common::String::format("z-%p-2-glyphMask.png", (void *)this));
+	if (out.open(filename)) {
+		warning("Wrote: %s", filename.toString().c_str());
+		Image::writePNG(out, _glyphMaskSurface->rawSurface(), pal);
+		out.flush();
+		out.close();
+	}
+
+	filename = Common::Path(Common::String::format("z-%p-2-charBoxMask.png", (void *)this));
+	if (out.open(filename)) {
+		warning("Wrote: %s", filename.toString().c_str());
+		Image::writePNG(out, _charBoxMaskSurface->rawSurface(), pal);
+		out.flush();
+		out.close();
+	}
+
+	if (_scrollBar) {
+		filename = Common::Path(Common::String::format("z-%p-2-borderMask.png", (void *)this));
+		if (out.open(filename)) {
+			warning("Wrote: %s", filename.toString().c_str());
+			Image::writePNG(out, _borderMaskSurface.rawSurface(), pal);
+			out.flush();
+			out.close();
+		}
+	}
+
+	filename = Common::Path(Common::String::format("z-%p-3-c-glyphMask.png", (void *)this));
+	if (out.open(filename)) {
+		warning("Wrote: %s", filename.toString().c_str());
+		Image::writePNG(out, _canvas._glyphMask->rawSurface(), pal);
+		out.flush();
+		out.close();
+	}
+
+	filename = Common::Path(Common::String::format("z-%p-3-c-charBoxMask.png", (void *)this));
+	if (out.open(filename)) {
+		warning("Wrote: %s", filename.toString().c_str());
+		Image::writePNG(out, _canvas._charBoxMask->rawSurface(), pal);
+		out.flush();
+		out.close();
+	}
+#endif
 }
 
 bool MacText::draw(bool forceRedraw) {

@@ -68,7 +68,7 @@ public:
 
 	void render();
 	void undrawCursor();
-	void drawStep(ManagedSurface *g, ManagedSurface *src,  ManagedSurface *border, int x, int y, int w, int h, int xoff, int yoff, uint32 transcolor);
+	void drawStep(ManagedSurface *g, ManagedSurface *src,  ManagedSurface *border, int x, int y, int w, int h, int xoff, int yoff, uint32 transcolor, uint32 btcolor);
 	void draw(ManagedSurface *g, int x, int y, int w, int h, int xoff, int yoff);
 	bool draw(ManagedSurface *g, bool forceRedraw = false) override;
 	bool draw(bool forceRedraw = false) override;
@@ -77,7 +77,7 @@ public:
 
 	ManagedSurface *getRawSurface() { return _canvas._surface; }
 	ManagedSurface *getGlyphMask() { return _glyphMaskSurface; }
-	ManagedSurface *getCharBoxMask() { return _charMaskSurface; }
+	ManagedSurface *getCharBoxMask() { return _charBoxMaskSurface; }
 
 	int getInterLinear() { return _canvas._interLinear; }
 	void setInterLinear(int interLinear);
@@ -251,7 +251,7 @@ private:
 	ManagedSurface *_cursorSurface2;
 
 	ManagedSurface *_glyphMaskSurface;
-	ManagedSurface *_charMaskSurface;
+	ManagedSurface *_charBoxMaskSurface;
 
 	int _editableRow;
 
