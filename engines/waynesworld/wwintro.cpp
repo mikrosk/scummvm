@@ -102,4 +102,35 @@ void WWIntro::wwEffect(int arg0, int arg1, bool flag) {
 	_vm->waitMillis(200);
 }
 
+void WWIntro::setColor236(int index) {
+	byte newColor[3] = {0, 0, 0};
+	static const byte rArr[] = {9, 9, 9, 9, 43, 43, 53, 63, 63, 63, 63, 63, 63, 63, 45, 28, 9, 9, 9};
+	static const byte gArr[] = {33, 33, 40, 47, 47, 47, 47, 47, 35, 23, 0, 0, 0, 0, 0, 0, 0, 33, 33};
+	static const byte bArr[] = {29, 20, 20, 20, 20, 0, 0, 0, 0, 0, 0, 23, 37, 50, 50, 50, 50, 50, 40};
+
+	newColor[0] = rArr[index] * 4;
+	newColor[1] = gArr[index] * 4;
+	newColor[2] = bArr[index] * 4;
+
+	g_system->getPaletteManager()->setPalette((const byte *)&newColor, 236, 1);
+}
+
+void WWIntro::introPt3_init() {
+	_backg2Surface = new WWSurface(320, 170);
+	_logoSurface = new WWSurface(226, 134);
+	_outlineSurface = new WWSurface(226, 134);
+
+	_vm->drawImageToSurface(_oanGxl, "backg2.pcx", _backg2Surface, 0, 0);
+	_vm->drawImageToSurface(_oanGxl, "logo.pcx", _logoSurface, 0, 0);
+	_vm->drawImageToSurface(_oanGxl, "outline.pcx", _outlineSurface, 0, 0);
+}
+
+void WWIntro::introPt3_clean() {
+	delete _outlineSurface;
+	delete _logoSurface;
+	delete _backg2Surface;
+
+	_outlineSurface = _logoSurface = _backg2Surface = nullptr;
+}
+
 } // End of namespace WaynesWorld

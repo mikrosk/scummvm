@@ -43,7 +43,7 @@ SoundManager::~SoundManager() {
 	delete _effectsHandle;
 }
 
-void SoundManager::playSound(const char *filename, int flag) {
+void SoundManager::playSound(const char *filename, bool flag) {
 	while (isSFXPlaying())
 		_vm->waitMillis(10);
 
@@ -61,10 +61,6 @@ void SoundManager::playSound(const char *filename, int flag) {
 	Common::SeekableReadStream *rawStream = new Common::MemoryReadStream(buffer, size, DisposeAfterUse::YES);
 	Audio::RewindableAudioStream *audioStream = Audio::makeRawStream(rawStream, 9000, Audio::FLAG_UNSIGNED);
 
-/*
-	if (loop)
-		Audio::LoopingAudioStream *loopingStream = new Audio::LoopingAudioStream(audioStream, 0, DisposeAfterUse::NO));
-*/
 	if (!_mixer->isSoundHandleActive(*_effectsHandle)) {
 		_mixer->playStream(Audio::Mixer::kSFXSoundType, _effectsHandle, audioStream, -1, _mixer->kMaxChannelVolume, 0, DisposeAfterUse::NO);
 	}

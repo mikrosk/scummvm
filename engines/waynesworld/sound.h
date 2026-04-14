@@ -49,7 +49,7 @@ public:
 	SoundManager(WaynesWorldEngine *vm, Audio::Mixer *mixer);
 	~SoundManager();
 
-	void playSound(const char *filename, int flag);
+	void playSound(const char *filename, bool flag);
 	bool isSFXPlaying();
 
 	void syncVolume();

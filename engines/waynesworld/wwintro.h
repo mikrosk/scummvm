@@ -58,7 +58,10 @@ protected:
 	GxlArchive *_oanGxl = nullptr;
 
 	bool initOanGxl();
-	void wwEffect(int arg0, int arg1, bool flag);
+	void wwEffect(int arg0, int arg1, bool flag = false);
+	void setColor236(int index);
+	void introPt3_init();
+	void introPt3_clean();
 };
 
 class WWIntro_full : public WWIntro {
@@ -89,7 +92,6 @@ private:
 	void sub3009A(int textId);
 	void sub2FEFB(int arg_refreshBackgFl, int arg_wBodyIndex, int arg_gBodyIndex, int arg_wHead1Index, int arg_gHead1Index, int arg_TextId);
 
-	void cleanPt3();
 	void introPt4_init();
 	bool introPt4_intro();
 	bool introPt4_displayCallInTime();
@@ -116,6 +118,7 @@ public:
 
 private:
 	bool introPt1();
+	bool introPt2();
 };
 } // End of namespace WaynesWorld
 

@@ -40,6 +40,9 @@ void WWIntro_demo1::runIntro() {
 
 	if (continueFl)
 		introPt1();
+
+	if (continueFl)
+		introPt2();
 }
 
 bool WWIntro_demo1::introPt1() {
@@ -140,6 +143,47 @@ bool WWIntro_demo1::introPt1() {
 	}
 
 	delete capspinGxl;
+	return true;
+}
+
+bool WWIntro_demo1::introPt2() {
+	// sub1 - Parameter is always 'true' so it has been removed and the code simplified
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	_vm->loadPalette(_oanGxl, "backg1.pcx");
+	_vm->paletteFadeOut(0, 256, 64);
+	
+	introPt3_init();
+	// End of sub1
+
+	_demoPt2Surface->clear(0);
+	_demoPt2Surface->drawSurface(_logoSurface, 47, 25);
+	wwEffect(1, 0);
+	_vm->paletteFadeIn(0, 256, 6);
+
+	_vm->playSound("theme1.snd", 0);
+
+	wwEffect(1, 1);
+	wwEffect(1, 2);
+	wwEffect(1, 3);
+
+	for (int i = 0; i < 24; ++i) {
+		setColor236(i % 19);
+		wwEffect((i % 8) + 1, 4);
+	}
+
+	wwEffect(1, 3);
+	wwEffect(1, 2);
+	wwEffect(1, 1);
+	wwEffect(1, 0);
+
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(30);
+
+	_vm->_sound->playSound("exclnt.snd", false);
+
+	introPt3_clean();
+
 	return true;
 }
 

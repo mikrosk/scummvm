@@ -189,22 +189,8 @@ bool WWIntro_full::introPt1() {
 	return true;
 }
 
-void WWIntro_full::cleanPt3() {
-	delete _outlineSurface;
-	delete _logoSurface;
-	delete _backg2Surface;
-}
-
 bool WWIntro_full::introPt3(bool flag) {
-	// sub1
-	_backg2Surface = new WWSurface(320, 170);
-	_logoSurface = new WWSurface(226, 134);
-	_outlineSurface = new WWSurface(226, 134);
-
-	_vm->drawImageToSurface(_oanGxl, "backg2.pcx", _backg2Surface, 0, 0);
-	_vm->drawImageToSurface(_oanGxl, "logo.pcx", _logoSurface, 0, 0);
-	_vm->drawImageToSurface(_oanGxl, "outline.pcx", _outlineSurface, 0, 0);
-	// End of sub1
+	introPt3_init();
 
 	wwEffect(1, 0, flag);
 
@@ -212,7 +198,7 @@ bool WWIntro_full::introPt3(bool flag) {
 		_vm->waitSeconds(1);
 
 	if (_vm->_escPressed) {
-		cleanPt3();
+		introPt3_clean();
 		return false;
 	}
 
@@ -221,26 +207,16 @@ bool WWIntro_full::introPt3(bool flag) {
 	wwEffect(1, 2, flag);
 	wwEffect(1, 3, flag);
 	if (_vm->_escPressed) {
-		cleanPt3();
+		introPt3_clean();
 		return false;
 	}
 
-	byte newColor[3] = {0, 0, 0};
-	static const byte rArr[] = { 9,  9,  9,  9, 43, 43, 53, 63, 63, 63, 63, 63, 63, 63, 45, 28,  9,  9,  9};
-	static const byte gArr[] = {33, 33, 40, 47, 47, 47, 47, 47, 35, 23,  0,  0,  0,  0,  0,  0,  0, 33, 33};
-	static const byte bArr[] = {29, 20, 20, 20, 20,  0,  0,  0,  0,  0,  0, 23, 37, 50, 50, 50, 50, 50, 40};
-
 	for (int i = 0; i < 32; ++i) {
-		const int index = (i % 19);
-		newColor[0] = rArr[index] * 4;
-		newColor[1] = gArr[index] * 4;
-		newColor[2] = bArr[index] * 4;
-
-		g_system->getPaletteManager()->setPalette((const byte *)&newColor, 236, 1);
+		setColor236(i % 19);
 		wwEffect((i % 8) + 1, 4, flag);
 
 		if (_vm->_escPressed) {
-			cleanPt3();
+			introPt3_clean();
 			return false;
 		}
 	}
@@ -250,7 +226,7 @@ bool WWIntro_full::introPt3(bool flag) {
 	wwEffect(1, 1, flag);
 	wwEffect(1, 0, flag);
 	if (_vm->_escPressed) {
-		cleanPt3();
+		introPt3_clean();
 		return false;
 	}
 
@@ -262,7 +238,7 @@ bool WWIntro_full::introPt3(bool flag) {
 	_vm->waitSeconds(1);
 	_vm->paletteFadeOut(0, 256, 4);
 
-	cleanPt3();
+	introPt3_clean();
 
 	if (_vm->_escPressed) {
 		return false;
@@ -581,7 +557,7 @@ bool WWIntro_full::introPt4_caller1() {
 		++_startOawPos;
 	}
 
-	_vm->_sound->playSound("sv33.snd", 0);
+	_vm->_sound->playSound("sv33.snd", false);
 	for (int j = 0; j < 10; ++j) {
 		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
 		if (_vm->_escPressed) {
@@ -598,7 +574,7 @@ bool WWIntro_full::introPt4_caller1() {
 		}
 	}
 
-	_vm->_sound->playSound("sv38.snd", 0);
+	_vm->_sound->playSound("sv38.snd", false);
 
 	for (int j = 0; j < 10; ++j) {
 		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
@@ -623,7 +599,7 @@ bool WWIntro_full::introPt4_caller1() {
 		}
 	}
 	++_startOagPos;
-	_vm->_sound->playSound("sv31.snd", 0);
+	_vm->_sound->playSound("sv31.snd", false);
 
 	for (int i = 0; i < 3; ++i) {
 		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
@@ -642,7 +618,7 @@ bool WWIntro_full::introPt4_caller1() {
 		}
 		++_startOawPos;
 	}
-	_vm->_sound->playSound("sv28.snd", 0);
+	_vm->_sound->playSound("sv28.snd", false);
 
 	for (int j = 0; j < 5; ++j) {
 		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
@@ -651,7 +627,7 @@ bool WWIntro_full::introPt4_caller1() {
 		}
 	}
 	++_startOawPos;
-	_vm->_sound->playSound("sv21.snd", 0);
+	_vm->_sound->playSound("sv21.snd", false);
 
 	for (int i = 0; i < 3; ++i) {
 		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
@@ -825,7 +801,9 @@ bool WWIntro_full::introPt4_caller3() {
 	}
 	++_startOawPos;
 	++_startOagPos;
-	_vm->_sound->playSound("sv46.snd", true);
+	_vm->_sound->playSound("sv46.snd", false);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(30);
 
 	for (int j = 0; j < 2; ++j) {
 		for (int i = 0; i < 15; ++i) {
@@ -915,8 +893,14 @@ bool WWIntro_full::introPt4_caller4() {
 		++_startOagPos;
 	}
 
-	_vm->_sound->playSound("sv37.snd", true);
-	_vm->_sound->playSound("sv24.snd", true);
+	_vm->_sound->playSound("sv37.snd", false);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(30);
+	
+	_vm->_sound->playSound("sv24.snd", false);
+	
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(30);
 
 	for (int i = 0; i < 15; ++i) {
 		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
@@ -1001,7 +985,9 @@ bool WWIntro_full::introPt4_caller4() {
 		}
 	}
 
-	_vm->_sound->playSound("sv45.snd", true);
+	_vm->_sound->playSound("sv45.snd", false);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(30);
 
 	for (int j = 0; j < 3; ++j) {
 		for (int i = 0; i < 8; ++i) {
