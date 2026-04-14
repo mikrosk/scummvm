@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.7.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 17:14+0000\n"
+"POT-Creation-Date: 2026-04-14 15:46+0000\n"
 "PO-Revision-Date: 2026-02-09 20:22+0000\n"
 "Last-Translator: AsciiWolf <mail@asciiwolf.com>\n"
 "Language-Team: Czech <https://translations.scummvm.org/projects/scummvm/"
@@ -127,7 +127,7 @@ msgstr "Jít nahoru"
 #: gui/integrity-dialog.cpp:253 gui/filebrowser-dialog.cpp:68
 #: gui/fluidsynth-dialog.cpp:153 gui/massadd.cpp:93 gui/options.cpp:2416
 #: gui/predictivedialog.cpp:68 gui/printing-dialog.cpp:96
-#: gui/recorderdialog.cpp:73 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:211
 #: gui/remotebrowser.cpp:59 gui/saveload-dialog.cpp:64
 #: gui/saveload-dialog.cpp:456 gui/saveload-dialog.cpp:540
 #: gui/saveload-dialog.cpp:839 gui/saveload-dialog.cpp:1243
@@ -2813,43 +2813,43 @@ msgstr "Rychlost ukazatele:"
 msgid "Orientation:"
 msgstr "~P~ředchozí"
 
-#: gui/recorderdialog.cpp:67
+#: gui/recorderdialog.cpp:66
 msgid "Recorder or Playback Gameplay"
 msgstr "Nahrávat nebo přehrát hru"
 
-#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:71 gui/recorderdialog.cpp:211
 #: gui/saveload-dialog.cpp:460 gui/saveload-dialog.cpp:540
 #: dists/android.strings.xml.cpp:47 engines/engine.cpp:641
 msgid "Delete"
 msgstr "Smazat"
 
-#: gui/recorderdialog.cpp:74
+#: gui/recorderdialog.cpp:73
 msgid "Record"
 msgstr "Nahrát"
 
-#: gui/recorderdialog.cpp:75
+#: gui/recorderdialog.cpp:74
 msgid "Playback"
 msgstr "Přehrát"
 
-#: gui/recorderdialog.cpp:77 gui/widgets/grid.cpp:340
+#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:336
 msgid "Edit"
 msgstr "Upravit"
 
-#: gui/recorderdialog.cpp:142 gui/recorderdialog.cpp:301
-#: gui/recorderdialog.cpp:308
+#: gui/recorderdialog.cpp:141 gui/recorderdialog.cpp:300
+#: gui/recorderdialog.cpp:307
 msgid "Author: "
 msgstr "Autor: "
 
-#: gui/recorderdialog.cpp:144 gui/recorderdialog.cpp:302
-#: gui/recorderdialog.cpp:309
+#: gui/recorderdialog.cpp:143 gui/recorderdialog.cpp:301
+#: gui/recorderdialog.cpp:308
 msgid "Notes: "
 msgstr "Poznámky: "
 
-#: gui/recorderdialog.cpp:211
+#: gui/recorderdialog.cpp:210
 msgid "Do you really want to delete this record?"
 msgstr "Opravdu chcete tento záznam smazat?"
 
-#: gui/recorderdialog.cpp:228
+#: gui/recorderdialog.cpp:227
 msgid "Unknown Author"
 msgstr "Neznámý autor"
 
@@ -2965,28 +2965,28 @@ msgstr "Vyberte Vzhled"
 msgid "Select a Theme"
 msgstr "Vyberte Vzhled"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgid "Disabled GFX"
 msgstr "GFX zakázáno"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgctxt "lowres"
 msgid "Disabled GFX"
 msgstr "GFX zakázáno"
 
-#: gui/ThemeEngine.cpp:267
+#: gui/ThemeEngine.cpp:257
 msgid "Standard renderer"
 msgstr "Standardní vykreslovač"
 
-#: gui/ThemeEngine.cpp:267 engines/scumm/dialogs.cpp:1054
+#: gui/ThemeEngine.cpp:257 engines/scumm/dialogs.cpp:1054
 msgid "Standard"
 msgstr "Standardní"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased renderer"
 msgstr "Vykreslovač s vyhlazenými hranami"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased"
 msgstr "S vyhlazenými hranami"
 
@@ -3044,11 +3044,11 @@ msgstr ""
 msgid "Clear value"
 msgstr "Vymazat hodnotu"
 
-#: gui/widgets/grid.cpp:334
+#: gui/widgets/grid.cpp:330
 msgid "Play"
 msgstr "Hrát"
 
-#: gui/widgets/grid.cpp:337
+#: gui/widgets/grid.cpp:333
 #, fuzzy
 msgid "Saves"
 msgstr "Uložit"
@@ -4333,7 +4333,7 @@ msgstr "Uložit snímek obrazovky"
 msgid "Windowed mode"
 msgstr "Režim do okna"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:169
+#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:168
 #: engines/scumm/help.cpp:88
 msgid "Toggle fullscreen"
 msgstr "Přepnout celou obrazovku"
@@ -5829,7 +5829,7 @@ msgstr ""
 #. I18N: Hardware key
 #: backends/platform/sdl/miyoo/miyoo.cpp:83
 #: backends/platform/sdl/miyoo/miyoo.cpp:114
-#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:180
+#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:179
 #: engines/grim/grim.cpp:545 engines/grim/grim.cpp:645
 #: engines/hdb/metaengine.cpp:264 engines/made/metaengine.cpp:186
 #: engines/phoenixvr/metaengine.cpp:101 engines/toltecs/metaengine.cpp:252
@@ -7599,19 +7599,19 @@ msgstr "Dívat se"
 msgid "Look down"
 msgstr "Přiblížení dolů"
 
-#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:138
+#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:137
 #, fuzzy
 #| msgid "Look at"
 msgid "Look left"
 msgstr "Dívat se na"
 
-#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:143
+#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:142
 #, fuzzy
 #| msgid "Look at"
 msgid "Look right"
 msgstr "Dívat se na"
 
-#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:100
+#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:99
 #: engines/dm/metaengine.cpp:196 engines/kyra/engine/eobcommon.cpp:371
 #: engines/kyra/engine/lol.cpp:513 engines/mohawk/riven.cpp:881
 #: engines/titanic/metaengine.cpp:336 engines/titanic/metaengine.cpp:378
@@ -7960,21 +7960,21 @@ msgid ""
 "beginning using new savegames."
 msgstr ""
 
-#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:40
+#: engines/colony/metaengine.cpp:45 engines/myst3/metaengine.cpp:40
 #, fuzzy
 msgid "Widescreen mod"
 msgstr "Režim celé obrazovky"
 
-#: engines/colony/metaengine.cpp:47 engines/myst3/metaengine.cpp:41
+#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:41
 msgid "Enable widescreen rendering in fullscreen mode."
 msgstr ""
 
-#: engines/colony/metaengine.cpp:107
+#: engines/colony/metaengine.cpp:106
 #, fuzzy
 msgid "Move backward"
 msgstr "Vzad"
 
-#: engines/colony/metaengine.cpp:114 engines/dm/metaengine.cpp:216
+#: engines/colony/metaengine.cpp:113 engines/dm/metaengine.cpp:216
 #: engines/freescape/movement.cpp:53 engines/hpl1/metaengine.cpp:78
 #: engines/mm/mm1/metaengine.cpp:100
 #, fuzzy
@@ -7982,7 +7982,7 @@ msgstr "Vzad"
 msgid "Strafe left"
 msgstr "Přesunout se Doleva"
 
-#: engines/colony/metaengine.cpp:121 engines/dm/metaengine.cpp:236
+#: engines/colony/metaengine.cpp:120 engines/dm/metaengine.cpp:236
 #: engines/freescape/movement.cpp:61 engines/hpl1/metaengine.cpp:79
 #: engines/mm/mm1/metaengine.cpp:101
 #, fuzzy
@@ -7990,7 +7990,7 @@ msgstr "Přesunout se Doleva"
 msgid "Strafe right"
 msgstr "Přesunout se Doprava"
 
-#: engines/colony/metaengine.cpp:128
+#: engines/colony/metaengine.cpp:127
 #: engines/freescape/games/castle/castle.cpp:488
 #: engines/freescape/games/dark/dark.cpp:252
 #: engines/freescape/games/driller/driller.cpp:149
@@ -8000,7 +8000,7 @@ msgstr "Přesunout se Doprava"
 msgid "Rotate left"
 msgstr "Přesunout se Doleva"
 
-#: engines/colony/metaengine.cpp:133
+#: engines/colony/metaengine.cpp:132
 #: engines/freescape/games/castle/castle.cpp:493
 #: engines/freescape/games/dark/dark.cpp:257
 #: engines/freescape/games/driller/driller.cpp:154
@@ -8010,27 +8010,27 @@ msgstr "Přesunout se Doleva"
 msgid "Rotate right"
 msgstr "Přesunout se Doprava"
 
-#: engines/colony/metaengine.cpp:148
+#: engines/colony/metaengine.cpp:147
 #, fuzzy
 msgid "Look behind"
 msgstr "Přiblížení dolů"
 
-#: engines/colony/metaengine.cpp:153
+#: engines/colony/metaengine.cpp:152
 #, fuzzy
 msgid "Toggle mouselook"
 msgstr "Povolit zachycování myši"
 
-#: engines/colony/metaengine.cpp:159
+#: engines/colony/metaengine.cpp:158
 #, fuzzy
 msgid "Toggle dashboard"
 msgstr "Povolit zachycování myši"
 
-#: engines/colony/metaengine.cpp:164
+#: engines/colony/metaengine.cpp:163
 #, fuzzy
 msgid "Toggle wireframe"
 msgstr "Rychlý režim"
 
-#: engines/colony/metaengine.cpp:174 engines/hypno/metaengine.cpp:146
+#: engines/colony/metaengine.cpp:173 engines/hypno/metaengine.cpp:146
 #: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
 #: engines/sherlock/metaengine.cpp:872 engines/teenagent/metaengine.cpp:232
 #: engines/toon/metaengine.cpp:98 engines/voyeur/metaengine.cpp:235
@@ -8039,7 +8039,7 @@ msgstr "Rychlý režim"
 msgid "Skip intro"
 msgstr "Přeskočit řádek"
 
-#: engines/colony/metaengine.cpp:186 engines/ultima/ultima8/metaengine.cpp:89
+#: engines/colony/metaengine.cpp:185 engines/ultima/ultima8/metaengine.cpp:89
 #, fuzzy
 msgid "Fire weapon"
 msgstr "~P~ředchozí"
@@ -8878,122 +8878,122 @@ msgstr ""
 msgid "Play sound type 16"
 msgstr "Doba hraní: "
 
-#: engines/freescape/metaengine.cpp:42
+#: engines/freescape/metaengine.cpp:41
 msgid "Prerecorded sounds"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:43
+#: engines/freescape/metaengine.cpp:42
 msgid "Use high-quality pre-recorded sounds instead of pc speaker emulation"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:53
+#: engines/freescape/metaengine.cpp:52
 msgid "Extended timer"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:54
+#: engines/freescape/metaengine.cpp:53
 msgid "Start the game timer at 99:59:59"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:64
+#: engines/freescape/metaengine.cpp:63
 msgid "Automatic drilling"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:65
+#: engines/freescape/metaengine.cpp:64
 msgid "Allow to successfully drill in any part of the area in Driller"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:75
+#: engines/freescape/metaengine.cpp:74
 #, fuzzy
 msgid "Disable demo mode"
 msgstr "Zapnout héliový režim"
 
-#: engines/freescape/metaengine.cpp:76
+#: engines/freescape/metaengine.cpp:75
 msgid "Never activate demo mode"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:86
+#: engines/freescape/metaengine.cpp:85
 #, fuzzy
 msgid "Disable sensors"
 msgstr "Nelze uložit hru"
 
-#: engines/freescape/metaengine.cpp:87
+#: engines/freescape/metaengine.cpp:86
 msgid "Sensors will not shoot the player"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:97
+#: engines/freescape/metaengine.cpp:96
 #, fuzzy
 msgid "Disable falling"
 msgstr "Nelze uložit hru"
 
-#: engines/freescape/metaengine.cpp:98
+#: engines/freescape/metaengine.cpp:97
 msgid "Player cannot fall over edges"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:108
+#: engines/freescape/metaengine.cpp:107
 msgid "Invert Y-axis on mouse"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:109
+#: engines/freescape/metaengine.cpp:108
 #, fuzzy
 #| msgid "Use an alternative palette"
 msgid "Use alternative camera controls"
 msgstr "Použít jinou paletu"
 
-#: engines/freescape/metaengine.cpp:119
+#: engines/freescape/metaengine.cpp:118
 #, fuzzy
 #| msgid "Filter graphics"
 msgid "Authentic graphics"
 msgstr "Filtrování grafiky"
 
-#: engines/freescape/metaengine.cpp:120
+#: engines/freescape/metaengine.cpp:119
 msgid "Keep graphics as close as possible to the original"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:130
+#: engines/freescape/metaengine.cpp:129
 #, fuzzy
 #| msgid "Enable storage"
 msgid "Enable rock travel"
 msgstr "Povolit úložiště"
 
-#: engines/freescape/metaengine.cpp:131
+#: engines/freescape/metaengine.cpp:130
 msgid "Enable traveling using a rock shoot at start"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:141
+#: engines/freescape/metaengine.cpp:140
 msgid "Smoother movement"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:142
+#: engines/freescape/metaengine.cpp:141
 msgid "Use smoother movements instead of discrete steps"
 msgstr ""
 
 #. I18N: Use modern FPS-style controls: WASD for movement, Shift to run
-#: engines/freescape/metaengine.cpp:153
+#: engines/freescape/metaengine.cpp:152
 #, fuzzy
 #| msgid "Control"
 msgid "WASD controls"
 msgstr "Ovládání"
 
-#: engines/freescape/metaengine.cpp:154
+#: engines/freescape/metaengine.cpp:153
 msgid "Use WASD keys for movement and Shift to run"
 msgstr ""
 
 #. I18N: Enable background music using AdLib/OPL2 FM synthesis
-#: engines/freescape/metaengine.cpp:165
+#: engines/freescape/metaengine.cpp:164
 msgid "Backported music from C64 releases (AdLib)"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:166
+#: engines/freescape/metaengine.cpp:165
 msgid ""
 "Enable background music ported from the C64 version using AdLib FM synthesis"
 msgstr ""
 
 #. I18N: Enable background music using AY chip emulation
-#: engines/freescape/metaengine.cpp:177
+#: engines/freescape/metaengine.cpp:176
 msgid "Backported music from C64 releases"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:178
+#: engines/freescape/metaengine.cpp:177
 msgid "Enable background music ported from the C64 version"
 msgstr ""
 

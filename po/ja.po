@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 17:14+0000\n"
+"POT-Creation-Date: 2026-04-14 15:46+0000\n"
 "PO-Revision-Date: 2026-02-06 00:22+0000\n"
 "Last-Translator: VAN-Gluon <van.gluonp@gmail.com>\n"
 "Language-Team: Japanese <https://translations.scummvm.org/projects/scummvm/"
@@ -119,7 +119,7 @@ msgstr "上へ"
 #: gui/integrity-dialog.cpp:253 gui/filebrowser-dialog.cpp:68
 #: gui/fluidsynth-dialog.cpp:153 gui/massadd.cpp:93 gui/options.cpp:2416
 #: gui/predictivedialog.cpp:68 gui/printing-dialog.cpp:96
-#: gui/recorderdialog.cpp:73 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:211
 #: gui/remotebrowser.cpp:59 gui/saveload-dialog.cpp:64
 #: gui/saveload-dialog.cpp:456 gui/saveload-dialog.cpp:540
 #: gui/saveload-dialog.cpp:839 gui/saveload-dialog.cpp:1243
@@ -2749,43 +2749,43 @@ msgstr "ポインターの速度："
 msgid "Orientation:"
 msgstr "次の行動"
 
-#: gui/recorderdialog.cpp:67
+#: gui/recorderdialog.cpp:66
 msgid "Recorder or Playback Gameplay"
 msgstr "ゲームプレイの記録と再生"
 
-#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:71 gui/recorderdialog.cpp:211
 #: gui/saveload-dialog.cpp:460 gui/saveload-dialog.cpp:540
 #: dists/android.strings.xml.cpp:47 engines/engine.cpp:641
 msgid "Delete"
 msgstr "削除"
 
-#: gui/recorderdialog.cpp:74
+#: gui/recorderdialog.cpp:73
 msgid "Record"
 msgstr "記録"
 
-#: gui/recorderdialog.cpp:75
+#: gui/recorderdialog.cpp:74
 msgid "Playback"
 msgstr "再生"
 
-#: gui/recorderdialog.cpp:77 gui/widgets/grid.cpp:340
+#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:336
 msgid "Edit"
 msgstr "編集"
 
-#: gui/recorderdialog.cpp:142 gui/recorderdialog.cpp:301
-#: gui/recorderdialog.cpp:308
+#: gui/recorderdialog.cpp:141 gui/recorderdialog.cpp:300
+#: gui/recorderdialog.cpp:307
 msgid "Author: "
 msgstr "製作者： "
 
-#: gui/recorderdialog.cpp:144 gui/recorderdialog.cpp:302
-#: gui/recorderdialog.cpp:309
+#: gui/recorderdialog.cpp:143 gui/recorderdialog.cpp:301
+#: gui/recorderdialog.cpp:308
 msgid "Notes: "
 msgstr "メモ： "
 
-#: gui/recorderdialog.cpp:211
+#: gui/recorderdialog.cpp:210
 msgid "Do you really want to delete this record?"
 msgstr "記録を削除してもよろしいですか？"
 
-#: gui/recorderdialog.cpp:228
+#: gui/recorderdialog.cpp:227
 msgid "Unknown Author"
 msgstr "不明な製作者"
 
@@ -2899,28 +2899,28 @@ msgstr "シェーダーを選択"
 msgid "Select a Theme"
 msgstr "テーマを選ぶ"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgid "Disabled GFX"
 msgstr "レンダラー無効"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgctxt "lowres"
 msgid "Disabled GFX"
 msgstr "レンダラー無効"
 
-#: gui/ThemeEngine.cpp:267
+#: gui/ThemeEngine.cpp:257
 msgid "Standard renderer"
 msgstr "標準レンダラー"
 
-#: gui/ThemeEngine.cpp:267 engines/scumm/dialogs.cpp:1054
+#: gui/ThemeEngine.cpp:257 engines/scumm/dialogs.cpp:1054
 msgid "Standard"
 msgstr "標準"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased renderer"
 msgstr "アンチエイリアスレンダラー"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased"
 msgstr "アンチエイリアス"
 
@@ -2977,11 +2977,11 @@ msgstr ""
 msgid "Clear value"
 msgstr "クリア"
 
-#: gui/widgets/grid.cpp:334
+#: gui/widgets/grid.cpp:330
 msgid "Play"
 msgstr "再生"
 
-#: gui/widgets/grid.cpp:337
+#: gui/widgets/grid.cpp:333
 msgid "Saves"
 msgstr "セーブ"
 
@@ -4266,7 +4266,7 @@ msgstr "スクリーンショットを保存できませんでした"
 msgid "Windowed mode"
 msgstr "ウインドーモード"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:169
+#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:168
 #: engines/scumm/help.cpp:88
 msgid "Toggle fullscreen"
 msgstr "全面モードの切替"
@@ -6058,7 +6058,7 @@ msgstr "R2"
 #. I18N: Hardware key
 #: backends/platform/sdl/miyoo/miyoo.cpp:83
 #: backends/platform/sdl/miyoo/miyoo.cpp:114
-#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:180
+#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:179
 #: engines/grim/grim.cpp:545 engines/grim/grim.cpp:645
 #: engines/hdb/metaengine.cpp:264 engines/made/metaengine.cpp:186
 #: engines/phoenixvr/metaengine.cpp:101 engines/toltecs/metaengine.cpp:252
@@ -7817,19 +7817,19 @@ msgstr "上を見る"
 msgid "Look down"
 msgstr "下を見る"
 
-#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:138
+#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:137
 #, fuzzy
 #| msgid "Look at"
 msgid "Look left"
 msgstr "見る"
 
-#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:143
+#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:142
 #, fuzzy
 #| msgid "Look at"
 msgid "Look right"
 msgstr "見る"
 
-#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:100
+#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:99
 #: engines/dm/metaengine.cpp:196 engines/kyra/engine/eobcommon.cpp:371
 #: engines/kyra/engine/lol.cpp:513 engines/mohawk/riven.cpp:881
 #: engines/titanic/metaengine.cpp:336 engines/titanic/metaengine.cpp:378
@@ -8181,21 +8181,21 @@ msgstr ""
 "自体も壊れるおそれがあります。新しいセーブからOperation Stealthを開始する事も"
 "検討してください。"
 
-#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:40
+#: engines/colony/metaengine.cpp:45 engines/myst3/metaengine.cpp:40
 msgid "Widescreen mod"
 msgstr "ワイドスクリーン対応MOD"
 
-#: engines/colony/metaengine.cpp:47 engines/myst3/metaengine.cpp:41
+#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:41
 msgid "Enable widescreen rendering in fullscreen mode."
 msgstr "全画面モードでワイドスクリーンレンダリングを有効にします。"
 
-#: engines/colony/metaengine.cpp:107
+#: engines/colony/metaengine.cpp:106
 #, fuzzy
 #| msgid "Move backwards"
 msgid "Move backward"
 msgstr "後退"
 
-#: engines/colony/metaengine.cpp:114 engines/dm/metaengine.cpp:216
+#: engines/colony/metaengine.cpp:113 engines/dm/metaengine.cpp:216
 #: engines/freescape/movement.cpp:53 engines/hpl1/metaengine.cpp:78
 #: engines/mm/mm1/metaengine.cpp:100
 #, fuzzy
@@ -8203,7 +8203,7 @@ msgstr "後退"
 msgid "Strafe left"
 msgstr "左ステップ"
 
-#: engines/colony/metaengine.cpp:121 engines/dm/metaengine.cpp:236
+#: engines/colony/metaengine.cpp:120 engines/dm/metaengine.cpp:236
 #: engines/freescape/movement.cpp:61 engines/hpl1/metaengine.cpp:79
 #: engines/mm/mm1/metaengine.cpp:101
 #, fuzzy
@@ -8211,7 +8211,7 @@ msgstr "左ステップ"
 msgid "Strafe right"
 msgstr "右ステップ"
 
-#: engines/colony/metaengine.cpp:128
+#: engines/colony/metaengine.cpp:127
 #: engines/freescape/games/castle/castle.cpp:488
 #: engines/freescape/games/dark/dark.cpp:252
 #: engines/freescape/games/driller/driller.cpp:149
@@ -8221,7 +8221,7 @@ msgstr "右ステップ"
 msgid "Rotate left"
 msgstr "左回転"
 
-#: engines/colony/metaengine.cpp:133
+#: engines/colony/metaengine.cpp:132
 #: engines/freescape/games/castle/castle.cpp:493
 #: engines/freescape/games/dark/dark.cpp:257
 #: engines/freescape/games/driller/driller.cpp:154
@@ -8231,31 +8231,31 @@ msgstr "左回転"
 msgid "Rotate right"
 msgstr "右回転"
 
-#: engines/colony/metaengine.cpp:148
+#: engines/colony/metaengine.cpp:147
 #, fuzzy
 #| msgid "Look down"
 msgid "Look behind"
 msgstr "下を見る"
 
-#: engines/colony/metaengine.cpp:153
+#: engines/colony/metaengine.cpp:152
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle mouselook"
 msgstr "消音の切替"
 
-#: engines/colony/metaengine.cpp:159
+#: engines/colony/metaengine.cpp:158
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle dashboard"
 msgstr "消音の切替"
 
-#: engines/colony/metaengine.cpp:164
+#: engines/colony/metaengine.cpp:163
 #, fuzzy
 #| msgid "Toggle fast mode"
 msgid "Toggle wireframe"
 msgstr "高速モードの切り替え"
 
-#: engines/colony/metaengine.cpp:174 engines/hypno/metaengine.cpp:146
+#: engines/colony/metaengine.cpp:173 engines/hypno/metaengine.cpp:146
 #: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
 #: engines/sherlock/metaengine.cpp:872 engines/teenagent/metaengine.cpp:232
 #: engines/toon/metaengine.cpp:98 engines/voyeur/metaengine.cpp:235
@@ -8264,7 +8264,7 @@ msgstr "高速モードの切り替え"
 msgid "Skip intro"
 msgstr "行単位でスキップ"
 
-#: engines/colony/metaengine.cpp:186 engines/ultima/ultima8/metaengine.cpp:89
+#: engines/colony/metaengine.cpp:185 engines/ultima/ultima8/metaengine.cpp:89
 #, fuzzy
 #| msgid "Next action"
 msgid "Fire weapon"
@@ -9146,115 +9146,115 @@ msgstr "音声Type9を再生"
 msgid "Play sound type 16"
 msgstr "音の再生：A"
 
-#: engines/freescape/metaengine.cpp:42
+#: engines/freescape/metaengine.cpp:41
 msgid "Prerecorded sounds"
 msgstr "録音済みサウンド"
 
-#: engines/freescape/metaengine.cpp:43
+#: engines/freescape/metaengine.cpp:42
 msgid "Use high-quality pre-recorded sounds instead of pc speaker emulation"
 msgstr "スピーカーエミュレーションの代わりに高品質なサウンドを使用"
 
-#: engines/freescape/metaengine.cpp:53
+#: engines/freescape/metaengine.cpp:52
 msgid "Extended timer"
 msgstr "タイマー延長"
 
-#: engines/freescape/metaengine.cpp:54
+#: engines/freescape/metaengine.cpp:53
 msgid "Start the game timer at 99:59:59"
 msgstr "99:59:59でゲームを開始"
 
-#: engines/freescape/metaengine.cpp:64
+#: engines/freescape/metaengine.cpp:63
 msgid "Automatic drilling"
 msgstr "自動穿孔"
 
-#: engines/freescape/metaengine.cpp:65
+#: engines/freescape/metaengine.cpp:64
 msgid "Allow to successfully drill in any part of the area in Driller"
 msgstr "Drillerで任意の場所の掘削を成功させます"
 
-#: engines/freescape/metaengine.cpp:75
+#: engines/freescape/metaengine.cpp:74
 msgid "Disable demo mode"
 msgstr "デモを無効化"
 
-#: engines/freescape/metaengine.cpp:76
+#: engines/freescape/metaengine.cpp:75
 msgid "Never activate demo mode"
 msgstr "デモを起動させません"
 
-#: engines/freescape/metaengine.cpp:86
+#: engines/freescape/metaengine.cpp:85
 msgid "Disable sensors"
 msgstr "センサーを無効化"
 
-#: engines/freescape/metaengine.cpp:87
+#: engines/freescape/metaengine.cpp:86
 msgid "Sensors will not shoot the player"
 msgstr "センサーに撃たれなくなる"
 
-#: engines/freescape/metaengine.cpp:97
+#: engines/freescape/metaengine.cpp:96
 msgid "Disable falling"
 msgstr "落下を無効化"
 
-#: engines/freescape/metaengine.cpp:98
+#: engines/freescape/metaengine.cpp:97
 msgid "Player cannot fall over edges"
 msgstr "プレイヤーが落ちなくなる"
 
-#: engines/freescape/metaengine.cpp:108
+#: engines/freescape/metaengine.cpp:107
 msgid "Invert Y-axis on mouse"
 msgstr "マウスのY軸を反転"
 
-#: engines/freescape/metaengine.cpp:109
+#: engines/freescape/metaengine.cpp:108
 msgid "Use alternative camera controls"
 msgstr "異なるカメラ操作を使用"
 
-#: engines/freescape/metaengine.cpp:119
+#: engines/freescape/metaengine.cpp:118
 msgid "Authentic graphics"
 msgstr "真正のグラフィック"
 
-#: engines/freescape/metaengine.cpp:120
+#: engines/freescape/metaengine.cpp:119
 msgid "Keep graphics as close as possible to the original"
 msgstr "できる限りオリジナルに近付けた表示にします"
 
-#: engines/freescape/metaengine.cpp:130
+#: engines/freescape/metaengine.cpp:129
 #, fuzzy
 #| msgid "Enable storage"
 msgid "Enable rock travel"
 msgstr "有効にする"
 
-#: engines/freescape/metaengine.cpp:131
+#: engines/freescape/metaengine.cpp:130
 msgid "Enable traveling using a rock shoot at start"
 msgstr "開始時に岩の射出を使用して移動"
 
-#: engines/freescape/metaengine.cpp:141
+#: engines/freescape/metaengine.cpp:140
 msgid "Smoother movement"
 msgstr "より滑らかな動き"
 
-#: engines/freescape/metaengine.cpp:142
+#: engines/freescape/metaengine.cpp:141
 msgid "Use smoother movements instead of discrete steps"
 msgstr "離散的なステップではなく、より滑らかな動きを使用"
 
 #. I18N: Use modern FPS-style controls: WASD for movement, Shift to run
-#: engines/freescape/metaengine.cpp:153
+#: engines/freescape/metaengine.cpp:152
 #, fuzzy
 #| msgid "Touch Controls"
 msgid "WASD controls"
 msgstr "タッチ操作"
 
-#: engines/freescape/metaengine.cpp:154
+#: engines/freescape/metaengine.cpp:153
 msgid "Use WASD keys for movement and Shift to run"
 msgstr ""
 
 #. I18N: Enable background music using AdLib/OPL2 FM synthesis
-#: engines/freescape/metaengine.cpp:165
+#: engines/freescape/metaengine.cpp:164
 msgid "Backported music from C64 releases (AdLib)"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:166
+#: engines/freescape/metaengine.cpp:165
 msgid ""
 "Enable background music ported from the C64 version using AdLib FM synthesis"
 msgstr ""
 
 #. I18N: Enable background music using AY chip emulation
-#: engines/freescape/metaengine.cpp:177
+#: engines/freescape/metaengine.cpp:176
 msgid "Backported music from C64 releases"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:178
+#: engines/freescape/metaengine.cpp:177
 msgid "Enable background music ported from the C64 version"
 msgstr ""
 

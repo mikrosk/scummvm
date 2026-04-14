@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.8.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 17:14+0000\n"
+"POT-Creation-Date: 2026-04-14 15:46+0000\n"
 "PO-Revision-Date: 2026-03-27 06:22+0000\n"
 "Last-Translator: NorwayFun <temuri.doghonadze@gmail.com>\n"
 "Language-Team: Georgian <https://translations.scummvm.org/projects/scummvm/"
@@ -119,7 +119,7 @@ msgstr "მაღლა ასვლა"
 #: gui/integrity-dialog.cpp:253 gui/filebrowser-dialog.cpp:68
 #: gui/fluidsynth-dialog.cpp:153 gui/massadd.cpp:93 gui/options.cpp:2416
 #: gui/predictivedialog.cpp:68 gui/printing-dialog.cpp:96
-#: gui/recorderdialog.cpp:73 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:211
 #: gui/remotebrowser.cpp:59 gui/saveload-dialog.cpp:64
 #: gui/saveload-dialog.cpp:456 gui/saveload-dialog.cpp:540
 #: gui/saveload-dialog.cpp:839 gui/saveload-dialog.cpp:1243
@@ -2649,43 +2649,43 @@ msgstr "პრინტერი:"
 msgid "Orientation:"
 msgstr "ორიენტაცია:"
 
-#: gui/recorderdialog.cpp:67
+#: gui/recorderdialog.cpp:66
 msgid "Recorder or Playback Gameplay"
 msgstr "თამასის ჩაწერა ან დაკვრა"
 
-#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:71 gui/recorderdialog.cpp:211
 #: gui/saveload-dialog.cpp:460 gui/saveload-dialog.cpp:540
 #: dists/android.strings.xml.cpp:47 engines/engine.cpp:641
 msgid "Delete"
 msgstr "წაშლა"
 
-#: gui/recorderdialog.cpp:74
+#: gui/recorderdialog.cpp:73
 msgid "Record"
 msgstr "ჩაწერა"
 
-#: gui/recorderdialog.cpp:75
+#: gui/recorderdialog.cpp:74
 msgid "Playback"
 msgstr "დაკვრა"
 
-#: gui/recorderdialog.cpp:77 gui/widgets/grid.cpp:340
+#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:336
 msgid "Edit"
 msgstr "ჩასწორება"
 
-#: gui/recorderdialog.cpp:142 gui/recorderdialog.cpp:301
-#: gui/recorderdialog.cpp:308
+#: gui/recorderdialog.cpp:141 gui/recorderdialog.cpp:300
+#: gui/recorderdialog.cpp:307
 msgid "Author: "
 msgstr "ავტორი: "
 
-#: gui/recorderdialog.cpp:144 gui/recorderdialog.cpp:302
-#: gui/recorderdialog.cpp:309
+#: gui/recorderdialog.cpp:143 gui/recorderdialog.cpp:301
+#: gui/recorderdialog.cpp:308
 msgid "Notes: "
 msgstr "შენიშვნები: "
 
-#: gui/recorderdialog.cpp:211
+#: gui/recorderdialog.cpp:210
 msgid "Do you really want to delete this record?"
 msgstr "დარწმუნებული ბრძანდებით, რომ გნებავთ ამ ჩანაწერის წაშლა?"
 
-#: gui/recorderdialog.cpp:228
+#: gui/recorderdialog.cpp:227
 msgid "Unknown Author"
 msgstr "უცნობი ავტორი"
 
@@ -2799,28 +2799,28 @@ msgstr "აირჩიეთ შეიდერი"
 msgid "Select a Theme"
 msgstr "აირჩიეთ თემა"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgid "Disabled GFX"
 msgstr "გრაფიკის გარეშე"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgctxt "lowres"
 msgid "Disabled GFX"
 msgstr "გრაფიკის გარეშე"
 
-#: gui/ThemeEngine.cpp:267
+#: gui/ThemeEngine.cpp:257
 msgid "Standard renderer"
 msgstr "სტანდარტული რენდერერი"
 
-#: gui/ThemeEngine.cpp:267 engines/scumm/dialogs.cpp:1054
+#: gui/ThemeEngine.cpp:257 engines/scumm/dialogs.cpp:1054
 msgid "Standard"
 msgstr "სტანდარტული"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased renderer"
 msgstr "მომრგვალებული რენდერერი"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased"
 msgstr "მომრგვალებული"
 
@@ -2872,11 +2872,11 @@ msgstr ""
 msgid "Clear value"
 msgstr "მნიშვნელობის გასუფთავება"
 
-#: gui/widgets/grid.cpp:334
+#: gui/widgets/grid.cpp:330
 msgid "Play"
 msgstr "დაკვრა"
 
-#: gui/widgets/grid.cpp:337
+#: gui/widgets/grid.cpp:333
 msgid "Saves"
 msgstr "შენახული თამაშები"
 
@@ -4060,7 +4060,7 @@ msgstr "ეკრანის ანაბეჭდის შენახვა 
 msgid "Windowed mode"
 msgstr "ფანჯრის რეჟიმი"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:169
+#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:168
 #: engines/scumm/help.cpp:88
 msgid "Toggle fullscreen"
 msgstr "მთელ ეკრანზე გატანის ჩართ/გამორთ"
@@ -5450,7 +5450,7 @@ msgstr "R2"
 #. I18N: Hardware key
 #: backends/platform/sdl/miyoo/miyoo.cpp:83
 #: backends/platform/sdl/miyoo/miyoo.cpp:114
-#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:180
+#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:179
 #: engines/grim/grim.cpp:545 engines/grim/grim.cpp:645
 #: engines/hdb/metaengine.cpp:264 engines/made/metaengine.cpp:186
 #: engines/phoenixvr/metaengine.cpp:101 engines/toltecs/metaengine.cpp:252
@@ -7076,15 +7076,15 @@ msgstr "ახედვა"
 msgid "Look down"
 msgstr "დახედვა"
 
-#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:138
+#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:137
 msgid "Look left"
 msgstr "გახედვა მარცხნივ"
 
-#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:143
+#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:142
 msgid "Look right"
 msgstr "გახედვა მარჯვნივ"
 
-#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:100
+#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:99
 #: engines/dm/metaengine.cpp:196 engines/kyra/engine/eobcommon.cpp:371
 #: engines/kyra/engine/lol.cpp:513 engines/mohawk/riven.cpp:881
 #: engines/titanic/metaengine.cpp:336 engines/titanic/metaengine.cpp:378
@@ -7382,31 +7382,31 @@ msgid ""
 "beginning using new savegames."
 msgstr ""
 
-#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:40
+#: engines/colony/metaengine.cpp:45 engines/myst3/metaengine.cpp:40
 msgid "Widescreen mod"
 msgstr "ფართოეკრანიანი მოდი"
 
-#: engines/colony/metaengine.cpp:47 engines/myst3/metaengine.cpp:41
+#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:41
 msgid "Enable widescreen rendering in fullscreen mode."
 msgstr ""
 
-#: engines/colony/metaengine.cpp:107
+#: engines/colony/metaengine.cpp:106
 msgid "Move backward"
 msgstr "უკან გადასვლა"
 
-#: engines/colony/metaengine.cpp:114 engines/dm/metaengine.cpp:216
+#: engines/colony/metaengine.cpp:113 engines/dm/metaengine.cpp:216
 #: engines/freescape/movement.cpp:53 engines/hpl1/metaengine.cpp:78
 #: engines/mm/mm1/metaengine.cpp:100
 msgid "Strafe left"
 msgstr "სტრეიფი მარცხნივ"
 
-#: engines/colony/metaengine.cpp:121 engines/dm/metaengine.cpp:236
+#: engines/colony/metaengine.cpp:120 engines/dm/metaengine.cpp:236
 #: engines/freescape/movement.cpp:61 engines/hpl1/metaengine.cpp:79
 #: engines/mm/mm1/metaengine.cpp:101
 msgid "Strafe right"
 msgstr "სტრეიფი მარჯვნივ"
 
-#: engines/colony/metaengine.cpp:128
+#: engines/colony/metaengine.cpp:127
 #: engines/freescape/games/castle/castle.cpp:488
 #: engines/freescape/games/dark/dark.cpp:252
 #: engines/freescape/games/driller/driller.cpp:149
@@ -7414,7 +7414,7 @@ msgstr "სტრეიფი მარჯვნივ"
 msgid "Rotate left"
 msgstr "მარცხნივ შებრუნება"
 
-#: engines/colony/metaengine.cpp:133
+#: engines/colony/metaengine.cpp:132
 #: engines/freescape/games/castle/castle.cpp:493
 #: engines/freescape/games/dark/dark.cpp:257
 #: engines/freescape/games/driller/driller.cpp:154
@@ -7422,38 +7422,38 @@ msgstr "მარცხნივ შებრუნება"
 msgid "Rotate right"
 msgstr "მარჯვნივ შებრუნება"
 
-#: engines/colony/metaengine.cpp:148
+#: engines/colony/metaengine.cpp:147
 #, fuzzy
 #| msgid "Look down"
 msgid "Look behind"
 msgstr "დახედვა"
 
-#: engines/colony/metaengine.cpp:153
+#: engines/colony/metaengine.cpp:152
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle mouselook"
 msgstr "დადუმების გადართვა"
 
-#: engines/colony/metaengine.cpp:159
+#: engines/colony/metaengine.cpp:158
 #, fuzzy
 #| msgid "Toggle sound"
 msgid "Toggle dashboard"
 msgstr "ხმის გადართვა"
 
-#: engines/colony/metaengine.cpp:164
+#: engines/colony/metaengine.cpp:163
 #, fuzzy
 #| msgid "Toggle frame by frame"
 msgid "Toggle wireframe"
 msgstr "კადრკადრ ჩვენების გადართვა"
 
-#: engines/colony/metaengine.cpp:174 engines/hypno/metaengine.cpp:146
+#: engines/colony/metaengine.cpp:173 engines/hypno/metaengine.cpp:146
 #: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
 #: engines/sherlock/metaengine.cpp:872 engines/teenagent/metaengine.cpp:232
 #: engines/toon/metaengine.cpp:98 engines/voyeur/metaengine.cpp:235
 msgid "Skip intro"
 msgstr "შესავლის გამოტოვება"
 
-#: engines/colony/metaengine.cpp:186 engines/ultima/ultima8/metaengine.cpp:89
+#: engines/colony/metaengine.cpp:185 engines/ultima/ultima8/metaengine.cpp:89
 msgid "Fire weapon"
 msgstr "იარაღის სროლა"
 
@@ -8146,111 +8146,111 @@ msgstr ""
 msgid "Play sound type 16"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:42
+#: engines/freescape/metaengine.cpp:41
 msgid "Prerecorded sounds"
 msgstr "წინასწარ ჩაწერილი ხმები"
 
-#: engines/freescape/metaengine.cpp:43
+#: engines/freescape/metaengine.cpp:42
 msgid "Use high-quality pre-recorded sounds instead of pc speaker emulation"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:53
+#: engines/freescape/metaengine.cpp:52
 msgid "Extended timer"
 msgstr "გაფართოებული ტაიმერი"
 
-#: engines/freescape/metaengine.cpp:54
+#: engines/freescape/metaengine.cpp:53
 msgid "Start the game timer at 99:59:59"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:64
+#: engines/freescape/metaengine.cpp:63
 msgid "Automatic drilling"
 msgstr "ავტომატური ბურღვა"
 
-#: engines/freescape/metaengine.cpp:65
+#: engines/freescape/metaengine.cpp:64
 msgid "Allow to successfully drill in any part of the area in Driller"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:75
+#: engines/freescape/metaengine.cpp:74
 msgid "Disable demo mode"
 msgstr "დემო რეჟიმის გამორთვა"
 
-#: engines/freescape/metaengine.cpp:76
+#: engines/freescape/metaengine.cpp:75
 msgid "Never activate demo mode"
 msgstr "დემო რეჟიმი არასდროს გააქტიურდეს"
 
-#: engines/freescape/metaengine.cpp:86
+#: engines/freescape/metaengine.cpp:85
 msgid "Disable sensors"
 msgstr "სენსორების გამორთვა"
 
-#: engines/freescape/metaengine.cpp:87
+#: engines/freescape/metaengine.cpp:86
 msgid "Sensors will not shoot the player"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:97
+#: engines/freescape/metaengine.cpp:96
 msgid "Disable falling"
 msgstr "ვარდნის გამორთვა"
 
-#: engines/freescape/metaengine.cpp:98
+#: engines/freescape/metaengine.cpp:97
 msgid "Player cannot fall over edges"
 msgstr "მოთამაშე ვერ გადავარდება"
 
-#: engines/freescape/metaengine.cpp:108
+#: engines/freescape/metaengine.cpp:107
 msgid "Invert Y-axis on mouse"
 msgstr "Y ღერძის ინვერსია თაგუნაზე"
 
-#: engines/freescape/metaengine.cpp:109
+#: engines/freescape/metaengine.cpp:108
 msgid "Use alternative camera controls"
 msgstr "კამერის ალტერნატიული კონტროლის გამოყენება"
 
-#: engines/freescape/metaengine.cpp:119
+#: engines/freescape/metaengine.cpp:118
 msgid "Authentic graphics"
 msgstr "ავთენტური გრაფიკა"
 
-#: engines/freescape/metaengine.cpp:120
+#: engines/freescape/metaengine.cpp:119
 msgid "Keep graphics as close as possible to the original"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:130
+#: engines/freescape/metaengine.cpp:129
 msgid "Enable rock travel"
 msgstr "Rock travel-ის ჩართვა"
 
-#: engines/freescape/metaengine.cpp:131
+#: engines/freescape/metaengine.cpp:130
 msgid "Enable traveling using a rock shoot at start"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:141
+#: engines/freescape/metaengine.cpp:140
 msgid "Smoother movement"
 msgstr "უფრო გლუვი მოძრაობა"
 
-#: engines/freescape/metaengine.cpp:142
+#: engines/freescape/metaengine.cpp:141
 msgid "Use smoother movements instead of discrete steps"
 msgstr ""
 
 #. I18N: Use modern FPS-style controls: WASD for movement, Shift to run
-#: engines/freescape/metaengine.cpp:153
+#: engines/freescape/metaengine.cpp:152
 msgid "WASD controls"
 msgstr "WASD-ით კონტროლი"
 
-#: engines/freescape/metaengine.cpp:154
+#: engines/freescape/metaengine.cpp:153
 msgid "Use WASD keys for movement and Shift to run"
 msgstr ""
 
 #. I18N: Enable background music using AdLib/OPL2 FM synthesis
-#: engines/freescape/metaengine.cpp:165
+#: engines/freescape/metaengine.cpp:164
 msgid "Backported music from C64 releases (AdLib)"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:166
+#: engines/freescape/metaengine.cpp:165
 msgid ""
 "Enable background music ported from the C64 version using AdLib FM synthesis"
 msgstr ""
 
 #. I18N: Enable background music using AY chip emulation
-#: engines/freescape/metaengine.cpp:177
+#: engines/freescape/metaengine.cpp:176
 msgid "Backported music from C64 releases"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:178
+#: engines/freescape/metaengine.cpp:177
 msgid "Enable background music ported from the C64 version"
 msgstr ""
 
