@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.3.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-14 15:46+0000\n"
-"PO-Revision-Date: 2026-04-09 23:22+0000\n"
+"PO-Revision-Date: 2026-04-14 18:12+0000\n"
 "Last-Translator: Walter Agazzi <walter.agazzi@protonmail.com>\n"
 "Language-Team: Italian <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/it/>\n"
@@ -26,10 +26,9 @@ msgstr "Audio Apple Macintosh"
 
 #. I18N: built with <compiler>
 #: gui/about.cpp:113
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#, c-format
 msgid "(built with %s)"
-msgstr "(build creata il %s con %s)"
+msgstr "(compilata con %s)"
 
 #. I18N: built on <build date> with <compiler>
 #: gui/about.cpp:116
@@ -7806,6 +7805,8 @@ msgid ""
 "This option allows the game to play at a slightly extended resolution. This "
 "is what the Mac and CDi versions are supposed to play like."
 msgstr ""
+"Questa opzione permette di utilizzare una risoluzione grafica leggermente "
+"superiore, come nelle versioni originali per Mac e CDi."
 
 #: engines/buried/buried.cpp:598
 msgid "Are you sure you want to quit?"
@@ -8484,21 +8485,16 @@ msgid "Brighten the graphics to simulate a Macintosh monitor"
 msgstr "Rende i colori più brillanti per simulare un schermo Macintosh"
 
 #: engines/director/metaengine.cpp:81
-#, fuzzy
-#| msgid "Force true color"
 msgid "Force true color (32bpp) mode"
-msgstr "Forza modalità true color"
+msgstr "Forza modalità true color (32 bpp)"
 
 #: engines/director/metaengine.cpp:82
-#, fuzzy
-#| msgid ""
-#| "Use true color graphics mode, even if the game is not designed for it"
 msgid ""
 "Use true color graphics mode (32 bits per pixel), even if the game is not "
 "designed for it"
 msgstr ""
-"Utilizza la modalità grafica true color, anche se il gioco non richiede tale "
-"modalità"
+"Utilizza la modalità grafica true color (a 32 bit per pixel), anche se il "
+"gioco non è progettato per tale modalità"
 
 #: engines/dm/metaengine.cpp:125
 msgid "Dialog choice selection keymappings"
@@ -9300,228 +9296,194 @@ msgstr "Visualizzazione immagine/testo modificata\n"
 
 #: engines/glk/dialogs.cpp:141
 msgid "white"
-msgstr ""
+msgstr "bianco"
 
 #: engines/glk/dialogs.cpp:142
 msgid "green"
-msgstr ""
+msgstr "verde"
 
 #: engines/glk/dialogs.cpp:143
-#, fuzzy
-#| msgid "Proceed"
 msgid "red"
-msgstr "Procedi"
+msgstr "rosso"
 
 #: engines/glk/dialogs.cpp:144
 msgid "blue"
-msgstr ""
+msgstr "blu"
 
 #: engines/glk/dialogs.cpp:145
 msgid "black"
-msgstr ""
+msgstr "nero"
 
 #: engines/glk/dialogs.cpp:146
 msgid "grey"
-msgstr ""
+msgstr "grigio"
 
 #: engines/glk/dialogs.cpp:195
 msgid "Monospace Regular"
-msgstr ""
+msgstr "Monospaziato normale"
 
 #: engines/glk/dialogs.cpp:196
 msgid "Monospace Bold"
-msgstr ""
+msgstr "Monospaziato grassetto"
 
 #: engines/glk/dialogs.cpp:197
 msgid "Monospace Italic"
-msgstr ""
+msgstr "Monospaziato corsivo"
 
 #: engines/glk/dialogs.cpp:198
 msgid "Monospace Bold Italic"
-msgstr ""
+msgstr "Monospaziato grassetto corsivo"
 
 #: engines/glk/dialogs.cpp:199
 msgid "Proportional Regular"
-msgstr ""
+msgstr "Proporzionale normale"
 
 #: engines/glk/dialogs.cpp:200
 msgid "Proportional Bold"
-msgstr ""
+msgstr "Proporzionale grassetto"
 
 #: engines/glk/dialogs.cpp:201
 msgid "Proportional Italic"
-msgstr ""
+msgstr "Proporzionale corsivo"
 
 #: engines/glk/dialogs.cpp:202
 msgid "Proportional Bold Italic"
-msgstr ""
+msgstr "Proporzionale grassetto corsivo"
 
 #: engines/glk/dialogs.cpp:210
-#, fuzzy
-#| msgid "SoundFont:"
 msgid "Font"
-msgstr "SoundFont:"
+msgstr "Font"
 
 #: engines/glk/dialogs.cpp:212 engines/glk/dialogs.cpp:222
-#, fuzzy
-#| msgid "ProText"
 msgid "Text:"
-msgstr "ProText"
+msgstr "Testo:"
 
 #: engines/glk/dialogs.cpp:212
 msgid "Font for the text"
-msgstr ""
+msgstr "Font per il testo"
 
 #: engines/glk/dialogs.cpp:216 engines/glk/dialogs.cpp:227
 msgid "Grid:"
-msgstr ""
+msgstr "Griglia:"
 
 #: engines/glk/dialogs.cpp:216
 msgid "Font for drawn graphics like maps, diagrams, puzzles, etc"
-msgstr ""
+msgstr "Font utilizzato per la grafica di mappe, diagrammi, puzzle, ecc."
 
 #: engines/glk/dialogs.cpp:220
 msgid "Color"
-msgstr ""
+msgstr "Colore"
 
 #: engines/glk/dialogs.cpp:222
-#, fuzzy
-#| msgid "Move focus to interactive object"
 msgid "Color of the interactive text"
-msgstr "Sposta focus sull'oggetto interattivo"
+msgstr "Colore dei testi interattivi"
 
 #: engines/glk/dialogs.cpp:225 engines/glk/dialogs.cpp:230
 #: engines/glk/dialogs.cpp:236 engines/glk/dialogs.cpp:242
 #: engines/glk/dialogs.cpp:254 engines/glk/dialogs.cpp:260
 #: engines/glk/dialogs.cpp:269
 msgid "<custom>"
-msgstr ""
+msgstr "<personalizzato>"
 
 #: engines/glk/dialogs.cpp:227
 msgid "Color for drawn graphics such as maps, diagrams, puzzles, etc"
-msgstr ""
+msgstr "Colore per la grafica di mappe, diagrammi, puzzle, ecc."
 
 #: engines/glk/dialogs.cpp:232
-#, fuzzy
-#| msgid "Window"
 msgid "Window:"
-msgstr "Finestra"
+msgstr "Finestra:"
 
 #: engines/glk/dialogs.cpp:232
-#, fuzzy
-#| msgid "Toggle windows mode"
 msgid "Color of the window (background)"
-msgstr "Alterna modalità finestre"
+msgstr "Colore della finestra (sfondo)"
 
 #: engines/glk/dialogs.cpp:238
-#, fuzzy
-#| msgid "New order"
 msgid "Border:"
-msgstr "Nuovo ordine"
+msgstr "Bordo:"
 
 #: engines/glk/dialogs.cpp:238
-#, fuzzy
-#| msgid "Toggle windows mode"
 msgid "Color of the window border"
-msgstr "Alterna modalità finestre"
+msgstr "Colore del bordo della finestra"
 
 #. I18N: This is a section for text windows border settings
 #: engines/glk/dialogs.cpp:245
-#, fuzzy
-#| msgid "New order"
 msgid "Border"
-msgstr "Nuovo ordine"
+msgstr "Bordi"
 
 #: engines/glk/dialogs.cpp:247 engines/glk/dialogs.cpp:341
 #: engines/glk/dialogs.cpp:345 engines/glk/dialogs.cpp:349
-#, fuzzy
-#| msgid "Horizontal underscan:"
 msgid "Horizontal:"
-msgstr "Underscan orizzontale:"
+msgstr "Orizzontale:"
 
 #: engines/glk/dialogs.cpp:247
-#, fuzzy
-#| msgid "Horizontal underscan:"
 msgid "Horizontal border size"
-msgstr "Underscan orizzontale:"
+msgstr "Spessore dei bordi orizzontali"
 
 #: engines/glk/dialogs.cpp:248 engines/glk/dialogs.cpp:342
 #: engines/glk/dialogs.cpp:346 engines/glk/dialogs.cpp:350
-#, fuzzy
-#| msgid "Vertical underscan:"
 msgid "Vertical:"
-msgstr "Underscan verticale:"
+msgstr "Verticale:"
 
 #: engines/glk/dialogs.cpp:248
-#, fuzzy
-#| msgid "Vertical underscan:"
 msgid "Vertical border size"
-msgstr "Underscan verticale:"
+msgstr "Spessore dei bordi verticali"
 
 #: engines/glk/dialogs.cpp:250
 msgid "Caret:"
-msgstr ""
+msgstr "Cursore:"
 
 #: engines/glk/dialogs.cpp:250
-#, fuzzy
-#| msgid "Teleport to cursor"
 msgid "Color of the cursor"
-msgstr "Teletrasporto al cursore"
+msgstr "Colore del cursore"
 
 #: engines/glk/dialogs.cpp:256
 msgid "Link:"
-msgstr ""
+msgstr "Link:"
 
 #: engines/glk/dialogs.cpp:256
 msgid "Color for URLs if they appear in-game"
-msgstr ""
+msgstr "Colore dei collegamenti ipertestuali, se presenti nel gioco"
 
 #. I18N: "More..." is a prompt in text windows, which appears when the text exceeds the window size
 #: engines/glk/dialogs.cpp:264
 msgid "More:"
-msgstr ""
+msgstr "\"Altro...\":"
 
 #: engines/glk/dialogs.cpp:265
 msgid "Color for the \"More...\" markers in the text"
-msgstr ""
+msgstr "Colore dei marcatori \"Altro...\" nei testi"
 
 #: engines/glk/dialogs.cpp:272
-#, fuzzy
-#| msgid "Graphics mode:"
 msgid "Typography"
-msgstr "Modalità grafica:"
+msgstr "Tipografia"
 
 #: engines/glk/dialogs.cpp:274
 msgid "Link style:"
-msgstr ""
+msgstr "Stile link:"
 
 #: engines/glk/dialogs.cpp:274
 msgid "Style for URLs if they appear in-game"
-msgstr ""
+msgstr "Stile dei collegamenti ipertestuali, se presenti nel gioco"
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Change shadow type"
 msgid "Caret shape:"
-msgstr "Cambia qualità ombre"
+msgstr "Forma cursore:"
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Show mouse cursor"
 msgid "Shape of the cursor"
-msgstr "Mostra cursore"
+msgstr "Forma del cursore"
 
 #: engines/glk/dialogs.cpp:286
-#, fuzzy
-#| msgid "Quit prompt"
 msgid "More prompt:"
-msgstr "Finestra di chiusura"
+msgstr "Marcatore \"Altro...\":"
 
 #: engines/glk/dialogs.cpp:286
 msgid ""
 "Custom marker in place of the \"More...\" marker for eg. \"continue\". Leave "
 "it blank to use the game's default"
 msgstr ""
+"Marcatore personalizzato, al posto di \"Altro...\". Lascia in bianco per "
+"usare l'opzione predefinita dal gioco"
 
 #: engines/glk/dialogs.cpp:288
 #, fuzzy
