@@ -835,14 +835,7 @@ void onImGuiRender() {
 		return;
 
 	if (_state->_windowToRedraw) {
-		Graphics::ManagedSurface *surface = _state->_windowToRedraw->getSurface();
-		if (surface) {
-			Common::Rect fullScreen(0, 0, surface->w, surface->h);
-
-			_state->_windowToRedraw->addDirtyRect(fullScreen);
-			_state->_windowToRedraw->setDirty(true);
-		}
-
+		_state->_windowToRedraw->render(true);
 		_state->_windowToRedraw = nullptr;
 	}
 
