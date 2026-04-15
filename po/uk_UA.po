@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.9.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-14 22:09+0000\n"
-"PO-Revision-Date: 2026-04-06 17:30+0000\n"
+"PO-Revision-Date: 2026-04-15 22:03+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Ukrainian <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/uk/>\n"
@@ -28,10 +28,9 @@ msgstr "Звук Apple Macintosh"
 
 #. I18N: built with <compiler>
 #: gui/about.cpp:119
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#, c-format
 msgid "(built with %s)"
-msgstr "(зібраний %s з %s)"
+msgstr "(зібраний з %s)"
 
 #. I18N: built on <build date> with <compiler>
 #: gui/about.cpp:122
@@ -3741,13 +3740,7 @@ msgid "Skip autosave"
 msgstr "Пропустити автозбереження"
 
 #: engines/engine.cpp:644
-#, fuzzy, c-format
-#| msgid ""
-#| "WARNING: The autosave slot contains a saved game named %S, and an "
-#| "autosave is pending.\n"
-#| "Please move this saved game to a new slot, or delete it if it's no longer "
-#| "needed.\n"
-#| "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
+#, c-format
 msgid ""
 "WARNING: The autosave slot contains a saved game named %s, and an autosave "
 "is pending.\n"
@@ -3755,7 +3748,7 @@ msgid ""
 "needed.\n"
 "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
 msgstr ""
-"УВАГА: У слоті автозбереження вже знаходиться збереження %S, і потрібно його "
+"УВАГА: У слоті автозбереження вже знаходиться збереження %s, і потрібно його "
 "переписати.\n"
 "Ви можете або перенести поточне збереження у новий слот, або видалити його, "
 "якщо воно не потрібно.\n"
@@ -7729,16 +7722,16 @@ msgid "Quit game"
 msgstr "Вийти з гри"
 
 #: engines/bolt/metaengine.cpp:34
-#, fuzzy
-#| msgid "Enable high resolution"
 msgid "Extended game resolution"
-msgstr "Ввімкнути високе розгалуження"
+msgstr "Розширене розгалуження гри"
 
 #: engines/bolt/metaengine.cpp:35
 msgid ""
 "This option allows the game to play at a slightly extended resolution. This "
 "is what the Mac and CDi versions are supposed to play like."
 msgstr ""
+"Ця опція дозволяє грі грати з дещо розширеною роздільною здатністю. Саме так "
+"мають працювати версії для Mac та CDi."
 
 #: engines/buried/buried.cpp:598
 msgid "Are you sure you want to quit?"
@@ -8417,15 +8410,10 @@ msgid "Brighten the graphics to simulate a Macintosh monitor"
 msgstr "Підвищити яскравість графіки для симуляції монітору Macintosh"
 
 #: engines/director/metaengine.cpp:81
-#, fuzzy
-#| msgid "Force true color"
 msgid "Force true color (32bpp) mode"
-msgstr "Примусово true color"
+msgstr "Примусово true color (32-біти)"
 
 #: engines/director/metaengine.cpp:82
-#, fuzzy
-#| msgid ""
-#| "Use true color graphics mode, even if the game is not designed for it"
 msgid ""
 "Use true color graphics mode (32 bits per pixel), even if the game is not "
 "designed for it"
@@ -9349,7 +9337,7 @@ msgstr "Горизонтальна:"
 
 #: engines/glk/dialogs.cpp:247
 msgid "Horizontal border size"
-msgstr "Розмір горизонтальної облямівки"
+msgstr "Горизонтальний розмір облямівки"
 
 #: engines/glk/dialogs.cpp:248 engines/glk/dialogs.cpp:342
 #: engines/glk/dialogs.cpp:346 engines/glk/dialogs.cpp:350
@@ -9358,7 +9346,7 @@ msgstr "Вертикальна:"
 
 #: engines/glk/dialogs.cpp:248
 msgid "Vertical border size"
-msgstr "Розмір вертикальної облямівки"
+msgstr "Вертикальний розмір облямівки"
 
 #: engines/glk/dialogs.cpp:250
 msgid "Caret:"
@@ -9487,24 +9475,18 @@ msgid "Choose typographic quotes"
 msgstr "Виберіть стиль типографічних лапкок"
 
 #: engines/glk/dialogs.cpp:307
-#, fuzzy
-#| msgid "Off"
 msgctxt "quotes"
 msgid "Off"
 msgstr "Вимкнені"
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
 #: engines/glk/dialogs.cpp:309
-#, fuzzy
-#| msgid "Normal"
 msgctxt "quotes"
 msgid "Normal"
-msgstr "Нормальний"
+msgstr "Нормальні"
 
 #. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
 #: engines/glk/dialogs.cpp:311
-#, fuzzy
-#| msgid "Rabid"
 msgctxt "quotes"
 msgid "Rabid"
 msgstr "Особливі"
@@ -10978,10 +10960,8 @@ msgid "Replace a colored gem with bars for hit points and spell points."
 msgstr "Замінити кольоровий камінь на смужки очок здоров'я та очок заклинань."
 
 #: engines/mm/metaengine.cpp:183
-#, fuzzy
-#| msgid "Might and Magic 1"
 msgid "Might and Magic"
-msgstr "Might and Magic 1"
+msgstr "Might and Magic"
 
 #: engines/mm/mm1/metaengine.cpp:55
 msgid "View party member 1"
@@ -11092,10 +11072,8 @@ msgid "Might and Magic 1 - Minimal Keys"
 msgstr "Might and Magic 1 - Мінімальні клавіші"
 
 #: engines/mm/mm1/metaengine.cpp:150
-#, fuzzy
-#| msgid "Might and Magic 1 - Menus"
 msgid "Might and Magic 1 - Main"
-msgstr "Might and Magic 1 - Меню"
+msgstr "Might and Magic 1 - Головна"
 
 #: engines/mm/mm1/metaengine.cpp:151
 msgid "Might and Magic 1 - Party"
@@ -11232,29 +11210,21 @@ msgstr ""
 "швидше пересуватися у грі."
 
 #: engines/mohawk/dialogs.cpp:364
-#, fuzzy
-#| msgid "Disabled"
 msgctxt "riven-transition"
 msgid "Disabled"
 msgstr "Вимкнено"
 
 #: engines/mohawk/dialogs.cpp:365
-#, fuzzy
-#| msgid "Fastest"
 msgctxt "riven-transition"
 msgid "Fastest"
 msgstr "Найшвидші"
 
 #: engines/mohawk/dialogs.cpp:366
-#, fuzzy
-#| msgid "Normal"
 msgctxt "riven-transition"
 msgid "Normal"
 msgstr "Нормальний"
 
 #: engines/mohawk/dialogs.cpp:367
-#, fuzzy
-#| msgid "Best"
 msgctxt "riven-transition"
 msgid "Best"
 msgstr "Найкраще"
