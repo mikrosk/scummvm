@@ -932,11 +932,17 @@ void Score::incrementFilmLoops() {
 			if (!fl->_score->_scoreCache.empty()) {
 				// increment the film loop counter
 				if (fl->_looping) {
-					if (_curFrameNumber + 1 > getFramesNum())
+					if (fl->_score->_curFrameNumber + 1 > fl->_score->getFramesNum())
 						fl->_score->setCurrentFrame(1);
+
+					fl->_score->step();
+				} else {
+					if (fl->_score->_curFrameNumber < fl->_score->getFramesNum() - 1)
+						fl->_score->step();
+					else
+						fl->_score->stopPlay();
 				}
 
-				fl->_score->step();
 			} else {
 				warning("Score::updateFilmLoops(): invalid film loop in castId %s", it->_sprite->_castId.asString().c_str());
 			}
