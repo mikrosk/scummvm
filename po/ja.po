@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-14 22:09+0000\n"
-"PO-Revision-Date: 2026-02-06 00:22+0000\n"
+"PO-Revision-Date: 2026-04-15 08:22+0000\n"
 "Last-Translator: VAN-Gluon <van.gluonp@gmail.com>\n"
 "Language-Team: Japanese <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/ja/>\n"
@@ -26,10 +26,9 @@ msgstr "Macintoshオーディオ"
 
 #. I18N: built with <compiler>
 #: gui/about.cpp:119
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#, c-format
 msgid "(built with %s)"
-msgstr "(%sに%sでビルド)"
+msgstr "(%sでビルド)"
 
 #. I18N: built on <build date> with <compiler>
 #: gui/about.cpp:122
@@ -1421,10 +1420,8 @@ msgid "About ScummVM"
 msgstr "ScummVMについて"
 
 #: gui/launcher.cpp:277 gui/launcher.cpp:959
-#, fuzzy
-#| msgid "General Keys"
 msgid "General help"
-msgstr "キー全般"
+msgstr "一般的なヘルプ"
 
 #. I18N: Button caption. O is the shortcut, Ctrl+O, put it in parens for non-latin (~O~)
 #: gui/launcher.cpp:280
@@ -2717,7 +2714,7 @@ msgstr "*  Abc"
 
 #: gui/printing-dialog.cpp:54
 msgid "Print"
-msgstr ""
+msgstr "印刷"
 
 #: gui/printing-dialog.cpp:56
 #, fuzzy
