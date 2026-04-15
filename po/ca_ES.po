@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.6.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-14 22:09+0000\n"
-"PO-Revision-Date: 2026-04-11 00:22+0000\n"
+"PO-Revision-Date: 2026-04-15 17:22+0000\n"
 "Last-Translator: Xaviu <xaviu@xaviu.com>\n"
 "Language-Team: Catalan <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/ca/>\n"
@@ -26,10 +26,9 @@ msgstr "Àudio d'Apple Macintosh"
 
 #. I18N: built with <compiler>
 #: gui/about.cpp:119
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#, c-format
 msgid "(built with %s)"
-msgstr "(compilat el %s amb %s)"
+msgstr "(compilat amb %s)"
 
 #. I18N: built on <build date> with <compiler>
 #: gui/about.cpp:122
@@ -9086,11 +9085,9 @@ msgstr ""
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
 #: engines/glk/dialogs.cpp:309
-#, fuzzy
-#| msgid "Normal"
 msgctxt "quotes"
 msgid "Normal"
-msgstr "Normal"
+msgstr "Normals"
 
 #. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
 #: engines/glk/dialogs.cpp:311
@@ -10824,29 +10821,21 @@ msgstr ""
 "transicions de pantalla us permetrà navegar més ràpidament a través del joc."
 
 #: engines/mohawk/dialogs.cpp:364
-#, fuzzy
-#| msgid "Disabled"
 msgctxt "riven-transition"
 msgid "Disabled"
-msgstr "Inhabilitat"
+msgstr "Desactivat"
 
 #: engines/mohawk/dialogs.cpp:365
-#, fuzzy
-#| msgid "Fastest"
 msgctxt "riven-transition"
 msgid "Fastest"
 msgstr "Més ràpid"
 
 #: engines/mohawk/dialogs.cpp:366
-#, fuzzy
-#| msgid "Normal"
 msgctxt "riven-transition"
 msgid "Normal"
 msgstr "Normal"
 
 #: engines/mohawk/dialogs.cpp:367
-#, fuzzy
-#| msgid "Best"
 msgctxt "riven-transition"
 msgid "Best"
 msgstr "Millor"
