@@ -74,7 +74,7 @@ ScriptValue DocumentActor::callMethod(BuiltInMethod methodId, Common::Array<Scri
 		uint contextId = args[0].asActorId();
 
 		// We are looking for the screen actor with the same ID as the context.
-		Actor *screenActor = g_engine->getActorById(contextId);
+		Actor *screenActor = g_engine->getImtGod()->getActorById(contextId);
 		bool contextIsLoading = g_engine->getDocument()->isContextLoadInProgress(contextId);
 		bool contextIsLoaded = (screenActor != nullptr) && !contextIsLoading;
 		returnValue.setToBool(contextIsLoaded);

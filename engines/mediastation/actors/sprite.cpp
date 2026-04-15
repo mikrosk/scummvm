@@ -87,7 +87,7 @@ void SpriteMovieActor::readParameter(Chunk &chunk, ActorHeaderSectionType paramT
 
 	case kActorHeaderActorReference: {
 		_actorReference = chunk.readTypedUint16();
-		SpriteMovieActor *referencedSprite = static_cast<SpriteMovieActor *>(g_engine->getActorByIdAndType(_actorReference, kActorTypeSprite));
+		SpriteMovieActor *referencedSprite = static_cast<SpriteMovieActor *>(g_engine->getImtGod()->getActorByIdAndType(_actorReference, kActorTypeSprite));
 		_asset = referencedSprite->_asset;
 		break;
 	}

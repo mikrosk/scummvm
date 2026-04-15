@@ -699,19 +699,19 @@ void VideoDisplayManager::_colorShiftCurrentPalette(uint startIndex, uint shiftA
 }
 
 void VideoDisplayManager::_fadeToPaletteObject(uint paletteId, double fadeTime, uint startIndex, uint colorCount) {
-	PaletteActor *paletteActor = static_cast<PaletteActor *>(_vm->getActorByIdAndType(paletteId, kActorTypePalette));
+	PaletteActor *paletteActor = static_cast<PaletteActor *>(_vm->getImtGod()->getActorByIdAndType(paletteId, kActorTypePalette));
 	Graphics::Palette *palette = paletteActor->_palette;
 	_fadeToPalette(fadeTime, *palette, startIndex, colorCount);
 }
 
 void VideoDisplayManager::_setToPaletteObject(uint paletteId, uint startIndex, uint colorCount) {
-	PaletteActor *paletteActor = static_cast<PaletteActor *>(_vm->getActorByIdAndType(paletteId, kActorTypePalette));
+	PaletteActor *paletteActor = static_cast<PaletteActor *>(_vm->getImtGod()->getActorByIdAndType(paletteId, kActorTypePalette));
 	Graphics::Palette *palette = paletteActor->_palette;
 	_setPalette(*palette, startIndex, colorCount);
 }
 
 void VideoDisplayManager::_setPercentToPaletteObject(double percent, uint paletteId, uint startIndex, uint colorCount) {
-	PaletteActor *paletteActor = static_cast<PaletteActor *>(_vm->getActorByIdAndType(paletteId, kActorTypePalette));
+	PaletteActor *paletteActor = static_cast<PaletteActor *>(_vm->getImtGod()->getActorByIdAndType(paletteId, kActorTypePalette));
 	Graphics::Palette *palette = paletteActor->_palette;
 	_setToPercentPalette(percent, *_registeredPalette, *palette, startIndex, colorCount);
 }

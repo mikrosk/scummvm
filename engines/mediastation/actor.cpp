@@ -452,7 +452,7 @@ void SpatialEntity::readParameter(Chunk &chunk, ActorHeaderSectionType paramType
 void SpatialEntity::loadIsComplete() {
 	Actor::loadIsComplete();
 	if (_stageId != 0) {
-		StageActor *pendingParentStage = static_cast<StageActor *>(g_engine->getActorByIdAndType(_stageId, kActorTypeStage));
+		StageActor *pendingParentStage = static_cast<StageActor *>(g_engine->getImtGod()->getActorByIdAndType(_stageId, kActorTypeStage));
 		pendingParentStage->addChildSpatialEntity(this);
 	}
 }

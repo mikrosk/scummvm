@@ -37,7 +37,7 @@ void TextActor::readParameter(Chunk &chunk, ActorHeaderSectionType paramType) {
 
 	case kActorHeaderFontActorId: {
 		uint fontActorId = chunk.readTypedUint16();
-		_fontActor = static_cast<FontActor *>(g_engine->getActorByIdAndType(fontActorId, kActorTypeFont));
+		_fontActor = static_cast<FontActor *>(g_engine->getImtGod()->getActorByIdAndType(fontActorId, kActorTypeFont));
 		break;
 	}
 
@@ -137,7 +137,7 @@ ScriptValue TextActor::callMethod(BuiltInMethod methodId, Common::Array<ScriptVa
 	case kTextSetFontActorMethod: {
 		ARGCOUNTCHECK(1);
 		uint fontActorId = args[0].asActorId();
-		_fontActor = static_cast<FontActor *>(g_engine->getActorByIdAndType(fontActorId, kActorTypeFont));
+		_fontActor = static_cast<FontActor *>(g_engine->getImtGod()->getActorByIdAndType(fontActorId, kActorTypeFont));
 		invalidateLocalBounds();
 		break;
 	}

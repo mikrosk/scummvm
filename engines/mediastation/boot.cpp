@@ -155,7 +155,7 @@ CursorDeclaration::CursorDeclaration(Chunk &chunk) {
 #pragma endregion
 
 #pragma region Boot
-void MediaStationEngine::readDocumentDef(Chunk &chunk) {
+void ImtGod::readDocumentDef(Chunk &chunk) {
 	BootSectionType sectionType = kBootLastSection;
 	while (true) {
 		sectionType = static_cast<BootSectionType>(chunk.readTypedUint16());
@@ -166,7 +166,7 @@ void MediaStationEngine::readDocumentDef(Chunk &chunk) {
 	}
 }
 
-void MediaStationEngine::readDocumentInfoFromStream(Chunk &chunk, BootSectionType sectionType) {
+void ImtGod::readDocumentInfoFromStream(Chunk &chunk, BootSectionType sectionType) {
 	switch (sectionType) {
 	case kBootVersionInformation:
 		readVersionInfoFromStream(chunk);
@@ -221,14 +221,14 @@ void MediaStationEngine::readDocumentInfoFromStream(Chunk &chunk, BootSectionTyp
 	}
 }
 
-void MediaStationEngine::readVersionInfoFromStream(Chunk &chunk) {
+void ImtGod::readVersionInfoFromStream(Chunk &chunk) {
 	_gameTitle = chunk.readTypedString();
 	_versionInfo = chunk.readTypedVersion();
 	_engineInfo = chunk.readTypedString();
 	_sourceString = chunk.readTypedString();
 }
 
-void MediaStationEngine::readContextReferencesFromStream(Chunk &chunk) {
+void ImtGod::readContextReferencesFromStream(Chunk &chunk) {
 	uint flag = chunk.readTypedUint16();
 	while (flag != 0) {
 		ContextReference contextReference(chunk);
@@ -237,7 +237,7 @@ void MediaStationEngine::readContextReferencesFromStream(Chunk &chunk) {
 	}
 }
 
-void MediaStationEngine::readScreenReferencesFromStream(Chunk &chunk) {
+void ImtGod::readScreenReferencesFromStream(Chunk &chunk) {
 	uint flag = chunk.readTypedUint16();
 	while (flag != 0) {
 		ScreenReference screenDeclaration(chunk);
@@ -246,7 +246,7 @@ void MediaStationEngine::readScreenReferencesFromStream(Chunk &chunk) {
 	}
 }
 
-void MediaStationEngine::readAndAddFileMaps(Chunk &chunk) {
+void ImtGod::readAndAddFileMaps(Chunk &chunk) {
 	uint flag = chunk.readTypedUint16();
 	while (flag != 0) {
 		FileInfo fileDeclaration(chunk);
@@ -255,7 +255,7 @@ void MediaStationEngine::readAndAddFileMaps(Chunk &chunk) {
 	}
 }
 
-void MediaStationEngine::readAndAddStreamMaps(Chunk &chunk) {
+void ImtGod::readAndAddStreamMaps(Chunk &chunk) {
 	uint flag = chunk.readTypedUint16();
 	while (flag != 0) {
 		StreamInfo subfileDeclaration(chunk);

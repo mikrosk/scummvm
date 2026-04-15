@@ -28,8 +28,8 @@ namespace MediaStation {
 
 class ParameterClient {
 public:
-	ParameterClient() {};
-	virtual ~ParameterClient() {};
+	ParameterClient();
+	virtual ~ParameterClient();
 
 	virtual bool attemptToReadFromStream(Chunk &chunk, uint sectionType) = 0;
 };
@@ -39,7 +39,7 @@ enum DeviceOwnerSectionType {
 	kDeviceOwnerAllowMultipleStreams = 0x36,
 };
 
-class DeviceOwner : public ParameterClient {
+class ImtDeviceOwner : public ParameterClient {
 public:
 	virtual bool attemptToReadFromStream(Chunk &chunk, uint sectionType) override;
 

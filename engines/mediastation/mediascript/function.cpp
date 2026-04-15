@@ -79,6 +79,7 @@ ScriptValue ScriptFunction::execute(Common::Array<ScriptValue> &args) {
 	return returnValue;
 }
 
+
 FunctionManager::~FunctionManager() {
 	for (auto it = _functions.begin(); it != _functions.end(); ++it) {
 		delete it->_value;

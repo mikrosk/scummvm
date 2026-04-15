@@ -52,7 +52,7 @@ Context::~Context() {
 	_variables.clear();
 }
 
-void MediaStationEngine::readControlCommands(Chunk &chunk) {
+void ImtGod::readControlCommands(Chunk &chunk) {
 	ContextSectionType sectionType = kContextEndOfSection;
 	do {
 		sectionType = static_cast<ContextSectionType>(chunk.readTypedUint16());
@@ -63,7 +63,7 @@ void MediaStationEngine::readControlCommands(Chunk &chunk) {
 	} while (sectionType != kContextEndOfSection);
 }
 
-void MediaStationEngine::readCreateContextData(Chunk &chunk) {
+void ImtGod::readCreateContextData(Chunk &chunk) {
 	uint contextId = chunk.readTypedUint16();
 	debugC(5, kDebugLoading, "%s: Context %d", __func__, contextId);
 	Context *context = _loadedContexts.getValOrDefault(contextId);
@@ -74,26 +74,26 @@ void MediaStationEngine::readCreateContextData(Chunk &chunk) {
 	}
 }
 
-void MediaStationEngine::readDestroyContextData(Chunk &chunk) {
+void ImtGod::readDestroyContextData(Chunk &chunk) {
 	uint contextId = chunk.readTypedUint16();
 	debugC(5, kDebugLoading, "%s: Context %d", __func__, contextId);
 	destroyContext(contextId);
 }
 
-void MediaStationEngine::readDestroyActorData(Chunk &chunk) {
+void ImtGod::readDestroyActorData(Chunk &chunk) {
 	uint actorId = chunk.readTypedUint16();
 	debugC(5, kDebugLoading, "[%s] %s", g_engine->formatActorName(actorId).c_str(), __func__);
 	destroyActor(actorId);
 }
 
-void MediaStationEngine::readActorLoadComplete(Chunk &chunk) {
+void ImtGod::readActorLoadComplete(Chunk &chunk) {
 	uint actorId = chunk.readTypedUint16();
-	Actor *actor = g_engine->getActorById(actorId);
+	Actor *actor = g_engine->getImtGod()->getActorById(actorId);
 	debugC(5, kDebugLoading, "[%s] %s", actor->debugName(), __func__);
 	actor->loadIsComplete();
 }
 
-void MediaStationEngine::readCreateActorData(Chunk &chunk) {
+void ImtGod::readCreateActorData(Chunk &chunk) {
 	uint contextId = chunk.readTypedUint16();
 	ActorType type = static_cast<ActorType>(chunk.readTypedUint16());
 	uint id = chunk.readTypedUint16();
@@ -171,13 +171,13 @@ void MediaStationEngine::readCreateActorData(Chunk &chunk) {
 	actor->setId(id);
 	actor->setContextId(contextId);
 	actor->initFromParameterStream(chunk);
-	g_engine->registerActor(actor);
+	g_engine->getImtGod()->addConstructedActor(actor);
 }
 
-void MediaStationEngine::readCreateVariableData(Chunk &chunk) {
+void ImtGod::readCreateVariableData(Chunk &chunk) {
 	uint contextId = chunk.readTypedUint16();
 	uint id = chunk.readTypedUint16();
-	if (g_engine->getVariable(id) != nullptr) {
+	if (g_engine->getImtGod()->getVariable(id) != nullptr) {
 		error("[%s] %s: Global variable already exists", g_engine->formatVariableName(id).c_str(), __func__);
 	}
 
@@ -191,10 +191,10 @@ void MediaStationEngine::readCreateVariableData(Chunk &chunk) {
 	debugC(5, kDebugLoading, "[%s] %s", g_engine->formatVariableName(id).c_str(), __func__);
 }
 
-void MediaStationEngine::readHeaderSections(Subfile &subfile, Chunk &chunk) {
+void ImtGod::readHeaderSections(Subfile &subfile, Chunk &chunk) {
 	do {
 		debugC(5, kDebugLoading, "[%s] %s", g_engine->formatAssetNameForChannelIdent(chunk._id).c_str(), __func__);
-		ChannelClient *actor = g_engine->getChannelClientByChannelIdent(chunk._id);
+		ChannelClient *actor = g_engine->getImtGod()->getChannelClientByChannelIdent(chunk._id);
 		if (actor == nullptr) {
 			error("%s: Client %s does not exist or has not been read yet in this title",
 				__func__, g_engine->formatAssetNameForChannelIdent(chunk._id).c_str());
@@ -213,7 +213,7 @@ void MediaStationEngine::readHeaderSections(Subfile &subfile, Chunk &chunk) {
 	} while (!subfile.atEnd());
 }
 
-void MediaStationEngine::readSetContextName(Chunk &chunk) {
+void ImtGod::readSetContextName(Chunk &chunk) {
 	uint contextId = chunk.readTypedUint16();
 	debugC(5, kDebugLoading, "%s: Context %d", __func__, contextId);
 	Context *context = _loadedContexts.getValOrDefault(contextId);
@@ -223,7 +223,7 @@ void MediaStationEngine::readSetContextName(Chunk &chunk) {
 	context->_name = chunk.readTypedString();
 }
 
-void MediaStationEngine::readCommandFromStream(Chunk &chunk, ContextSectionType sectionType) {
+void ImtGod::readCommandFromStream(Chunk &chunk, ContextSectionType sectionType) {
 	switch (sectionType) {
 	case kContextCreateData:
 		readCreateContextData(chunk);

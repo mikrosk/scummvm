@@ -26,8 +26,15 @@
 #include "mediastation/mediastation.h"
 
 namespace MediaStation {
+ParameterClient::ParameterClient() {
+	g_engine->getImtGod()->registerParameterClient(this);
+}
 
-bool DeviceOwner::attemptToReadFromStream(Chunk &chunk, uint sectionType) {
+ParameterClient::~ParameterClient() {
+	g_engine->getImtGod()->unregisterParameterClient(this);
+}
+
+bool ImtDeviceOwner::attemptToReadFromStream(Chunk &chunk, uint sectionType) {
 	bool handledParam = true;
 	switch (sectionType) {
 	case kDeviceOwnerAllowMultipleSounds:
@@ -44,6 +51,7 @@ bool DeviceOwner::attemptToReadFromStream(Chunk &chunk, uint sectionType) {
 
 	return handledParam;
 }
+
 
 bool Document::attemptToReadFromStream(Chunk &chunk, uint sectionType) {
 	bool handledParam = true;
@@ -109,10 +117,10 @@ void Document::beginTitle(uint overriddenEntryPointScreenId) {
 
 void Document::startContextLoad(uint contextId) {
 	debugC(5, kDebugLoading, "%s: Loading context %d", __func__, contextId);
-	Context *existingContext = g_engine->_loadedContexts.getValOrDefault(contextId);
+	Context *existingContext = g_engine->getImtGod()->getContextById(contextId);
 	if (existingContext == nullptr) {
 		if (_loadingContextId == 0) {
-			const ContextReference &contextRef = g_engine->contextRefWithId(contextId);
+			const ContextReference &contextRef = g_engine->getImtGod()->contextRefWithId(contextId);
 			if (contextRef._contextId != 0) {
 				_loadingContextId = contextId;
 				startFeed(contextRef._streamId);
@@ -122,7 +130,7 @@ void Document::startContextLoad(uint contextId) {
 		}
 	} else {
 		if (_currentScreenActorId != 0 && contextId != _loadingContextId) {
-			Actor *currentScreen = g_engine->getActorById(_currentScreenActorId);
+			Actor *currentScreen = g_engine->getImtGod()->getActorById(_currentScreenActorId);
 			ScriptValue arg;
 			arg.setToActorId(contextId);
 			currentScreen->runScriptResponseIfExists(kContextLoadCompleteEvent2, arg);
@@ -180,7 +188,7 @@ void Document::scheduleScreenBranch(uint screenActorId) {
 }
 
 void Document::scheduleContextRelease(uint contextId) {
-	if (!g_engine->contextIsLocked(contextId)) {
+	if (!g_engine->getImtGod()->contextIsLocked(contextId)) {
 		_requestedContextReleaseId.push_back(contextId);
 	}
 }
@@ -211,7 +219,7 @@ void Document::contextLoadDidComplete() {
 	if (_currentScreenActorId != 0) {
 		ScriptValue arg;
 		arg.setToActorId(_loadingContextId);
-		Actor *currentScreen = g_engine->getActorById(_currentScreenActorId);
+		Actor *currentScreen = g_engine->getImtGod()->getActorById(_currentScreenActorId);
 		if (currentScreen != nullptr) {
 			currentScreen->runScriptResponseIfExists(kContextLoadCompleteEvent, arg);
 		}
@@ -221,7 +229,7 @@ void Document::contextLoadDidComplete() {
 
 void Document::screenLoadDidComplete() {
 	_currentScreenActorId = _loadingScreenActorId;
-	Actor *currentScreen = g_engine->getActorById(_loadingScreenActorId);
+	Actor *currentScreen = g_engine->getImtGod()->getActorById(_loadingScreenActorId);
 	currentScreen->runScriptResponseIfExists(kScreenEntryEvent);
 	_loadingScreenActorId = 0;
 }
@@ -229,7 +237,7 @@ void Document::screenLoadDidComplete() {
 void Document::process() {
 	if (!_requestedContextReleaseId.empty()) {
 		for (uint contextId : _requestedContextReleaseId) {
-			g_engine->destroyContext(contextId);
+			g_engine->getImtGod()->destroyContext(contextId);
 		}
 		_requestedContextReleaseId.clear();
 	}
@@ -243,15 +251,15 @@ void Document::blowAwayCurrentScreen() {
 	if (_currentScreenActorId != 0) {
 		uint contextId = contextIdForScreenActorId(_currentScreenActorId);
 		if (contextId != 0) {
-			Actor *currentScreen = g_engine->getActorById(_currentScreenActorId);
+			Actor *currentScreen = g_engine->getImtGod()->getActorById(_currentScreenActorId);
 			currentScreen->runScriptResponseIfExists(kScreenExitEvent);
-			g_engine->destroyContext(contextId);
+			g_engine->getImtGod()->destroyContext(contextId);
 		}
 	}
 }
 
 uint Document::contextIdForScreenActorId(uint screenActorId) {
-	ScreenReference screenRef = g_engine->screenRefWithId(screenActorId);
+	ScreenReference screenRef = g_engine->getImtGod()->screenRefWithId(screenActorId);
 	return screenRef._contextId;
 }
 
@@ -269,10 +277,10 @@ void Document::stopFeed() {
 }
 
 void Document::preloadParentContexts(uint contextId) {
-	ContextReference contextReference = g_engine->contextRefWithId(contextId);
+	ContextReference contextReference = g_engine->getImtGod()->contextRefWithId(contextId);
 	for (uint parentContextId : contextReference._parentContextIds) {
 		if (parentContextId != 0) {
-			Context *existingContext = g_engine->_loadedContexts.getValOrDefault(parentContextId);
+			Context *existingContext = g_engine->getImtGod()->getContextById(parentContextId);
 			if (existingContext == nullptr && parentContextId != contextId) {
 				debugC(5, kDebugLoading, "%s: Loading parent context %d", __func__, parentContextId);
 				addToContextLoadQueue(parentContextId);

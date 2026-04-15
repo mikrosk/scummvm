@@ -45,7 +45,7 @@ void StageActor::readParameter(Chunk &chunk, ActorHeaderSectionType paramType) {
 		// In stages, this basically has the oppose meaning it has outside of stages. Here,
 		// it specifies an actor that is a parent of this stage.
 		uint parentActorId = chunk.readTypedUint16();
-		_pendingParent = static_cast<SpatialEntity *>(g_engine->getActorByIdAndType(parentActorId, kActorTypeStage));
+		_pendingParent = static_cast<SpatialEntity *>(g_engine->getImtGod()->getActorByIdAndType(parentActorId, kActorTypeStage));
 		break;
 	}
 
@@ -364,7 +364,7 @@ void StageActor::loadIsComplete() {
 
 void StageActor::addActorToStage(uint actorId) {
 	// If actor has a current parent, remove it from that parent first.
-	SpatialEntity *spatialEntity = g_engine->getSpatialEntityById(actorId);
+	SpatialEntity *spatialEntity = g_engine->getImtGod()->getSpatialEntityById(actorId);
 	StageActor *currentParent = spatialEntity->getParentStage();
 	if (currentParent != nullptr) {
 		currentParent->removeChildSpatialEntity(spatialEntity);
@@ -373,7 +373,7 @@ void StageActor::addActorToStage(uint actorId) {
 }
 
 void StageActor::removeActorFromStage(uint actorId) {
-	SpatialEntity *spatialEntity = g_engine->getSpatialEntityById(actorId);
+	SpatialEntity *spatialEntity = g_engine->getImtGod()->getSpatialEntityById(actorId);
 	StageActor *currentParent = spatialEntity->getParentStage();
 	if (currentParent == this) {
 		// Remove the actor from this stage, and add it back to the root stage.
@@ -790,11 +790,11 @@ StageDirector::StageDirector() {
 	_rootStage = new RootStage;
 	Common::Rect rootStageBounds(MediaStationEngine::SCREEN_WIDTH, MediaStationEngine::SCREEN_HEIGHT);
 	_rootStage->setBounds(rootStageBounds);
-	g_engine->registerActor(_rootStage);
+	g_engine->getImtGod()->addConstructedActor(_rootStage);
 }
 
 StageDirector::~StageDirector() {
-	g_engine->destroyActor(RootStage::ROOT_STAGE_ACTOR_ID);
+	g_engine->getImtGod()->destroyActor(RootStage::ROOT_STAGE_ACTOR_ID);
 	_rootStage = nullptr;
 }
 

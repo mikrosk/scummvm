@@ -71,7 +71,7 @@ void CameraActor::readParameter(Chunk &chunk, ActorHeaderSectionType paramType) 
 
 	case kActorHeaderCameraImageActor: {
 		uint actorReference = chunk.readTypedUint16();
-		CameraActor *referencedCamera = static_cast<CameraActor *>(g_engine->getActorByIdAndType(actorReference, kActorTypeCamera));
+		CameraActor *referencedCamera = static_cast<CameraActor *>(g_engine->getImtGod()->getActorByIdAndType(actorReference, kActorTypeCamera));
 		_overlayImage = referencedCamera->_overlayImage;
 		break;
 	}

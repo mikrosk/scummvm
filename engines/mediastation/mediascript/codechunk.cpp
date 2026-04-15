@@ -320,7 +320,7 @@ ScriptValue *CodeChunk::readAndReturnVariable() {
 	ScriptValue *variable = nullptr;
 	switch (scope) {
 	case kVariableScopeGlobal: {
-		variable = g_engine->getVariable(id);
+		variable = g_engine->getImtGod()->getVariable(id);
 		if (variable == nullptr) {
 			error("%s: Global variable %s doesn't exist", __func__, g_engine->formatVariableName(id).c_str());
 		}
@@ -599,7 +599,7 @@ ScriptValue CodeChunk::evaluateMethodCall(BuiltInMethod method, uint paramCount)
 		} else {
 			// This is a regular actor that we can process directly.
 			uint actorId = methodCallTargetPtr->asActorId();
-			Actor *targetActor = g_engine->getActorById(actorId);
+			Actor *targetActor = g_engine->getImtGod()->getActorById(actorId);
 			if (targetActor == nullptr) {
 				warning("[%s] %s: Actor not loaded", g_engine->formatActorName(actorId).c_str(), __func__);
 			} else {

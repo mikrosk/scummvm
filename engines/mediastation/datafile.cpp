@@ -210,12 +210,12 @@ bool Subfile::atEnd() {
 }
 
 void CdRomStream::openStream(uint streamId) {
-	const StreamInfo &streamInfo = g_engine->streamInfoForIdent(streamId);
+	const StreamInfo &streamInfo = g_engine->getImtGod()->streamInfoForIdent(streamId);
 	if (streamInfo._fileId == 0) {
 		error("%s: Stream %d not found in current title", __func__, streamId);
 	}
 
-	const FileInfo &fileInfo = g_engine->fileInfoForIdent(streamInfo._fileId);
+	const FileInfo &fileInfo = g_engine->getImtGod()->fileInfoForIdent(streamInfo._fileId);
 	if (fileInfo._id == 0) {
 		error("%s: File %s for stream %d not found in current title", __func__, g_engine->formatFileName(streamInfo._fileId).c_str(), streamId);
 	}
@@ -283,7 +283,7 @@ void ImtStreamFeed::readData() {
 	Subfile subfile = _stream->getNextSubfile();
 	Chunk chunk = subfile.nextChunk();
 	g_engine->getDocument()->streamWillRead(_id);
-	g_engine->readHeaderSections(subfile, chunk);
+	g_engine->getImtGod()->readHeaderSections(subfile, chunk);
 	g_engine->getDocument()->streamDidFinish(_id);
 }
 

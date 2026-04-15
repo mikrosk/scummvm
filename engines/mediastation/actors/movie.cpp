@@ -55,7 +55,7 @@ bool StreamMovieProxy::isVisible() const {
 }
 
 MovieFrame::MovieFrame(Chunk &chunk) {
-	if (g_engine->isFirstGenerationEngine()) {
+	if (g_engine->getImtGod()->isFirstGenerationEngine()) {
 		blitType = static_cast<MovieBlitType>(chunk.readTypedUint16());
 		startInMilliseconds = chunk.readTypedUint32();
 		endInMilliseconds = chunk.readTypedUint32();
@@ -291,7 +291,7 @@ ScriptValue StreamMovieActor::callMethod(BuiltInMethod methodId, Common::Array<S
 				debugName(), __func__, g_engine->formatParamTokenName(scriptId).c_str());
 			break;
 		}
-		StageActor *parentStage = static_cast<StageActor *>(g_engine->getActorByIdAndType(targetStageId, kActorTypeStage));
+		StageActor *parentStage = static_cast<StageActor *>(g_engine->getImtGod()->getActorByIdAndType(targetStageId, kActorTypeStage));
 		if (parentStage == nullptr) {
 			warning("[%s] %s: Stream movie proxy with script ID %s has null parent stage",
 				debugName(), __func__, g_engine->formatParamTokenName(scriptId).c_str());
@@ -315,7 +315,7 @@ ScriptValue StreamMovieActor::callMethod(BuiltInMethod methodId, Common::Array<S
 		}
 
 		RootStage *rootStage = g_engine->getRootStage();
-		StageActor *sourceStage = static_cast<StageActor *>(g_engine->getActorByIdAndType(sourceStageId, kActorTypeStage));
+		StageActor *sourceStage = static_cast<StageActor *>(g_engine->getImtGod()->getActorByIdAndType(sourceStageId, kActorTypeStage));
 		if (sourceStage == nullptr) {
 			warning("[%s] %s: Stream movie proxy with script ID %s has null parent stage",
 				debugName(), __func__, g_engine->formatParamTokenName(scriptId).c_str());
