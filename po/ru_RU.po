@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.8.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-14 22:09+0000\n"
-"PO-Revision-Date: 2026-03-28 17:49+0000\n"
+"PO-Revision-Date: 2026-04-15 22:03+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Russian <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/ru/>\n"
@@ -26,10 +26,9 @@ msgstr "Звук Apple Macintosh"
 
 #. I18N: built with <compiler>
 #: gui/about.cpp:119
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#, c-format
 msgid "(built with %s)"
-msgstr "(собрано %s c %s)"
+msgstr "(собрано c %s)"
 
 #. I18N: built on <build date> with <compiler>
 #: gui/about.cpp:122
@@ -3744,13 +3743,7 @@ msgid "Skip autosave"
 msgstr "Пропустить автосохранение"
 
 #: engines/engine.cpp:644
-#, fuzzy, c-format
-#| msgid ""
-#| "WARNING: The autosave slot contains a saved game named %S, and an "
-#| "autosave is pending.\n"
-#| "Please move this saved game to a new slot, or delete it if it's no longer "
-#| "needed.\n"
-#| "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
+#, c-format
 msgid ""
 "WARNING: The autosave slot contains a saved game named %s, and an autosave "
 "is pending.\n"
@@ -3758,7 +3751,7 @@ msgid ""
 "needed.\n"
 "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
 msgstr ""
-"ПРЕДУПРЕЖДЕНИЕ: В слоте для автосохранений находится сохранение %S, и "
+"ПРЕДУПРЕЖДЕНИЕ: В слоте для автосохранений находится сохранение %s, и "
 "поступил запрос на автосохранение.\n"
 "Вы можете либо перенести существующее сохранение в новый слот, либо удалить "
 "его, если оно не нужно.\n"
@@ -7749,16 +7742,16 @@ msgid "Quit game"
 msgstr "Выйти из игры"
 
 #: engines/bolt/metaengine.cpp:34
-#, fuzzy
-#| msgid "Enable high resolution"
 msgid "Extended game resolution"
-msgstr "Включить отображение высокого разрешения"
+msgstr "Расширенное разрешение игры"
 
 #: engines/bolt/metaengine.cpp:35
 msgid ""
 "This option allows the game to play at a slightly extended resolution. This "
 "is what the Mac and CDi versions are supposed to play like."
 msgstr ""
+"Эта опция позволяет запускать игру в немного расширенном разрешении. Именно "
+"так должны работать версии для Mac и CDi."
 
 #: engines/buried/buried.cpp:598
 msgid "Are you sure you want to quit?"
@@ -8179,28 +8172,20 @@ msgid "Rotate right"
 msgstr "Вращение вправо"
 
 #: engines/colony/metaengine.cpp:147
-#, fuzzy
-#| msgid "Look down"
 msgid "Look behind"
-msgstr "Смотреть вниз"
+msgstr "Смотреть назад"
 
 #: engines/colony/metaengine.cpp:152
-#, fuzzy
-#| msgid "Toggle mute"
 msgid "Toggle mouselook"
-msgstr "Вкл/выкл звук"
+msgstr "Переключить обзор мышью"
 
 #: engines/colony/metaengine.cpp:158
-#, fuzzy
-#| msgid "Toggle sound"
 msgid "Toggle dashboard"
-msgstr "Переключить звук"
+msgstr "Переключить панель управления"
 
 #: engines/colony/metaengine.cpp:163
-#, fuzzy
-#| msgid "Toggle frame by frame"
 msgid "Toggle wireframe"
-msgstr "Переключить кадр за кадром"
+msgstr "Переключить режим каркаса"
 
 #: engines/colony/metaengine.cpp:173 engines/hypno/metaengine.cpp:146
 #: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
@@ -8445,21 +8430,16 @@ msgid "Brighten the graphics to simulate a Macintosh monitor"
 msgstr "Увеличить яркость картинки для симуляции монитора Macinotsh"
 
 #: engines/director/metaengine.cpp:81
-#, fuzzy
-#| msgid "Force true color"
 msgid "Force true color (32bpp) mode"
-msgstr "Принудительно истинный цвет"
+msgstr "Принудительно 32-битный цвет"
 
 #: engines/director/metaengine.cpp:82
-#, fuzzy
-#| msgid ""
-#| "Use true color graphics mode, even if the game is not designed for it"
 msgid ""
 "Use true color graphics mode (32 bits per pixel), even if the game is not "
 "designed for it"
 msgstr ""
-"Использовать режим полной цветопередачи, даже если игра его не "
-"предусматривала"
+"Использовать режим полной цветопередачи (32 бита на пиксель), даже если игра "
+"его не предусматривет"
 
 #: engines/dm/metaengine.cpp:125
 msgid "Dialog choice selection keymappings"
@@ -9260,10 +9240,8 @@ msgid "green"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:143
-#, fuzzy
-#| msgid "Proceed"
 msgid "red"
-msgstr "Продолжить"
+msgstr "красный"
 
 #: engines/glk/dialogs.cpp:144
 msgid "blue"
@@ -9310,16 +9288,12 @@ msgid "Proportional Bold Italic"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:210
-#, fuzzy
-#| msgid "SoundFont:"
 msgid "Font"
-msgstr "SoundFont:"
+msgstr "Шрифт"
 
 #: engines/glk/dialogs.cpp:212 engines/glk/dialogs.cpp:222
-#, fuzzy
-#| msgid "ProText"
 msgid "Text:"
-msgstr "ПроТекст"
+msgstr "Текст:"
 
 #: engines/glk/dialogs.cpp:212
 msgid "Font for the text"
@@ -9338,10 +9312,8 @@ msgid "Color"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:222
-#, fuzzy
-#| msgid "Move focus to interactive object"
 msgid "Color of the interactive text"
-msgstr "Переместить фокус на следующий объект"
+msgstr "Цвет интерактивного текста"
 
 #: engines/glk/dialogs.cpp:225 engines/glk/dialogs.cpp:230
 #: engines/glk/dialogs.cpp:236 engines/glk/dialogs.cpp:242
@@ -9355,71 +9327,51 @@ msgid "Color for drawn graphics such as maps, diagrams, puzzles, etc"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:232
-#, fuzzy
-#| msgid "Window"
 msgid "Window:"
-msgstr "Окно"
+msgstr "Окно:"
 
 #: engines/glk/dialogs.cpp:232
-#, fuzzy
-#| msgid "Toggle windows mode"
 msgid "Color of the window (background)"
-msgstr "Переключить оконный режим"
+msgstr "Цвет окна (фона)"
 
 #: engines/glk/dialogs.cpp:238
-#, fuzzy
-#| msgid "New order"
 msgid "Border:"
-msgstr "Новый приказ"
+msgstr "Рамка:"
 
 #: engines/glk/dialogs.cpp:238
-#, fuzzy
-#| msgid "Toggle windows mode"
 msgid "Color of the window border"
-msgstr "Переключить оконный режим"
+msgstr "Цвет рамки окна"
 
 #. I18N: This is a section for text windows border settings
 #: engines/glk/dialogs.cpp:245
-#, fuzzy
-#| msgid "New order"
 msgid "Border"
-msgstr "Новый приказ"
+msgstr "Рамка"
 
 #: engines/glk/dialogs.cpp:247 engines/glk/dialogs.cpp:341
 #: engines/glk/dialogs.cpp:345 engines/glk/dialogs.cpp:349
-#, fuzzy
-#| msgid "Horizontal underscan:"
 msgid "Horizontal:"
-msgstr "Горизонтальный underscan:"
+msgstr "Горизонтальная:"
 
 #: engines/glk/dialogs.cpp:247
-#, fuzzy
-#| msgid "Horizontal underscan:"
 msgid "Horizontal border size"
-msgstr "Горизонтальный underscan:"
+msgstr "Размер рамки по-горизонтали"
 
 #: engines/glk/dialogs.cpp:248 engines/glk/dialogs.cpp:342
 #: engines/glk/dialogs.cpp:346 engines/glk/dialogs.cpp:350
-#, fuzzy
-#| msgid "Vertical underscan:"
 msgid "Vertical:"
-msgstr "Вертикальный underscan:"
+msgstr "Вертикальная:"
 
 #: engines/glk/dialogs.cpp:248
-#, fuzzy
-#| msgid "Vertical underscan:"
 msgid "Vertical border size"
-msgstr "Вертикальный underscan:"
+msgstr "Размер рамки по-вертикали"
 
 #: engines/glk/dialogs.cpp:250
 msgid "Caret:"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:250
-#, fuzzy
-#| msgid "Teleport to cursor"
 msgid "Color of the cursor"
-msgstr "Телепортироваться к курсору"
+msgstr "Цвета курсора"
 
 #: engines/glk/dialogs.cpp:256
 msgid "Link:"
@@ -9439,10 +9391,8 @@ msgid "Color for the \"More...\" markers in the text"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:272
-#, fuzzy
-#| msgid "Graphics mode:"
 msgid "Typography"
-msgstr "Граф. режим:"
+msgstr "Типографика"
 
 #: engines/glk/dialogs.cpp:274
 msgid "Link style:"
@@ -9453,22 +9403,16 @@ msgid "Style for URLs if they appear in-game"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Change shadow type"
 msgid "Caret shape:"
-msgstr "Изменить тип тени"
+msgstr "Форма каретки:"
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Show mouse cursor"
 msgid "Shape of the cursor"
-msgstr "Показывать курсор мыши"
+msgstr "Форма курсора"
 
 #: engines/glk/dialogs.cpp:286
-#, fuzzy
-#| msgid "Quit prompt"
 msgid "More prompt:"
-msgstr "Подтверждение выхода из игры"
+msgstr "Приглашение «Ещё»:"
 
 #: engines/glk/dialogs.cpp:286
 msgid ""
@@ -9477,20 +9421,16 @@ msgid ""
 msgstr ""
 
 #: engines/glk/dialogs.cpp:288
-#, fuzzy
-#| msgid "Hide hints"
 msgid "Style hints:"
-msgstr "Скрыть подсказки"
+msgstr "Стиль автоматом:"
 
 #: engines/glk/dialogs.cpp:288
 msgid "Let the game suggest text styling options"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:289
-#, fuzzy
-#| msgid "Left click"
 msgid "Safe clicks:"
-msgstr "Левый щелчок"
+msgstr "Безопасные щелчки:"
 
 #: engines/glk/dialogs.cpp:289
 msgid "Safely apply clicks while input is pending"
@@ -9498,10 +9438,8 @@ msgstr ""
 
 #. I18N: This is setting for number of text columns
 #: engines/glk/dialogs.cpp:292
-#, fuzzy
-#| msgid "Volume controls"
 msgid "Column count:"
-msgstr "Управление громкостью"
+msgstr "Количество колонок:"
 
 #: engines/glk/dialogs.cpp:292
 msgid "Number of columns"
@@ -9525,10 +9463,8 @@ msgid "Check it to manually change the column count"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:297
-#, fuzzy
-#| msgid "Block low"
 msgid "Lock rows:"
-msgstr "Защита снизу"
+msgstr "Заблокированных строк:"
 
 #: engines/glk/dialogs.cpp:297
 msgid "Check it to manually change the row count"
@@ -9540,23 +9476,17 @@ msgid "Justify:"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:302
-#, fuzzy
-#| msgid "Enable short transitions"
 msgid "Enable text justification"
-msgstr "Включить короткие переходы"
+msgstr "Включить выравнивание текста"
 
 #. I18N: These is setting for type of text quote symbols
 #: engines/glk/dialogs.cpp:305
-#, fuzzy
-#| msgid "Graphics mode:"
 msgid "Typographic quotes:"
-msgstr "Граф. режим:"
+msgstr "Типографические кавычки:"
 
 #: engines/glk/dialogs.cpp:306
-#, fuzzy
-#| msgid "Color graphics"
 msgid "Choose typographic quotes"
-msgstr "Цветная графика"
+msgstr "Выберите типографические кавычки"
 
 #: engines/glk/dialogs.cpp:307
 msgctxt "quotes"
@@ -9565,8 +9495,6 @@ msgstr ""
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
 #: engines/glk/dialogs.cpp:309
-#, fuzzy
-#| msgid "Normal"
 msgctxt "quotes"
 msgid "Normal"
 msgstr "Обычные"
@@ -9611,17 +9539,13 @@ msgid "En+Em dashes"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:326
-#, fuzzy
-#| msgid "Preferences"
 msgid "User experience"
-msgstr "Предпочтения"
+msgstr "Пользовательский опыт"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:329
-#, fuzzy
-#| msgid "Space"
 msgid "Spaces:"
-msgstr "Пробел"
+msgstr "Пробелы:"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:331
@@ -9639,20 +9563,16 @@ msgid "Expand single spaces"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:338
-#, fuzzy
-#| msgid "Graphics"
 msgid "Graphics:"
-msgstr "Графика"
+msgstr "Графика:"
 
 #: engines/glk/dialogs.cpp:338
 msgid "Turn graphics on/off"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:340
-#, fuzzy
-#| msgid "Window"
 msgid "Window margin"
-msgstr "Окно"
+msgstr "Поля окна"
 
 #: engines/glk/dialogs.cpp:341
 msgid "Horizontal margin for window"
@@ -9663,10 +9583,8 @@ msgid "Vertical margin for window"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:344
-#, fuzzy
-#| msgid "Window"
 msgid "Window padding"
-msgstr "Окно"
+msgstr "Отступы окна"
 
 #: engines/glk/dialogs.cpp:345
 msgid "Horizontal padding for window"
@@ -9677,10 +9595,8 @@ msgid "Vertical padding for window"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:348
-#, fuzzy
-#| msgid "Next action"
 msgid "Text margin"
-msgstr "Следующее действие"
+msgstr "Поля текста"
 
 #: engines/glk/dialogs.cpp:349
 msgid "Horizontal margin for text"
@@ -9692,9 +9608,8 @@ msgstr ""
 
 #. I18N: This is a setting for leading, which is the vertical distance between text rows
 #: engines/glk/dialogs.cpp:353
-#, fuzzy
 msgid "Leading:"
-msgstr "Загружаю игру..."
+msgstr "Межстрочный интервал:"
 
 #: engines/glk/dialogs.cpp:354
 msgid "Vertical distance between text rows. Valid inputs - 12, 16, 22 etc."
@@ -9744,10 +9659,8 @@ msgid "Alignment of the \"More...\" marker on the window"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:375
-#, fuzzy
-#| msgid "SoundFont:"
 msgid "Font:"
-msgstr "SoundFont:"
+msgstr "Шрифт:"
 
 #: engines/glk/dialogs.cpp:375
 msgid "Font for the \"More...\" marker"
@@ -11059,10 +10972,8 @@ msgstr ""
 "Заменить цветной драгоценный камень полосками очков жизни и очков заклинаний."
 
 #: engines/mm/metaengine.cpp:183
-#, fuzzy
-#| msgid "Might and Magic 1"
 msgid "Might and Magic"
-msgstr "Might and Magic 1"
+msgstr "Might and Magic"
 
 #: engines/mm/mm1/metaengine.cpp:55
 msgid "View party member 1"
@@ -11173,10 +11084,8 @@ msgid "Might and Magic 1 - Minimal Keys"
 msgstr "Might and Magic 1 - Минимальные клавиши"
 
 #: engines/mm/mm1/metaengine.cpp:150
-#, fuzzy
-#| msgid "Might and Magic 1 - Menus"
 msgid "Might and Magic 1 - Main"
-msgstr "Might and Magic 1 - Меню"
+msgstr "Might and Magic 1 - Главная"
 
 #: engines/mm/mm1/metaengine.cpp:151
 msgid "Might and Magic 1 - Party"
@@ -11314,29 +11223,21 @@ msgstr ""
 "перемещаться по игре быстрее."
 
 #: engines/mohawk/dialogs.cpp:364
-#, fuzzy
-#| msgid "Disabled"
 msgctxt "riven-transition"
 msgid "Disabled"
 msgstr "Выключены"
 
 #: engines/mohawk/dialogs.cpp:365
-#, fuzzy
-#| msgid "Fastest"
 msgctxt "riven-transition"
 msgid "Fastest"
-msgstr "Быстрые"
+msgstr "Самые быстрые"
 
 #: engines/mohawk/dialogs.cpp:366
-#, fuzzy
-#| msgid "Normal"
 msgctxt "riven-transition"
 msgid "Normal"
 msgstr "Обычные"
 
 #: engines/mohawk/dialogs.cpp:367
-#, fuzzy
-#| msgid "Best"
 msgctxt "riven-transition"
 msgid "Best"
 msgstr "Лучшие"
