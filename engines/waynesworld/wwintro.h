@@ -78,6 +78,7 @@ protected:
 	void sub2FEFB(int arg_refreshBackgFl, int arg_wBodyIndex, int arg_gBodyIndex, int arg_wHead1Index, int arg_gHead1Index, int arg_TextId);
 	void introPt3_init();
 	void introPt3_clean();
+	bool introPt4_displayCallInTime();
 
 private:
 	void sub3009A(int textId);
@@ -100,7 +101,6 @@ private:
 
 	void introPt4_init();
 	bool introPt4_intro();
-	bool introPt4_displayCallInTime();
 	bool introPt4_caller1();
 	bool introPt4_caller2();
 	bool introPt4_caller3();
@@ -122,6 +122,7 @@ private:
 	bool introPt4();
 	void introPt4_init();
 	bool introPt4_intro();
+	bool introPt4_caller1();
 	void introPt4_cleanup();
 };
 } // End of namespace WaynesWorld

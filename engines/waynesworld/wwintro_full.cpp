@@ -428,35 +428,6 @@ bool WWIntro_full::introPt4_intro() {
 	return true;
 }
 
-bool WWIntro_full::introPt4_displayCallInTime() {
-	WWSurface *pt4Sub3Surface1 = new WWSurface(178, 21);
-	WWSurface *pt4Sub3Surface2 = new WWSurface(178, 21);
-	pt4Sub3Surface2->clear(0);
-	_vm->drawImageToSurface(_oanGxl, "callin.pcx", pt4Sub3Surface1, 0, 0);
-
-	for (int i = 0; i < 5; ++i) {
-		_vm->drawImageToScreen(_oanGxl, "backg1.pcx", 0, 15);
-		_vm->waitMillis(500);
-		if (_vm->_escPressed) {
-			break;
-		}
-		_vm->_screen->drawSurfaceTransparent(pt4Sub3Surface1, 66, 157);
-		_vm->waitMillis(500);
-		if (_vm->_escPressed) {
-			break;
-		}
-	}
-
-	delete pt4Sub3Surface1;
-	delete pt4Sub3Surface2;
-
-	if (_vm->_escPressed) {
-		return false;
-	}
-
-	return true;
-}
-
 bool WWIntro_full::introPt4_caller1() {
 	for (int i = 0; i < 3; ++i) {
 		for (int j = 0; j < 15; ++j) {
@@ -476,6 +447,7 @@ bool WWIntro_full::introPt4_caller1() {
 			}
 		}
 		++_startOagPos;
+
 		for (int j = 0; j < 10; ++j) {
 			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
 			if (_vm->_escPressed) {

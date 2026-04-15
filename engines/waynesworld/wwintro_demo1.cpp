@@ -198,6 +198,10 @@ bool WWIntro_demo1::introPt4() {
 	introPt4_init();
 	if (!introPt4_intro()) {
 		retVal = false;
+	} else if (!introPt4_displayCallInTime()) {
+		retVal = false;
+	} else if (!introPt4_caller1()) {
+		retVal = false;
 	}
 
 	introPt4_cleanup();
@@ -247,6 +251,94 @@ bool WWIntro_demo1::introPt4_intro() {
 
 		++_startOawPos;
 	}
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt4_caller1() {
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 15; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 5; ++j) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+
+		for (int j = 0; j < 5; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+	_vm->playSound("ok.abt", false);
+
+	for (int i = 0; i < 10; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 2; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	_vm->playSound("shya!2.abt", false);
+
+	for (int j = 0; j < 10; ++j) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 3; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int j = 0; j < 15; ++j) {
+		sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+	}
+	++_startOagPos;
+	
+	_vm->playSound("not!.abt", true);
+	
+	for (int i = 0; i < 3; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int i = 0; i < 2; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 15; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->_sound->playSound("hello.abt", true);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
 
 	return true;
 }
