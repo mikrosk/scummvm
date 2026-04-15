@@ -2,6 +2,11 @@ Umfangreichere Informationen über die Änderungen des aktuellen Codes findest D
         https://github.com/scummvm/scummvm/commits/
 
 #### 2026.3.0 (XX.06.2026)
+
+ Neue Spiele:
+   - Unterstützung für Nancy Drew: The Haunted Carousel hinzugefügt.
+   - Unterstützung für Nancy Drew: Danger on Deception Island hinzugefügt.
+
  Allgemein:
    - Klickbare Links in der Benutzeroberfläche werden jetzt durch einen veränderten Cursor hervorgehoben.
    - Die Fenstergröße wird jetzt korrekt wiederhergestellt, wenn in 3D-Engines von Vollbild zurück zum Fenster-Modus gewechselt wird.
