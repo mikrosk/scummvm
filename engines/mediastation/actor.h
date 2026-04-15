@@ -26,6 +26,7 @@
 #include "common/keyboard.h"
 
 #include "mediastation/datafile.h"
+#include "mediastation/events.h"
 #include "mediastation/mediascript/scriptresponse.h"
 #include "mediastation/mediascript/scriptconstants.h"
 #include "mediastation/mediascript/scriptvalue.h"
@@ -201,24 +202,21 @@ private:
 		warning("%s: Expected at least %d arguments, got %d", builtInMethodToStr(methodId), (min), args.size()); \
 	}
 
-class Actor {
+class Actor : public TimerEventReceiver {
 public:
-	Actor(ActorType type) : _type(type) {};
+	Actor(ActorType type) : _type(type), _timer(this) {};
 	virtual ~Actor();
 
-	// Does any needed frame drawing, audio playing, script responses, etc.
-	virtual void process() { return; }
+	virtual void timerEvent(const TimerEvent &event) { return; }
 
 	// Runs built-in bytecode methods.
 	virtual ScriptValue callMethod(BuiltInMethod methodId, Common::Array<ScriptValue> &args);
-
-	virtual bool isSpatialActor() const { return false; }
-
 	virtual void initFromParameterStream(Chunk &chunk);
 	virtual void readParameter(Chunk &chunk, ActorHeaderSectionType paramType);
 	virtual void loadIsComplete();
 
-	void processTimeScriptResponses();
+	virtual void onEvent(const ActorEvent &event);
+	ScriptResponse *findNextTimeScriptResponseAfter(uint32 after) const;
 	void runScriptResponseIfExists(EventType eventType, const ScriptValue &arg);
 	void runScriptResponseIfExists(EventType eventType);
 
@@ -227,6 +225,8 @@ public:
 	uint contextId() const { return _contextId; }
 	void setId(uint id);
 	void setContextId(uint id) { _contextId = id; }
+	virtual bool isSpatialActor() const { return false; }
+
 	const char *debugName() const;
 
 protected:
@@ -236,10 +236,17 @@ protected:
 	uint _contextId = 0;
 	Common::String _debugName;
 
-	uint _startTime = 0;
-	uint _lastProcessedTime = 0;
 	uint _duration = 0;
 	Common::HashMap<uint, Common::Array<ScriptResponse *> > _scriptResponses;
+
+	// The original had these fields duplicated across several actors, but it made more
+	// sense to consolidate it into the main Actor in the reimplementation.
+	TimerEntry _timer;
+	uint _startTime = 0;
+	uint _lastProcessedTime = 0;
+	bool setupNextScriptResponseTimer();
+	void triggerRemainingTimerEvents();
+	void processTimeScriptResponses();
 };
 
 class SpatialEntity : public Actor {
@@ -276,13 +283,13 @@ public:
 		uint16 eventMask,
 		MouseActorState &state) { return kNoFlag; }
 
-	virtual void mouseDownEvent(const Common::Event &event) { return; }
-	virtual void mouseUpEvent(const Common::Event &event) { return; }
-	virtual void mouseEnteredEvent(const Common::Event &event) { return; }
-	virtual void mouseExitedEvent(const Common::Event &event) { return; }
-	virtual void mouseMovedEvent(const Common::Event &event) { return; }
-	virtual void mouseOutOfFocusEvent(const Common::Event &event) { return; }
-	virtual void keyboardEvent(const Common::Event &event) { return; }
+	virtual void mouseDownEvent(const MouseEvent &event) { return; }
+	virtual void mouseUpEvent(const MouseEvent &event) { return; }
+	virtual void mouseEnteredEvent(const MouseEvent &event) { return; }
+	virtual void mouseExitedEvent(const MouseEvent &event) { return; }
+	virtual void mouseMovedEvent(const MouseEvent &event) { return; }
+	virtual void mouseOutOfFocusEvent(const MouseEvent &event) { return; }
+	virtual void keyboardEvent(const KeyboardEvent &event) { return; }
 
 	void setParentStage(StageActor *parentStage) { _parentStage = parentStage; }
 	void setToNoParentStage() { _parentStage = nullptr; }

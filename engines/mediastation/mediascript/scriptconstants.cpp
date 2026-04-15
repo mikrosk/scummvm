@@ -219,6 +219,10 @@ const char *builtInMethodToStr(BuiltInMethod method) {
 		return "TimePlay";
 	case kTimeStopMethod:
 		return "TimeStop";
+	case kTimePauseMethod:
+		return "Pause";
+	case kTimeResumeMethod:
+		return "Resume";
 	case kIsPlayingMethod:
 		return "IsPlaying/SetMultipleStreams";
 	case kSetDissolveFactorMethod:
@@ -265,10 +269,6 @@ const char *builtInMethodToStr(BuiltInMethod method) {
 		return "StartCaching";
 	case kIsCachingMethod:
 		return "IsCaching";
-	case kPauseMethod:
-		return "PauseWhileStarting";
-	case kResumeMethod:
-		return "ResumeStart";
 	case kIsPausedMethod:
 		return "SetMultipleSounds/IsPaused";
 	case kSetMousePositionMethod:
@@ -457,8 +457,16 @@ const char *builtInMethodToStr(BuiltInMethod method) {
 
 const char *eventTypeToStr(EventType type) {
 	switch (type) {
-	case kTimerEvent:
-		return "Timer";
+	case kEventTypeInvalid:
+		return "Invalid";
+	case kDisplayAutoUpdateEvent:
+		return "DisplayAutoUpdate";
+	case kDisplayEnableAutoUpdateEvent:
+		return "DisplayEnableAutoUpdate";
+	case kTimerServiceAlarmEvent:
+		return "TimerServiceAlarm";
+	case kTimerScriptEvent:
+		return "ScriptTimer";
 	case kMouseDownEvent:
 		return "MouseDown";
 	case kMouseUpEvent:
@@ -469,42 +477,52 @@ const char *eventTypeToStr(EventType type) {
 		return "MouseEntered";
 	case kMouseExitedEvent:
 		return "MouseExited";
+	case kMouseEnterExitEvent:
+		return "MouseEnterExit";
+	case kMouseOutOfFocusEvent:
+		return "MouseOutOfFocus";
 	case kKeyDownEvent:
 		return "KeyDown";
 	case kSoundEndEvent:
 		return "SoundEnd";
+	case kMovieEndEvent:
+		return "MovieEnd";
+	case kPathEndEvent:
+		return "PathEnd";
+	case kScreenEntryEvent:
+		return "ScreenEntry";
+	case kScreenBranchEvent:
+		return "ScreenBranch";
 	case kSoundAbortEvent:
 		return "SoundAbort";
 	case kSoundFailureEvent:
 		return "SoundFailure";
-	case kSoundStoppedEvent:
-		return "SoundStopped";
-	case kSoundBeginEvent:
-		return "SoundBegin";
-	case kMovieEndEvent:
-		return "MovieEnd";
 	case kMovieAbortEvent:
 		return "MovieAbort";
 	case kMovieFailureEvent:
 		return "MovieFailure";
+	case kSpriteMovieEndEvent:
+		return "SpriteMovieEnd";
+	case kScreenExitEvent:
+		return "ScreenExit";
+	case kPathStepEvent:
+		return "PathStep";
+	case kSoundStoppedEvent:
+		return "SoundStopped";
+	case kSoundBeginEvent:
+		return "SoundBegin";
 	case kMovieStoppedEvent:
 		return "MovieStopped";
 	case kMovieBeginEvent:
 		return "MovieBegin";
-	case kSpriteMovieEndEvent:
-		return "SpriteMovieEnd";
-	case kScreenEntryEvent:
-		return "ScreenEntry";
-	case kScreenExitEvent:
-		return "ScreenExit";
-	case kContextLoadCompleteEvent:
-		return "ContextLoadComplete";
-	case kContextLoadCompleteEvent2:
-		return "ContextLoadComplete2";
-	case kContextLoadAbortEvent:
-		return "ContextLoadAbort";
-	case kContextLoadFailureEvent:
-		return "ContextLoadFailure";
+	case kPathStoppedEvent:
+		return "PathStopped";
+	case kCachingFailureEvent:
+		return "CachingFailure";
+	case kCachingEndedEvent:
+		return "CachingEnded";
+	case kCachingStartedEvent:
+		return "CachingStarted";
 	case kTextInputEvent:
 		return "TextInput";
 	case kTextErrorEvent:
@@ -515,18 +533,22 @@ const char *eventTypeToStr(EventType type) {
 		return "DiskImageActorEnd";
 	case kCameraPanStepEvent:
 		return "CameraPanStep";
-	case kCameraPanAbortEvent:
-		return "CameraPanAbort";
 	case kCameraPanEndEvent:
 		return "CameraPanEnd";
-	case kPathStepEvent:
-		return "PathStep";
-	case kPathStoppedEvent:
-		return "PathStopped";
-	case kPathEndEvent:
-		return "PathEnd";
+	case kCameraPanAbortEvent:
+		return "CameraPanAbort";
+	case kContextLoadCompleteEvent:
+	case kContextAlreadyLoadedEvent:
+		return "ContextLoadComplete";
+	case kContextReleaseCompleteEvent:
+	case kContextAlreadyReleasedEvent:
+		return "ContextReleaseComplete";
+	case kContextLoadStartEvent:
+		return "ContextLoadStart";
+	case kContextReleaseStartEvent:
+		return "ContextReleaseStart";
 	default:
-		return "UNKNOWN";
+		return "UNKNOWN EVENT TYPE";
 	}
 }
 

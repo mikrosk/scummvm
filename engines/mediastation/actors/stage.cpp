@@ -755,16 +755,16 @@ uint16 RootStage::findActorToAcceptMouseEvents(
 	return result;
 }
 
-void RootStage::mouseEnteredEvent(const Common::Event &event) {
+void RootStage::mouseEnteredEvent(const MouseEvent &event) {
 	_isMouseInside = true;
 	g_engine->getCursorManager()->unsetTemporary();
 }
 
-void RootStage::mouseExitedEvent(const Common::Event &event) {
+void RootStage::mouseExitedEvent(const MouseEvent &event) {
 	_isMouseInside = false;
 }
 
-void RootStage::mouseOutOfFocusEvent(const Common::Event &event) {
+void RootStage::mouseOutOfFocusEvent(const MouseEvent &event) {
 	_isMouseInside = true;
 	g_engine->getCursorManager()->unsetTemporary();
 }
@@ -811,59 +811,86 @@ void StageDirector::clearDirtyRegion() {
 	_rootStage->_dirtyRegion._bounds = Common::Rect(0, 0, 0, 0);
 }
 
-void StageDirector::handleKeyboardEvent(const Common::Event &event) {
+void StageDirector::handleMouseEvent(const MouseEvent &event) {
+	switch (event.type) {
+	case kMouseDownEvent:
+		handleMouseDownEvent(event);
+		break;
+
+	case kMouseUpEvent:
+		handleMouseUpEvent(event);
+		break;
+
+	case kMouseMovedEvent:
+		handleMouseMovedEvent(event);
+		break;
+
+	case kMouseEnterExitEvent:
+		handleMouseEnterExitEvent(event);
+		break;
+
+	case kMouseOutOfFocusEvent:
+		handleMouseOutOfFocusEvent(event);
+		break;
+
+	default:
+		warning("%s: Unhandled mouse event: %s", __func__, event.debugString().c_str());
+	}
+}
+
+void StageDirector::handleKeyboardEvent(const KeyboardEvent &event) {
 	MouseActorState state;
-	uint16 flags = _rootStage->findActorToAcceptKeyboardEvents(event.kbd.ascii, kKeyDownFlag, state);
+	uint16 flags = _rootStage->findActorToAcceptKeyboardEvents(event.keyCode, kKeyDownFlag, state);
 	if (flags & kKeyDownFlag) {
 		debugC(5, kDebugEvents, "%s: Dispatching to %s from root stage", __func__, state.keyDown->debugName());
 		state.keyDown->keyboardEvent(event);
 	}
 }
 
-void StageDirector::handleMouseDownEvent(const Common::Event &event) {
+void StageDirector::handleMouseDownEvent(const MouseEvent &event) {
 	MouseActorState state;
-	uint16 flags = _rootStage->findActorToAcceptMouseEvents(event.mouse, kMouseDownFlag, state, false);
+	uint16 flags = _rootStage->findActorToAcceptMouseEvents(event.position, kMouseDownFlag, state, false);
 	if (flags & kMouseDownFlag) {
 		debugC(5, kDebugEvents, "%s: Dispatching to %s from root stage (mousePos: %d, %d) (bounds: %d, %d, %d, %d)",
-			__func__, state.mouseDown->debugName(), event.mouse.x, event.mouse.y, PRINT_RECT(state.mouseDown->getBbox()));
+			__func__, state.mouseDown->debugName(), event.position.x, event.position.y, PRINT_RECT(state.mouseDown->getBbox()));
 		state.mouseDown->mouseDownEvent(event);
 	}
 }
 
-void StageDirector::handleMouseUpEvent(const Common::Event &event) {
+void StageDirector::handleMouseUpEvent(const MouseEvent &event) {
 	MouseActorState state;
-	uint16 flags = _rootStage->findActorToAcceptMouseEvents(event.mouse, kMouseUpFlag, state, false);
+	uint16 flags = _rootStage->findActorToAcceptMouseEvents(event.position, kMouseUpFlag, state, false);
 	if (flags & kMouseUpFlag) {
 		debugC(5, kDebugEvents, "%s: Dispatching to %s from root stage (mousePos: %d, %d) (bounds: %d, %d, %d, %d)",
-			__func__, state.mouseUp->debugName(), event.mouse.x, event.mouse.y, PRINT_RECT(state.mouseUp->getBbox()));
+			__func__, state.mouseUp->debugName(), event.position.x, event.position.y, PRINT_RECT(state.mouseUp->getBbox()));
 		state.mouseUp->mouseUpEvent(event);
 	}
 }
 
-void StageDirector::handleMouseMovedEvent(const Common::Event &event) {
+void StageDirector::handleMouseMovedEvent(const MouseEvent &event) {
 	MouseActorState state;
 	uint16 flags = _rootStage->findActorToAcceptMouseEvents(
-		event.mouse,
+		event.position,
 		kMouseEnterFlag | kMouseExitFlag | kMouseMovedFlag,
 		state, false);
 
 	sendMouseEnterExitEvent(flags, state, event);
 	if (flags & kMouseMovedFlag) {
 		debugC(5, kDebugEvents, "%s: Dispatching to %s (mousePos: %d, %d) (bounds: %d, %d, %d, %d)",
-			__func__, state.mouseMoved->debugName(), event.mouse.x, event.mouse.y, PRINT_RECT(state.mouseMoved->getBbox()));
+			__func__, state.mouseMoved->debugName(), event.position.x, event.position.y, PRINT_RECT(state.mouseMoved->getBbox()));
 		state.mouseMoved->mouseMovedEvent(event);
 	}
 }
 
-void StageDirector::handleMouseEnterExitEvent(const Common::Event &event) {
+void StageDirector::handleMouseEnterExitEvent(const MouseEvent &event) {
 	MouseActorState state;
-	uint16 flags = _rootStage->findActorToAcceptMouseEvents(event.mouse, kMouseEnterFlag | kMouseExitFlag, state, false);
+	uint16 flags = _rootStage->findActorToAcceptMouseEvents(event.position, kMouseEnterFlag | kMouseExitFlag, state, false);
 	sendMouseEnterExitEvent(flags, state, event);
 }
 
-void StageDirector::handleMouseOutOfFocusEvent(const Common::Event &event) {
+void StageDirector::handleMouseOutOfFocusEvent(const MouseEvent &event) {
 	MouseActorState state;
-	uint16 flags = _rootStage->findActorToAcceptMouseEvents(event.mouse, kMouseExitFlag | kMouseOutOfFocusFlag, state, false);
+	uint16 flags = _rootStage->findActorToAcceptMouseEvents(event.position, kMouseExitFlag | kMouseOutOfFocusFlag, state, false);
 
 	if (flags & kMouseExitFlag) {
 		debugC(5, kDebugEvents, "%s: Dispatching mouse enter to %s", __func__, state.mouseExit->debugName());
@@ -876,7 +903,7 @@ void StageDirector::handleMouseOutOfFocusEvent(const Common::Event &event) {
 	}
 }
 
-void StageDirector::sendMouseEnterExitEvent(uint16 flags, MouseActorState &state, const Common::Event &event) {
+void StageDirector::sendMouseEnterExitEvent(uint16 flags, MouseActorState &state, const MouseEvent &event) {
 	if (state.mouseEnter != state.mouseExit) {
 		if (flags & kMouseExitFlag) {
 			debugC(5, kDebugEvents, "%s: Dispatching mouse exit to %s", __func__, state.mouseExit->debugName());

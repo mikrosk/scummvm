@@ -171,11 +171,18 @@ ScriptValue DiskImageActor::callMethod(BuiltInMethod methodId, Common::Array<Scr
 	return returnValue;
 }
 
-void DiskImageActor::process() {
-	if (_isLoading) {
-		// All timer events are scheduled for 0.0 seconds, so just fire them immediately.
-		// We don't need to track time separately.
-		timerEvent();
+void DiskImageActor::onEvent(const ActorEvent &event) {
+	switch (event.type) {
+	case kCachingStartedEvent:
+	case kCachingEndedEvent:
+	case kCachingFailureEvent:
+		// Caching-related events are not implemented, but they can be implemented
+		// if the original CD-ROM streaming/caching logic is reimplemented.
+		Actor::onEvent(event);
+		break;
+
+	default:
+		runScriptResponseIfExists(event.type);
 	}
 }
 
@@ -209,20 +216,23 @@ void DiskImageActor::readChunk(Chunk &chunk) {
 	PixMapImage *stripImage = new PixMapImage(chunk, imageInfo, _shouldDecompressInPlace);
 	StripImageNode stripImageNode;
 	stripImageNode.image = stripImage;
+	// In the original, this does indeed get the absolute time, not gameplay time.
 	stripImageNode.lastDrawTime = g_system->getMillis();
 	stripImageNode.isLoaded = true;
 	_stripImageNodes.setVal(index, stripImageNode);
 
-	// This was originally in RT_DiskImageActor::releaseBuffer, but it's here since
-	// we read data synchronously for now.
+	// This was in releaseBuffer in the original, but it's here since
+	// we read data synchronously for now in the reimplementation.
 	if (_isLoadingStrips) {
 		if (isRectInMemory(_rectToLoad)) {
 			if (_firePreloadEvent) {
-				generateLoadEvent(kDiskImageActorStepEvent);
+				ActorEvent event(_id, kDiskImageActorStepEvent);
+				g_engine->getEventLoop()->queueEvent(event);
 			}
 			stopLoad();
 		} else {
-			// The original scheduled a zero-length timer for the next load.
+			// The timer is meant to fire immediately.
+			g_engine->getTimerService()->startTimer(_timer, (uint32)0);
 			unregisterWithStreamManager();
 		}
 	}
@@ -247,6 +257,7 @@ void DiskImageActor::draw(DisplayContext &displayContext) {
 					error("[%s] %s: Strip index %d marked as loaded but image node not found", debugName(), __func__, stripIndex);
 				}
 				StripImageNode &imageNode = _stripImageNodes.getVal(stripIndex);
+				// In the original, this does indeed get the absolute time, not gameplay time.
 				imageNode.lastDrawTime = g_system->getMillis();
 
 				// Draw the strip image at its designated position.
@@ -271,9 +282,13 @@ void DiskImageActor::preload(const Common::Rect &rect, bool fireStepEvent) {
 		_firePreloadEvent = fireStepEvent;
 		_rectToLoad = rectToLoad;
 
+		// The timer is meant to fire immediately.
+		g_engine->getTimerService()->startTimer(_timer, (uint32)0);
+
 	} else if (fireStepEvent) {
 		debugC(5, kDebugGraphics, " (loaded)");
-		generateLoadEvent(kDiskImageActorStepEvent);
+		ActorEvent event(_id, kDiskImageActorStepEvent);
+		g_engine->getEventLoop()->queueEvent(event);
 	}
 }
 
@@ -416,13 +431,14 @@ void DiskImageActor::startStripLoad(uint stripIndex) {
 	_isLoadingStrips = false;
 }
 
-void DiskImageActor::timerEvent() {
+void DiskImageActor::timerEvent(const TimerEvent &event) {
 	int stripId = getStripToLoad();
 	if (stripId != -1) {
 		startStripLoad(stripId);
 	} else {
 		if (_firePreloadEvent) {
-			generateLoadEvent(kDiskImageActorEndEvent);
+			ActorEvent actorEvent(_id, kDiskImageActorEndEvent);
+			g_engine->getEventLoop()->queueEvent(actorEvent);
 		}
 		_isLoading = false;
 	}
@@ -455,11 +471,6 @@ void DiskImageActor::stopLoad() {
 	_rectToLoad = Common::Rect();
 
 	unregisterWithStreamManager();
-}
-
-void DiskImageActor::generateLoadEvent(EventType eventType) {
-	// In the original, this does just queue an event.
-	runScriptResponseIfExists(eventType);
 }
 
 void DiskImageActor::debugPrintNodes() {

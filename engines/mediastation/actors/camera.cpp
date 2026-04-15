@@ -242,6 +242,10 @@ ScriptValue CameraActor::callMethod(BuiltInMethod methodId, Common::Array<Script
 	return returnValue;
 }
 
+void CameraActor::onEvent(const ActorEvent &event) {
+	runScriptResponseIfExists(event.type);
+}
+
 void CameraActor::invalidateLocalBounds() {
 	if (_parentStage != nullptr) {
 		_parentStage->invalidateLocalBounds();
@@ -465,47 +469,48 @@ void CameraActor::panToByTime(int16 x, int16 y, double duration) {
 	_panState = kCameraPanToByTime;
 	_panStart = _currentViewportOrigin;
 	_panDest = Common::Point(x, y);
-	_panDuration = duration;
+	_totalPanDuration = duration;
 	_currentPanStep = 1;
-	_startTime = g_system->getMillis();
-	_nextPanStepTime = 0;
+	_startTime = g_engine->getTotalPlayTime();
 	debugC(6, kDebugCamera, "[%s] %s: panStart: (%d, %d); panDest: (%d, %d); panDuration: %f",
-		debugName(), __func__, _panStart.x, _panStart.y, _panDest.x, _panDest.y, _panDuration);
+		debugName(), __func__, _panStart.x, _panStart.y, _panDest.x, _panDest.y, _totalPanDuration);
 	setXYDelta();
 	calcNewViewportOrigin();
+
+	g_engine->getTimerService()->startTimer(_timer, _durationBetweenStepEvents);
 }
 
 void CameraActor::panToByStepCount(int16 x, int16 y, uint panSteps, double duration) {
 	_panState = kCameraPanByStepCount;
 	_panStart = _currentViewportOrigin;
 	_panDest = Common::Point(x, y);
-	_panDuration = duration;
+	_durationBetweenStepEvents = duration;
 	_currentPanStep = 1;
 	_maxPanStep = panSteps;
-	_startTime = g_system->getMillis();
-	_nextPanStepTime = 0;
 	debugC(6, kDebugCamera, "[%s] %s: panStart: (%d, %d); panDest: (%d, %d); panDuration: %f; maxPanStep: %d",
-		debugName(), __func__, _panStart.x, _panStart.y, _panDest.x, _panDest.y, _panDuration, _maxPanStep);
+		debugName(), __func__, _panStart.x, _panStart.y, _panDest.x, _panDest.y, _totalPanDuration, _maxPanStep);
 	setXYDelta();
 	calcNewViewportOrigin();
+	g_engine->getTimerService()->startTimer(_timer, _durationBetweenStepEvents);
 }
 
 void CameraActor::startPan(uint xOffset, uint yOffset, double duration) {
 	_panState = kCameraPanningStarted;
-	_panDuration = duration;
-	_startTime = g_system->getMillis();
-	_nextPanStepTime = 0;
+	g_engine->getTimerService()->startTimer(_timer, duration);
+	_durationBetweenStepEvents = duration;
+	setXYDelta(xOffset, yOffset);
+
 	_currentPanStep = 0;
 	_maxPanStep = 0;
-	setXYDelta(xOffset, yOffset);
 	debugC(6, kDebugCamera, "[%s] %s: xOffset: %u, yOffset: %u, duration: %f", debugName(), __func__, xOffset, yOffset, duration);
 }
 
 void CameraActor::stopPan() {
 	_panState = kCameraNotPanning;
-	_panDuration = 0.0;
+	g_engine->getTimerService()->stopTimer(_timer);
+
+	_totalPanDuration = 0.0;
 	_startTime = 0;
-	_nextPanStepTime = 0;
 	_currentPanStep = 0;
 	_maxPanStep = 0;
 	debugC(6, kDebugCamera, "[%s] %s: nextViewportOrigin: (%d, %d); actualViewportOrigin: (%d, %d)",
@@ -527,24 +532,7 @@ bool CameraActor::continuePan() {
 	return panShouldContinue;
 }
 
-void CameraActor::process() {
-	// Only process panning if we're actively panning.
-	if (_panState == kCameraNotPanning) {
-		return;
-	}
-
-	// Check if it's time for the next pan step.
-	uint currentTime = g_system->getMillis() - _startTime;
-	if (currentTime < _nextPanStepTime) {
-		return;
-	}
-
-	debugC(7, kDebugCamera, "*** START PAN STEP ***");
-	timerEvent();
-	debugC(7, kDebugCamera, "*** END PAN STEP ***");
-}
-
-void CameraActor::timerEvent() {
+void CameraActor::timerEvent(const TimerEvent &event) {
 	if (_parentStage != nullptr) {
 		if (processViewportMove()) {
 			processNextPanStep();
@@ -553,8 +541,10 @@ void CameraActor::timerEvent() {
 					adjustCameraViewport(_nextViewportOrigin);
 					Common::Rect advanceRect = getAdvanceRect();
 					_parentStage->preload(advanceRect, false);
+					g_engine->getTimerService()->startTimer(_timer, _durationBetweenStepEvents);
 				} else {
-					runScriptResponseIfExists(kCameraPanAbortEvent);
+					ActorEvent actorEvent(_id, kCameraPanAbortEvent);
+					g_engine->getEventLoop()->queueEvent(actorEvent);
 					stopPan();
 				}
 			} else {
@@ -565,18 +555,21 @@ void CameraActor::timerEvent() {
 					success = processViewportMove();
 				}
 				if (success) {
-					runScriptResponseIfExists(kCameraPanEndEvent);
+					ActorEvent actorEvent(_id, kCameraPanEndEvent);
+					g_engine->getEventLoop()->queueEvent(actorEvent);
 					stopPan();
 				} else {
 					Common::Rect currentBounds = getBbox();
 					Common::Rect preloadBounds(_nextViewportOrigin, currentBounds.width(), currentBounds.height());
 					_parentStage->preload(preloadBounds, false);
+					g_engine->getTimerService()->startTimer(_timer, _durationBetweenStepEvents);
 				}
 			}
 		} else {
 			Common::Rect currentBounds = getBbox();
 			Common::Rect preloadBounds(_nextViewportOrigin, currentBounds.width(), currentBounds.height());
 			_parentStage->preload(preloadBounds, false);
+			g_engine->getTimerService()->startTimer(_timer, _durationBetweenStepEvents);
 		}
 	}
 }
@@ -606,10 +599,8 @@ void CameraActor::processNextPanStep() {
 	}
 
 	calcNewViewportOrigin();
-	runScriptResponseIfExists(kCameraPanStepEvent);
-
-	uint stepDurationInMilliseconds = 20; // Visually smooth.
-	_nextPanStepTime += stepDurationInMilliseconds;
+	ActorEvent event(_id, kCameraPanStepEvent);
+	g_engine->getEventLoop()->queueEvent(event);
 }
 
 void CameraActor::adjustCameraViewport(Common::Point &viewportToAdjust) {
@@ -706,10 +697,10 @@ double CameraActor::percentComplete() {
 
 	case kCameraPanToByTime: {
 		const double MILLISECONDS_IN_ONE_SECOND = 1000.0;
-		uint currentRuntime = g_system->getMillis();
+		uint currentRuntime = g_engine->getTotalPlayTime();
 		uint elapsedTime = currentRuntime - _startTime;
 		double elapsedSeconds = elapsedTime / MILLISECONDS_IN_ONE_SECOND;
-		percentValue = elapsedSeconds / _panDuration;
+		percentValue = elapsedSeconds / _totalPanDuration;
 		break;
 	}
 

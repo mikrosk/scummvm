@@ -205,6 +205,17 @@ ScriptValue SpriteMovieActor::callMethod(BuiltInMethod methodId, Common::Array<S
 	return returnValue;
 }
 
+void SpriteMovieActor::onEvent(const ActorEvent &event) {
+	switch (event.type) {
+	case kSpriteMovieEndEvent:
+		runScriptResponseIfExists(kSpriteMovieEndEvent, event.arg);
+		break;
+
+	default:
+		Actor::onEvent(event);
+	}
+}
+
 bool SpriteMovieActor::activateNextFrame() {
 	bool clipMovesForward = _activeClip.firstFrameIndex <= _activeClip.lastFrameIndex;
 	if (clipMovesForward) {
@@ -272,9 +283,9 @@ void SpriteMovieActor::setVisibility(bool visibility) {
 
 void SpriteMovieActor::play() {
 	_isPlaying = true;
-	_startTime = g_system->getMillis();
+	_startTime = g_engine->getTotalPlayTime();
 	_lastProcessedTime = 0;
-	_nextFrameTime = 0;
+	_nextFrameTime = _startTime;
 
 	scheduleNextFrame();
 	debugC(3, kDebugSpriteMovie, "[%s] %s", debugName(), __func__);
@@ -283,6 +294,7 @@ void SpriteMovieActor::play() {
 void SpriteMovieActor::stop() {
 	_nextFrameTime = 0;
 	_isPlaying = false;
+	g_engine->getTimerService()->stopTimer(_timer);
 	debugC(3, kDebugSpriteMovie, "[%s] %s", debugName(), __func__);
 }
 
@@ -320,11 +332,6 @@ void SpriteMovieActor::setCurrentFrameToFinal() {
 		_currentFrameIndex = _activeClip.lastFrameIndex;
 		dirtyIfVisible();
 	}
-}
-
-void SpriteMovieActor::process() {
-	updateFrameState();
-	// Sprites don't have time script responses, separate timers do time handling.
 }
 
 void SpriteMovieActor::readChunk(Chunk &chunk) {
@@ -374,31 +381,19 @@ void SpriteMovieActor::scheduleNextFrame() {
 }
 
 void SpriteMovieActor::scheduleNextTimerEvent() {
-	uint frameDuration = 1000 / _frameRate;
-	_nextFrameTime += frameDuration;
-	debugC(3, kDebugSpriteMovie, "[%s] %s", debugName(), __func__);
+	uint32 frameDurationInMilliseconds = 1000 / _frameRate;
+	// Catch up if we are behind.
+	_nextFrameTime += frameDurationInMilliseconds;
+	uint32 currentTime = g_engine->getTotalPlayTime();
+	if (_nextFrameTime < currentTime) {
+		_nextFrameTime = currentTime;
+	}
+	uint32 delayUntilNextFrameInMilliseconds = _nextFrameTime - currentTime;
+	debugC(3, kDebugSpriteMovie, "[%s] %s: next frame in %d ms", debugName(), __func__, delayUntilNextFrameInMilliseconds);
+	g_engine->getTimerService()->startTimer(_timer, delayUntilNextFrameInMilliseconds);
 }
 
-void SpriteMovieActor::updateFrameState() {
-	if (!_isPlaying) {
-		return;
-	}
-
-	uint currentTime = g_system->getMillis() - _startTime;
-	bool drawNextFrame = currentTime >= _nextFrameTime;
-	debugC(3, kDebugSpriteMovie, "[%s] %s: nextFrameTime: %d; startTime: %d, currentTime: %d",
-		debugName(), __func__, _nextFrameTime, _startTime, currentTime);
-	if (drawNextFrame) {
-		timerEvent();
-	}
-}
-
-void SpriteMovieActor::timerEvent() {
-	if (!_isPlaying) {
-		warning("[%s] %s: Not playing", debugName(), __func__);
-		return;
-	}
-
+void SpriteMovieActor::timerEvent(const TimerEvent &event) {
 	bool moreFramesToShow = activateNextFrame();
 	if (moreFramesToShow) {
 		postMovieEndEventIfNecessary();
@@ -420,7 +415,8 @@ void SpriteMovieActor::postMovieEndEventIfNecessary() {
 
 	ScriptValue value;
 	value.setToParamToken(_activeClip.id);
-	runScriptResponseIfExists(kSpriteMovieEndEvent, value);
+	ActorEvent actorEvent(_id, kSpriteMovieEndEvent, value);
+	g_engine->getEventLoop()->queueEvent(actorEvent);
 }
 
 void SpriteMovieActor::draw(DisplayContext &displayContext) {

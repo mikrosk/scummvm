@@ -44,17 +44,19 @@ struct StripImageNode {
 	uint lastDrawTime = 0;
 };
 
-class DiskImageActor : public SpatialEntity, public ChannelClient {
 // Despite the name from the original, this is not a "disk image" but
 // a set of graphics (like a large background) that are streamed from
 // disk in a very particular way.
+class DiskImageActor : public SpatialEntity, public ChannelClient {
 public:
 	DiskImageActor() : SpatialEntity(kActorTypeDiskImage) {};
 	~DiskImageActor();
 
 	virtual void readParameter(Chunk &chunk, ActorHeaderSectionType paramType) override;
 	virtual ScriptValue callMethod(BuiltInMethod methodId, Common::Array<ScriptValue> &args) override;
-	virtual void process() override;
+
+	virtual void onEvent(const ActorEvent &event) override;
+	virtual void timerEvent(const TimerEvent &event) override;
 
 	virtual void readChunk(Chunk &chunk) override;
 	virtual void draw(DisplayContext &displayContext) override;
@@ -68,11 +70,9 @@ private:
 	void setStripsToLoad(const Common::Rect &rectToLoad);
 	int getStripToLoad();
 	void startStripLoad(uint stripIndex);
-	void timerEvent();
 
 	void purge();
 	void stopLoad();
-	void generateLoadEvent(EventType eventType);
 	void unloadLeastRecentlyDrawnStrip();
 	void debugPrintNodes();
 

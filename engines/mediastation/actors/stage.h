@@ -25,6 +25,7 @@
 #include "common/events.h"
 
 #include "mediastation/actor.h"
+#include "mediastation/events.h"
 #include "mediastation/graphics.h"
 #include "mediastation/mediascript/scriptvalue.h"
 #include "mediastation/mediascript/scriptconstants.h"
@@ -154,9 +155,9 @@ public:
 	virtual void invalidateRect(const Common::Rect &rect) override;
 	virtual void deleteChildrenFromContextId(uint contextId);
 
-	virtual void mouseEnteredEvent(const Common::Event &event) override;
-	virtual void mouseExitedEvent(const Common::Event &event) override;
-	virtual void mouseOutOfFocusEvent(const Common::Event &event) override;
+	virtual void mouseEnteredEvent(const MouseEvent &event) override;
+	virtual void mouseExitedEvent(const MouseEvent &event) override;
+	virtual void mouseOutOfFocusEvent(const MouseEvent &event) override;
 
 	void drawAll(DisplayContext &displayContext);
 	void drawDirtyRegion(DisplayContext &displayContext);
@@ -179,13 +180,14 @@ public:
 	void drawDirtyRegion();
 	void clearDirtyRegion();
 
-	void handleKeyboardEvent(const Common::Event &event);
-	void handleMouseDownEvent(const Common::Event &event);
-	void handleMouseUpEvent(const Common::Event &event);
-	void handleMouseMovedEvent(const Common::Event &event);
-	void handleMouseEnterExitEvent(const Common::Event &event);
-	void handleMouseOutOfFocusEvent(const Common::Event &event);
-	void sendMouseEnterExitEvent(uint16 flags, MouseActorState &state, const Common::Event &event);
+	void handleMouseEvent(const MouseEvent &event);
+	void handleKeyboardEvent(const KeyboardEvent &event);
+	void handleMouseDownEvent(const MouseEvent &event);
+	void handleMouseUpEvent(const MouseEvent &event);
+	void handleMouseMovedEvent(const MouseEvent &event);
+	void handleMouseEnterExitEvent(const MouseEvent &event);
+	void handleMouseOutOfFocusEvent(const MouseEvent &event);
+	void sendMouseEnterExitEvent(uint16 flags, MouseActorState &state, const MouseEvent &event);
 
 private:
 	RootStage *_rootStage = nullptr;

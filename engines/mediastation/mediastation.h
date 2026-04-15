@@ -44,6 +44,7 @@
 #include "mediastation/cursors.h"
 #include "mediastation/datafile.h"
 #include "mediastation/detection.h"
+#include "mediastation/events.h"
 #include "mediastation/graphics.h"
 #include "mediastation/mediascript/function.h"
 #include "mediastation/profile.h"
@@ -56,6 +57,7 @@ class HotspotActor;
 class RootStage;
 class PixMapImage;
 class ImtGod;
+class EventLoop;
 
 // Most Media Station titles follow this file structure from the root directory
 // of the CD-ROM:
@@ -82,17 +84,23 @@ public:
 	Common::Platform getPlatform() const;
 	const char *getAppName() const;
 	bool hasFeature(EngineFeature f) const override;
-	void dispatchSystemEvents();
-	void draw(bool dirtyOnly = true);
+	void dispatchOneSystemEvent(const Common::Event &event);
 
 	VideoDisplayManager *getDisplayManager() { return _displayManager; }
+	DisplayUpdateManager *getDisplayUpdateManager() { return _displayUpdateManager; }
 	CursorManager *getCursorManager() { return _cursorManager; }
 	FunctionManager *getFunctionManager() { return _functionManager; }
 	RootStage *getRootStage() { return _stageDirector->getRootStage(); }
 	StageDirector *getStageDirector() { return _stageDirector; }
 	StreamFeedManager *getStreamFeedManager() { return _streamFeedManager; }
+	EventLoop *getEventLoop() { return _eventLoop; }
 	Document *getDocument() { return _document; }
+	TimerService *getTimerService() { return _timerService; }
 	ImtGod *getImtGod() { return _imtGod; }
+
+	void registerAudioSequence(AudioSequence *sequence);
+	void unregisterAudioSequence(AudioSequence *sequence);
+	void serviceSounds();
 
 	Common::String formatActorName(uint actorId, bool attemptToGetType = false) { return _profile->formatActorName(actorId, attemptToGetType); }
 	Common::String formatActorName(const Actor *actor) { return _profile->formatActorName(actor); }
@@ -119,19 +127,21 @@ protected:
 	Common::Error run() override;
 
 private:
-	Common::Event _event;
 	Common::FSNode _gameDataDir;
 	const ADGameDescription *_gameDescription;
 
 	SpatialEntity *_mouseInsideHotspot = nullptr;
 	SpatialEntity *_mouseDownHotspot = nullptr;
 
+	EventLoop *_eventLoop = nullptr;
+	TimerService *_timerService = nullptr;
 	StreamFeedManager *_streamFeedManager = nullptr;
 	// CacheManager *_cacheManager = nullptr;
 	// StreamProfiler *_streamProfiler = nullptr;
 	ImtGod *_imtGod = nullptr;
 	ImtDeviceOwner *_deviceOwner = nullptr;
 	FunctionManager *_functionManager = nullptr;
+	DisplayUpdateManager *_displayUpdateManager = nullptr;
 	VideoDisplayManager *_displayManager = nullptr;
 	// PrintManager *_printManager = nullptr;
 	Document *_document = nullptr;
@@ -142,12 +152,11 @@ private:
 	Common::HashMap<AudioSequence *, AudioSequence *> _activeAudioSequences;
 
 	void initCursorManager();
-
-	void runEventLoop();
+	void queueMouseEvent(EventType type, const Common::Point &point);
 };
 
 class ImtGod : public ChannelClient {
-friend class MediaStationEngine;
+friend class EventLoop;
 
 public:
 	ImtGod(MediaStationEngine *vm);

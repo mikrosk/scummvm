@@ -197,23 +197,21 @@ ScriptValue Actor::callMethod(BuiltInMethod methodId, Common::Array<ScriptValue>
 	return ScriptValue();
 }
 
-void Actor::processTimeScriptResponses() {
-	// TODO: Replace with a queue.
-	uint currentTime = g_system->getMillis();
-	const Common::Array<ScriptResponse *> &_timeResponses = _scriptResponses.getValOrDefault(kTimerEvent);
+void Actor::onEvent(const ActorEvent &event) {
+	warning("[%s] %s: No handler for engine event %s", debugName(), __func__, eventTypeToStr(event.type));
+}
+
+ScriptResponse *Actor::findNextTimeScriptResponseAfter(uint32 after) const {
+	const Common::Array<ScriptResponse *> &_timeResponses = _scriptResponses.getValOrDefault(kTimerScriptEvent);
 	for (ScriptResponse *timeEvent : _timeResponses) {
-		// Indeed float, not time.
 		double timeEventInFractionalSeconds = timeEvent->_argumentValue.asFloat();
-		uint timeEventInMilliseconds = timeEventInFractionalSeconds * 1000;
-		bool timeEventAlreadyProcessed = timeEventInMilliseconds < _lastProcessedTime;
-		bool timeEventNeedsToBeProcessed = timeEventInMilliseconds < currentTime - _startTime;
-		if (!timeEventAlreadyProcessed && timeEventNeedsToBeProcessed) {
-			debugC(5, kDebugScript, "%s: Running On Time response for time %d ms (lastProcessedTime: %d, currentTime: %d)",
-				__func__, timeEventInMilliseconds, _lastProcessedTime, currentTime);
-			timeEvent->execute(_id);
+		uint32 timeEventInMilliseconds = static_cast<uint32>(timeEventInFractionalSeconds * 1000);
+		if (timeEventInMilliseconds >= after) {
+			return timeEvent;
 		}
 	}
-	_lastProcessedTime = currentTime - _startTime;
+
+	return nullptr;
 }
 
 void Actor::runScriptResponseIfExists(EventType eventType, const ScriptValue &arg) {
@@ -240,6 +238,76 @@ void Actor::runScriptResponseIfExists(EventType eventType, const ScriptValue &ar
 void Actor::runScriptResponseIfExists(EventType eventType) {
 	ScriptValue scriptValue;
 	runScriptResponseIfExists(eventType, scriptValue);
+}
+
+void Actor::processTimeScriptResponses() {
+	// The original had this logic duplicated across several actors, but it made more sense
+	// to consolidate it into the main Actor in the reimplementation. This does NOT set up the
+	// next timer - client code has to do that itself.
+	// Get current runtime time.
+	uint32 currentTimeInMilliseconds = g_engine->getTotalPlayTime();
+	uint32 elapsedTimeInMilliseconds = currentTimeInMilliseconds - _startTime;
+
+	// Process all events that have elapsed up to current time.
+	ScriptResponse *nextTimeScriptResponse = findNextTimeScriptResponseAfter(_lastProcessedTime);
+	while (nextTimeScriptResponse != nullptr) {
+		// If this event is in the future, stop processing.
+		double eventTimeInSeconds = nextTimeScriptResponse->_argumentValue.asFloat();
+		uint32 eventTimeInMilliseconds = eventTimeInSeconds * 1000;
+		if (eventTimeInMilliseconds > elapsedTimeInMilliseconds) {
+			break;
+		}
+
+		// Execute the event.
+		debugC(5, kDebugScript, "[%s] %s: Running On Time response for time %d ms (lastProcessedTime: %d, elapsedTime: %d)",
+			debugName(), __func__, eventTimeInMilliseconds, _lastProcessedTime, elapsedTimeInMilliseconds);
+		nextTimeScriptResponse->execute(_id);
+
+		// Increment by 1 to prevent re-triggering the same event. This works because in the original,
+		// timer events are at least 10 ms apart anyway.
+		_lastProcessedTime = eventTimeInMilliseconds + 1;
+		nextTimeScriptResponse = findNextTimeScriptResponseAfter(_lastProcessedTime);
+	}
+}
+
+bool Actor::setupNextScriptResponseTimer() {
+	// Find the next event after the last processed time.
+	ScriptResponse *nextEvent = findNextTimeScriptResponseAfter(_lastProcessedTime);
+	if (nextEvent == nullptr) {
+		// No more events to schedule.
+		debugC(5, kDebugScript, "[%s] %s: No more events to schedule", debugName(), __func__);
+		return false;
+	}
+
+	// Calculate duration until next event from current elapsed time.
+	double nextEventTimeInFractionalSeconds = nextEvent->_argumentValue.asFloat();
+	uint32 nextEventTimeInMilliseconds = nextEventTimeInFractionalSeconds * 1000;
+	uint32 currentTimeInMilliseconds = g_engine->getTotalPlayTime();
+	uint32 elapsedTimeInMilliseconds = currentTimeInMilliseconds - _startTime;
+	uint32 durationUntilNextEventInMilliseconds = nextEventTimeInMilliseconds - elapsedTimeInMilliseconds;
+	debugC(5, kDebugEvents, "[%s] %s: Scheduling timer for %d ms (next event at %d ms)",
+		debugName(), __func__, durationUntilNextEventInMilliseconds, nextEventTimeInMilliseconds);
+	g_engine->getTimerService()->startTimer(_timer, durationUntilNextEventInMilliseconds);
+	return true;
+}
+
+void Actor::triggerRemainingTimerEvents() {
+	uint32 currentTimeInMilliseconds = g_engine->getTotalPlayTime();
+	uint32 elapsedTimeInMilliseconds = currentTimeInMilliseconds - _startTime;
+
+	ScriptResponse *nextTimeScriptResponse = findNextTimeScriptResponseAfter(_lastProcessedTime);
+	while (nextTimeScriptResponse != nullptr) {
+		double eventTimeInSeconds = nextTimeScriptResponse->_argumentValue.asFloat();
+		uint32 eventTimeInMilliseconds = eventTimeInSeconds * 1000;
+
+		debugC(5, kDebugEvents, "[%s] %s: Running remaining On Time response for time %d ms (lastProcessedTime: %d, elapsedTime: %d)",
+			debugName(), __func__, eventTimeInMilliseconds,  _lastProcessedTime, elapsedTimeInMilliseconds);
+
+		// Increment by 1 to prevent re-triggering the same event.
+		_lastProcessedTime = eventTimeInMilliseconds + 1;
+		nextTimeScriptResponse->execute(_id);
+		nextTimeScriptResponse = findNextTimeScriptResponseAfter(_lastProcessedTime);
+	}
 }
 
 SpatialEntity::~SpatialEntity() {
@@ -464,12 +532,8 @@ void SpatialEntity::currentMousePosition(Common::Point &point) {
 }
 
 void SpatialEntity::invalidateMouse() {
-	// TODO: Invalidate the mouse properly when we have custom events.
-	// For now, we simulate the mouse update event with a mouse moved event.
-	Common::Event mouseEvent;
-	mouseEvent.type = Common::EVENT_MOUSEMOVE;
-	mouseEvent.mouse = g_system->getEventManager()->getMousePos();
-	g_system->getEventManager()->pushEvent(mouseEvent);
+	MouseEvent event(kMouseEnterExitEvent, g_system->getEventManager()->getMousePos());
+	g_engine->getEventLoop()->queueEvent(event);
 }
 
 void SpatialEntity::moveTo(int16 x, int16 y) {

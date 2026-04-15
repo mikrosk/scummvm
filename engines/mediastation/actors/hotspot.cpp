@@ -174,7 +174,7 @@ void HotspotActor::deactivate() {
 	}
 }
 
-void HotspotActor::mouseDownEvent(const Common::Event &event) {
+void HotspotActor::mouseDownEvent(const MouseEvent &event) {
 	if (!_isActive) {
 		warning("[%s] %s: Inactive", debugName(), __func__);
 		return;
@@ -184,7 +184,7 @@ void HotspotActor::mouseDownEvent(const Common::Event &event) {
 	runScriptResponseIfExists(kMouseDownEvent);
 }
 
-void HotspotActor::mouseUpEvent(const Common::Event &event) {
+void HotspotActor::mouseUpEvent(const MouseEvent &event) {
 	if (!_isActive) {
 		warning("[%s] %s: Inactive", debugName(), __func__);
 		return;
@@ -194,7 +194,7 @@ void HotspotActor::mouseUpEvent(const Common::Event &event) {
 	runScriptResponseIfExists(kMouseUpEvent);
 }
 
-void HotspotActor::mouseEnteredEvent(const Common::Event &event) {
+void HotspotActor::mouseEnteredEvent(const MouseEvent &event) {
 	if (!_isActive) {
 		warning("[%s] %s: Inactive", debugName(), __func__);
 		return;
@@ -212,7 +212,7 @@ void HotspotActor::mouseEnteredEvent(const Common::Event &event) {
 	runScriptResponseIfExists(kMouseEnteredEvent);
 }
 
-void HotspotActor::mouseMovedEvent(const Common::Event &event) {
+void HotspotActor::mouseMovedEvent(const MouseEvent &event) {
 	if (!_isActive) {
 		warning("[%s] %s: Inactive", debugName(), __func__);
 		return;
@@ -221,7 +221,7 @@ void HotspotActor::mouseMovedEvent(const Common::Event &event) {
 	runScriptResponseIfExists(kMouseMovedEvent);
 }
 
-void HotspotActor::mouseExitedEvent(const Common::Event &event) {
+void HotspotActor::mouseExitedEvent(const MouseEvent &event) {
 	if (!_isActive) {
 		warning("[%s] %s: Inactive", debugName(), __func__);
 		return;

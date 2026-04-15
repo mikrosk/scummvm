@@ -23,6 +23,7 @@
 #define MEDIASTATION_HOTSPOT_H
 
 #include "mediastation/actor.h"
+#include "mediastation/events.h"
 #include "mediastation/mediascript/scriptvalue.h"
 #include "mediastation/mediascript/scriptconstants.h"
 
@@ -49,11 +50,11 @@ public:
 	void activate();
 	void deactivate();
 
-	virtual void mouseDownEvent(const Common::Event &event) override;
-	virtual void mouseUpEvent(const Common::Event &event) override;
-	virtual void mouseEnteredEvent(const Common::Event &event) override;
-	virtual void mouseExitedEvent(const Common::Event &event) override;
-	virtual void mouseMovedEvent(const Common::Event &event) override;
+	virtual void mouseDownEvent(const MouseEvent &event) override;
+	virtual void mouseUpEvent(const MouseEvent &event) override;
+	virtual void mouseEnteredEvent(const MouseEvent &event) override;
+	virtual void mouseExitedEvent(const MouseEvent &event) override;
+	virtual void mouseMovedEvent(const MouseEvent &event) override;
 
 	uint _cursorResourceId = 0;
 

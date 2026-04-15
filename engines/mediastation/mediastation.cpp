@@ -61,11 +61,15 @@ MediaStationEngine::~MediaStationEngine() {
 	delete _document;
 	_imtGod->destroyActor(DocumentActor::DOCUMENT_ACTOR_ID);
 	delete _displayManager;
+	delete _displayUpdateManager;
 	delete _functionManager;
 	// delete _printManager;
 	delete _imtGod;
 	// delete _streamProfiler;
 	delete _streamFeedManager;
+	// delete _cacheManager;
+	delete _timerService;
+	delete _eventLoop;
 	delete _profile;
 }
 
@@ -137,12 +141,15 @@ bool MediaStationEngine::hasFeature(EngineFeature f) const {
 }
 
 Common::Error MediaStationEngine::run() {
+	_eventLoop = new EventLoop;
+	_timerService = new TimerService;
 	_streamFeedManager = new StreamFeedManager;
 	// _cacheManager = new CacheManager;
 	// _streamProfiler = new StreamProfiler;
 	_imtGod = new ImtGod(this);
 	_deviceOwner = new ImtDeviceOwner;
 	_functionManager = new FunctionManager;
+	_displayUpdateManager = new DisplayUpdateManager;
 	_displayManager = new VideoDisplayManager(this);
 	// _printManager = new PrintManager;
 	_document = new Document;
@@ -153,27 +160,8 @@ Common::Error MediaStationEngine::run() {
 	_profile = new Profile();
 	_profile->load();
 	_document->beginTitle();
-	runEventLoop();
+	_eventLoop->run();
 	return Common::kNoError;
-}
-
-void MediaStationEngine::runEventLoop() {
-	while (true) {
-		dispatchSystemEvents();
-		if (shouldQuit()) {
-			break;
-		}
-		_document->process();
-
-		debugC(9, kDebugGraphics, "***** START SCREEN UPDATE ***");
-		for (auto it = _imtGod->_actors.begin(); it != _imtGod->_actors.end(); ++it) {
-			it->_value->process();
-		}
-		draw();
-		debugC(9, kDebugGraphics, "***** END SCREEN UPDATE ***");
-
-		g_system->delayMillis(10);
-	}
 }
 
 void MediaStationEngine::initCursorManager() {
@@ -185,6 +173,21 @@ void MediaStationEngine::initCursorManager() {
 		error("%s: Attempted to use unsupported platform %s", __func__, Common::getPlatformDescription(getPlatform()));
 	}
 	_cursorManager->showCursor();
+}
+
+void MediaStationEngine::registerAudioSequence(AudioSequence *sequence) {
+	_activeAudioSequences[sequence] = sequence;
+}
+
+void MediaStationEngine::unregisterAudioSequence(AudioSequence *sequence) {
+	_activeAudioSequences.erase(sequence);
+}
+
+void MediaStationEngine::serviceSounds() {
+	for (auto it = _activeAudioSequences.begin(); it != _activeAudioSequences.end(); ++it) {
+		AudioSequence *sequence = it->_value;
+		sequence->service();
+	}
 }
 
 ImtGod::ImtGod(MediaStationEngine *vm) : _vm(vm) {
@@ -205,59 +208,6 @@ void ImtGod::setupInitialStreamMap() {
 	fileInfo._id = MediaStationEngine::BOOT_STREAM_ID;
 	fileInfo._name = BOOT_STM_FILENAME;
 	_fileMap.setVal(fileInfo._id, fileInfo);
-}
-
-void MediaStationEngine::dispatchSystemEvents() {
-	while (g_system->getEventManager()->pollEvent(_event)) {
-		debugC(9, kDebugEvents, "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-		debugC(9, kDebugEvents, "@@@@   Dispatching system events");
-		debugC(9, kDebugEvents, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-
-		switch (_event.type) {
-		case Common::EVENT_MOUSEMOVE:
-			_stageDirector->handleMouseMovedEvent(_event);
-			break;
-
-		case Common::EVENT_KEYDOWN:
-			_stageDirector->handleKeyboardEvent(_event);
-			break;
-
-		case Common::EVENT_LBUTTONDOWN:
-			_stageDirector->handleMouseDownEvent(_event);
-			break;
-
-		case Common::EVENT_LBUTTONUP:
-			_stageDirector->handleMouseUpEvent(_event);
-			break;
-
-		case Common::EVENT_FOCUS_LOST:
-			_stageDirector->handleMouseOutOfFocusEvent(_event);
-			break;
-
-		case Common::EVENT_RBUTTONDOWN:
-			// We are using the right button as a quick exit since the Media
-			// Station engine doesn't seem to use the right button itself.
-			warning("%s: EVENT_RBUTTONDOWN: Quitting for development purposes", __func__);
-			quitGame();
-			break;
-
-		default:
-			// Avoid warnings about unimplemented cases by having an explicit
-			// default case.
-			break;
-		}
-	}
-}
-
-void MediaStationEngine::draw(bool dirtyOnly) {
-	if (dirtyOnly) {
-		_stageDirector->drawDirtyRegion();
-	} else {
-		_stageDirector->drawAll();
-	}
-	_stageDirector->clearDirtyRegion();
-	_displayManager->updateScreen();
-	_displayManager->doTransitionOnSync();
 }
 
 ImtGod::~ImtGod() {

@@ -358,7 +358,7 @@ uint16 TextActor::findActorToAcceptKeyboardEvents(uint16 charCode, uint16 eventM
 	return result;
 }
 
-void TextActor::keyboardEvent(const Common::Event &event) {
+void TextActor::keyboardEvent(const KeyboardEvent &event) {
 	// TODO: Implement this once we have a title that actually uses it.
 	warning("STUB: %s", __func__);
 }

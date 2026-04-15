@@ -204,6 +204,20 @@ void DisplayContext::setClipTo(Region region) {
 	}
 }
 
+void DisplayUpdateManager::performUpdateAll() {
+	debugC(9, kDebugGraphics, "%s", __func__);
+	g_engine->getStageDirector()->drawAll();
+	g_engine->getStageDirector()->clearDirtyRegion();
+	g_engine->getDisplayManager()->flushToDisplay();
+}
+
+void DisplayUpdateManager::performUpdateDirty() {
+	debugC(9, kDebugGraphics, "%s", __func__);
+	g_engine->getStageDirector()->drawDirtyRegion();
+	g_engine->getStageDirector()->clearDirtyRegion();
+	g_engine->getDisplayManager()->flushToDisplay();
+}
+
 VideoDisplayManager::VideoDisplayManager(MediaStationEngine *vm) : _vm(vm) {
 	initGraphics(MediaStationEngine::SCREEN_WIDTH, MediaStationEngine::SCREEN_HEIGHT);
 	_screen = new Graphics::Screen();
@@ -222,11 +236,11 @@ bool VideoDisplayManager::attemptToReadFromStream(Chunk &chunk, uint sectionType
 	bool handledParam = true;
 	switch (sectionType) {
 	case kVideoDisplayManagerUpdateDirty:
-		performUpdateDirty();
+		g_engine->getDisplayUpdateManager()->performUpdateDirty();
 		break;
 
 	case kVideoDisplayManagerUpdateAll:
-		performUpdateAll();
+		g_engine->getDisplayUpdateManager()->performUpdateAll();
 		break;
 
 	case kVideoDisplayManagerEffectTransition:
@@ -247,6 +261,67 @@ bool VideoDisplayManager::attemptToReadFromStream(Chunk &chunk, uint sectionType
 	}
 
 	return handledParam;
+}
+
+void VideoDisplayManager::flushToDisplay() {
+	_screen->update();
+	doTransitionOnSync();
+}
+
+void DisplayUpdateManager::onEvent(const DisplayEvent &event) {
+	switch (event.type) {
+	case kDisplayAutoUpdateEvent:
+		performAutoUpdateAndFlush();
+		break;
+
+	case kDisplayEnableAutoUpdateEvent:
+		enableAutoUpdate(event.disableScreenAutoUpdateToken);
+		break;
+
+	default:
+		break;
+	}
+}
+
+bool DisplayUpdateManager::needToDisplay() {
+	return !g_engine->getStageDirector()->getRootStage()->_dirtyRegion._rects.empty();
+}
+
+void DisplayUpdateManager::performAutoUpdateAndFlush() {
+	bool screenUpdated = false;
+	if (_autoUpdateEnabled && _forceFlush) {
+		performUpdateDirty();
+		screenUpdated = true;
+		_forceFlush = false;
+	} else if (_autoUpdateEnabled) {
+		if (needToDisplay()) {
+			performUpdateDirty();
+			screenUpdated = true;
+		}
+	}
+
+	// Any mouse movements and such need to be committed even if there
+	// was nothing else to draw.
+	if (!screenUpdated) {
+		g_system->updateScreen();
+	}
+}
+
+void DisplayUpdateManager::enableAutoUpdate(uint disabledScreenAutoUpdateToken) {
+	if (disabledScreenAutoUpdateToken == _disabledScreenAutoUpdateToken) {
+		_autoUpdateEnabled = true;
+		_forceFlush = true;
+	}
+}
+
+uint DisplayUpdateManager::disableAutoUpdate() {
+	_autoUpdateEnabled = false;
+	_forceFlush = false;
+	_disabledScreenAutoUpdateToken += 1;
+	if (_disabledScreenAutoUpdateToken == 0) {
+		_disabledScreenAutoUpdateToken = 1;
+	}
+	return _disabledScreenAutoUpdateToken;
 }
 
 void VideoDisplayManager::readAndEffectTransition(Chunk &chunk) {
@@ -330,16 +405,6 @@ void VideoDisplayManager::doTransitionOnSync() {
 		effectTransition(_scheduledTransitionOnSync);
 		_scheduledTransitionOnSync.clear();
 	}
-}
-
-void VideoDisplayManager::performUpdateDirty() {
-	debugC(5, kDebugGraphics, "%s", __func__);
-	g_engine->draw();
-}
-
-void VideoDisplayManager::performUpdateAll() {
-	debugC(5, kDebugGraphics, "%s", __func__);
-	g_engine->draw(false);
 }
 
 void VideoDisplayManager::fadeToBlack(Common::Array<ScriptValue> &args) {

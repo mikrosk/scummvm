@@ -155,8 +155,6 @@ enum BuiltInMethod {
 	kSetParallaxFactorYMethod = 0x181,
 	kStartCachingMethod = 0x113,
 	kIsCachingMethod = 0x114,
-	kPauseMethod = 0xD0,
-	kResumeMethod = 0xD1,
 	kIsPausedMethod = 0x175,
 
 	// STREAM MOVIE METHODS.
@@ -300,17 +298,24 @@ enum BuiltInMethod {
 const char *builtInMethodToStr(BuiltInMethod method);
 
 enum EventType {
-	kTimerEvent = 0x05,
+	kEventTypeInvalid = 0x00,
+	kDisplayAutoUpdateEvent = 0x02,
+	kDisplayEnableAutoUpdateEvent = 0x03,
+	kTimerServiceAlarmEvent = 0x04, // This schedules when the timer is supposed to fire.
+	kTimerScriptEvent = 0x05, // This is specifically a script timer event.
 	kMouseDownEvent = 0x06,
 	kMouseUpEvent = 0x07,
 	kMouseMovedEvent = 0x08,
 	kMouseEnteredEvent = 0x09,
 	kMouseExitedEvent = 0x0A,
+	kMouseEnterExitEvent = 0x0B,
+	kMouseOutOfFocusEvent = 0x0C,
 	kKeyDownEvent = 0x0D,
 	kSoundEndEvent = 0x0E,
 	kMovieEndEvent = 0x0F,
 	kPathEndEvent = 0x10,
 	kScreenEntryEvent = 0x11,
+	kScreenBranchEvent = 0x12,
 	kSoundAbortEvent = 0x13,
 	kSoundFailureEvent = 0x14,
 	kMovieAbortEvent = 0x15,
@@ -323,6 +328,9 @@ enum EventType {
 	kMovieStoppedEvent = 0x1F,
 	kMovieBeginEvent = 0x20,
 	kPathStoppedEvent = 0x21,
+	kCachingFailureEvent = 0x22,
+	kCachingEndedEvent = 0x23,
+	kCachingStartedEvent = 0x24,
 	kTextInputEvent = 0x25,
 	kTextErrorEvent = 0x26,
 	kDiskImageActorStepEvent = 0x27,
@@ -331,11 +339,11 @@ enum EventType {
 	kCameraPanEndEvent = 0x2A,
 	kCameraPanAbortEvent = 0x2B,
 	kContextLoadCompleteEvent = 0x2C,
-	// TODO: These last 3 events appear as valid event types, but I haven't found
-	// scripts that actually use them. So the names might be wrong.
-	kContextLoadCompleteEvent2 = 0x2D,
-	kContextLoadAbortEvent = 0x2E,
-	kContextLoadFailureEvent = 0x2F,
+	kContextAlreadyLoadedEvent = 0x2D,
+	kContextReleaseCompleteEvent = 0x2E,
+	kContextAlreadyReleasedEvent = 0x2F,
+	kContextLoadStartEvent = 0x30,
+	kContextReleaseStartEvent = 0x31
 };
 const char *eventTypeToStr(EventType type);
 

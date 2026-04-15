@@ -29,6 +29,7 @@
 #include "graphics/screen.h"
 
 #include "mediastation/clients.h"
+#include "mediastation/events.h"
 #include "mediastation/mediascript/scriptvalue.h"
 
 namespace MediaStation {
@@ -124,6 +125,25 @@ private:
 	Common::Stack<Clip> _clips;
 };
 
+class DisplayUpdateManager {
+public:
+	virtual ~DisplayUpdateManager() {}
+	virtual void onEvent(const DisplayEvent &event);
+
+	void performAutoUpdateAndFlush();
+	void performUpdateAll();
+	void performUpdateDirty();
+
+	void enableAutoUpdate(uint disabledUpdateDepthCounter);
+	uint disableAutoUpdate();
+	bool needToDisplay();
+
+private:
+	bool _autoUpdateEnabled = true;
+	bool _forceFlush = false;
+	uint _disabledScreenAutoUpdateToken = 0;
+};
+
 class VideoDisplayManager : public ParameterClient {
 public:
 	VideoDisplayManager(MediaStationEngine *vm);
@@ -131,6 +151,7 @@ public:
 
 	virtual bool attemptToReadFromStream(Chunk &chunk, uint sectionType) override;
 
+	void flushToDisplay();
 	void updateScreen() { _screen->update(); }
 	Graphics::Palette *getRegisteredPalette() { return _registeredPalette; }
 	void setRegisteredPalette(Graphics::Palette *palette) { _registeredPalette = palette; }
@@ -159,9 +180,6 @@ public:
 	void effectTransition(Common::Array<ScriptValue> &args);
 	void setTransitionOnSync(Common::Array<ScriptValue> &args) { _scheduledTransitionOnSync = args; }
 	void doTransitionOnSync();
-
-	void performUpdateDirty();
-	void performUpdateAll();
 
 	void setGammaValues(double red, double green, double blue);
 	void getDefaultGammaValues(double &red, double &green, double &blue);
