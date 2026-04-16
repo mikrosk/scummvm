@@ -51,7 +51,7 @@ void OSystem_iOS7::updateStartSettings(const Common::String &executable, Common:
 		// Check if scummvm is running from an app bundle
 		if (!bundle || ![bundle bundleIdentifier]) {
 			// Use default autostart implementation
-			EventsBaseBackend::updateStartSettings(executable, command, settings, additionalArgs);
+			BaseBackend::updateStartSettings(executable, command, settings, additionalArgs);
 			return;
 		}
 
