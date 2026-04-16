@@ -312,7 +312,7 @@ void StreamFeedManager::closeStreamFeed(StreamFeed *streamFeed) {
 
 void StreamFeedManager::registerChannelClient(ChannelClient *client) {
 	if (_channelClients.getValOrDefault(client->channelIdent()) != nullptr) {
-		error("%s: Channel %s already has a client", __func__, g_engine->formatAssetNameForChannelIdent(client->channelIdent()).c_str());
+		warning("%s: Channel %s already has a client", __func__, g_engine->formatAssetNameForChannelIdent(client->channelIdent()).c_str());
 	}
 	_channelClients.setVal(client->channelIdent(), client);
 }

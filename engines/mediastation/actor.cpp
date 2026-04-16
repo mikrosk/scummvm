@@ -91,10 +91,6 @@ const char *actorTypeToStr(ActorType type) {
 
 void Actor::setId(uint id) {
 	_id = id;
-	updateDebugName();
-}
-
-void Actor::updateDebugName() {
 	_debugName = g_engine->formatActorName(this);
 }
 
@@ -117,6 +113,7 @@ void Actor::initFromParameterStream(Chunk &chunk) {
 	ActorHeaderSectionType paramType = kActorHeaderEmptySection;
 	while (true) {
 		paramType = static_cast<ActorHeaderSectionType>(chunk.readTypedUint16());
+		debugC(5, kDebugLoading, "[%s] %s: Got section type 0x%x", debugName(), __func__, static_cast<uint>(paramType));
 		if (paramType == 0) {
 			break;
 		} else {
@@ -517,8 +514,6 @@ void SpatialEntity::invalidateLocalBounds() {
 	if (_parentStage != nullptr) {
 		_parentStage->setAdjustedBounds(kWrapNone);
 		_parentStage->invalidateRect(getBbox());
-	} else {
-		warning("[%s] %s: No parent stage", debugName(), __func__);
 	}
 }
 

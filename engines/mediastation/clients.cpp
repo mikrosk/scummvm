@@ -149,6 +149,9 @@ void Document::branchToScreen() {
 		_loadingScreenActorId = _requestedScreenBranchId;
 		_requestedScreenBranchId = 0;
 		uint contextId = contextIdForScreenActorId(_loadingScreenActorId);
+		if (contextId == 0) {
+			error("%s: Screen %d doesn't have a context in current title", __func__, _loadingScreenActorId);
+		}
 
 		blowAwayCurrentScreen();
 		preloadParentContexts(contextId);

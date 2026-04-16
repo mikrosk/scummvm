@@ -31,19 +31,19 @@ namespace MediaStation {
 // For exact argument count.
 #define FUNCARGCHECK(n) \
 	if (args.size() != (n)) { \
-		warning("%s: expected %d argument%s, got %d", builtInFunctionToStr(static_cast<BuiltInFunction>(functionId)), (n), ((n) == 1 ? "" : "s"), args.size()); \
+		warning("%s: expected %d argument%s, got %d", builtInFunctionToStr(functionId), (n), ((n) == 1 ? "" : "s"), args.size()); \
 	}
 
 // For a range of valid argument counts (min to max).
 #define FUNCARGRANGE(min, max) \
 	if (args.size() < (min) || args.size() > (max)) { \
-		warning("%s: expected %d to %d argument, got %d", builtInFunctionToStr(static_cast<BuiltInFunction>(functionId)), (min), (max), args.size()); \
+		warning("%s: expected %d to %d argument, got %d", builtInFunctionToStr(functionId), (min), (max), args.size()); \
 	}
 
 // For minimum argument count (no maximum).
 #define FUNCARGMIN(min) \
 	if (args.size() < (min)) { \
-		warning("%s: expected at least %d argument%s, got %d", builtInFunctionToStr(static_cast<BuiltInFunction>(functionId)), (min), ((min) == 1 ? "" : "s"), args.size()); \
+		warning("%s: expected at least %d argument%s, got %d", builtInFunctionToStr(functionId), (min), ((min) == 1 ? "" : "s"), args.size()); \
 	}
 
 ScriptFunction::ScriptFunction(Chunk &chunk) {

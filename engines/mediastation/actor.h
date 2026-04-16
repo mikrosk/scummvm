@@ -211,7 +211,6 @@ public:
 	void setId(uint id);
 	void setContextId(uint id) { _contextId = id; }
 	const char *debugName() const;
-	void updateDebugName();
 
 protected:
 	ActorType _type = kActorTypeEmpty;

@@ -74,6 +74,10 @@ private:
 	Common::Array<ScriptValue> _locals;
 	Common::Array<ScriptValue> *_args = nullptr;
 	ParameterReadStream *_bytecode = nullptr;
+
+	// Debug output indentation tracking.
+	uint _debugIndentLevel = 0;
+	Common::String makeDebugIndent() const;
 };
 
 } // End of namespace MediaStation

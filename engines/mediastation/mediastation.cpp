@@ -335,10 +335,10 @@ void MediaStationEngine::destroyActor(uint actorId) {
 }
 
 void MediaStationEngine::destroyContext(uint contextId, bool eraseFromLoadedContexts) {
-	debugC(5, kDebugScript, "%s: Context %d", __func__, contextId);
+	debugC(5, kDebugScript, "%s: Context %s", __func__, formatActorName(contextId).c_str());
 	Context *context = _loadedContexts.getValOrDefault(contextId);
 	if (context == nullptr) {
-		warning("%s: Attempted to unload context %d that is not currently loaded", __func__, contextId);
+		warning("%s: Attempted to unload context %s that is not currently loaded", __func__, formatActorName(contextId).c_str());
 		return;
 	}
 

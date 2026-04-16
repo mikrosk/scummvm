@@ -179,7 +179,7 @@ uint16 HotspotActor::findActorToAcceptMouseEvents(
 			result |= kMouseUpFlag;
 		}
 	} else {
-		debugC(6, kDebugEvents, "[%s] %s: Inactive", debugName(),  __func__);
+		debugC(8, kDebugEvents, "[%s] %s: Inactive", debugName(),  __func__);
 	}
 
 	return result;

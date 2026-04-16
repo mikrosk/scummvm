@@ -643,6 +643,11 @@ void StageActor::currentMousePosition(Common::Point &point) {
 	}
 }
 
+RootStage::RootStage() : StageActor() {
+	_id = ROOT_STAGE_ACTOR_ID;
+	_debugName = Common::String("Stage ROOT");
+}
+
 void RootStage::invalidateRect(const Common::Rect &rect) {
 	Common::Rect rectToAdd = rect;
 	rectToAdd.clip(_boundingBox);

@@ -257,7 +257,7 @@ Common::String Profile::formatFunctionName(uint functionId) {
 		formattedName = Common::String::format("%s (%d)", functionName.c_str(), functionId);
 	} else {
 		// This might be a built-in function, in which case we can try to get the built-in name.
-		formattedName = Common::String::format("%s (%d)", builtInFunctionToStr(static_cast<BuiltInFunction>(functionId)), functionId);
+		formattedName = Common::String::format("%s (%d)", builtInFunctionToStr(functionId), functionId);
 	}
 	return formattedName;
 }

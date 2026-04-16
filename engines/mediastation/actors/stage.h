@@ -137,7 +137,7 @@ protected:
 class RootStage : public StageActor {
 public:
 	friend class StageDirector;
-	RootStage() : StageActor() { _id = ROOT_STAGE_ACTOR_ID; };
+	RootStage();
 
 	virtual uint16 findActorToAcceptMouseEvents(
 		const Common::Point &point,

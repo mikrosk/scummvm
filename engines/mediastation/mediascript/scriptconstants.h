@@ -22,6 +22,8 @@
 #ifndef MEDIASTATION_MEDIASCRIPT_BUILTINS_H
 #define MEDIASTATION_MEDIASCRIPT_BUILTINS_H
 
+#include "common/scummsys.h"
+
 namespace MediaStation {
 
 enum ExpressionType {
@@ -115,7 +117,7 @@ enum BuiltInFunction {
 	kLegacy_GetAudioVolumeFunction = 0xBF,
 	kLegacy_SystemLanguagePreferenceFunction = 0xC8,
 };
-const char *builtInFunctionToStr(BuiltInFunction function);
+const char *builtInFunctionToStr(uint function);
 
 enum BuiltInMethod {
 	kInvalidMethod = 0,

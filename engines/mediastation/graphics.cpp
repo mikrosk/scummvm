@@ -232,7 +232,7 @@ bool VideoDisplayManager::attemptToReadFromStream(Chunk &chunk, uint sectionType
 		break;
 
 	case kVideoDisplayManagerSetTime:
-		debugC(5, kDebugGraphics, "%s", __func__);
+		debugC(7, kDebugGraphics, "%s", __func__);
 		_defaultTransitionTime = chunk.readTypedTime();
 		break;
 

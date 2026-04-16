@@ -112,7 +112,7 @@ const char *variableScopeToStr(VariableScope scope) {
 	}
 }
 
-const char *builtInFunctionToStr(BuiltInFunction function) {
+const char *builtInFunctionToStr(uint function) {
 	switch (function) {
 	case kRandomFunction:
 		return "Random";

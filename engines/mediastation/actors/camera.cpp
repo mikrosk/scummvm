@@ -364,7 +364,6 @@ void CameraActor::drawUsingCamera(DisplayContext &destContext, const Common::Arr
 
 void CameraActor::drawObject(DisplayContext &sourceContext, DisplayContext &destContext, SpatialEntity *objectToDraw) {
 	if (_parentStage == nullptr) {
-		warning("[%s] %s: No parent stage", debugName(), __func__);
 		return;
 	}
 
@@ -469,7 +468,7 @@ bool CameraActor::continuePan() {
 			panShouldContinue = false;
 		}
 	}
-	debugC(6, kDebugCamera, "[%s] %s: %s", debugName(), __func__, panShouldContinue ? "true": "false");
+	debugC(6, kDebugCamera, "[%s] %s: %s", debugName(), __func__, panShouldContinue ? "true" : "false");
 	return panShouldContinue;
 }
 
@@ -564,7 +563,6 @@ void CameraActor::processNextPanStep() {
 
 void CameraActor::adjustCameraViewport(Common::Point &viewportToAdjust) {
 	if (_parentStage == nullptr) {
-		warning("[%s] %s: No parent stage", debugName(), __func__);
 		return;
 	}
 
