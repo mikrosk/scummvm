@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.3.0\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-17 00:10+0000\n"
-"PO-Revision-Date: 2025-08-14 14:36+0000\n"
+"PO-Revision-Date: 2026-04-17 00:22+0000\n"
 "Last-Translator: SkiffPL <skiff@windowslive.com>\n"
 "Language-Team: Polish <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/pl/>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.15.1\n"
 "X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-Language: Polish\n"
@@ -31,10 +31,9 @@ msgstr "Dźwięk Apple Macintosh"
 
 #. I18N: built with <compiler>
 #: gui/about.cpp:119
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#, c-format
 msgid "(built with %s)"
-msgstr "(skompilowane %s przy użyciu %s)"
+msgstr "(skompilowane użyciu %s)"
 
 #. I18N: built on <build date> with <compiler>
 #: gui/about.cpp:122
@@ -1283,58 +1282,6 @@ msgid "Cloud"
 msgstr "Chmura"
 
 #: gui/helpdialog.cpp:71
-#, fuzzy
-#| msgid ""
-#| "## Connecting a cloud service - Quick mode\n"
-#| "\n"
-#| "1. From the Launcher, select **Global Options** and then select the "
-#| "**Cloud** tab.\n"
-#| "\n"
-#| "2. Select your preferred cloud storage service from the **Active "
-#| "storage** dropdown, then select **Connect**.\n"
-#| "\n"
-#| "\t  ![Select cloud service](choose_storage.png \"Select cloud service\")"
-#| "{w=70%}\n"
-#| "\n"
-#| "3. Select **Quick mode**.\n"
-#| "\n"
-#| "\t  ![Quick mode](quick_mode.png \"Quick mode\"){w=70%}\n"
-#| "\n"
-#| "4. Select **Run server** and then select **Next** \n"
-#| "\n"
-#| "\t  ![Run server](run_server.png \"Run server\"){w=70%}\n"
-#| "\n"
-#| "  ![Next step](server_next.png \"Next step\"){w=70%}\n"
-#| "\n"
-#| "5. Open the link.\n"
-#| "\n"
-#| "\t  ![Open the link](open_link.png \"Open the link\"){w=70%}\n"
-#| "\n"
-#| "6. In the browser window that opens, select the cloud service to "
-#| "connect. \n"
-#| "\n"
-#| "\t  ![Choose the cloud service](cloud_browser.png \"Choose the cloud "
-#| "service\"){w=70%}\n"
-#| "\n"
-#| "7. Sign in to the chosen cloud service. Once completed, return to "
-#| "ScummVM.\n"
-#| "\n"
-#| "8. On the success screen, select **Finish** to exit. \n"
-#| "\n"
-#| "\t  ![Success](cloud_success.png \"Success\"){w=70%}\n"
-#| "9. Back on the main Cloud tab, select **Enable storage**.\n"
-#| "\n"
-#| "\t  ![Enable storage](enable_storage.png \"Enable storage\"){w=70%}\n"
-#| "\n"
-#| "10. You're ready to go! Use the cloud functionality to sync saved games "
-#| "or game files between your devices.\n"
-#| "\n"
-#| "\t  ![Cloud functionality](cloud_functions.png \"Cloud functionality\")"
-#| "{w=70%}\n"
-#| "\n"
-#| "   For more information, including how to use the manual connection "
-#| "wizard, see our [Cloud documentation](https://docs.scummvm.org/en/latest/"
-#| "use_scummvm/connect_cloud.html) "
 msgid ""
 "## Connecting a cloud service - Quick mode\n"
 "\n"
@@ -1395,44 +1342,44 @@ msgstr ""
 "**Dostawca**, a następnie wybierz **Połącz**.\n"
 "\n"
 "![Wybierz usługę w chmurze](choose_storage.png \"Wybierz usługę w chmurze\")"
-"{w=70%}\n"
+"{w=70%,maxw=50em}\n"
 "\n"
 "3. Wybierz **Tryb szybki**.\n"
 "\n"
-"![Tryb szybki](quick_mode.png \"Tryb szybki\"){w=70%}\n"
+"![Tryb szybki](quick_mode.png \"Tryb szybki\"){w=70%,maxw=50em}\n"
 "\n"
 "4. Wybierz **Uruchom serwer**, a następnie wybierz **Dalej**\n"
 "\n"
-"![Uruchom serwer](run_server.png \"Uruchom serwer\"){w=70%}\n"
+"![Uruchom serwer](run_server.png \"Uruchom serwer\"){w=70%,maxw=50em}\n"
 "\n"
-"   ![Następny krok](server_next.png \"Następny krok\"){w=70%}\n"
+"   ![Następny krok](server_next.png \"Następny krok\"){w=70%,maxw=50em}\n"
 "\n"
 "5. Otwórz odnośnik.\n"
 "\n"
-"![Otwórz odnośnik](open_link.png \"Otwórz odnośnik\"){w=70%}\n"
+"![Otwórz odnośnik](open_link.png \"Otwórz odnośnik\"){w=70%,maxw=50em}\n"
 "\n"
 "6. W nowo otwartym oknie przeglądarki wybierz usługę w chmurze, z którą "
 "chcesz się połączyć.\n"
 "\n"
 "![Wybierz usługę w chmurze](cloud_browser.png \"Wybierz usługę w chmurze\")"
-"{w=70%}\n"
+"{w=70%,maxw=50em}\n"
 "\n"
 "7. Zaloguj się do wybranej usługi przechowywania danych w chmurze. Po "
 "zakończeniu wróć do ScummVM.\n"
 "\n"
 "8. Na ekranie końcowym wybierz **Zakończ**, aby wyjść.\n"
 "\n"
-"![Sukces](cloud_success.png \"Sukces\"){w=70%}\n"
+"![Sukces](cloud_success.png \"Sukces\"){w=70%,maxw=50em}\n"
 "9. Na głównej karcie Chmura wybierz **Włącz przechowywanie w chmurze**.\n"
 "\n"
 "![Włącz przechowywanie w chmurze](enable_storage.png \"Włącz przechowywanie "
-"w chmurzeć\"){w=70%}\n"
+"w chmurzeć\"){w=70%,maxw=50em}\n"
 "\n"
 "10. Gotowe! Można korzystać z funkcji chmury, aby synchronizować zapisane "
 "gry lub pliki gier pomiędzy swoimi urządzeniami.\n"
 "\n"
 "![Funkcjonalność chmury](cloud_functions.png \"Funkcjonalność chmury\")"
-"{w=70%}\n"
+"{w=70%,maxw=50em}\n"
 "\n"
 "    Więcej informacji, w tym dotyczących korzystania z kreatora ręcznego "
 "połączenia, znajdziesz w naszej [dokumentacji Chmury](https://"
@@ -1543,10 +1490,8 @@ msgid "About ScummVM"
 msgstr "ScummVM - informacje"
 
 #: gui/launcher.cpp:277 gui/launcher.cpp:959
-#, fuzzy
-#| msgid "General Keys"
 msgid "General help"
-msgstr "Klawisze ogólne"
+msgstr "Ogólna pomoc"
 
 #. I18N: Button caption. O is the shortcut, Ctrl+O, put it in parens for non-latin (~O~)
 #: gui/launcher.cpp:280
@@ -1751,12 +1696,13 @@ msgid "Icons per row:"
 msgstr "Ikon w wierszu:"
 
 #: gui/launcher.cpp:1869
-#, fuzzy, c-format
-#| msgid "Do you really want to remove this game configuration?"
+#, c-format
 msgid ""
 "Do you really want to remove the following %d game configurations?\n"
 "\n"
-msgstr "Na pewno chcesz usunąć konfigurację tej gry?"
+msgstr ""
+"Na pewno chcesz usunąć konfiguracje gry %d?\n"
+"\n"
 
 #: gui/massadd.cpp:77 gui/massadd.cpp:80
 msgid "... progress ..."
@@ -2850,19 +2796,15 @@ msgstr "*  Abc"
 
 #: gui/printing-dialog.cpp:54
 msgid "Print"
-msgstr ""
+msgstr "Drukuj"
 
 #: gui/printing-dialog.cpp:56
-#, fuzzy
-#| msgid "Save Image"
 msgid "Save as image"
-msgstr "Zapisz obraz"
+msgstr "Zapisz jako obraz"
 
 #: gui/printing-dialog.cpp:58
-#, fuzzy
-#| msgid "First page"
 msgid "Fit to page"
-msgstr "Pierwsza strona"
+msgstr "Dopasuj do strony"
 
 #: gui/printing-dialog.cpp:60 backends/graphics/opengl/opengl-graphics.cpp:315
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:127
@@ -2871,16 +2813,12 @@ msgid "Center"
 msgstr "Wycentrowany"
 
 #: gui/printing-dialog.cpp:63
-#, fuzzy
-#| msgid "Pointer Speed:"
 msgid "Printer:"
-msgstr "Szybkość wskaźnika:"
+msgstr "Drukarka:"
 
 #: gui/printing-dialog.cpp:88
-#, fuzzy
-#| msgid "Next action"
 msgid "Orientation:"
-msgstr "Następna akcja"
+msgstr "Orientacja:"
 
 #: gui/recorderdialog.cpp:66
 msgid "Recorder or Playback Gameplay"
@@ -3660,10 +3598,8 @@ msgid "~O~ptions"
 msgstr "~O~pcje"
 
 #: engines/dialogs.cpp:79
-#, fuzzy
-#| msgid "~H~elp"
 msgid "Game ~H~elp"
-msgstr "Po~m~oc"
+msgstr "Po~m~oc gry"
 
 #: engines/dialogs.cpp:83
 msgid "~H~elp"
@@ -3799,13 +3735,7 @@ msgid "Skip autosave"
 msgstr "Pomiń autozapis"
 
 #: engines/engine.cpp:644
-#, fuzzy, c-format
-#| msgid ""
-#| "WARNING: The autosave slot contains a saved game named %S, and an "
-#| "autosave is pending.\n"
-#| "Please move this saved game to a new slot, or delete it if it's no longer "
-#| "needed.\n"
-#| "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
+#, c-format
 msgid ""
 "WARNING: The autosave slot contains a saved game named %s, and an autosave "
 "is pending.\n"
@@ -3813,7 +3743,7 @@ msgid ""
 "needed.\n"
 "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
 msgstr ""
-"UWAGA: Slot automatycznego zapisu zawiera zapisaną grę o nazwie %S i "
+"UWAGA: Slot automatycznego zapisu zawiera zapisaną grę o nazwie %s i "
 "oczekuje na automatyczny zapis.\n"
 "Przenieś zapisaną grę do nowego slotu lub usuń ją, jeśli nie jest już "
 "potrzebna.\n"
@@ -3945,8 +3875,6 @@ msgid "Game not implemented"
 msgstr "Gra nie jest obsługiwana"
 
 #: engines/metaengine.cpp:75 engines/saga/metaengine.cpp:267
-#, fuzzy
-#| msgid "Default game keymap"
 msgid "Default game keymappings"
 msgstr "Domyślne mapowanie klawiatury"
 
@@ -4473,42 +4401,30 @@ msgid "Switch to the previous scaler"
 msgstr "Przełącz na poprzedni silnik skalowania"
 
 #: backends/keymapper/hardware-input.cpp:244
-#, fuzzy
 msgid "Left mouse button"
 msgstr "Lewy przycisk myszy"
 
 #: backends/keymapper/hardware-input.cpp:245
-#, fuzzy
 msgid "Right mouse button"
 msgstr "Prawy przycisk myszy"
 
 #: backends/keymapper/hardware-input.cpp:246
-#, fuzzy
-#| msgid "Middle Mouse Button"
 msgid "Middle mouse button"
 msgstr "Środkowy przycisk myszy"
 
 #: backends/keymapper/hardware-input.cpp:247
-#, fuzzy
-#| msgid "Mouse Wheel Up"
 msgid "Mouse wheel up"
 msgstr "Rolka myszy w górę"
 
 #: backends/keymapper/hardware-input.cpp:248
-#, fuzzy
-#| msgid "Mouse Wheel Down"
 msgid "Mouse wheel down"
 msgstr "Rolka myszy w dół"
 
 #: backends/keymapper/hardware-input.cpp:249
-#, fuzzy
-#| msgid "X1 Mouse Button"
 msgid "X1 mouse button"
 msgstr "Przycisk myszy X1"
 
 #: backends/keymapper/hardware-input.cpp:250
-#, fuzzy
-#| msgid "X2 Mouse Button"
 msgid "X2 mouse button"
 msgstr "Przycisk myszy X2"
 
@@ -4529,32 +4445,22 @@ msgid "Joy Y"
 msgstr "Joystick Y"
 
 #: backends/keymapper/hardware-input.cpp:259
-#, fuzzy
-#| msgid "Joy Back"
 msgid "Joy back"
-msgstr "Joystick wstecz"
+msgstr "Joystick do tyłu"
 
 #: backends/keymapper/hardware-input.cpp:260
-#, fuzzy
-#| msgid "Joy Guide"
 msgid "Joy guide"
 msgstr "Joystick Guide"
 
 #: backends/keymapper/hardware-input.cpp:261
-#, fuzzy
-#| msgid "Joy Start"
 msgid "Joy start"
 msgstr "Joystick Start"
 
 #: backends/keymapper/hardware-input.cpp:262
-#, fuzzy
-#| msgid "Left Stick"
 msgid "Left stick"
 msgstr "Lewa gałka analogowa"
 
 #: backends/keymapper/hardware-input.cpp:263
-#, fuzzy
-#| msgid "Right Stick"
 msgid "Right stick"
 msgstr "Prawa gałka analogowa"
 
@@ -4574,8 +4480,6 @@ msgstr "Prawe ramię"
 #: backends/platform/sdl/opendingux/opendingux.cpp:64
 #: backends/platform/sdl/ps3/ps3.cpp:57 backends/platform/sdl/psp2/psp2.cpp:56
 #: backends/platform/sdl/switch/switch.cpp:48
-#, fuzzy
-#| msgid "D-pad Up"
 msgid "D-pad up"
 msgstr "Krzyżak w górę"
 
@@ -4587,8 +4491,6 @@ msgstr "Krzyżak w górę"
 #: backends/platform/sdl/opendingux/opendingux.cpp:65
 #: backends/platform/sdl/ps3/ps3.cpp:58 backends/platform/sdl/psp2/psp2.cpp:57
 #: backends/platform/sdl/switch/switch.cpp:49
-#, fuzzy
-#| msgid "D-pad Down"
 msgid "D-pad down"
 msgstr "Krzyżak w dół"
 
@@ -4600,8 +4502,6 @@ msgstr "Krzyżak w dół"
 #: backends/platform/sdl/opendingux/opendingux.cpp:66
 #: backends/platform/sdl/ps3/ps3.cpp:59 backends/platform/sdl/psp2/psp2.cpp:58
 #: backends/platform/sdl/switch/switch.cpp:50
-#, fuzzy
-#| msgid "D-pad Left"
 msgid "D-pad left"
 msgstr "Krzyżak w lewo"
 
@@ -4613,26 +4513,18 @@ msgstr "Krzyżak w lewo"
 #: backends/platform/sdl/opendingux/opendingux.cpp:67
 #: backends/platform/sdl/ps3/ps3.cpp:60 backends/platform/sdl/psp2/psp2.cpp:59
 #: backends/platform/sdl/switch/switch.cpp:51
-#, fuzzy
-#| msgid "D-pad Right"
 msgid "D-pad right"
 msgstr "Krzyżak w prawo"
 
 #: backends/keymapper/hardware-input.cpp:270
-#, fuzzy
-#| msgid "D-pad Center"
 msgid "D-pad center"
 msgstr "Krzyżak środek"
 
 #: backends/keymapper/hardware-input.cpp:275
-#, fuzzy
-#| msgid "Left Trigger"
 msgid "Left trigger"
 msgstr "Lewy spust"
 
 #: backends/keymapper/hardware-input.cpp:276
-#, fuzzy
-#| msgid "Right Trigger"
 msgid "Right trigger"
 msgstr "Prawy spust"
 
@@ -4640,8 +4532,6 @@ msgstr "Prawy spust"
 #: backends/platform/sdl/opendingux/opendingux.cpp:78
 #: backends/platform/sdl/ps3/ps3.cpp:67 backends/platform/sdl/psp2/psp2.cpp:64
 #: backends/platform/sdl/switch/switch.cpp:58
-#, fuzzy
-#| msgid "Left Stick X"
 msgid "Left stick X"
 msgstr "Lewy Analog X"
 
@@ -4649,26 +4539,20 @@ msgstr "Lewy Analog X"
 #: backends/platform/sdl/opendingux/opendingux.cpp:79
 #: backends/platform/sdl/ps3/ps3.cpp:68 backends/platform/sdl/psp2/psp2.cpp:65
 #: backends/platform/sdl/switch/switch.cpp:59
-#, fuzzy
-#| msgid "Left Stick Y"
 msgid "Left stick Y"
 msgstr "Lewy Analog Y"
 
 #: backends/keymapper/hardware-input.cpp:279
 #: backends/platform/sdl/ps3/ps3.cpp:69 backends/platform/sdl/psp2/psp2.cpp:66
 #: backends/platform/sdl/switch/switch.cpp:60
-#, fuzzy
-#| msgid "Right Stick X"
 msgid "Right stick X"
-msgstr "Prawy Analog X"
+msgstr "Prawy gałka X"
 
 #: backends/keymapper/hardware-input.cpp:280
 #: backends/platform/sdl/ps3/ps3.cpp:70 backends/platform/sdl/psp2/psp2.cpp:67
 #: backends/platform/sdl/switch/switch.cpp:61
-#, fuzzy
-#| msgid "Right Stick Y"
 msgid "Right stick Y"
-msgstr "Prawy Analog Y"
+msgstr "Prawy gałka Y"
 
 #: backends/keymapper/hardware-input.cpp:281
 msgid "Hat X"
@@ -5008,16 +4892,12 @@ msgid "R"
 msgstr "R"
 
 #: backends/platform/3ds/osystem-events.cpp:63
-#, fuzzy
-#| msgid "Circle"
 msgid "Circle Pad X"
-msgstr "Koło"
+msgstr "Koło kierunkowe X"
 
 #: backends/platform/3ds/osystem-events.cpp:64
-#, fuzzy
-#| msgid "Circle"
 msgid "Circle Pad Y"
-msgstr "Koło"
+msgstr "Koło kierunkowe Y"
 
 #: backends/platform/3ds/osystem-events.cpp:69
 #: backends/platform/ds/osystem_ds.cpp:197
@@ -5143,75 +5023,6 @@ msgid "Touch Controls"
 msgstr "Sterowanie dotykowe"
 
 #: backends/platform/android/android.cpp:945
-#, fuzzy
-#| msgid ""
-#| "## Touch control modes\n"
-#| "The touch control mode can be changed by tapping or clicking on the "
-#| "controller icon in the upper right corner\n"
-#| "### Direct mouse \n"
-#| "\n"
-#| "The touch controls are direct. The pointer jumps to where the finger "
-#| "touches the screen (default for menus).\n"
-#| "\n"
-#| "  ![Direct mouse mode](mouse.png \"Direct mouse mode\"){w=10em}\n"
-#| "\n"
-#| "### Touchpad emulation \n"
-#| "\n"
-#| "The touch controls are indirect, like on a laptop touchpad.\n"
-#| "\n"
-#| "  ![Touchpad mode](touchpad.png \"Touchpad mode\"){w=10em}\n"
-#| "\n"
-#| "### Gamepad emulation \n"
-#| "\n"
-#| "Fingers must be placed on lower left and right of the screen to emulate a "
-#| "directional pad and action buttons.\n"
-#| "\n"
-#| "  ![Gamepad mode](gamepad.png \"Gamepad mode\"){w=10em}\n"
-#| "\n"
-#| "To select the preferred touch mode for menus, 2D games, and 3D games, go "
-#| "to **Global Options > Backend > Choose the preferred touch mode**.\n"
-#| "\n"
-#| "## Touch actions \n"
-#| "\n"
-#| "### Two finger scroll \n"
-#| "\n"
-#| "To scroll, slide two fingers up or down the screen\n"
-#| "### Two finger tap\n"
-#| "\n"
-#| "To do a two finger tap, hold one finger down and then tap with a second "
-#| "finger.\n"
-#| "\n"
-#| "### Three finger tap\n"
-#| "\n"
-#| "To do a three finger tap, start with holding down one finger and "
-#| "progressively touch down the other two fingers, one at a time, while "
-#| "still holding down the previous fingers. Imagine you are impatiently "
-#| "tapping your fingers on a surface, but then slow down that movement so it "
-#| "is rhythmic, but not too slow.\n"
-#| "\n"
-#| "### Immersive Sticky fullscreen mode\n"
-#| "\n"
-#| "Swipe from the edge to reveal the system bars.  They remain semi-"
-#| "transparent and disappear after a few seconds unless you interact with "
-#| "them.\n"
-#| "\n"
-#| "### Global Main Menu\n"
-#| "\n"
-#| "To open the Global Main Menu, tap on the menu icon at the top right of "
-#| "the screen.\n"
-#| "\n"
-#| "  ![Menu icon](menu.png \"Menu icon\"){w=10em}\n"
-#| "\n"
-#| "## Virtual keyboard\n"
-#| "\n"
-#| "To open the virtual keyboard, long press on the controller icon at the "
-#| "top right of the screen, or tap on any editable text field. To hide the "
-#| "virtual keyboard, tap the controller icon again, or tap outside the text "
-#| "field.\n"
-#| "\n"
-#| "\n"
-#| "  ![Keyboard icon](keyboard.png \"Keyboard icon\"){w=10em}\n"
-#| "\n"
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5354,43 +5165,6 @@ msgid "Adding Games"
 msgstr "Dodawanie gier"
 
 #: backends/platform/android/android.cpp:1004
-#, fuzzy
-#| msgid ""
-#| "## Adding Games \n"
-#| "\n"
-#| "1. Select **Add Game...** from the launcher. \n"
-#| "\n"
-#| "2. Inside the ScummVM file browser, select **Go Up** until you reach the "
-#| "root folder which has the **<Add a new folder>** option. \n"
-#| "\n"
-#| "  ![ScummVM file browser root](browser-root.png \"ScummVM file browser "
-#| "root\"){w=70%}\n"
-#| "\n"
-#| "3. Double-tap **<Add a new folder>**. In your device's file browser, "
-#| "navigate to the folder containing all your game folders. For example, "
-#| "**SD Card > ScummVMgames**. \n"
-#| "\n"
-#| "4. Select **Use this folder**. \n"
-#| "\n"
-#| "  ![OS selectable folder](fs-folder.png \"OS selectable folder\"){w=70%}\n"
-#| "\n"
-#| "5. Select **ALLOW** to give ScummVM permission to access the folder. \n"
-#| "\n"
-#| "  ![OS access permission dialog](fs-permission.png \"OS access "
-#| "permission\"){w=70%}\n"
-#| "\n"
-#| "6. In the ScummVM file browser, double-tap to browse through your added "
-#| "folder. Add a game by selecting the sub-folder containing the game files, "
-#| "then tap **Choose**. \n"
-#| "\n"
-#| "  ![SAF folder added](browser-folder-in-list.png \"SAF folder added\")"
-#| "{w=70%}\n"
-#| "\n"
-#| "Step 2 and 3 are done only once. To add more games, repeat Steps 1 and "
-#| "6. \n"
-#| "\n"
-#| "See our [Android documentation](https://docs.scummvm.org/en/latest/"
-#| "other_platforms/android.html) for more information.\n"
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5436,7 +5210,7 @@ msgstr ""
 "katalogu głównego, w którym znajduje się opcja **<Dodaj nowy folder>**.\n"
 "\n"
 "  ![ScummVM file browser root]((browser-root.png \"Główny katalog "
-"przeglądarki plików ScummVM\"){w=70%}\n"
+"przeglądarki plików ScummVM\"){w=70%,maxw=50em}\n"
 "\n"
 "3. Naciśnij dwukrotnie **<Dodaj nowy folder>**. W przeglądarce plików na "
 "swoim urządzeniu przejdź do folderu zawierającego wszystkie foldery z grami. "
@@ -5445,19 +5219,19 @@ msgstr ""
 "4. Wybierz opcję **Użyj tego folderu**.\n"
 "\n"
 "  ![OS selectable folder](fs-folder.png \"Folder do wyboru w systemie "
-"operacyjnym\"){w=70%}\n"
+"operacyjnym\"){w=70%,maxw=50em}\n"
 "\n"
 "5. Wybierz **ZEZWÓL**, aby nadać ScummVM uprawnienia dostępu do folderu.\n"
 "\n"
 "  ![OS access permission dialog](fs-permission.png \"Uprawnienia dostępu "
-"systemu operacyjnego\"){w=70%}\n"
+"systemu operacyjnego\"){w=70%,maxw=50em}\n"
 "\n"
 "6. W przeglądarce plików ScummVM naciśnij dwukrotnie, aby przeglądać dodany "
 "folder. Dodaj grę, wybierając podkatalog zawierający pliki gier, a następnie "
 "dotknij **Wybierz**.\n"
 "\n"
 "  ![SAF folder added](browser-folder-in-list.png \"Dodano folder SAF\")"
-"{w=70%}\n"
+"{w=70%,maxw=50em}\n"
 "\n"
 "Krok 2 i 3 wykonuje się tylko raz. Aby dodać więcej gier, powtórz kroki 1 i "
 "6.\n"
@@ -5472,7 +5246,7 @@ msgstr "Pokaż sterowanie na ekranie"
 
 #: backends/platform/android/options.cpp:138
 msgid "Ignore safe areas in-game"
-msgstr ""
+msgstr "Ignoruj bezpieczne obszary w grze"
 
 #: backends/platform/android/options.cpp:139
 #: backends/platform/ios7/ios7_options.mm:112
@@ -6655,7 +6429,7 @@ msgstr "Użyj"
 
 #: engines/access/metaengine.cpp:296
 msgid "Goto"
-msgstr ""
+msgstr "Idź do"
 
 #: engines/access/metaengine.cpp:301 engines/access/metaengine.cpp:332
 #: engines/bbvs/metaengine.cpp:130 engines/drascula/metaengine.cpp:250
@@ -6711,10 +6485,8 @@ msgid "Walk"
 msgstr "Idź"
 
 #: engines/access/metaengine.cpp:348
-#, fuzzy
-#| msgid "Page up in save / load menu"
 msgid "Open save/load menu"
-msgstr "Strona w górę w menu zapisywania i wczytywania"
+msgstr "Otwórz menu zapisu/wczytywania"
 
 #: engines/access/resources.cpp:43 engines/drascula/drascula.cpp:993
 #: engines/hugo/hugo.cpp:461 engines/lure/lure.cpp:57
@@ -7026,14 +6798,12 @@ msgid "Don't fade every screen to black when leaving a room."
 msgstr "Nie przyciemniaj każdego ekranu, gdy wychodzisz z pokoju."
 
 #: engines/agos/dialogs.cpp:93
-#, fuzzy
-#| msgid "Use original save/load screens"
 msgid "Use original Acorn system cursor"
-msgstr "Użyj oryginalnych ekranów wczytywania/zapisywania"
+msgstr "Użyj oryginalnego kursora systemowego Acorn"
 
 #: engines/agos/dialogs.cpp:94
 msgid "Toggle between the system cursor and the default cursor."
-msgstr ""
+msgstr "Przełącz pomiędzy kursorem domyślnym oraz systemowym."
 
 #: engines/agos/dialogs.cpp:107 engines/sci/detection_options.h:263
 msgid "MIDI mode:"
@@ -7112,10 +6882,8 @@ msgstr "Włącz/wyłącz muzykę"
 
 #: engines/agos/metaengine.cpp:199 engines/sherlock/metaengine.cpp:702
 #: engines/vcruise/metaengine.cpp:206
-#, fuzzy
-#| msgid "Toggle sound effect on/off"
 msgid "Toggle sound effects"
-msgstr "Włącz/wyłącz efekt dźwiękowy"
+msgstr "Włącz/wyłącz efekty dźwiękowe"
 
 #. I18N: Speeds up the game to twice its normal speed
 #: engines/agos/metaengine.cpp:204 engines/queen/metaengine.cpp:192
@@ -7181,8 +6949,6 @@ msgid "Show objects to interact"
 msgstr "Pokaż interaktywne obiekty"
 
 #: engines/agos/metaengine.cpp:272
-#, fuzzy
-#| msgid "Toggle background sounds on / off"
 msgid "Toggle background sounds"
 msgstr "Włącz/wyłącz dźwięki otoczenia"
 
@@ -7192,8 +6958,6 @@ msgid "Switch characters"
 msgstr "Zmień postać"
 
 #: engines/agos/metaengine.cpp:287
-#, fuzzy
-#| msgid "Toggle hitbox names on / off"
 msgid "Toggle hitbox names"
 msgstr "Włącz/wyłącz nazwy pól trafień"
 
@@ -7401,37 +7165,31 @@ msgstr ""
 
 #: engines/alcachofa/graphics-opengl.cpp:108
 msgid "Old OpenGL detected, some graphical errors will occur."
-msgstr ""
+msgstr "Wykryto stare biblioteki OpenGL, będą widoczne błędy graficzne."
 
 #: engines/alcachofa/metaengine.cpp:40
-#, fuzzy
-#| msgid "Music Quality:"
 msgid "High Quality"
-msgstr "Jakość muzyki:"
+msgstr "Wysoka jakość"
 
 #: engines/alcachofa/metaengine.cpp:41
-#, fuzzy
-#| msgid "Toggle sound effect on/off"
 msgid "Toggles some optional graphical effects"
-msgstr "Włącz/wyłącz efekt dźwiękowy"
+msgstr "Włącza/wyłącza niektóre opcjonalne efekty graficzne"
 
 #: engines/alcachofa/metaengine.cpp:51
 msgid "32 Bits"
-msgstr ""
+msgstr "32 bity"
 
 #: engines/alcachofa/metaengine.cpp:52
 msgid "Whether to render the game in 16-bit color"
-msgstr ""
+msgstr "Czy renderować grę w kolorze 16-bitowym"
 
 #: engines/alcachofa/metaengine.cpp:62
-#, fuzzy
-#| msgid "Give mixtures"
 msgid "Filter textures"
-msgstr "Daj mikstury"
+msgstr "Filtrowanie tekstur"
 
 #: engines/alcachofa/metaengine.cpp:63
 msgid "Whether textures should be linearly filtered"
-msgstr ""
+msgstr "Czy tekstury powinny bić filtrowane liniowo"
 
 #: engines/alcachofa/metaengine.cpp:98 engines/cine/metaengine.cpp:347
 #: engines/freescape/games/castle/castle.cpp:520
@@ -7507,8 +7265,6 @@ msgid "Open character inventory"
 msgstr "Otwórz ekwipunek"
 
 #: engines/asylum/metaengine.cpp:226
-#, fuzzy
-#| msgid "Toggle animation on / off"
 msgid "Toggle animation"
 msgstr "Włącz/wyłącz animacje"
 
@@ -7563,18 +7319,14 @@ msgstr ""
 "innym przypadku zostałyby domyślnie pominięte."
 
 #: engines/awe/metaengine.cpp:61
-#, fuzzy
-#| msgid "Select/Kick/Run"
 msgid "Select / Kick / Run"
-msgstr "Wybierz/Kopnij/Biegnij"
+msgstr "Wybierz / Kopnij / Biegnij"
 
 #: engines/awe/metaengine.cpp:62 engines/hpl1/metaengine.cpp:83
 msgid "Jump"
 msgstr "Skok"
 
 #: engines/awe/metaengine.cpp:63
-#, fuzzy
-#| msgid "Enter Level Code"
 msgid "Enter level code"
 msgstr "Podaj kod poziomu"
 
@@ -7606,38 +7358,28 @@ msgid "Escape"
 msgstr "Escape"
 
 #: engines/bagel/metaengine.cpp:70
-#, fuzzy
-#| msgid "Page up"
 msgid "Page Up"
 msgstr "Strona w górę"
 
 #: engines/bagel/metaengine.cpp:71
-#, fuzzy
-#| msgid "Page down"
 msgid "Page Down"
 msgstr "Strona w dół"
 
 #: engines/bagel/metaengine.cpp:72
-#, fuzzy
-#| msgid "Home key"
 msgid "Home"
-msgstr "Klawisz Home"
+msgstr "Home"
 
 #: engines/bagel/metaengine.cpp:73
-#, fuzzy
-#| msgid "End key"
 msgid "End"
-msgstr "Klawisz End"
+msgstr "End"
 
 #: engines/bagel/metaengine.cpp:180
 msgid "General Keys"
 msgstr "Klawisze ogólne"
 
 #: engines/bagel/metaengine.cpp:180
-#, fuzzy
-#| msgid "Minimal Volume"
 msgid "Minimal Keys"
-msgstr "Głośność minimalna"
+msgstr "Klawisze minimalistyczne"
 
 #. I18N: Escape is a key
 #: engines/bbvs/metaengine.cpp:95
@@ -7998,16 +7740,16 @@ msgid "Quit game"
 msgstr "Wyjdź z gry"
 
 #: engines/bolt/metaengine.cpp:34
-#, fuzzy
-#| msgid "Enable high resolution"
 msgid "Extended game resolution"
-msgstr "Włącz grafikę wysokiej rozdzielczości"
+msgstr "Zwiększona rozdzielczość gry"
 
 #: engines/bolt/metaengine.cpp:35
 msgid ""
 "This option allows the game to play at a slightly extended resolution. This "
 "is what the Mac and CDi versions are supposed to play like."
 msgstr ""
+"Ta opcja pozwala, aby gra używała nieznacznie większej rozdzielczości. Tak "
+"powinny wyglądać wersję na Maca oraz CDi."
 
 #: engines/buried/buried.cpp:598
 msgid "Are you sure you want to quit?"
@@ -8190,56 +7932,38 @@ msgstr "Potwierdź zamknięcie"
 #. I18N: Here ALTered Item refers to the dice that has been altered/changed.
 #. In order to escape the dice game loop press Right/Left Alt
 #: engines/cge/metaengine.cpp:250
-#, fuzzy
-#| msgid "ALTered Item"
 msgid "ALTered item"
 msgstr "Zmieniony przedmiot (ALT)"
 
 #: engines/cge/metaengine.cpp:257
-#, fuzzy
-#| msgid "Inventory Item 1 (Select / Deselect)"
 msgid "Inventory item 1 (Select / Deselect)"
 msgstr "Pozycja ekwipunku 1 (zaznacz/odznacz)"
 
 #: engines/cge/metaengine.cpp:262
-#, fuzzy
-#| msgid "Inventory Item 2 (Select / Deselect)"
 msgid "Inventory item 2 (Select / Deselect)"
 msgstr "Pozycja ekwipunku 2 (zaznacz/odznacz)"
 
 #: engines/cge/metaengine.cpp:267
-#, fuzzy
-#| msgid "Inventory Item 3 (Select / Deselect)"
 msgid "Inventory item 3 (Select / Deselect)"
 msgstr "Pozycja ekwipunku 3 (zaznacz/odznacz)"
 
 #: engines/cge/metaengine.cpp:272
-#, fuzzy
-#| msgid "Inventory Item 4 (Select / Deselect)"
 msgid "Inventory item 4 (Select / Deselect)"
 msgstr "Pozycja ekwipunku 4 (zaznacz/odznacz)"
 
 #: engines/cge/metaengine.cpp:277
-#, fuzzy
-#| msgid "Inventory Item 5 (Select / Deselect)"
 msgid "Inventory item 5 (Select / Deselect)"
 msgstr "Pozycja ekwipunku 5 (zaznacz/odznacz)"
 
 #: engines/cge/metaengine.cpp:282
-#, fuzzy
-#| msgid "Inventory Item 6 (Select / Deselect)"
 msgid "Inventory item 6 (Select / Deselect)"
 msgstr "Pozycja ekwipunku 6 (zaznacz/odznacz)"
 
 #: engines/cge/metaengine.cpp:287
-#, fuzzy
-#| msgid "Inventory Item 7 (Select / Deselect)"
 msgid "Inventory item 7 (Select / Deselect)"
 msgstr "Pozycja ekwipunku 7 (zaznacz/odznacz)"
 
 #: engines/cge/metaengine.cpp:292
-#, fuzzy
-#| msgid "Inventory Item 8 (Select / Deselect)"
 msgid "Inventory item 8 (Select / Deselect)"
 msgstr "Pozycja ekwipunku 8 (zaznacz/odznacz)"
 
@@ -8306,10 +8030,8 @@ msgstr "Zamknij okno dialogowe"
 #: engines/chamber/metaengine.cpp:61 engines/drascula/metaengine.cpp:208
 #: engines/lab/metaengine.cpp:151 engines/sherlock/metaengine.cpp:338
 #: engines/sherlock/metaengine.cpp:790 engines/tot/metaengine.cpp:104
-#, fuzzy
-#| msgid "Quit panel keymapping"
 msgid "Quit dialog keymappings"
-msgstr "Mapowanie klawiszy panelu wychodzenia z gry"
+msgstr "Mapowanie klawiszy okna dialogowego"
 
 #: engines/cine/metaengine.cpp:57
 msgid "Use transparent dialog boxes in 16 color scenes"
@@ -8437,8 +8159,6 @@ msgstr "Krok w prawo"
 #: engines/freescape/games/dark/dark.cpp:252
 #: engines/freescape/games/driller/driller.cpp:149
 #: engines/freescape/games/eclipse/eclipse.cpp:374
-#, fuzzy
-#| msgid "Rotate Left"
 msgid "Rotate left"
 msgstr "Obrót w lewo"
 
@@ -8447,34 +8167,24 @@ msgstr "Obrót w lewo"
 #: engines/freescape/games/dark/dark.cpp:257
 #: engines/freescape/games/driller/driller.cpp:154
 #: engines/freescape/games/eclipse/eclipse.cpp:379
-#, fuzzy
-#| msgid "Rotate Right"
 msgid "Rotate right"
 msgstr "Obrót w prawo"
 
 #: engines/colony/metaengine.cpp:147
-#, fuzzy
-#| msgid "Look down"
 msgid "Look behind"
-msgstr "Spójrz w dół"
+msgstr "Spójrz do tyłu"
 
 #: engines/colony/metaengine.cpp:152
-#, fuzzy
-#| msgid "Toggle mute"
 msgid "Toggle mouselook"
-msgstr "Przełącz wyciszenie"
+msgstr "Włącz/wyłącz rozglądanie myszą"
 
 #: engines/colony/metaengine.cpp:158
-#, fuzzy
-#| msgid "Toggle sound"
 msgid "Toggle dashboard"
-msgstr "Włącz/wyłącz dźwięk"
+msgstr "Włącz/wyłącz tablicę"
 
 #: engines/colony/metaengine.cpp:163
-#, fuzzy
-#| msgid "Toggle frame by frame"
 msgid "Toggle wireframe"
-msgstr "Włącz/wyłącz tryb klatka po klatce"
+msgstr "Włącz/wyłącz tryb szkieletowy"
 
 #: engines/colony/metaengine.cpp:173 engines/hypno/metaengine.cpp:146
 #: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
@@ -8489,11 +8199,11 @@ msgstr "Wystrzel z broni"
 
 #: engines/colony/savegame.cpp:290
 msgid "Saving is only available in first-person view."
-msgstr ""
+msgstr "Zapisywanie jest możliwe tylko w widoku pierwszej osoby."
 
 #: engines/colony/savegame.cpp:299
 msgid "Loading is only available in first-person view."
-msgstr ""
+msgstr "Wczytywanie jest możliwe tylko w widoku pierwszej osoby."
 
 #: engines/crab/input/input.cpp:119
 msgid "Talk / Interact"
@@ -8629,10 +8339,8 @@ msgstr ""
 "zostać skopiowane do katalogu SOUND."
 
 #: engines/darkseed/dialogs.cpp:121
-#, fuzzy
-#| msgid "SFX volume:"
 msgid "SFX mode:"
-msgstr "Efekty dźw.:"
+msgstr "Tryb efektów graficznych:"
 
 #: engines/darkseed/dialogs.cpp:122
 msgid ""
