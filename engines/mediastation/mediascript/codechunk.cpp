@@ -28,12 +28,6 @@
 
 namespace MediaStation {
 
-CodeChunk::CodeChunk(Chunk &chunk) {
-	uint lengthInBytes = chunk.readTypedUint32();
-	debugC(5, kDebugLoading, "CodeChunk::CodeChunk(): Length 0x%x (@0x%llx)", lengthInBytes, static_cast<long long int>(chunk.pos()));
-	_bytecode = static_cast<ParameterReadStream *>(chunk.readStream(lengthInBytes));
-}
-
 ScriptValue CodeChunk::executeNextBlock() {
 	uint blockSize = _bytecode->readTypedUint32();
 	int64 startingPos = _bytecode->pos();
@@ -52,7 +46,8 @@ ScriptValue CodeChunk::executeNextBlock() {
 		}
 	}
 
-	// Verify we consumed the right number of script bytes.
+	// Verify we consumed the right number of script bytes. This is not in the original,
+	// but it's a very useful sanity check.
 	if (!_returnImmediately) {
 		uint bytesRead = _bytecode->pos() - startingPos;
 		if (bytesRead != blockSize) {
@@ -68,19 +63,16 @@ void CodeChunk::skipNextBlock() {
 	_bytecode->skip(lengthInBytes);
 }
 
-ScriptValue CodeChunk::execute(Common::Array<ScriptValue> *args) {
+ScriptValue CodeChunk::executeWithArguments(Common::Array<ScriptValue> *args) {
+	// Only functions have this call depth requirement.
+	if (g_engine->getFunctionManager()->_scriptBlockCallDepth >= MAX_CALL_DEPTH) {
+		error("%s: Exceeded max call stack depth", __func__);
+	}
+
+	g_engine->getFunctionManager()->_scriptBlockCallDepth++;
 	_args = args;
 	ScriptValue returnValue = executeNextBlock();
-
-	// Rewind the stream once we're finished, in case we need to execute
-	// this code again!
-	_bytecode->seek(0);
-	_returnImmediately = false;
-	_locals.clear();
-	// We don't own the args, so we will prevent a potentially out-of-scope
-	// variable from being re-accessed.
-	_args = nullptr;
-
+	g_engine->getFunctionManager()->_scriptBlockCallDepth--;
 	return returnValue;
 }
 
@@ -630,10 +622,8 @@ void CodeChunk::evaluateWhileLoop() {
 CodeChunk::~CodeChunk() {
 	_locals.clear();
 
-	// We don't own the args, so we don't need to delete it.
+	// We don't own the args or the code stream, so we don't need to delete them.
 	_args = nullptr;
-
-	delete _bytecode;
 	_bytecode = nullptr;
 }
 

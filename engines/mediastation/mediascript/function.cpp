@@ -19,6 +19,8 @@
  *
  */
 
+#include "common/memstream.h"
+
 #include "mediastation/mediascript/function.h"
 #include "mediastation/debugchannels.h"
 #include "mediastation/mediastation.h"
@@ -46,19 +48,33 @@ namespace MediaStation {
 ScriptFunction::ScriptFunction(Chunk &chunk) {
 	_contextId = chunk.readTypedUint16();
 	_id = chunk.readTypedUint16();
-	_code = new CodeChunk(chunk);
+	_bytecodeSize = chunk.readTypedUint32();
+	debugC(5, kDebugLoading, "%s: Context %d, function %d [%d bytes]",
+		__func__, _contextId, _id, _bytecodeSize);
+
+	// Store bytecode as a flat buffer rather than a stream, so we can create
+	// fresh streams for each execution (necessary for recursive function calls).
+	_bytecodeBuffer = static_cast<byte *>(malloc(_bytecodeSize));
+	chunk.read(_bytecodeBuffer, _bytecodeSize);
 }
 
 ScriptFunction::~ScriptFunction() {
-	delete _code;
-	_code = nullptr;
+	free(_bytecodeBuffer);
+	_bytecodeBuffer = nullptr;
 }
 
 ScriptValue ScriptFunction::execute(Common::Array<ScriptValue> &args) {
 	Common::String name = g_engine->formatFunctionName(_id);
 	debugC(5, kDebugScript, "\n********** SCRIPT FUNCTION %s **********", name.c_str());
-	ScriptValue returnValue = _code->execute(&args);
-	debugC(5, kDebugScript, "********** END SCRIPT FUNCTION **********");
+
+	// Create a new stream for this execution to avoid conflicts with recursive calls.
+	Common::SeekableReadStream *baseStream = new Common::MemoryReadStream(_bytecodeBuffer, _bytecodeSize, DisposeAfterUse::NO);
+	ParameterReadStream *bytecodeStream = static_cast<ParameterReadStream *>(baseStream);
+	CodeChunk code(bytecodeStream);
+	ScriptValue returnValue = code.executeWithArguments(&args);
+	delete bytecodeStream;
+
+	debugC(5, kDebugScript, "********** END SCRIPT FUNCTION %s **********", name.c_str());
 	return returnValue;
 }
 

@@ -32,13 +32,17 @@ namespace MediaStation {
 
 class CodeChunk {
 public:
-	CodeChunk(Chunk &chunk);
+	CodeChunk(ParameterReadStream *bytecode) : _bytecode(bytecode) {};
 	~CodeChunk();
 
 	ScriptValue executeNextBlock();
-	ScriptValue execute(Common::Array<ScriptValue> *args = nullptr);
+	ScriptValue executeWithArguments(Common::Array<ScriptValue> *args);
 
 private:
+	// This is not the number of recursive calls, it is as far is the script call stack is
+	// ever allowed to get.
+	static const uint MAX_CALL_DEPTH = 0x0f;
+
 	void skipNextBlock();
 
 	ScriptValue evaluateExpression();
