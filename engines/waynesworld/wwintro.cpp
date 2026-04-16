@@ -205,6 +205,30 @@ void WWIntro::introPt3_clean() {
 	_outlineSurface = _logoSurface = _backg2Surface = nullptr;
 }
 
+bool WWIntro::introPt4() {
+	bool retVal = true;
+	introPt4_init();
+
+	if (!introPt4_intro()) {
+		retVal = false;
+	} else if (!introPt4_displayCallInTime()) {
+		retVal = false;
+	} else if (!introPt4_caller1()) {
+		retVal = false;
+	} else if (!introPt4_caller2()) {
+		retVal = false;
+	} else if (!introPt4_caller3()) {
+		retVal = false;
+	} else if (!introPt4_caller4()) {
+		retVal = false;
+	} else
+		retVal = introPt4_playGuitar();
+
+	introPt4_cleanup();
+
+	return retVal;
+}
+
 bool WWIntro::introPt4_displayCallInTime() {
 	WWSurface *pt4Sub3Surface1 = new WWSurface(178, 21);
 	WWSurface *pt4Sub3Surface2 = new WWSurface(178, 21);
@@ -226,6 +250,42 @@ bool WWIntro::introPt4_displayCallInTime() {
 
 	delete pt4Sub3Surface1;
 	delete pt4Sub3Surface2;
+
+	if (_vm->_escPressed) {
+		return false;
+	}
+
+	return true;
+}
+
+void WWIntro::introPt4_cleanup() {
+	delete _vm->_fontWW;
+	_vm->_fontWW = nullptr;
+	delete _introBackg1Image;
+	_introBackg1Image = nullptr;
+	for (int i = 0; i < 5; ++i) {
+		delete _introWbodyImage[i];
+		_introWbodyImage[i] = nullptr;
+	}
+	delete _introGbodyImage;
+	_introGbodyImage = nullptr;
+	for (int i = 0; i < 7; ++i) {
+		delete _introWhead1[i];
+		_introWhead1[i] = nullptr;
+	}
+	for (int i = 0; i < 11; ++i) {
+		delete _introGhead1[i];
+		_introGhead1[i] = nullptr;
+	}
+}
+
+bool WWIntro::introPt4_playGuitar() {
+	sub2FEFB(1, 1, 1, 0, 9, -1);
+	sub2FEFB(1, 2, 1, 0, 9, -1);
+	sub2FEFB(1, 3, 1, 0, 9, -1);
+	sub2FEFB(1, 4, 1, 0, 9, -1);
+
+	_vm->_midi->stopSong();
 
 	if (_vm->_escPressed) {
 		return false;

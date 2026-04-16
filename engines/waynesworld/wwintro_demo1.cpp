@@ -192,22 +192,6 @@ bool WWIntro_demo1::introPt3() {
 	return true;
 }
 
-bool WWIntro_demo1::introPt4() {
-	bool retVal = true;
-
-	introPt4_init();
-	if (!introPt4_intro()) {
-		retVal = false;
-	} else if (!introPt4_displayCallInTime()) {
-		retVal = false;
-	} else if (!introPt4_caller1()) {
-		retVal = false;
-	}
-
-	introPt4_cleanup();
-	return retVal;
-}
-
 void WWIntro_demo1::introPt4_init() {
 	_vm->_fontWW = new GFTFont();
 	_vm->_fontWW->loadFromFile("ww.gft");
@@ -217,8 +201,13 @@ void WWIntro_demo1::introPt4_init() {
 
 	_introBackg1Image = new WWSurface(320, 170);
 	_vm->drawImageToSurface(_oanGxl, "backg1.pcx", _introBackg1Image, 0, 0);
-	_introWbodyImage[0] = new WWSurface(145, 118);
-	_vm->drawImageToSurface(_oanGxl, "wbody0.pcx", _introWbodyImage[0], 0, 0);
+
+	for (int i = 0; i < 5; ++i) {
+		_introWbodyImage[i] = new WWSurface(145, 118);
+		Common::String filename = Common::String::format("wbody%d.pcx", i == 0 ? 0 : i + 8);
+		_vm->drawImageToSurface(_oanGxl, filename.c_str(), _introWbodyImage[i], 0, 0);
+	}
+
 	_introGbodyImage = new WWSurface(160, 149);
 	_vm->drawImageToSurface(_oanGxl, "gbody0.pcx", _introGbodyImage, 0, 0);
 
@@ -343,25 +332,222 @@ bool WWIntro_demo1::introPt4_caller1() {
 	return true;
 }
 
-void WWIntro_demo1::introPt4_cleanup() {
-	delete _vm->_fontWW;
-	_vm->_fontWW = nullptr;
-	delete _introBackg1Image;
-	_introBackg1Image = nullptr;
+bool WWIntro_demo1::introPt4_caller2() {
+	for (int i = 0; i < 4; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->playSound("flash-bk.abt", true);
+
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int j = 0; j < 10; ++j) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+	_vm->waitSeconds(2);
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+	}
+
+	for (int i = 0; i < 2; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 4; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->_sound->playSound("no-way.abt", false);
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+	}
+	_vm->_sound->playSound("goodc-g.abt", false);
+
+	for (int i = 0; i < 2; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt4_caller3() {
 	for (int i = 0; i < 5; ++i) {
-		delete _introWbodyImage[i];
-		_introWbodyImage[i] = nullptr;
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
 	}
-	delete _introGbodyImage;
-	_introGbodyImage = nullptr;
-	for (int i = 0; i < 7; ++i) {
-		delete _introWhead1[i];
-		_introWhead1[i] = nullptr;
+
+	for (int i = 0; i < 10; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
 	}
-	for (int i = 0; i < 11; ++i) {
-		delete _introGhead1[i];
-		_introGhead1[i] = nullptr;
+	++_startOawPos;
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 0);
 	}
+	++_startOawPos;
+	++_startOagPos;
+	_vm->_sound->playSound("worthy.snd", true);
+
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < 15; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	_vm->_sound->playSound("not!.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 0);
+	}
+	++_startOawPos;
+	++_startOagPos;
+
+	for (int i = 0; i < 2; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int j = 0; j < 4; ++j) {
+		for (int i = 0; i < 15; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+	_vm->_sound->playSound("as-if.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 0);
+	}
+	++_startOawPos;
+	++_startOagPos;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt4_caller4() {
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < 15; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+	_vm->waitSeconds(2);
+
+	for (int i = 0; i < 15; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < 15; ++i) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+	}
+
+	_vm->_sound->playSound("ilovetw.abt", true);
+
+	for (int i = 0; i < 15; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+	_vm->waitSeconds(2);
+	_vm->_sound->playSound("cool!.abt", false);
+
+	for (int i = 0; i < 3; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 2; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->_sound->playSound("nway-way.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+	}
+	++_startOagPos;
+
+	sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+	_vm->waitSeconds(1);
+
+	for (int j = 0; j < 3; ++j) {
+		for (int i = 0; i < 8; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	for (int i = 0; i < 8; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->_sound->playSound("exskweez.abt", false);
+
+	for (int i = 0; i < 8; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 6; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	_vm->_sound->playSound("donut.snd", true);
+
+	for (int j = 0; j < 3; ++j) {
+		for (int i = 0; i < 8; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	_vm->_sound->playSound("partyon.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+	}
+	++_startOagPos;
+
+	return true;
 }
 
 } // End of namespace WaynesWorld
