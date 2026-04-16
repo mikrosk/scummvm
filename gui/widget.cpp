@@ -213,7 +213,8 @@ bool Widget::isEnabled() const {
 }
 
 void Widget::setVisible(bool e) {
-	if (!(_flags & WIDGET_INVISIBLE) != e) {
+	bool currentlyVisible = !(_flags & WIDGET_INVISIBLE);
+	if (currentlyVisible != e) {
 		if (e) {
 			clearFlags(WIDGET_INVISIBLE);
 			markAsDirty();
