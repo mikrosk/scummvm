@@ -134,6 +134,8 @@ private:
 	bool introPreviewRoom08and22();
 	bool introMapButterfield();
 	bool introPreviewRoom07and15and16();
+	bool introMapDowntown();
+	bool introPreviewRoom10();
 
 protected:
 	bool introPt4_intro() override;

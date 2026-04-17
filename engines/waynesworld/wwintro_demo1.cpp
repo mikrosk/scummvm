@@ -25,7 +25,6 @@
 #include "waynesworld/gxlarchive.h"
 
 #include "audio/audiostream.h"
-#include "graphics/paletteman.h"
 
 namespace WaynesWorld {
 
@@ -38,17 +37,14 @@ WWIntro_demo1::~WWIntro_demo1() {
 void WWIntro_demo1::runIntro() {
 	// continueFl is used like in the full version, but for the moment it's not possible to skip (demo is not interactive)
 	bool continueFl = initOanGxl();
-	//continueFl = false; // For debug purposes
+	// continueFl = false; // For debug purposes
 
 	if (continueFl)
 		continueFl = introPt1();
-
 	if (continueFl)
 		continueFl = introPt3();
-
 	if (continueFl)
 		continueFl = introPt4();
-
 	if (continueFl)
 		continueFl = introPt3Bis();
 
@@ -63,9 +59,13 @@ void WWIntro_demo1::runIntro() {
 		continueFl = introMapStonebridge();
 	if (continueFl)
 		continueFl = introPreviewRoom08and22();
+	if (continueFl)
+		continueFl = introMapButterfield();
+	if (continueFl)
+		continueFl = introPreviewRoom07and15and16();
 
-	introMapButterfield();
-	introPreviewRoom07and15and16();
+	introMapDowntown();
+	introPreviewRoom10();
 }
 
 bool WWIntro_demo1::introPt1() {
@@ -796,4 +796,111 @@ bool WWIntro_demo1::introPreviewRoom07and15and16() {
 	return true;
 }
 
+bool WWIntro_demo1::introMapDowntown() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(137, 110);
+		Common::String filename = Common::String::format("dt_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "dt_tag.pcx", 125, 137);
+	_vm->waitSeconds(1);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("flash-bk.abt", false);
+
+	for (int i = 3; i < 12; ++i) {
+		// The original starts the loop at 3. It looks like a typo, but it's on purpose: there's a visible glitch on the left on the first 3 frames.
+		_vm->_screen->drawSurface(zmPcx[i], 70, 69);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "jun_tag.pcx", 78, 87);
+	_vm->drawImageToScreen(m02Gxl, "cih_tag.pcx", 134, 102);
+	_vm->drawImageToScreen(m02Gxl, "uno_tag.pcx", 142, 137);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom10() {
+	GxlArchive *r10Gxl = new GxlArchive("r10");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+
+	WWSurface *r10Win = new WWSurface(141, 92);
+	_vm->drawImageToSurface(r10Gxl, "win.pcx", r10Win, 0, 0);
+	WWSurface *r10Getmon[5] = {nullptr};
+	for (int i = 0; i < 5; ++i) {
+		r10Getmon[i] = new WWSurface(84, 100);
+		Common::String filename = Common::String::format("getmon%d.pcx", i);
+		_vm->drawImageToSurface(r10Gxl, filename.c_str(), r10Getmon[i], 0, 0);
+	}
+
+	WWSurface *r10Puttick[4] = {nullptr};
+	for (int i = 0; i < 4; ++i) {
+		r10Puttick[i] = new WWSurface(84, 100);
+		Common::String filename = Common::String::format("puttick%d.pcx", i);
+		_vm->drawImageToSurface(r10Gxl, filename.c_str(), r10Puttick[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r10Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->drawImageToScreen(r10Gxl, "money.pcx", 136, 100);
+	_vm->paletteFadeIn(0, 256, 3);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("ilovetw.abt", false);
+	_vm->waitSeconds(1);
+
+	for (int i = 0; i < 5; ++i) {
+		_vm->_screen->drawSurface(r10Getmon[i], 98, 7);
+		_vm->waitMillis(75);
+	}
+	
+	for (int i = 0; i < 4; ++i) {
+		_vm->_screen->drawSurface(r10Puttick[i], 98, 7);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(r10Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(r10Gxl, "cticket.pcx", 147, 101);
+
+	for (int i = 0; i < 4; ++i)
+		delete r10Puttick[i];
+	for (int i = 0; i < 5; ++i)
+		delete r10Getmon[i];
+
+	_vm->waitSeconds(2);
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("ex-clsp2.snd", false);
+	_vm->drawImageToScreen(r10Gxl, "ticket.pcx", 0, 13);
+	_vm->paletteFadeIn(0, 256, 64);
+	_vm->waitSeconds(2);
+
+	_vm->drawRandomEffect(r10Win, 157, 38, 1, 1);
+
+	delete r10Win;
+
+	delete m00Gxl;
+	delete r10Gxl;
+
+	return true;
+}
 } // End of namespace WaynesWorld
