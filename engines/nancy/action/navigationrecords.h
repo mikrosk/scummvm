@@ -44,6 +44,7 @@ class HotSingleFrameSceneChange : public SceneChange {
 public:
 	HotSingleFrameSceneChange(bool readExtra = false) : _readExtra(readExtra) {
 		_hasHotspot = false;
+		_hoverCursor = CursorManager::kNormal;
 	}
 	virtual ~HotSingleFrameSceneChange() {}
 
