@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.1.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-16 05:35+0000\n"
+"POT-Creation-Date: 2026-04-17 00:10+0000\n"
 "PO-Revision-Date: 2025-04-09 20:18+0000\n"
 "Last-Translator: Niv Baehr <bloop93@gmail.com>\n"
 "Language-Team: Hebrew <https://translations.scummvm.org/projects/scummvm/"
@@ -2922,7 +2922,7 @@ msgstr ""
 "ניתן לשנות הגדרה זו בהמשך בכרטיסייה שונות\n"
 "בתיבת הדו-שיח אפשרויות."
 
-#: gui/widget.cpp:466 gui/widget.cpp:468 gui/widget.cpp:473 gui/widget.cpp:475
+#: gui/widget.cpp:467 gui/widget.cpp:469 gui/widget.cpp:474 gui/widget.cpp:476
 msgid "Clear value"
 msgstr "ניקוי ערך"
 

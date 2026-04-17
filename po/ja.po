@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-16 05:35+0000\n"
+"POT-Creation-Date: 2026-04-17 00:10+0000\n"
 "PO-Revision-Date: 2026-04-15 08:22+0000\n"
 "Last-Translator: VAN-Gluon <van.gluonp@gmail.com>\n"
 "Language-Team: Japanese <https://translations.scummvm.org/projects/scummvm/"
@@ -2970,7 +2970,7 @@ msgstr ""
 "設定は、後から「オプション」→「その他」で\n"
 "変更可能です。"
 
-#: gui/widget.cpp:466 gui/widget.cpp:468 gui/widget.cpp:473 gui/widget.cpp:475
+#: gui/widget.cpp:467 gui/widget.cpp:469 gui/widget.cpp:474 gui/widget.cpp:476
 msgid "Clear value"
 msgstr "クリア"
 
