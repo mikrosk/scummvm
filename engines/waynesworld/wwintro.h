@@ -131,6 +131,9 @@ private:
 	bool introDisplaySign();
 	bool introPreviewRoom00();
 	bool introMapStonebridge();
+	bool introPreviewRoom08and22();
+	bool introMapButterfield();
+	bool introPreviewRoom07and15and16();
 
 protected:
 	bool introPt4_intro() override;

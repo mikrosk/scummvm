@@ -38,6 +38,7 @@ WWIntro_demo1::~WWIntro_demo1() {
 void WWIntro_demo1::runIntro() {
 	// continueFl is used like in the full version, but for the moment it's not possible to skip (demo is not interactive)
 	bool continueFl = initOanGxl();
+	//continueFl = false; // For debug purposes
 
 	if (continueFl)
 		continueFl = introPt1();
@@ -57,7 +58,14 @@ void WWIntro_demo1::runIntro() {
 		continueFl = introDisplaySign();
 
 	introPreviewRoom00();
-	introMapStonebridge();
+	
+	if (continueFl)
+		continueFl = introMapStonebridge();
+	if (continueFl)
+		continueFl = introPreviewRoom08and22();
+
+	introMapButterfield();
+	introPreviewRoom07and15and16();
 }
 
 bool WWIntro_demo1::introPt1() {
@@ -680,6 +688,110 @@ bool WWIntro_demo1::introMapStonebridge() {
 		delete zmPcx[i];
 
 	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom08and22() {
+	GxlArchive *r08Gxl = new GxlArchive("r08");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+	GxlArchive *r22Gxl = new GxlArchive("r22");
+
+	WWSurface *r22Back = new WWSurface(320, 150);
+	_vm->drawImageToSurface(r22Gxl, "backg.pcx", r22Back, 0, 0);
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r08Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(3);
+
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+
+	_vm->playSound("zeetsa.abt", false);
+	_vm->drawSpiralEffect(r22Back, 0, 0, 5, 5);
+	_vm->waitSeconds(3);
+
+	delete r22Back;
+
+	delete r22Gxl;
+	delete m00Gxl;
+	delete r08Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introMapButterfield() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(171, 109);
+		Common::String filename = Common::String::format("but_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "but_tag.pcx", 247, 38);
+	_vm->playSound("flash-bk.abt", false);
+	_vm->waitSeconds(1);
+
+	for (int i = 0; i < 12; ++i) {
+		_vm->_screen->drawSurface(zmPcx[i], 127, 11);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "cin_tag.pcx", 147, 27);
+	_vm->drawImageToScreen(m02Gxl, "c35_tag.pcx", 208, 72);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom07and15and16() {
+	GxlArchive *r07Gxl = new GxlArchive("r07");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+	GxlArchive *r15Gxl = new GxlArchive("r15");
+	GxlArchive *r16Gxl = new GxlArchive("r16");
+
+	WWSurface *r15Back = new WWSurface(320, 150);
+	_vm->drawImageToSurface(r15Gxl, "backg.pcx", r15Back, 0, 0);
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r07Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(3);
+
+	_vm->drawSpiralEffect(r15Back, 0, 0, 5, 5);
+	_vm->waitSeconds(3);
+	delete r15Back;
+
+	WWSurface *r16Back = new WWSurface(320, 150);
+	_vm->drawImageToSurface(r16Gxl, "backg.pcx", r16Back, 0, 0);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->_sound->playSound("zang!.abt", false);
+	_vm->waitSeconds(3);
+	_vm->drawSpiralEffect(r16Back, 0, 0, 5, 5);
+	_vm->waitSeconds(3);
+	delete r16Back;
+
+	delete r16Gxl;
+	delete r15Gxl;
+	delete m00Gxl;
+	delete r07Gxl;
 
 	return true;
 }
