@@ -48,6 +48,16 @@ void WWIntro_demo1::runIntro() {
 	if (continueFl)
 		continueFl = introPt4();
 
+	if (continueFl)
+		continueFl = introPt3Bis();
+
+	cleanOanGxl();
+
+	if (continueFl)
+		continueFl = introDisplaySign();
+
+	introPreviewRoom00();
+	introMapStonebridge();
 }
 
 bool WWIntro_demo1::introPt1() {
@@ -188,6 +198,29 @@ bool WWIntro_demo1::introPt3() {
 	_vm->_sound->playSound("exclnt.snd", false);
 
 	introPt3_clean();
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt3Bis() {
+	// sub1 - Parameter is always 'true' so it has been removed and the code simplified
+	introPt3_init();
+	// End of sub1
+	_vm->stopMusic();
+	_vm->playSound("theme1.snd", false);
+
+	wwEffect(1, 0);
+	wwEffect(1, 1);
+	wwEffect(1, 2);
+	wwEffect(1, 3);
+
+	for (int i = 0; i < 20; ++i) {
+		setColor236(i % 19);
+		wwEffect((i % 8) + 1, 4);
+	}
+
+	introPt3_clean();
+	_vm->waitSeconds(9);
 
 	return true;
 }
@@ -546,6 +579,107 @@ bool WWIntro_demo1::introPt4_caller4() {
 		sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
 	}
 	++_startOagPos;
+
+	return true;
+}
+
+bool WWIntro_demo1::introDisplaySign() {
+	WWSurface *introPt6Surface[5] = {nullptr};
+
+	GxlArchive *signGxl = new GxlArchive("sign");
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+
+	for (int i = 0; i < 5; ++i) {
+		introPt6Surface[i] = new WWSurface(320, 200);
+		Common::String filename = Common::String::format("sign%d.pcx", i);
+		_vm->drawImageToSurface(signGxl, filename.c_str(), introPt6Surface[i], 0, 0);
+	}
+
+	_vm->_sound->playSound("ex-clsp2.snd", false);
+
+	for (int i = 0; i < 5; ++i) {
+		_vm->_screen->drawSurface(introPt6Surface[i], 0, 0);
+		_vm->waitMillis(150);
+	}
+
+	WWSurface *signBottomSurface = new WWSurface(320, 94);
+	_vm->drawImageToSurface(signGxl, "signbot.pcx", signBottomSurface, 0, 0);
+
+	_vm->waitSeconds(4);
+	_vm->_musicIndex = 1;
+	_vm->changeMusic();
+
+	WWSurface *scrollSurface = new WWSurface(320, 200);
+
+	for (int i = 199; i > 106; --i) {
+		scrollSurface->copyRectToSurface((Graphics::Surface)*introPt6Surface[4], 0, 0, Common::Rect(0, 200 - i, 319, 200));
+		scrollSurface->copyRectToSurface((Graphics::Surface)*signBottomSurface, 0, i, Common::Rect(0, 0, 319, 200 - i));
+		_vm->_screen->drawSurface(scrollSurface, 0, 0);
+	}
+
+	delete scrollSurface;
+	delete signBottomSurface;
+	for (int i = 0; i < 5; ++i)
+		delete introPt6Surface[i];
+
+	delete signGxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom00() {
+	GxlArchive *r00Gxl = new GxlArchive("r00");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	_vm->loadPalette(r00Gxl, "backg.pcx");
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_musicIndex = 0;
+	_vm->changeMusic();
+	_vm->drawImageToScreen(r00Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(3);
+
+	delete m00Gxl;
+	delete r00Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introMapStonebridge() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(137, 109);
+		Common::String filename = Common::String::format("stn_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "stn_tag.pcx", 173, 90);
+	_vm->playSound("flash-bk.abt", false);
+	_vm->waitSeconds(1);
+
+	for (int i = 0; i < 12; ++i) {
+		_vm->_screen->drawSurface(zmPcx[i], 173, 13);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "may_tag.pcx", 193, 40);
+	_vm->drawImageToScreen(m02Gxl, "eug_tag.pcx", 241, 82);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
 
 	return true;
 }

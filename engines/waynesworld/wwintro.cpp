@@ -43,6 +43,11 @@ bool WWIntro::initOanGxl() {
 	return true;
 }
 
+void WWIntro::cleanOanGxl() {
+	delete _oanGxl;
+	_oanGxl = nullptr;
+}
+
 void WWIntro::wwEffect(int arg0, int arg1, bool flag) {
 	int xmult = 0;
 	int ymult = 0;

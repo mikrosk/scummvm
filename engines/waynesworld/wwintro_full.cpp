@@ -53,7 +53,7 @@ void WWIntro_full::runIntro() {
 	cleanOanGxl();
 
 	if (continueFl)
-		introPt6();
+		introDisplaySign();
 
 	introPt7();
 }
@@ -247,17 +247,10 @@ bool WWIntro_full::introPt3(bool flag) {
 	return true;
 }
 
-void WWIntro_full::cleanOanGxl() {
-	delete _oanGxl;
-	_oanGxl = nullptr;
-}
-
-void WWIntro_full::introPt6() {
+void WWIntro_full::introDisplaySign() {
 	WWSurface *introPt6Surface[5] = {nullptr};
 	WWSurface *signBottomSurface = nullptr;
 	WWSurface *scrollSurface = nullptr;
-
-	_vm->_escPressed = false;
 
 	while (_vm->_sound->isSFXPlaying())
 		_vm->waitMillis(10);

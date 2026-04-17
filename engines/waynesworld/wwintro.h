@@ -73,6 +73,7 @@ protected:
 
 
 	bool initOanGxl();
+	void cleanOanGxl();
 	void wwEffect(int arg0, int arg1, bool flag = false);
 	void setColor236(int index);
 	void sub2FEFB(int arg_refreshBackgFl, int arg_wBodyIndex, int arg_gBodyIndex, int arg_wHead1Index, int arg_gHead1Index, int arg_TextId);
@@ -104,8 +105,7 @@ public:
 private:
 	bool introPt1();
 	bool introPt3(bool flag);
-	void cleanOanGxl();
-	void introPt6();
+	void introDisplaySign();
 	void introPt7();
 
 protected:
@@ -127,6 +127,10 @@ public:
 private:
 	bool introPt1();
 	bool introPt3();
+	bool introPt3Bis();
+	bool introDisplaySign();
+	bool introPreviewRoom00();
+	bool introMapStonebridge();
 
 protected:
 	bool introPt4_intro() override;
