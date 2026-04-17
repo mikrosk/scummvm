@@ -52,6 +52,8 @@ namespace Graphics { struct Surface; }
 
 namespace Sci {
 
+extern int showScummVMDialog(const Common::U32String &message, const Common::U32String &altButton = Common::U32String(), bool alignCenter = true);
+
 bool VideoPlayer::open(const Common::Path &fileName) {
 	if (!_decoder->loadFile(fileName)) {
 		warning("Failed to load %s", fileName.toString().c_str());
@@ -65,7 +67,6 @@ void VideoPlayer::showUnsupportedFormatDialog() {
 	// KQ7 2.00b videos are compressed in 24bpp Cinepak, so cannot play on a
 	// system with no RGB support
 	// TODO: Optionally support dithering for Cinepak videos
-	void showScummVMDialog(const Common::U32String &message, const Common::U32String &altButton = Common::U32String(), bool alignCenter = true);
 	showScummVMDialog(Common::U32String::format(_("Cannot play back %s video on a system with maximum color depth of 8bpp"), _decoder->getPixelFormat().toString().c_str()));
 }
 
