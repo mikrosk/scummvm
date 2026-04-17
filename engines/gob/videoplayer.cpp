@@ -1096,8 +1096,11 @@ void VideoPlayer::writeVideoInfo(const Common::String &file, uint16 varX, uint16
 		width  = video.decoder->getWidth();
 		height = video.decoder->getHeight();
 
-		if (VAR_OFFSET(varX) == 0xFFFFFFFF)
-			video.decoder->getFrameCoords(1, x, y, width, height);
+		if (_vm->getGameType() != kGameTypeAdibou2 && _vm->getGameType() != kGameTypeAdi4) {
+			// Note: not found in Adibou2/Adi4 disasm, and cause video gltiches
+			if (VAR_OFFSET(varX) == 0xFFFFFFFF)
+				video.decoder->getFrameCoords(1, x, y, width, height);
+		}
 
 		WRITE_VAR_OFFSET(varX     , x);
 		WRITE_VAR_OFFSET(varY     , y);
