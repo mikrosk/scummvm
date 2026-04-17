@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.8.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-17 07:54+0000\n"
+"POT-Creation-Date: 2026-04-17 08:20+0000\n"
 "PO-Revision-Date: 2021-03-21 08:24+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Belarusian <https://translations.scummvm.org/projects/scummvm/"
@@ -12766,7 +12766,7 @@ msgid ""
 msgstr ""
 "Гэты файл захавання быў створаны іншай версіяй гульні, не магу прачытаць яго"
 
-#: engines/sci/graphics/video32.cpp:69
+#: engines/sci/graphics/video32.cpp:70
 #, fuzzy, c-format
 #| msgid ""
 #| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"

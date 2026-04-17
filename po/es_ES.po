@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.4.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-17 07:54+0000\n"
+"POT-Creation-Date: 2026-04-17 08:20+0000\n"
 "PO-Revision-Date: 2026-04-12 18:52+0000\n"
 "Last-Translator: IlDucci <pajaroloco_2@hotmail.com>\n"
 "Language-Team: Spanish <https://translations.scummvm.org/projects/scummvm/"
@@ -12491,7 +12491,7 @@ msgstr ""
 "Esta partida se guardó con una versión diferente del juego y no se puede "
 "cargar"
 
-#: engines/sci/graphics/video32.cpp:69
+#: engines/sci/graphics/video32.cpp:70
 #, fuzzy, c-format
 #| msgid ""
 #| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"

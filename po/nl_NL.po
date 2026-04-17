@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.9.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-17 07:54+0000\n"
+"POT-Creation-Date: 2026-04-17 08:20+0000\n"
 "PO-Revision-Date: 2026-02-11 14:23+0000\n"
 "Last-Translator: SecularSteve <fairfull.playing@gmail.com>\n"
 "Language-Team: Dutch <https://translations.scummvm.org/projects/scummvm/"
@@ -12509,7 +12509,7 @@ msgstr ""
 "Dit opgeslagen spel is gemaakt met een andere versie van het spel, het laden "
 "is niet mogelijk"
 
-#: engines/sci/graphics/video32.cpp:69
+#: engines/sci/graphics/video32.cpp:70
 #, fuzzy, c-format
 #| msgid ""
 #| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"

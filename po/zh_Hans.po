@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.9.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-17 07:54+0000\n"
+"POT-Creation-Date: 2026-04-17 08:20+0000\n"
 "PO-Revision-Date: 2024-12-01 22:18+0000\n"
 "Last-Translator: 复予 <clonewith@qq.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://"
@@ -12911,7 +12911,7 @@ msgid ""
 "load it"
 msgstr "此存档是使用不同版本的游戏创建的，无法加载"
 
-#: engines/sci/graphics/video32.cpp:69
+#: engines/sci/graphics/video32.cpp:70
 #, fuzzy, c-format
 #| msgid ""
 #| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
