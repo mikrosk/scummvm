@@ -444,6 +444,22 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		return new WhaleSurvivorPuzzle();
 	case 238:
 		return new MemoryPuzzle();
+	// -- Nancy 10 and up --
+	case 239:
+		//return new SortPuzzle();
+	case 241:
+		// return new DotConnectPuzzle();
+	case 242:
+		// return new MagnetMazePuzzle();
+	case 243:
+		// return new BeadPuzzle();
+	case 244:
+		// return new GridMapPuzzle();
+	// -- Nancy 11 and up --
+	case 245:
+		// return new TypingQuizPuzzle();
+	case 246:
+		// return new MatchPuzzle();
 	default:
 		warning("Unknown action record type %d", type);
 		return nullptr;
