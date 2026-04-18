@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.10.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-17 20:58+0000\n"
-"PO-Revision-Date: 2026-04-12 18:52+0000\n"
+"PO-Revision-Date: 2026-04-18 06:04+0000\n"
 "Last-Translator: Lothar Serra Mari <lothar.serramari@scummvm.org>\n"
 "Language-Team: German <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/de/>\n"
@@ -12523,13 +12523,11 @@ msgstr ""
 "nicht möglich"
 
 #: engines/sci/graphics/video32.cpp:70
-#, fuzzy, c-format
-#| msgid ""
-#| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
+#, c-format
 msgid "Cannot play back %s video on a system with maximum color depth of 8bpp"
 msgstr ""
-"Das %d bpp-Video kann nicht auf einem System mit einer maximalen Farbtiefe "
-"von 8bpp abgespielt werden"
+"Das %s-Video kann nicht auf einem System mit einer maximalen Farbtiefe von "
+"8bpp abgespielt werden"
 
 #: engines/sci/metaengine.cpp:212
 msgid "SCI32 support not compiled in"
