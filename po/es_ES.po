@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.4.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-17 20:58+0000\n"
-"PO-Revision-Date: 2026-04-12 18:52+0000\n"
+"PO-Revision-Date: 2026-04-18 20:10+0000\n"
 "Last-Translator: IlDucci <pajaroloco_2@hotmail.com>\n"
 "Language-Team: Spanish <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/es/>\n"
@@ -12492,12 +12492,10 @@ msgstr ""
 "cargar"
 
 #: engines/sci/graphics/video32.cpp:70
-#, fuzzy, c-format
-#| msgid ""
-#| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
+#, c-format
 msgid "Cannot play back %s video on a system with maximum color depth of 8bpp"
 msgstr ""
-"No se puede reproducir un vídeo a %d bpp en un sistema con un límite de "
+"No se puede reproducir un vídeo %s en un sistema con un límite de "
 "profundidad de color de 8 bpp"
 
 #: engines/sci/metaengine.cpp:212
