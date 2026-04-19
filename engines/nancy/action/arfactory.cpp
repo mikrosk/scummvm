@@ -101,7 +101,7 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 			return nullptr;
 		}
 	case 13:
-		return new HotMultiframeMultisceneChange();
+		return new HotMultiframeMultiSceneChange();
 	case 14:
 		return new Hot1FrSceneChange(CursorManager::kExit);
 	case 15:
@@ -141,7 +141,7 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 			return new HotMultiframeSceneChange(CursorManager::kMoveRight);
 		}
 	case 24:
-		return new HotMultiframeMultisceneCursorTypeSceneChange();
+		return new HotMultiframeMultiSceneCursorTypeSceneChange();
 	case 25: {
 		// Weird case; instead of storing the cursor id, they instead chose to store
 		// an AR id corresponding to one of the directional Hot1FrSceneChange variants.

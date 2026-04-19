@@ -145,7 +145,7 @@ protected:
 // Changes the scene when clicked. Hotspot can move along with scene background frame.
 // However, the scene it changes to can be one of two options, picked based on
 // a provided condition.
-class HotMultiframeMultisceneChange : public ActionRecord {
+class HotMultiframeMultiSceneChange : public ActionRecord {
 public:
 	void readData(Common::SeekableReadStream &stream) override;
 	void execute() override;
@@ -165,7 +165,7 @@ protected:
 // Changes the scene when clicked. Hotspot can move along with scene background frame.
 // However, the scene it changes to can be one of several options, picked based on
 // the item the player is currently holding.
-class HotMultiframeMultisceneCursorTypeSceneChange : public ActionRecord {
+class HotMultiframeMultiSceneCursorTypeSceneChange : public ActionRecord {
 public:
 	void readData(Common::SeekableReadStream &stream) override;
 	void execute() override;

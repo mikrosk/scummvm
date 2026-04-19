@@ -130,7 +130,7 @@ void Hot1FrSceneChange::execute() {
 	}
 }
 
-void HotMultiframeMultisceneChange::readData(Common::SeekableReadStream &stream) {
+void HotMultiframeMultiSceneChange::readData(Common::SeekableReadStream &stream) {
 	if (g_nancy->getGameType() <= kGameTypeNancy2) {
 		_onTrue._sceneChange.readData(stream);
 		_onFalse._sceneChange.readData(stream);
@@ -151,7 +151,7 @@ void HotMultiframeMultisceneChange::readData(Common::SeekableReadStream &stream)
 	}
 }
 
-void HotMultiframeMultisceneChange::execute() {
+void HotMultiframeMultiSceneChange::execute() {
 	switch (_state) {
 	case kBegin:
 		// set something to 1
@@ -199,7 +199,7 @@ void HotMultiframeMultisceneChange::execute() {
 	}
 }
 
-void HotMultiframeMultisceneCursorTypeSceneChange::readData(Common::SeekableReadStream &stream) {
+void HotMultiframeMultiSceneCursorTypeSceneChange::readData(Common::SeekableReadStream &stream) {
 	uint16 numScenes = stream.readUint16LE();
 	_scenes.resize(numScenes);
 	_cursorTypes.resize(numScenes);
@@ -218,7 +218,7 @@ void HotMultiframeMultisceneCursorTypeSceneChange::readData(Common::SeekableRead
 	}
 }
 
-void HotMultiframeMultisceneCursorTypeSceneChange::execute() {
+void HotMultiframeMultiSceneCursorTypeSceneChange::execute() {
 	switch (_state) {
 	case kBegin:
 		// turn main rendering on
