@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-17 20:58+0000\n"
+"POT-Creation-Date: 2026-04-19 23:47+0000\n"
 "PO-Revision-Date: 2024-05-14 12:42+0000\n"
 "Last-Translator: 复予 <clonewith@qq.com>\n"
 "Language-Team: Chinese <https://translations.scummvm.org/projects/scummvm/"
@@ -582,7 +582,7 @@ msgid "GFX"
 msgstr "图像"
 
 #: gui/editgamedialog.cpp:164 gui/options.cpp:2075 gui/options.cpp:2254
-#: backends/graphics/atari/atari-graphics.cpp:1054
+#: backends/graphics/atari/atari-graphics.cpp:1056
 #: backends/graphics/sdl/sdl-graphics.cpp:488
 msgid "Graphics"
 msgstr "图像"
@@ -4010,7 +4010,7 @@ msgstr ""
 msgid "Choose a new folder"
 msgstr "选择新文件夹"
 
-#: backends/graphics/atari/atari-graphics.cpp:1058
+#: backends/graphics/atari/atari-graphics.cpp:1060
 #: backends/graphics/sdl/sdl-graphics.cpp:515 engines/scumm/help.cpp:103
 msgid "Toggle aspect ratio correction"
 msgstr ""
