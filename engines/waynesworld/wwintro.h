@@ -136,6 +136,10 @@ private:
 	bool introPreviewRoom07and15and16();
 	bool introMapDowntown();
 	bool introPreviewRoom10();
+	bool introMapNorthAurora();
+	bool introPreviewRoom03and23();
+	bool introMapSouthEastArea();
+	bool introPreviewRoom13and18();
 
 protected:
 	bool introPt4_intro() override;

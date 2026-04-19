@@ -54,7 +54,7 @@ void WWIntro_demo1::runIntro() {
 		continueFl = introDisplaySign();
 
 	introPreviewRoom00();
-	
+
 	if (continueFl)
 		continueFl = introMapStonebridge();
 	if (continueFl)
@@ -63,9 +63,17 @@ void WWIntro_demo1::runIntro() {
 		continueFl = introMapButterfield();
 	if (continueFl)
 		continueFl = introPreviewRoom07and15and16();
+	if (continueFl)
+		continueFl = introMapDowntown();
+	if (continueFl)
+		continueFl = introPreviewRoom10();
+	if (continueFl)
+			continueFl = introMapNorthAurora();
+	if (continueFl)
+		continueFl = introPreviewRoom03and23();
 
-	introMapDowntown();
-	introPreviewRoom10();
+	introMapSouthEastArea();
+	introPreviewRoom13and18();
 }
 
 bool WWIntro_demo1::introPt1() {
@@ -160,7 +168,7 @@ bool WWIntro_demo1::introPt1() {
 		{"capawy08.pcx", 0, 27, 1030}
 	};
 
-	for (const auto &frame : animation) {
+	for (const Frame &frame : animation) {
 		_vm->drawImageToScreen(capspinGxl, frame.filename, frame.x, frame.y);
 		_vm->waitMillis(frame.delay);
 	}
@@ -903,4 +911,157 @@ bool WWIntro_demo1::introPreviewRoom10() {
 
 	return true;
 }
+
+bool WWIntro_demo1::introMapNorthAurora() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(137, 109);
+		Common::String filename = Common::String::format("na_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "na_tag.pcx", 84, 49);
+	_vm->waitSeconds(1);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("flash-bk.abt", false);
+
+	for (int i = 1; i < 12; ++i) {
+		_vm->_screen->drawSurface(zmPcx[i], 53, 6);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "cab_tag.pcx", 61, 18);
+	_vm->drawImageToScreen(m02Gxl, "ad_tag.pcx", 141, 31);
+	_vm->drawImageToScreen(m02Gxl, "cas_tag.pcx", 69, 80);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom03and23() {
+	GxlArchive *r03Gxl = new GxlArchive("r03");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+	GxlArchive *r23Gxl = new GxlArchive("r23");
+
+	WWSurface *r23Back = new WWSurface(320, 150);
+	_vm->drawImageToSurface(r23Gxl, "backg.pcx", r23Back, 0, 0);
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r03Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(3);
+
+	_vm->drawSpiralEffect(r23Back, 0, 0, 5, 5);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+
+	_vm->playSound("schwing.abt", false);
+	_vm->waitSeconds(3);
+
+	delete r23Back;
+
+	delete r23Gxl;
+	delete m00Gxl;
+	delete r03Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introMapSouthEastArea() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(137, 109);
+		Common::String filename = Common::String::format("sea_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "sea_tag.pcx", 218, 142);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("flash-bk.abt", false);
+	_vm->waitSeconds(1);
+
+	for (int i = 1; i < 12; ++i) {
+		_vm->_screen->drawSurface(zmPcx[i], 139, 57);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "pep_tag.pcx", 151, 101);
+	_vm->drawImageToScreen(m02Gxl, "gil_tag.pcx", 224, 106);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom13and18() {
+	GxlArchive *r13Gxl = new GxlArchive("r13");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+	GxlArchive *r18Gxl = new GxlArchive("r18");
+
+	WWSurface *machinePcx[9] = {nullptr};
+	for (int i = 0; i < 9; ++i) {
+		machinePcx[i] = new WWSurface(171, 68);
+		Common::String filename = Common::String::format("machine%d.pcx", i);
+		_vm->drawImageToSurface(r18Gxl, filename.c_str(), machinePcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r13Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(3);
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+
+	_vm->drawImageToScreen(r18Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+
+	_vm->playSound("cool!.abt", false);
+	for (int i = 0; i < 12; ++i) {
+		for (int j = 0; j < 9; ++j) {
+			_vm->_screen->drawSurface(machinePcx[j], 115, 51);
+			_vm->waitMillis(75);
+		}
+	}
+
+	for (int i = 0; i < 9; ++i)
+		delete machinePcx[i];
+
+	delete r18Gxl;
+	delete m00Gxl;
+	delete r13Gxl;
+
+	return true;
+}
+
 } // End of namespace WaynesWorld
