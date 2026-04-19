@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.5.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-17 20:58+0000\n"
-"PO-Revision-Date: 2026-03-29 10:38+0000\n"
+"PO-Revision-Date: 2026-04-19 13:22+0000\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/sv/>\n"
@@ -27,10 +27,9 @@ msgstr "Apple Macintosh-ljud"
 
 #. I18N: built with <compiler>
 #: gui/about.cpp:119
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#, c-format
 msgid "(built with %s)"
-msgstr "(byggdes %s med %s)"
+msgstr "(byggd med %s)"
 
 #. I18N: built on <build date> with <compiler>
 #: gui/about.cpp:122
@@ -8145,10 +8144,8 @@ msgid "Rotate right"
 msgstr "Rotera åt höger"
 
 #: engines/colony/metaengine.cpp:147
-#, fuzzy
-#| msgid "Look down"
 msgid "Look behind"
-msgstr "Titta ner"
+msgstr "Titta bakom"
 
 #: engines/colony/metaengine.cpp:152
 #, fuzzy
@@ -8157,10 +8154,8 @@ msgid "Toggle mouselook"
 msgstr "Ljud av/på"
 
 #: engines/colony/metaengine.cpp:158
-#, fuzzy
-#| msgid "Toggle sound"
 msgid "Toggle dashboard"
-msgstr "Växla ljud"
+msgstr "Växla kontrollpanel"
 
 #: engines/colony/metaengine.cpp:163
 #, fuzzy
