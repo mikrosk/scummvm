@@ -37,7 +37,6 @@ WWIntro_demo1::~WWIntro_demo1() {
 void WWIntro_demo1::runIntro() {
 	// continueFl is used like in the full version, but for the moment it's not possible to skip (demo is not interactive)
 	bool continueFl = initOanGxl();
-	// continueFl = false; // For debug purposes
 
 	if (continueFl)
 		continueFl = introPt1();
@@ -52,9 +51,8 @@ void WWIntro_demo1::runIntro() {
 
 	if (continueFl)
 		continueFl = introDisplaySign();
-
-	introPreviewRoom00();
-
+	if (continueFl)
+		continueFl = introPreviewRoom00();
 	if (continueFl)
 		continueFl = introMapStonebridge();
 	if (continueFl)
@@ -68,12 +66,35 @@ void WWIntro_demo1::runIntro() {
 	if (continueFl)
 		continueFl = introPreviewRoom10();
 	if (continueFl)
-			continueFl = introMapNorthAurora();
+		continueFl = introMapNorthAurora();
 	if (continueFl)
 		continueFl = introPreviewRoom03and23();
+	if (continueFl)
+		continueFl = introMapSouthEastArea();
+	if (continueFl)
+		continueFl = introPreviewRoom13and18();
+	if (continueFl)
+		continueFl = introMapWestAurora();
 
-	introMapSouthEastArea();
-	introPreviewRoom13and18();
+	if (continueFl)
+		continueFl = introPreviewRoom01();
+
+	if (continueFl) {
+		_oanGxl = new GxlArchive("oan");
+		_vm->loadPalette(_oanGxl, "backg2.pcx");
+		while (_vm->_sound->isSFXPlaying())
+			_vm->waitMillis(30);
+		_vm->stopMusic();
+
+		introPt3();
+
+		_vm->paletteFadeOut(0, 256, 4);
+		_vm->_screen->clear(0);
+		while (_vm->_sound->isSFXPlaying())
+			_vm->waitMillis(30);
+
+		delete _oanGxl;
+	}
 }
 
 bool WWIntro_demo1::introPt1() {
@@ -1060,6 +1081,100 @@ bool WWIntro_demo1::introPreviewRoom13and18() {
 	delete r18Gxl;
 	delete m00Gxl;
 	delete r13Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introMapWestAurora() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(137, 109);
+		Common::String filename = Common::String::format("wa_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "wa_tag.pcx", 56, 87);
+	_vm->waitSeconds(1);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("flash-bk.abt", false);
+
+	for (int i = 1; i < 12; ++i) {
+		_vm->_screen->drawSurface(zmPcx[i], 34, 32);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "inv_tag.pcx", 49, 52);
+	_vm->drawImageToScreen(m02Gxl, "don_tag.pcx", 120, 47);
+	_vm->drawImageToScreen(m02Gxl, "way_tag.pcx", 73, 86);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom01() {
+	GxlArchive *r01Gxl = new GxlArchive("r01");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+
+	WWSurface *r01Term[10] = {nullptr};
+	for (int i = 0; i < 10; ++i) { // The demo has a bug, it stops the initialization at 8 instead of 9, so the last frame is thrown uninitialized
+		r01Term[i] = new WWSurface(42, 25);
+		Common::String filename = Common::String::format("term%d.pcx", i);
+		_vm->drawImageToSurface(r01Gxl, filename.c_str(), r01Term[i], 0, 0);
+	}
+
+	WWSurface *r01Screen[6] = {nullptr};
+	for (int i = 0; i < 6; ++i) {
+		r01Screen[i] = new WWSurface(41, 49);
+		Common::String filename = Common::String::format("screen%d.pcx", i);
+		_vm->drawImageToSurface(r01Gxl, filename.c_str(), r01Screen[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r01Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("hello.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			_vm->_screen->drawSurface(r01Term[j], 270, 47);
+			_vm->waitMillis(75);
+		}
+	}
+
+	for (int i = 0; i < 6; ++i) {
+		_vm->_screen->drawSurface(r01Screen[i], 118, 53);
+		_vm->waitMillis(75);
+	}
+
+	for (int i = 0; i < 6; ++i)
+		delete r01Screen[i];
+	for (int i = 0; i < 9; ++i)
+		delete r01Term[i];
+
+	_vm->waitSeconds(3);
+	_vm->playSound("goodnite.abt", false);
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+
+	delete m00Gxl;
+	delete r01Gxl;
 
 	return true;
 }

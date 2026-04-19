@@ -140,6 +140,8 @@ private:
 	bool introPreviewRoom03and23();
 	bool introMapSouthEastArea();
 	bool introPreviewRoom13and18();
+	bool introMapWestAurora();
+	bool introPreviewRoom01();
 
 protected:
 	bool introPt4_intro() override;
