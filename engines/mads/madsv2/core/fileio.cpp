@@ -52,26 +52,6 @@ void fileio_purge_trailing_spaces(char *myline) {
 	} while (again);
 }
 
-void fileio_name_new_ext(char *bakfile, char *mainfile, char *new_ext) {
-	char temp_full[80];
-	char temp_drive[4];
-	char temp_dir[80];
-	char temp_name[10];
-	char temp_ext[8];
-
-	Common::strcpy_s(temp_dir, mainfile);
-
-	mads_fullpath(temp_full, temp_dir, 80);
-
-	_splitpath(temp_full, temp_drive, temp_dir, temp_name, temp_ext);
-
-	Common::strcpy_s(bakfile, 65536, temp_drive);
-	Common::strcat_s(bakfile, 65536, temp_dir);
-	Common::strcat_s(bakfile, 65536, temp_name);
-	Common::strcat_s(bakfile, 65536, new_ext);
-}
-
-
 char *fileio_ffgets(char *mystring, int num, Common::SeekableReadStream *stream) {
 	char *temp;
 	char *from;
