@@ -129,11 +129,7 @@ int vocab_load(int allocation_flag) {
 						result = VC_ERR_READMAINFILE;
 					}
 				} else {
-					if (errno == ENOENT) {
-						vocab_exist = false;
-					} else {
-						result = VC_ERR_OPENMAINFILE;
-					}
+					vocab_exist = false;
 				}
 			} else {
 				result = VC_ERR_READHARDFILE;

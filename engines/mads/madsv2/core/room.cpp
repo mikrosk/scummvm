@@ -100,33 +100,27 @@ int room_read_def(int room_code, char *room_file, char *picture_base, int mads_m
 			Common::strcpy_s(picture_base, 65536, roomdef.picture_base);
 
 	} else {
-		if (errno == ENOENT) {
+		roomdef.num_hotspots = 0;
+		roomdef.num_rails = 0;
 
-			roomdef.num_hotspots = 0;
-			roomdef.num_rails = 0;
-
-			for (count = 0; count < 10; count++) {
-				roomdef.misc[count] = 0;
-			}
-
-			roomdef.front_y = display_y - 1;
-			roomdef.back_y = 0;
-			roomdef.front_scale = 100;
-			roomdef.back_scale = 100;
-
-			for (count = 0; count < 16; count++) {
-				roomdef.depth_table[count] = 0;
-			}
-
-			roomdef.shadow.num_shadow_colors = 0;
-
-			Common::strcpy_s(roomdef.picture_base, picture_base);
-
-			result = 0;
-
-		} else {
-			result = -1;
+		for (count = 0; count < 10; count++) {
+			roomdef.misc[count] = 0;
 		}
+
+		roomdef.front_y = display_y - 1;
+		roomdef.back_y = 0;
+		roomdef.front_scale = 100;
+		roomdef.back_scale = 100;
+
+		for (count = 0; count < 16; count++) {
+			roomdef.depth_table[count] = 0;
+		}
+
+		roomdef.shadow.num_shadow_colors = 0;
+
+		Common::strcpy_s(roomdef.picture_base, picture_base);
+
+		result = 0;
 	}
 
 done:
@@ -443,48 +437,42 @@ int room_read_pict(int room_code, char *room_file, int mads_mode) {
 		result = !fileio_fread_f(&roompict, sizeof(RoomPict), 1, &handle);
 		roompict.id = room_code;
 	} else {
-		if (errno == ENOENT) {
+		roompict.id = room_code;
+		roompict.picture_id = room_code;
+		roompict.format = ROOM_FORMAT_NORMAL;
 
-			roompict.id = room_code;
-			roompict.picture_id = room_code;
-			roompict.format = ROOM_FORMAT_NORMAL;
+		roompict.xs = video_x;
+		roompict.ys = display_y;
 
-			roompict.xs = video_x;
-			roompict.ys = display_y;
-
-			for (count = 0; count < 10; count++) {
-				roompict.misc[count] = 0;
-			}
-
-			roompict.num_series = 0;
-			roompict.num_images = 0;
-
-			roompict.num_variants = 0;
-			roompict.num_translated = 0;
-
-			roompict.color_list.num_colors = 0;
-			roompict.cycle_list.num_cycles = 0;
-
-			Common::strcpy_s(roompict.variant_desc[0], "The One True Variant");
-			Common::strcpy_s(roompict.variant_desc[1], "False Variant");
-			Common::strcpy_s(roompict.variant_desc[2], "Blasphemous Variant");
-			Common::strcpy_s(roompict.variant_desc[3], "Heretical Variant");
-			Common::strcpy_s(roompict.variant_desc[4], "Usurper Variant");
-			Common::strcpy_s(roompict.variant_desc[5], "Untrue Variant");
-			Common::strcpy_s(roompict.variant_desc[6], "Most Untrue Variant");
-			Common::strcpy_s(roompict.variant_desc[7], "Why so many variants, eh, boy?");
-			Common::strcpy_s(roompict.variant_desc[8], "Geez, guys! C'moff it already!");
-			Common::strcpy_s(roompict.variant_desc[9], "And THAT is absolutely IT, dammit!");
-
-			if (!mads_mode) {
-				Common::strcpy_s(roompict.artwork_file, room_file);
-			}
-
-			result = 0;
-
-		} else {
-			result = -1;
+		for (count = 0; count < 10; count++) {
+			roompict.misc[count] = 0;
 		}
+
+		roompict.num_series = 0;
+		roompict.num_images = 0;
+
+		roompict.num_variants = 0;
+		roompict.num_translated = 0;
+
+		roompict.color_list.num_colors = 0;
+		roompict.cycle_list.num_cycles = 0;
+
+		Common::strcpy_s(roompict.variant_desc[0], "The One True Variant");
+		Common::strcpy_s(roompict.variant_desc[1], "False Variant");
+		Common::strcpy_s(roompict.variant_desc[2], "Blasphemous Variant");
+		Common::strcpy_s(roompict.variant_desc[3], "Heretical Variant");
+		Common::strcpy_s(roompict.variant_desc[4], "Usurper Variant");
+		Common::strcpy_s(roompict.variant_desc[5], "Untrue Variant");
+		Common::strcpy_s(roompict.variant_desc[6], "Most Untrue Variant");
+		Common::strcpy_s(roompict.variant_desc[7], "Why so many variants, eh, boy?");
+		Common::strcpy_s(roompict.variant_desc[8], "Geez, guys! C'moff it already!");
+		Common::strcpy_s(roompict.variant_desc[9], "And THAT is absolutely IT, dammit!");
+
+		if (!mads_mode) {
+			Common::strcpy_s(roompict.artwork_file, room_file);
+		}
+
+		result = 0;
 	}
 
 done:
