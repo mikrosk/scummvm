@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.8.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-20 05:31+0000\n"
+"POT-Creation-Date: 2026-04-20 21:33+0000\n"
 "PO-Revision-Date: 2026-04-15 22:03+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Russian <https://translations.scummvm.org/projects/scummvm/"
@@ -62,7 +62,7 @@ msgid "Available engines:"
 msgstr "Доступные движки:"
 
 #. I18N: Close dialog button
-#: gui/about.cpp:531 gui/about.cpp:663 gui/downloadpacksdialog.cpp:298
+#: gui/about.cpp:516 gui/about.cpp:648 gui/downloadpacksdialog.cpp:298
 #: gui/downloadpacksdialog.cpp:389 gui/integrity-dialog.cpp:354
 #: gui/gui-manager.cpp:168 gui/helpdialog.cpp:128 gui/imagealbum-dialog.cpp:133
 #: gui/textviewer.cpp:56 gui/unknown-game-dialog.cpp:53
@@ -1685,7 +1685,7 @@ msgid "Unknown Year"
 msgstr "Год неизвестен"
 
 #. I18N: Group for All items
-#: gui/launcher.cpp:1640 gui/widgets/groupedlist.cpp:81
+#: gui/launcher.cpp:1640 gui/widgets/groupedlist.cpp:82
 msgid "All"
 msgstr "Все"
 
@@ -2846,7 +2846,7 @@ msgstr "Записать"
 msgid "Playback"
 msgstr "Воспроизвести"
 
-#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:336
+#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:338
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -3059,11 +3059,11 @@ msgstr ""
 msgid "Clear value"
 msgstr "Очистить значение"
 
-#: gui/widgets/grid.cpp:330
+#: gui/widgets/grid.cpp:332
 msgid "Play"
 msgstr "Играть"
 
-#: gui/widgets/grid.cpp:333
+#: gui/widgets/grid.cpp:335
 msgid "Saves"
 msgstr "Сохранения"
 

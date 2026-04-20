@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-20 05:31+0000\n"
+"POT-Creation-Date: 2026-04-20 21:33+0000\n"
 "PO-Revision-Date: 2026-04-11 09:22+0000\n"
 "Last-Translator: Hoseok Seo <ddinghoya@gmail.com>\n"
 "Language-Team: Korean <https://translations.scummvm.org/projects/scummvm/"
@@ -63,7 +63,7 @@ msgid "Available engines:"
 msgstr "사용 가능한 엔진:"
 
 #. I18N: Close dialog button
-#: gui/about.cpp:531 gui/about.cpp:663 gui/downloadpacksdialog.cpp:298
+#: gui/about.cpp:516 gui/about.cpp:648 gui/downloadpacksdialog.cpp:298
 #: gui/downloadpacksdialog.cpp:389 gui/integrity-dialog.cpp:354
 #: gui/gui-manager.cpp:168 gui/helpdialog.cpp:128 gui/imagealbum-dialog.cpp:133
 #: gui/textviewer.cpp:56 gui/unknown-game-dialog.cpp:53
@@ -1669,7 +1669,7 @@ msgid "Unknown Year"
 msgstr "알 수 없는 연도"
 
 #. I18N: Group for All items
-#: gui/launcher.cpp:1640 gui/widgets/groupedlist.cpp:81
+#: gui/launcher.cpp:1640 gui/widgets/groupedlist.cpp:82
 msgid "All"
 msgstr "모두"
 
@@ -2808,7 +2808,7 @@ msgstr "녹화"
 msgid "Playback"
 msgstr "재생"
 
-#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:336
+#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:338
 msgid "Edit"
 msgstr "편집"
 
@@ -3018,11 +3018,11 @@ msgstr ""
 msgid "Clear value"
 msgstr "값 지우기"
 
-#: gui/widgets/grid.cpp:330
+#: gui/widgets/grid.cpp:332
 msgid "Play"
 msgstr "플레이"
 
-#: gui/widgets/grid.cpp:333
+#: gui/widgets/grid.cpp:335
 msgid "Saves"
 msgstr "저장"
 
