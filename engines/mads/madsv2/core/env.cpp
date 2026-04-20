@@ -530,44 +530,6 @@ int env_exist(const char *filename) {
 	return exist;
 }
 
-char *env_dos_error_name(char *error_buf) {
-	switch (errno) {
-	case EEXIST:
-		Common::strcpy_s(error_buf, 65536, "File already exists.");
-		break;
-
-	case EINVAL:
-		Common::strcpy_s(error_buf, 65536, "Invalid argument.");
-		break;
-
-	case EMFILE:
-		Common::strcpy_s(error_buf, 65536, "Too many open files.");
-		break;
-
-	case ENOENT:
-		Common::strcpy_s(error_buf, 65536, "No such file or directory.");
-		break;
-
-	case ENOSPC:
-		Common::strcpy_s(error_buf, 65536, "Disk full.");
-		break;
-
-	case EACCES:
-		Common::strcpy_s(error_buf, 65536, "Permission denied.");
-		break;
-
-	case EBADF:
-		Common::strcpy_s(error_buf, 65536, "Bad file number.");
-		break;
-
-	default:
-		Common::sprintf_s(error_buf, 65536, "Error Code %d.", errno);
-		break;
-	}
-
-	return error_buf;
-}
-
 char *env_get_level_path(char *out, int item_type, const char *file_spec, int first_level, int second_level) {
 	char temp_buf[80];
 	char *result;

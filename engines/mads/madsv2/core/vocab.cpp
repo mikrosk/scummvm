@@ -205,7 +205,7 @@ int vocab_load(int allocation_flag) {
 						} else {
 							result = VC_ERR_WORDTOOLONG;
 						}
-					}					
+					}
 				}
 
 				delete handle;
@@ -354,8 +354,7 @@ void vocab_report_error(int number) {
 	}
 
 	if (dos_flag) {
-		env_dos_error_name(temp_buf_3);
-		dialog_alert_ok(temp_buf_1, temp_buf_2, temp_buf_3, NULL);
+		dialog_alert_ok(temp_buf_1, temp_buf_2, "Error", NULL);
 	} else {
 		dialog_alert_ok(temp_buf_1, NULL, NULL, NULL);
 	}
