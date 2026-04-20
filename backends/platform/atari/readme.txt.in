@@ -168,10 +168,6 @@ value.
 that Falcon doesn't allow mixing in 16-bit mono, so this will have no effect on
 this machine.
 
-"print_rate" in scummvm.ini: used for optimising sample playback (where
-available). It prints input and output sample format as well as the name of the
-converter used. See below for details.
-
 "audio_buffer_size" in scummvm.ini: number of samples to preload. Default is
 2048 which equals to about 83ms of audio lag and seems to be about right for
 most games on my CT60@66 MHz.
@@ -179,6 +175,10 @@ most games on my CT60@66 MHz.
 If you want to play with "audio_buffer_size", the rule of thumb is: (lag in ms)
 = (audio_buffer_size / output_rate) * 1000. But it's totally OK just to double
 the samples value to get rid of stuttering in a heavier game.
+
+"gaudio" debug channel: used for optimising sample playback (where
+available). It prints input and output sample format as well as the name of the
+converter used. See below for details.
 
 
 Graphics modes
@@ -446,9 +446,10 @@ frequencies):
 - Any other combination: "interpolateConvert" (slowest).
 
 So how do you know which frequency to set as "output_rate" ? This is where
-"print_rate" comes to rescue. Enabling this option in scummvm.ini will tell you
-for each game which sample converters are being used and for what input/values.
-So you can easily verify whether the given game's demands match your setting.
+"gaudio" debug channel comes to rescue. Executing ScummVM as
+"scummvm.prg --debugflags=gaudio" will tell you for each game which sample
+converters are being used and for what input/values. So you can easily verify
+whether the given game's demands match your setting.
 
 Unfortunately, currently per-game "output_rate" / "output_channels" is not
 possible but this may change in the future.
