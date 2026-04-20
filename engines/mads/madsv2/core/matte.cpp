@@ -447,7 +447,8 @@ static void combine_mattes(MattePtr matte1, MattePtr matte2) {
 	/* Mark matte2 as EMPTY, but leave behind a pointer to matte1 */
 
 	matte2->valid = false;
-	matte2->y = (int)matte1;
+	//matte2->y = (int)matte1;
+	error("FIXME: Horrible non-portable cast from pointer to (int)");
 
 	/* Set matte1's update flag TRUE; we need to redraw everything in */
 	/* this matte.                                                    */
