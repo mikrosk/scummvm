@@ -387,8 +387,8 @@ void buffer_line_xor(Buffer target, int x1, int y1, int x2, int y2) {
 	}
 }
 
-int buffer_legal(Buffer walk, int orig_wrap,
-	int x1, int y1, int x2, int y2) {
+int buffer_legal(const Buffer &walk, int orig_wrap,
+		int x1, int y1, int x2, int y2) {
 	word legality = LEGAL;
 	word currently_illegal = false;
 

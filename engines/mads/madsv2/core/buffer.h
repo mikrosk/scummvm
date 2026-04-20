@@ -220,7 +220,7 @@ extern void buffer_line_xor(Buffer target, int x1, int y1, int x2, int y2);
  * bounds checking is performed first: a NULL buffer or any coordinate outside
  * the buffer dimensions short-circuits to LEGAL without scanning.
  */
-extern int buffer_legal(Buffer walk, int orig_wrap, int x1, int y1, int x2, int y2);
+extern int buffer_legal(const Buffer &walk, int orig_wrap, int x1, int y1, int x2, int y2);
 
 word buffer_rect_fill_pattern(Buffer target, int ul_x, int ul_y, int size_x, int size_y,
 	int base_x, int base_y, int base_xs, byte value1, byte value2,
