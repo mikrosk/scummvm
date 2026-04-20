@@ -387,86 +387,77 @@ void buffer_line_xor(Buffer target, int x1, int y1, int x2, int y2) {
 	}
 }
 
+static inline byte ror8(byte val, int count) {
+	count &= 7;          /* ror by 8 is identity; keep in 0..7 */
+	return (val >> count) | (val << (8 - count));
+}
+
 int buffer_legal(const Buffer &walk, int orig_wrap,
-		int x1, int y1, int x2, int y2) {
+	int x1, int y1, int x2, int y2) {
 	word legality = LEGAL;
 	word currently_illegal = false;
 
-	if (walk.data == NULL)                               return legality;
-	if ((x1 < 0) || (x2 < 0) || (y1 < 0) || (y2 < 0)) return legality;
-	if ((x1 >= orig_wrap) || (x2 >= orig_wrap))          return legality;
-	if ((y1 >= walk.y) || (y2 >= walk.y))             return legality;
+	if (walk.data == NULL)                                return legality;
+	if (x1 < 0 || x2 < 0 || y1 < 0 || y2 < 0)          return legality;
+	if (x1 >= orig_wrap || x2 >= orig_wrap)              return legality;
+	if (y1 >= walk.y || y2 >= walk.y)                 return legality;
 
-	int delta_x = abs(x2 - x1);
-	int delta_y = abs(y2 - y1);
-	int x_sign = (x2 >= x1) ? 1 : -1;
-	int y_sign = (y2 >= y1) ? walk.x : -walk.x;
+	int delta_y = y2 - y1;
+	int y_sign = walk.x;
+	if (delta_y < 0) {
+		delta_y = -delta_y; y_sign = -y_sign;
+	}
+
+	int delta_x = x2 - x1;
+	int x_sign = 1;
+	int dAccum = 0;
+
+	if (delta_x < 0) {
+		delta_x = -delta_x;
+		x_sign = -1;
+		dAccum = (delta_y < delta_x) ? delta_x : delta_y;  /* max, not min */
+	}
 
 	int x_count = delta_x + 1;
 	int y_count = delta_y + 1;
-	int dAccum = (delta_x >= delta_y) ? delta_y : delta_x;
 
-	/* Each byte in the walk buffer holds 8 packed single-bit walk codes.
-	   bit_pos counts from 1..8, where 1 means "rotate 1" i.e. the MSB,
-	   and 8 means "rotate 8" i.e. the LSB - matching the ror-by-cl logic. */
 	byte *ptr = walk.data + y1 * walk.x + (x1 / 8);
-	int   bit_pos = 8 - (x1 % 8);   /* CL in the original: inverted bit index */
+	int   bit_pos = 8 - (x1 % 8);   /* cl: 1=MSB side, 8=LSB side */
 
-	for (int col = 0; col < x_count; col++)
-	{
+	for (int col = x_count; col > 0; col--) {
 		dAccum += y_count;
 
-		/* Test the walk-code bit at the current position */
-		byte val = *ptr;
-		bool blocked = ((val >> (bit_pos - 1)) & 1) != 0;  /* ror al,cl then jnc */
-
-		if (blocked)
-		{
-			if (!currently_illegal)
-			{
+		bool blocked = (ror8(*ptr, bit_pos) & 1) != 0;  /* carry from ror */
+		if (blocked) {
+			if (!currently_illegal) {
 				currently_illegal = true;
 				legality -= ILLEGAL;
-				if (legality == 0)
-					return legality;
+				if (legality == 0) return legality;
 			}
-		} else
-		{
+		} else {
 			currently_illegal = false;
 		}
 
-		/* Y steps for this column (Bresenham) */
-		while (dAccum >= x_count)
-		{
+		while (dAccum >= x_count) {
 			dAccum -= x_count;
-
-			val = *ptr;
-			blocked = ((val >> (bit_pos - 1)) & 1) != 0;
-
-			if (blocked)
-			{
-				if (!currently_illegal)
-				{
+			blocked = (ror8(*ptr, bit_pos) & 1) != 0;
+			if (blocked) {
+				if (!currently_illegal) {
 					currently_illegal = true;
 					legality -= ILLEGAL;
-					if (legality == 0)
-						return legality;
+					if (legality == 0) return legality;
 				}
-			} else
-			{
+			} else {
 				currently_illegal = false;
 			}
-
 			ptr += y_sign;
 		}
 
-		/* Advance one pixel in X within the packed byte */
-		bit_pos -= x_sign;
-
-		if (bit_pos < 1 || bit_pos > 8)
-		{
-			ptr += x_sign;           /* crossed a byte boundary */
-			bit_pos += x_sign * 8;       /* wrap bit_pos back into 1..8 */
-		}
+		/* Advance one pixel in X */
+		int new_cl = ((bit_pos - x_sign - 1) & 7) + 1;
+		if ((bit_pos - x_sign - 1) & ~7)
+			ptr += x_sign;
+		bit_pos = new_cl;
 	}
 
 	return legality;
