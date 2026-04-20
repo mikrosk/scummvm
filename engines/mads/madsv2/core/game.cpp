@@ -1213,10 +1213,10 @@ void game_pause_mode() {
 
 
 /*
-/*      game_error_service ()
-/*
-/*      Handle fatal error situations
-*/
+ *      game_error_service ()
+ *
+ *      Handle fatal error situations
+ */
 void game_error_service() {
 	if (inter_spinning_objects || inter_animation_running) {
 		if (mem_last_alloc_failed) {
@@ -1255,12 +1255,12 @@ void game_set_camera_speed() {
 }
 
 /*
-/*      game_control()
-/*
-/*      This is the main outer control structure for the game, that
-/*      determines which section and room level information should be
-/*      loaded into and out of memory.
-*/
+ *      game_control()
+ *
+ *      This is the main outer control structure for the game, that
+ *      determines which section and room level information should be
+ *      loaded into and out of memory.
+ */
 
 void game_control() {
 	int count, color;
@@ -1733,19 +1733,19 @@ emergency:
 
 
 /*
-/*      Execute a function-pointer routine.
-*/
+ *      Execute a function-pointer routine.
+ */
 void game_exec_function(void (*(target))()) {
 	if (target)
 		target();
 }
 
 /*
-/*      game_system_maintenance()
-/*
-/*      Perform any system maintenance for this frame.  Mostly involves
-/*      reading the keyboard.
-*/
+ *      game_system_maintenance()
+ *
+ *      Perform any system maintenance for this frame.  Mostly involves
+ *      reading the keyboard.
+ */
 static void game_system_maintenance() {
 	int unparsed_key = false;
 
@@ -1811,10 +1811,10 @@ void do_interface_for_ouaf() {
 
 
 /*
-/*      game_daemon_code()
-/*
-/*      Calls, in proper order, all daemon code for this framing round.
-*/
+ *      game_daemon_code()
+ *
+ *      Calls, in proper order, all daemon code for this framing round.
+ */
 static void game_daemon_code() {
 #if 0
 	global[4] = -1; /* turn off global[player_selected_object] */
@@ -1842,16 +1842,16 @@ static void game_daemon_code() {
 
 
 /*
-/*      game_handle_preparse()
-/*
-/*      Handles incoming player commands BEFORE any walk action can take
-/*      place.  Player walk for the command can be postponed by setting
-/*      player.ready_to_walk to false, and then returning it to true when
-/*      ready for the walk to begin (additional player commands are auto-
-/*      matically disabled during the interim period).  Player walk for
-/*      the command can be cancelled permanently by setting the value of
-/*      player.need_to_walk to false.
-*/
+ *      game_handle_preparse()
+ *
+ *      Handles incoming player commands BEFORE any walk action can take
+ *      place.  Player walk for the command can be postponed by setting
+ *      player.ready_to_walk to false, and then returning it to true when
+ *      ready for the walk to begin (additional player commands are auto-
+ *      matically disabled during the interim period).  Player walk for
+ *      the command can be cancelled permanently by setting the value of
+ *      player.need_to_walk to false.
+ */
 static void game_handle_preparse() {
 	/* if (global[4] >= 0 || global[5]) player.command_ready = true; */
 	/* if (global[4] >= 0 || global[5]) player.command_error = false; */
@@ -1882,11 +1882,11 @@ static void game_handle_preparse() {
 
 
 /*
-/*      game_handle_command()
-/*
-/*      Handles incoming player commands -- they are filtered down through
-/*      various levels of parser code and error code.
-*/
+ *      game_handle_command()
+ *
+ *      Handles incoming player commands -- they are filtered down through
+ *      various levels of parser code and error code.
+ */
 static void game_handle_command() {
 	int handled_this_one;
 	int kernel_trigger_in;
@@ -1912,7 +1912,7 @@ static void game_handle_command() {
 		error_report(ERROR_ORPHANED_TRIGGER, WARNING, MODULE_KERNEL, kernel.trigger, 0);
 	}
 
-	if (!player.command_error && 
+	if (!player.command_error &&
 			(player.command_ready || kernel.trigger)) {
 		game_exec_function(room_parser_code_pointer);
 
@@ -2030,11 +2030,11 @@ void do_looping_sounds() {
 
 
 /*
-/*      game_main_loop()
-/*
-/*      This is the main inner graphics control loop for the game,
-/*      and is executed once for each framing round.
-*/
+ *      game_main_loop()
+ *
+ *      This is the main inner graphics control loop for the game,
+ *      and is executed once for each framing round.
+ */
 static void game_main_loop() {
 	int id;
 	int preparse_flag = false;
@@ -2480,10 +2480,10 @@ void chain_execute() {
 
 
 /*
-/*      game_read_save_directory()
-/*
-/*      Reads the list of save files.
-*/
+ *      game_read_save_directory()
+ *
+ *      Reads the list of save files.
+ */
 static void game_read_save_directory() {
 	int error_flag = true;
 	int mem_to_read;
@@ -2507,10 +2507,10 @@ done:
 
 
 /*
-/*      game_write_save_directory()
-/*
-/*      Writes the list of save files.
-*/
+ *      game_write_save_directory()
+ *
+ *      Writes the list of save files.
+ */
 void game_write_save_directory() {
 #ifdef TODO
 	int error_flag = true;
@@ -2540,11 +2540,11 @@ done:
 
 
 /*
-/*      game_menu_setup()
-/*
-/*      Sets up for the main menu routines to run--this mainly involves
-/*      getting enough memory to hold the save directory and menu heap.
-*/
+ *      game_menu_setup()
+ *
+ *      Sets up for the main menu routines to run--this mainly involves
+ *      getting enough memory to hold the save directory and menu heap.
+ */
 void game_menu_setup() {
 	long mem_to_get;
 
@@ -2594,10 +2594,10 @@ void game_menu_setup() {
 }
 
 /*
-/*      game_menu_shutdown()
-/*
-/*      Tells the menu structures to bite down hard.
-*/
+ *      game_menu_shutdown()
+ *
+ *      Tells the menu structures to bite down hard.
+ */
 void game_menu_shutdown() {
 	heap_destroy(&game_menu_heap);
 

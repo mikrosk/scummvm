@@ -248,10 +248,10 @@ extern void game_cold_data_init();
 extern void game_control();
 
 /*
-/*      flag_parse()
-/*
-/*      Routine to parse command line flags.
-*/
+ *      flag_parse()
+ *
+ *      Routine to parse command line flags.
+ */
 extern void flag_parse(const char **myscan);
 extern void show_logo();
 extern void show_version();
