@@ -929,7 +929,7 @@ int buffer_to_disk(Buffer *source, int x, int y, int xs, int ys) {
 	buffer_tracking[buffer_accum] = true;
 
 	handle = g_system->getSavefileManager()->openForSaving(file_name, false);
-	if (handle = nullptr)
+	if (handle == nullptr)
 		goto done;
 
 	for (count = 0; count < ys; count++) {
