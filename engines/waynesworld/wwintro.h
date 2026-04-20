@@ -126,6 +126,7 @@ public:
 
 private:
 	bool introPt1();
+	bool introPt1_selectware();
 	bool introPt3();
 	bool introPt3Bis();
 	bool introDisplaySign();

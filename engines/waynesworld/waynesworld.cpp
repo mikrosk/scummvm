@@ -185,6 +185,9 @@ Common::Error WaynesWorldEngine::run() {
 		intro->runIntro();
 		delete intro;
 		intro = nullptr;
+
+		if (_gameDescription->flags & ADGF_DEMO)
+			return Common::kNoError;
 	}
 
 	_introOngoing = false;

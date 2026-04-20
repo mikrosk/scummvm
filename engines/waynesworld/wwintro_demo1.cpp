@@ -38,8 +38,14 @@ void WWIntro_demo1::runIntro() {
 	// continueFl is used like in the full version, but for the moment it's not possible to skip (demo is not interactive)
 	bool continueFl = initOanGxl();
 
-	if (continueFl)
-		continueFl = introPt1();
+	if (continueFl) {
+		Common::File f;
+
+		if (f.exists("capspin.gxl"))
+			continueFl = introPt1();
+		else
+			continueFl = introPt1_selectware();
+	}
 	if (continueFl)
 		continueFl = introPt3();
 	if (continueFl)
@@ -195,6 +201,55 @@ bool WWIntro_demo1::introPt1() {
 	}
 
 	delete capspinGxl;
+	return true;
+}
+
+bool WWIntro_demo1::introPt1_selectware() {
+	GxlArchive *capGxl = new GxlArchive("cap");
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	_vm->loadPalette(capGxl, "paramnt.pcx");
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(capGxl, "paramnt.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(1);
+
+	_vm->paletteFadeOut(0, 256, 3);
+	_vm->_screen->clear(0);
+	_vm->loadPalette(capGxl, "pyramid.pcx");
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(capGxl, "pyramid.pcx", 58, 21);
+	_vm->paletteFadeIn(0, 256, 3);
+
+	// The original has all the frames hardcoded one after the other, I used a loop instead.
+	Frame animation[] = {
+		{"prestxt1.pcx", 40, 125, 60},
+		{"prestxt2.pcx", 40, 125, 60},
+		{"prestxt3.pcx", 40, 125, 60},
+		{"prestxt4.pcx", 40, 125, 60},
+		{"prestxt5.pcx", 40, 125, 60},
+		{"prestxt6.pcx", 40, 125, 60},
+		{"present1.pcx", 115, 156, 60},
+		{"present2.pcx", 115, 156, 60},
+		{"present3.pcx", 115, 156, 60},
+		{"present4.pcx", 115, 156, 60},
+		{"present5.pcx", 115, 156, 60},
+		{"present6.pcx", 115, 156, 60},
+		{"star1.pcx", 146, 17, 150},
+		{"star2.pcx", 146, 17, 150},
+		{"star3.pcx", 146, 17, 150},
+		{"star4.pcx", 146, 17, 150},
+		{"pyramid.pcx", 58, 21, 4250}
+	};
+
+	for (const Frame &frame : animation) {
+		_vm->drawImageToScreen(capGxl, frame.filename, frame.x, frame.y);
+		_vm->waitMillis(frame.delay);
+	}
+
+	delete capGxl;
 	return true;
 }
 
