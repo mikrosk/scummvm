@@ -1040,7 +1040,7 @@ int popup_ask_number(long *value, int maxlen, int save_screen) {
 	popup_asking_number = true;
 
 	if (value) {
-		ltoa(*value, temp_buf, 10);
+		snprintf(temp_buf, 80, "%ld", *value);
 	} else {
 		temp_buf[0] = 0;
 	}
