@@ -154,14 +154,12 @@ RoomPtr room_load(int id, int variant, const char *base_path, Buffer *picture,
 
 	room_unload(NULL, picture, depth, walk, special, picMap, depthMap);
 
-	/* Initialize structures */
-
+	// Initialize structures
 	mem_last_alloc_loader = MODULE_ROOM_LOADER;
 
 	load_handle.open = false;
 
-	/* Open the room data file */
-
+	// Open the room data file
 	room_resolve_base(base, temp_buf, id, base_path);
 
 	if (loader_open(&load_handle, temp_buf, "rb", true)) {
@@ -169,7 +167,7 @@ RoomPtr room_load(int id, int variant, const char *base_path, Buffer *picture,
 		goto done;
 	}
 
-	/* Load room header block */
+	// Load room header block
 	{
 		byte buffer[RoomFile::SIZE];
 		if (!loader_read(buffer, RoomFile::SIZE, 1, &load_handle)) {
@@ -184,8 +182,7 @@ RoomPtr room_load(int id, int variant, const char *base_path, Buffer *picture,
 	Common::strcpy_s(block_name, "$ROOM");
 	env_catint(block_name, id, 3);
 
-	/* Determine size needed for room data structure (based on # of rails) */
-
+	// Determine size needed for room data structure (based on # of rails)
 	mem_needed = (sizeof(Room) - sizeof(Rail)) + (sizeof(Rail) * (roomfile.num_rails + 2));
 	roomPtr = (RoomPtr)mem_get_name(mem_needed, block_name);
 	if (roomPtr == NULL) {
@@ -216,7 +213,7 @@ RoomPtr room_load(int id, int variant, const char *base_path, Buffer *picture,
 		picResource,
 		picMap,
 		picture,
-		NULL, /* &color_list, */
+		NULL,  // &color_list,
 		&roomPtr->cycle_list,
 		picture_ems_handle,
 		load_flags)) {
@@ -505,11 +502,11 @@ void room_himem_preload(int roomNum, int level) {
 	himem_preload_series(kernel_full_name(roomNum, 0, -1, NULL, KERNEL_DAT), level);
 	himem_preload_series(kernel_full_name(roomNum, 0, -1, NULL, KERNEL_HH), level);
 
-	/* himem_preload_series (kernel_full_name (room, 0, -1, NULL, KERNEL_TT),  level); */
+	// himem_preload_series (kernel_full_name (room, 0, -1, NULL, KERNEL_TT),  level);
 	himem_preload_series(kernel_full_name(roomNum, 0, -1, NULL, KERNEL_MM), level);
 	himem_preload_series(kernel_full_name(roomNum, 0, -1, NULL, KERNEL_WW), level);
 
-	/* himem_preload_series (kernel_full_name (room, 0, 0, NULL, KERNEL_TT),  level); */
+	// himem_preload_series (kernel_full_name (room, 0, 0, NULL, KERNEL_TT),  level);
 	himem_preload_series(kernel_full_name(roomNum, 0, 0, NULL, KERNEL_MM), level);
 	himem_preload_series(kernel_full_name(roomNum, 0, 0, NULL, KERNEL_WW), level);
 }
@@ -547,8 +544,7 @@ int room_picture_load(int roomId, Buffer *picture, int load_flags) {
 		goto done;
 	}
 
-	/* memcpy (&room->cycle_list, &art.cycle_list, sizeof(CycleList)); */
-
+	// memcpy (&room->cycle_list, &art.cycle_list, sizeof(CycleList));
 	if (!(load_flags & ROOM_LOAD_TRANSLATE)) {
 		color_handle = pal_allocate(&art.color_list, NULL, (load_flags & PAL_MAP_MASK));
 		if (color_handle < 0) {
@@ -621,30 +617,29 @@ static void room_buffer_invert(Buffer *buffer, byte *work, int granularity) {
 		byte *src, *dst;
 		int i;
 
-		/* Copy row into work buffer. */
+		// Copy row into work buffer.
 		memcpy(work, scan, wrap);
 
 		src = work;
-		dst = scan + wrap - 1;   /* dst walks right-to-left through scan */
+		dst = scan + wrap - 1;  // dst walks right-to-left through scan
 
 		for (i = 0; i < wrap; i++) {
 			byte al = *src++;
 
 			if (granularity == 8) {
-				/* Reverse all 8 bits. */
+				// Reverse all 8 bits.
 				byte ah = 0;
 				int b;
 				for (b = 0; b < 8; b++) {
-					ah = (ah >> 1) | (al << 7);  /* rcr ah,1 / shl al,1 pair */
+					ah = (ah >> 1) | (al << 7);  // rcr ah,1 / shl al,1 pair
 					al <<= 1;
 				}
 				al = ah;
 			} else if (granularity == 2) {
-				/* Swap the two nibbles. */
-				al = (al >> 4) | (al << 4);   /* ror al,4 */
+				// Swap the two nibbles.
+				al = (al >> 4) | (al << 4);  // ror al,4
 			}
-			/* granularity == 1: byte value is used as-is */
-
+			// granularity == 1: byte value is used as-is
 			*dst-- = al;
 		}
 

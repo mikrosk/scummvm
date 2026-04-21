@@ -38,7 +38,7 @@ word pattern_initial_value = 0xb78e;
 int  auto_pattern = true;
 int buffer_restore_keep_flag = false;
 
-static word accum;                    /* Pattern accumulator */
+static word accum;                    // Pattern accumulator
 static Buffer buffer_preserve_conventional;
 
 char buffer_disk_filename[8] = "$MPOP.$";
@@ -388,7 +388,7 @@ void buffer_line_xor(Buffer target, int x1, int y1, int x2, int y2) {
 }
 
 static inline byte ror8(byte val, int count) {
-	count &= 7;          /* ror by 8 is identity; keep in 0..7 */
+	count &= 7;  // ror by 8 is identity; keep in 0..7
 	return (val >> count) | (val << (8 - count));
 }
 
@@ -415,19 +415,19 @@ int buffer_legal(const Buffer &walk, int orig_wrap,
 	if (delta_x < 0) {
 		delta_x = -delta_x;
 		x_sign = -1;
-		dAccum = (delta_y < delta_x) ? delta_x : delta_y;  /* max, not min */
+		dAccum = (delta_y < delta_x) ? delta_x : delta_y;  // max, not min
 	}
 
 	int x_count = delta_x + 1;
 	int y_count = delta_y + 1;
 
 	byte *ptr = walk.data + y1 * walk.x + (x1 / 8);
-	int   bit_pos = 8 - (x1 % 8);   /* cl: 1=MSB side, 8=LSB side */
+	int   bit_pos = 8 - (x1 % 8);  // cl: 1=MSB side, 8=LSB side
 
 	for (int col = x_count; col > 0; col--) {
 		dAccum += y_count;
 
-		bool blocked = (ror8(*ptr, bit_pos) & 1) != 0;  /* carry from ror */
+		bool blocked = (ror8(*ptr, bit_pos) & 1) != 0;  // carry from ror
 		if (blocked) {
 			if (!currently_illegal) {
 				currently_illegal = true;
@@ -453,7 +453,7 @@ int buffer_legal(const Buffer &walk, int orig_wrap,
 			ptr += y_sign;
 		}
 
-		/* Advance one pixel in X */
+		// Advance one pixel in X
 		int new_cl = ((bit_pos - x_sign - 1) & 7) + 1;
 		if ((bit_pos - x_sign - 1) & ~7)
 			ptr += x_sign;
@@ -463,13 +463,15 @@ int buffer_legal(const Buffer &walk, int orig_wrap,
 	return legality;
 }
 
-/* Advance the pattern accumulator one step. */
+/**
+ * Advance the pattern accumulator one step.
+ */
 static void pattern_math(void) {
 	word bx = accum;
 	accum += pattern_control_value;
-	bx = (bx >> 9) | (bx << 7);   /* ror 9 */
+	bx = (bx >> 9) | (bx << 7);  // ror 9
 	accum ^= bx;
-	bx = (bx >> 3) | (bx << 13);  /* ror 3 */
+	bx = (bx >> 3) | (bx << 13);  // ror 3
 	accum += bx;
 }
 
@@ -566,12 +568,12 @@ word buffer_rect_fill_pattern(Buffer target, int ul_x, int ul_y, int size_x, int
 	if (result) {
 		accum = pattern_initial_value;
 
-		/* Wind the accumulator forward to account for rows above ul_y */
+		// Wind the accumulator forward to account for rows above ul_y
 		for (int row = 0; row < (ul_y - base_y); row++)
 			for (int col = 0; col < base_xs; col++)
 				pattern_math();
 
-		/* Wind the accumulator forward to account for columns left of ul_x */
+		// Wind the accumulator forward to account for columns left of ul_x
 		for (int col = 0; col < (ul_x - base_x); col++)
 			pattern_math();
 
@@ -600,7 +602,7 @@ word buffer_rect_fill_pattern(Buffer target, int ul_x, int ul_y, int size_x, int
 
 			target_ptr += target_wrap;
 
-			/* Wind accumulator past the columns not being drawn */
+			// Wind accumulator past the columns not being drawn
 			for (int col = 0; col < line_wrap; col++)
 				pattern_math();
 		}
@@ -650,12 +652,12 @@ void buffer_peel_horiz(Buffer *target, int peel) {
 	for (int row = 0; row < y; row++)
 	{
 		if (peel_sign > 0) {
-			/* Save the first peel_val bytes, shift row left, append saved bytes at end */
+			// Save the first peel_val bytes, shift row left, append saved bytes at end
 			memcpy(temp_buf, scan, peel_val);
 			memmove(scan, scan + peel_val, x - peel_val);
 			memcpy(scan + x - peel_val, temp_buf, peel_val);
 		} else {
-			/* Save the last peel_val bytes, shift row right, prepend saved bytes at start */
+			// Save the last peel_val bytes, shift row right, prepend saved bytes at start
 			memcpy(temp_buf, scan + x - peel_val, peel_val);
 			memmove(scan + peel_val, scan, x - peel_val);
 			memcpy(scan, temp_buf, peel_val);
@@ -688,9 +690,9 @@ void buffer_peel_vert(Buffer *target, int peel, byte *work_memory, long work_siz
 	}
 
 	if (peel_sign > 0) {
-		/* Positive peel: rotate buffer upward by peel_val rows.
-		   Save the bottom peel_val rows, shift everything down,
-		   then place the saved rows at the top. */
+		// Positive peel: rotate buffer upward by peel_val rows.
+		// Save the bottom peel_val rows, shift everything down,
+		// then place the saved rows at the top.
 		byte *deep_scan = buffer_pointer(target, 0, (y - 1) - (peel_val - 1));
 
 		memcpy(work_area, deep_scan, peel_memory);
@@ -704,9 +706,9 @@ void buffer_peel_vert(Buffer *target, int peel, byte *work_memory, long work_siz
 
 		memcpy(scan, work_area, peel_memory);
 	} else {
-		/* Negative peel: rotate buffer downward by peel_val rows.
-		   Save the top peel_val rows, shift everything up,
-		   then place the saved rows at the bottom. */
+		// Negative peel: rotate buffer downward by peel_val rows.
+		// Save the top peel_val rows, shift everything up,
+		// then place the saved rows at the bottom.
 		byte *deep_scan = buffer_pointer(target, 0, (y - 1) - (peel_val - 1));
 
 		memcpy(work_area, scan, peel_memory);
@@ -735,8 +737,7 @@ int buffer_preserve(Buffer *source, int flags, int source_ems_handle, int x, int
 		goto done;
 	}
 
-	/* Try to preserve in conventional memory, if requested */
-
+	// Try to preserve in conventional memory, if requested
 	if (flags == BUFFER_ATTEMPT_CONVENTIONAL) {
 		buffer_init_name(&buffer_preserve_conventional, xs, ys, "$preserv");
 		if (buffer_preserve_conventional.data != NULL) {
@@ -747,15 +748,13 @@ int buffer_preserve(Buffer *source, int flags, int source_ems_handle, int x, int
 		}
 	}
 
-	/* Try to preserve in EMS memory */
-
+	// Try to preserve in EMS memory
 	preserve_handle = buffer_to_ems(source, flags, source_ems_handle, x, y, xs, ys);
 	if (preserve_handle >= 0) {
 		goto done;
 	}
 
-	/* Try to preserve on disk */
-
+	// Try to preserve on disk
 	if (flags != BUFFER_PRESERVE_RAM) {
 		disk_number = buffer_to_disk(source, x, y, xs, ys);
 		if (disk_number >= 0) {

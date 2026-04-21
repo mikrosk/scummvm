@@ -238,7 +238,7 @@ char *fileio_read_header(char *target, Common::SeekableReadStream *handle) {
 		mark++;
 		count++;
 	}
-	(void)handle->readByte();         /* Throw away EOF mark */
+	(void)handle->readByte();  // Throw away EOF mark
 
 	return target;
 }
@@ -252,7 +252,7 @@ void fileio_write_header(char *text, Common::WriteStream *handle) {
 		text++;
 		handle->writeByte(next);
 	}
-	handle->writeByte(26);           /* Write fake EOF mark */
+	handle->writeByte(26);  // Write fake EOF mark
 }
 
 char *fileio_get_line(char *target, Common::SeekableReadStream *handle) {

@@ -194,18 +194,18 @@ static word mcga_time_palette_swap(Palette *pal, int first_color, int num_colors
 }
 
 void mcga_compute_retrace_parameters(void) {
-	/* In DOS, the BIOS initialised the VGA DAC with a default 256-colour
-	   palette when the video mode was set; this function read that palette
-	   back and stored it in master_palette so the engine had a populated
-	   baseline before any room-specific colours were allocated.
-	   In ScummVM there is no hardware DAC to read, so we copy the known
-	   default table directly instead of calling mcga_getpal(). */
+	// In DOS, the BIOS initialised the VGA DAC with a default 256-colour
+	// palette when the video mode was set; this function read that palette
+	// back and stored it in master_palette so the engine had a populated
+	// baseline before any room-specific colours were allocated.
+	// In ScummVM there is no hardware DAC to read, so we copy the known
+	// default table directly instead of calling mcga_getpal().
 	memcpy(&master_palette, &vga_default_pal, sizeof(Palette));
 	mcga_setpal(&master_palette);
 
-	/* On original hardware this function also measured how many palette
-	   entries could be written inside one vertical retrace interval.
-	   Under a modern graphics API there is no such constraint. */
+	// On original hardware this function also measured how many palette
+	// entries could be written inside one vertical retrace interval.
+	// Under a modern graphics API there is no such constraint.
 	mcga_palette_fast = true;
 	mcga_retrace_max_colors = Graphics::PALETTE_COUNT;
 	mcga_retrace_max_bytes = Graphics::PALETTE_SIZE;
