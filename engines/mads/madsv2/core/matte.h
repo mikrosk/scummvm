@@ -60,14 +60,15 @@ namespace MADSV2 {
 #define MATTE_FX_FAST_AND_FANCY       21
 
 
-typedef struct MatteBuf {
+struct Matte {
 	int x, y;             /* upper left coords    */
 	int xs, ys;             /* sizes                */
 	int xh, yh;             /* half sizes           */
 	int xc, yc;             /* centers              */
 	byte changed;           /* changed this update? */
 	byte valid;             /* contains valid matte?*/
-} Matte;
+	Matte *linked_matte;
+};
 
 typedef Matte *MattePtr;
 

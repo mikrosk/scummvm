@@ -347,6 +347,7 @@ void bound_matte(MattePtr matte, int xs, int ys, int maxx, int maxy) {
 	matte->yc = matte->y + (((matte->ys + 1) >> 1) - 1); /* Set center mark */
 
 	matte->valid = true;
+	matte->linked_matte = nullptr;
 }
 
 /*
@@ -445,14 +446,11 @@ static void combine_mattes(MattePtr matte1, MattePtr matte2) {
 	matte1->yc = matte1->y + (((matte1->ys + 1) >> 1) - 1);
 
 	/* Mark matte2 as EMPTY, but leave behind a pointer to matte1 */
-
 	matte2->valid = false;
-	//matte2->y = (int)matte1;
-	error("FIXME: Horrible non-portable cast from pointer to (int)");
+	matte2->linked_matte = matte1;
 
 	/* Set matte1's update flag TRUE; we need to redraw everything in */
 	/* this matte.                                                    */
-
 	matte1->changed = true;
 }
 
@@ -916,7 +914,8 @@ void matte_frame(int special_effect, int full_screen) {
 			/* Search through the matte list to find the matte of which this */
 			/* image is a part.                                              */
 
-			for (matte2 = matte; !matte2->valid; matte2 = (MattePtr)matte2->y);
+			for (matte2 = matte; !matte2->valid; matte2 = matte2->linked_matte) {
+			}
 
 			/* If its matte is being updated, make a depth list entry for    */
 			/* our sprite.                                                   */
@@ -988,7 +987,9 @@ void matte_frame(int special_effect, int full_screen) {
 	matte = &matte_list[FIRST_MESSAGE_MATTE];
 	for (id = 0; id < MESSAGE_LIST_SIZE; id++) {
 		if (message->active && (message->status >= 0)) {
-			for (matte2 = matte; !matte2->valid; matte2 = (MattePtr)matte2->y);
+			for (matte2 = matte; !matte2->valid; matte2 = matte2->linked_matte) {
+			}
+
 			if (matte2->changed || any_refresh) {
 				high_color = (byte)message->main_color;
 				low_color = (byte)(message->main_color >> 8);
@@ -1181,7 +1182,7 @@ static void make_inter_matte(ImageInterPtr image, MattePtr matte) {
 
 
 void matte_inter_frame(int update_live, int clear_chaff) {
-	register int id;
+	int id;
 	int x, y;
 	int flags;
 	word mirror;
@@ -1189,8 +1190,8 @@ void matte_inter_frame(int update_live, int clear_chaff) {
 	SeriesPtr series;
 	int beware_the_mouse = false;
 	byte new_marker;
-	register MattePtr matte;
-	register MattePtr matte2;
+	MattePtr matte;
+	MattePtr matte2;
 	MattePtr i_am_the_dog_master = NULL;
 	ImageInter *image;
 	ImageInter *image2;
@@ -1286,7 +1287,8 @@ void matte_inter_frame(int update_live, int clear_chaff) {
 			/* Search through the matte list to find the matte of which this */
 			/* image is a part.                                              */
 
-			for (matte2 = matte; !matte2->valid; matte2 = (MattePtr)matte2->y);
+			for (matte2 = matte; !matte2->valid; matte2 = matte2->linked_matte) {
+			}
 
 			if (matte2->changed) {
 				series = series_list[image->series_id];
