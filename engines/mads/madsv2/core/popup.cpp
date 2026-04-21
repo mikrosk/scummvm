@@ -2686,8 +2686,8 @@ static int popup_savelist_mouse(PopupItem *item) {
 	in_up_arrow = in_scroll_bar && (mouse_y <= (list->scroll.arrow_1_base + list->scroll.arrow_size));
 	in_down_arrow = in_scroll_bar && (mouse_y >= (list->scroll.arrow_2_base - 1));
 
-	in_main_box = popup_in_item(item) && !in_scroll_bar;
-	in_main_range = ((mouse_y > item->y) && (mouse_y < (item->y + item->ys - 1)));
+	in_main_box = popup_in_item(item) && ((mouse_y > item->y) &&
+		(mouse_y < (item->y + item->ys - 1)));
 
 	force_update = mouse_start_stroke || (item->status & ITEM_STATUS_FORCED) != 0;
 
