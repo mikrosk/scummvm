@@ -238,13 +238,32 @@ extern void game_set_camera_speed(void);
 extern void game_exec_function(void (*(target))());
 extern void game_debugger_reset(void);
 extern void game_debugger(void);
+/*
+ * game_write_save_directory()
+ * Writes the list of save files.
+ */
 extern void game_write_save_directory(void);
+/*
+ * game_menu_setup()
+ * Sets up for the main menu routines to run--this mainly involves
+ * getting enough memory to hold the save directory and menu heap.
+ */
 extern void game_menu_setup(void);
+/*
+ * game_menu_shutdown()
+ * Tells the menu structures to bite down hard.
+ */
 extern void game_menu_shutdown(void);
 extern int  main_cheating_key(int mykey);
 extern int  main_normal_key(int mykey);
 extern int  main_copy_verify(void);
 extern void game_cold_data_init();
+/*
+ * game_control()
+ * This is the main outer control structure for the game, that
+ * determines which section and room level information should be
+ * loaded into and out of memory.
+ */
 extern void game_control();
 
 /*

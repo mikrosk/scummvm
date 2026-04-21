@@ -27,19 +27,14 @@
 namespace MADS {
 namespace MADSV2 {
 
-/* btype_1.c */
 byte upcaseb(byte inp);
 
-/* btype_2.c */
 int  upcasei(int inp);
 
-/* btype_3.c */
 int xtoi(char *string);
 
-/* btype_4.c */
 int btoi(char *string);
 
-/* btype_5.c */
 int stoi(char *string);
 
 } // namespace MADSV2
