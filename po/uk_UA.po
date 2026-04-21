@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.9.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-21 19:16+0000\n"
-"PO-Revision-Date: 2026-04-15 22:03+0000\n"
+"PO-Revision-Date: 2026-04-21 22:05+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Ukrainian <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/uk/>\n"
@@ -12336,11 +12336,9 @@ msgstr ""
 "прочитати"
 
 #: engines/sci/graphics/video32.cpp:70
-#, fuzzy, c-format
-#| msgid ""
-#| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
+#, c-format
 msgid "Cannot play back %s video on a system with maximum color depth of 8bpp"
-msgstr "Не можу програти %dbpp відео на системі з кольоровою роздільністю 8bpp"
+msgstr "Не можу програти %s відео на системі з кольоровою роздільністю 8bpp"
 
 #: engines/sci/metaengine.cpp:212
 msgid "SCI32 support not compiled in"
