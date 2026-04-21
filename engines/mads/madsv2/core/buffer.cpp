@@ -387,11 +387,6 @@ void buffer_line_xor(Buffer target, int x1, int y1, int x2, int y2) {
 	}
 }
 
-static inline byte ror8(byte val, int count) {
-	count &= 7;  // ror by 8 is identity; keep in 0..7
-	return (val >> count) | (val << (8 - count));
-}
-
 int buffer_legal(const Buffer &walk, int orig_wrap,
 	int x1, int y1, int x2, int y2) {
 	word legality = LEGAL;
@@ -415,19 +410,20 @@ int buffer_legal(const Buffer &walk, int orig_wrap,
 	if (delta_x < 0) {
 		delta_x = -delta_x;
 		x_sign = -1;
-		dAccum = (delta_y < delta_x) ? delta_x : delta_y;  // max, not min
+		dAccum = MIN(delta_x, delta_y);
 	}
 
 	int x_count = delta_x + 1;
 	int y_count = delta_y + 1;
 
 	byte *ptr = walk.data + y1 * walk.x + (x1 / 8);
-	int   bit_pos = 8 - (x1 % 8);  // cl: 1=MSB side, 8=LSB side
+	uint bit_pos = 8 - (x1 % 8);  // cl: 1=MSB side, 8=LSB side
 
 	for (int col = x_count; col > 0; col--) {
 		dAccum += y_count;
 
-		bool blocked = (ror8(*ptr, bit_pos) & 1) != 0;  // carry from ror
+		bool blocked = ((*ptr >> bit_pos) & 1) != 0;
+
 		if (blocked) {
 			if (!currently_illegal) {
 				currently_illegal = true;
@@ -440,7 +436,7 @@ int buffer_legal(const Buffer &walk, int orig_wrap,
 
 		while (dAccum >= x_count) {
 			dAccum -= x_count;
-			blocked = (ror8(*ptr, bit_pos) & 1) != 0;
+			blocked = ((*ptr >> bit_pos) & 1) != 0;
 			if (blocked) {
 				if (!currently_illegal) {
 					currently_illegal = true;
@@ -450,12 +446,14 @@ int buffer_legal(const Buffer &walk, int orig_wrap,
 			} else {
 				currently_illegal = false;
 			}
+
 			ptr += y_sign;
 		}
 
 		// Advance one pixel in X
-		int new_cl = ((bit_pos - x_sign - 1) & 7) + 1;
+		uint new_cl = ((bit_pos - x_sign - 1) & 7) + 1;
 		if ((bit_pos - x_sign - 1) & ~7)
+			// ie. bit_pos < 0 or > 7
 			ptr += x_sign;
 		bit_pos = new_cl;
 	}
