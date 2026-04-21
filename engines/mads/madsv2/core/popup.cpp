@@ -2214,8 +2214,7 @@ static int popup_message_x_size(PopupItem *item) {
 }
 
 
-static int popup_message_y_size(PopupItem *item) {
-	item = NULL;  // delete if this routine is to be used
+static int popup_message_y_size(PopupItem *) {
 	return box_param.font->max_y_size;
 }
 

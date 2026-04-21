@@ -369,7 +369,7 @@ typedef struct {
 	int16 button_right_fill;      /* Button row right fill    */
 	int16 button_bar_color;       /* Button bar color         */
 
-	int16 key;                    /* Last keyboard input      */
+	uint32 key;                   /* Last keyboard input      */
 	int16 key_handled;            /* Flag if key handled      */
 
 	int16 mouse_status;           /* Mouse status word        */
