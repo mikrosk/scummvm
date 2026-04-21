@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.10.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-20 21:33+0000\n"
-"PO-Revision-Date: 2026-04-14 16:22+0000\n"
+"PO-Revision-Date: 2026-04-21 16:22+0000\n"
 "Last-Translator: Antoniou Athanasios <a.antoniou79@gmail.com>\n"
 "Language-Team: Greek <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/el/>\n"
@@ -9601,35 +9601,32 @@ msgstr "Σύστημα γραφικών:"
 
 #: engines/glk/dialogs.cpp:274
 msgid "Link style:"
-msgstr ""
+msgstr "Στυλ συνδέσμου:"
 
 #: engines/glk/dialogs.cpp:274
 msgid "Style for URLs if they appear in-game"
-msgstr ""
+msgstr "Στυλ για τις διευθύνσεις URL όπου εμφανίζονται στο παιχνίδι"
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Change shadow type"
 msgid "Caret shape:"
-msgstr "Αλλαγή τύπου σκιάς"
+msgstr "Σχήμα κέρσορα:"
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Show mouse cursor"
 msgid "Shape of the cursor"
-msgstr "Προβολή δρομέα ποντικιού"
+msgstr "Το σχήμα για τον κέρσορα"
 
 #: engines/glk/dialogs.cpp:286
-#, fuzzy
-#| msgid "Quit prompt"
 msgid "More prompt:"
-msgstr "Ερώτηση για έξοδο"
+msgstr "Ένδειξη \"παρακάτω\":"
 
 #: engines/glk/dialogs.cpp:286
 msgid ""
 "Custom marker in place of the \"More...\" marker for eg. \"continue\". Leave "
 "it blank to use the game's default"
 msgstr ""
+"Προσαρμοσμένη ένδειξη αντί για την ένδειξη \"Παρακάτω...\", όπως για "
+"παράδειγμα \"συνέχεια\". Αφήστε το κενό για να χρησιμοποιηθεί η προεπιλογή "
+"του παιχνιδιού"
 
 #: engines/glk/dialogs.cpp:288
 #, fuzzy
@@ -9653,41 +9650,37 @@ msgstr ""
 
 #. I18N: This is setting for number of text columns
 #: engines/glk/dialogs.cpp:292
-#, fuzzy
-#| msgid "Volume controls"
 msgid "Column count:"
-msgstr "Ρυθμίσεις έντασης"
+msgstr "Πλήθος στηλών:"
 
 #: engines/glk/dialogs.cpp:292
 msgid "Number of columns"
-msgstr ""
+msgstr "Ο αριθμός των στηλών κεμένου"
 
 #. I18N: This is setting for number of text rows
 #: engines/glk/dialogs.cpp:294
 msgid "Rows count:"
-msgstr ""
+msgstr "Πλήθος γραμμών:"
 
 #: engines/glk/dialogs.cpp:294
 msgid "Number of rows"
-msgstr ""
+msgstr "Ο αριθμός των γραμμών κειμένου"
 
 #: engines/glk/dialogs.cpp:296
 msgid "Lock columns:"
-msgstr ""
+msgstr "Κλείδωμα στηλών:"
 
 #: engines/glk/dialogs.cpp:296
 msgid "Check it to manually change the column count"
-msgstr ""
+msgstr "Επιλέξτε το για να θέσετε χειροκίνητα το πλήθος στηλών"
 
 #: engines/glk/dialogs.cpp:297
-#, fuzzy
-#| msgid "Block low"
 msgid "Lock rows:"
-msgstr "Μπλοκάρισμα χαμηλά"
+msgstr "Κλείδωμα γραμμών:"
 
 #: engines/glk/dialogs.cpp:297
 msgid "Check it to manually change the row count"
-msgstr ""
+msgstr "Επιλέξτε το για να θέσετε χειροκίνητα το πλήθος γραμμών"
 
 #. I18N: This is a setting for enabling text justification
 #: engines/glk/dialogs.cpp:301
@@ -9702,44 +9695,38 @@ msgstr "Σύντομες μεταβάσεις"
 
 #. I18N: These is setting for type of text quote symbols
 #: engines/glk/dialogs.cpp:305
-#, fuzzy
-#| msgid "Graphics mode:"
 msgid "Typographic quotes:"
-msgstr "Σύστημα γραφικών:"
+msgstr "Εισαγωγικά παραθέσεων:"
 
 #: engines/glk/dialogs.cpp:306
-#, fuzzy
-#| msgid "Color graphics"
 msgid "Choose typographic quotes"
-msgstr "Έγχρωμα γραφικά"
+msgstr "Επιλογή τύπου εισαγωγικών για παραθέσεις κειμένου"
 
 #: engines/glk/dialogs.cpp:307
 msgctxt "quotes"
 msgid "Off"
-msgstr ""
+msgstr "Χωρίς"
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
 #: engines/glk/dialogs.cpp:309
-#, fuzzy
-#| msgid "Normal"
 msgctxt "quotes"
 msgid "Normal"
-msgstr "Κανονικές"
+msgstr "Κανονικά"
 
 #. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
 #: engines/glk/dialogs.cpp:311
 msgctxt "quotes"
 msgid "Rabid"
-msgstr ""
+msgstr "Ειδικά"
 
 #. I18N: This is a setting for forcing all input to be in uppercase
 #: engines/glk/dialogs.cpp:314
 msgid "Caps:"
-msgstr ""
+msgstr "Κεφαλαία:"
 
 #: engines/glk/dialogs.cpp:314
 msgid "Force uppercase input"
-msgstr ""
+msgstr "Εξαναγκασμένη είσοδος κειμένου σε κεφαλαία"
 
 #. I18N: This is a setting for type of text dash symbols
 #: engines/glk/dialogs.cpp:317
@@ -9773,49 +9760,43 @@ msgstr "Προτιμήσεις"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:329
-#, fuzzy
-#| msgid "Space"
 msgid "Spaces:"
-msgstr "Space"
+msgstr "Κενά:"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:331
 msgid "Types of spaces"
-msgstr ""
+msgstr "Τύποι κενών στο κείμενο"
 
 #. I18N: This is a setting for compressing double spaces into single ones in text
 #: engines/glk/dialogs.cpp:334
 msgid "Compress double spaces"
-msgstr ""
+msgstr "Συμπίεση διπλών κενών"
 
 #. I18N: This is a setting for expanding single spaces into double ones in text
 #: engines/glk/dialogs.cpp:336
 msgid "Expand single spaces"
-msgstr ""
+msgstr "Ανάπτυξη απλών κενών"
 
 #: engines/glk/dialogs.cpp:338
-#, fuzzy
-#| msgid "Graphics"
 msgid "Graphics:"
-msgstr "Γραφικά"
+msgstr "Γραφικά:"
 
 #: engines/glk/dialogs.cpp:338
 msgid "Turn graphics on/off"
-msgstr ""
+msgstr "Απ/ενεργοποίηση γραφικών"
 
 #: engines/glk/dialogs.cpp:340
-#, fuzzy
-#| msgid "Window"
 msgid "Window margin"
-msgstr "Παράθυρο"
+msgstr "Περιθώριο παραθύρου"
 
 #: engines/glk/dialogs.cpp:341
 msgid "Horizontal margin for window"
-msgstr ""
+msgstr "Οριζόντιο περιθώριο παραθύρου"
 
 #: engines/glk/dialogs.cpp:342
 msgid "Vertical margin for window"
-msgstr ""
+msgstr "Κάθετο περιθώριο παραθύρου"
 
 #: engines/glk/dialogs.cpp:344
 #, fuzzy
@@ -9832,18 +9813,16 @@ msgid "Vertical padding for window"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:348
-#, fuzzy
-#| msgid "Next action"
 msgid "Text margin"
-msgstr "Επόμενη ενέργεια"
+msgstr "Περιθώριο κειμένου"
 
 #: engines/glk/dialogs.cpp:349
 msgid "Horizontal margin for text"
-msgstr ""
+msgstr "Οριζόντιο περιθώριο κειμένου"
 
 #: engines/glk/dialogs.cpp:350
 msgid "Vertical margin for text"
-msgstr ""
+msgstr "Κάθετο περιθώριο κειμένου"
 
 #. I18N: This is a setting for leading, which is the vertical distance between text rows
 #: engines/glk/dialogs.cpp:353
@@ -9887,26 +9866,24 @@ msgstr ""
 #. I18N: This is a section for settings related to the "More..." prompt in text windows
 #: engines/glk/dialogs.cpp:367
 msgid "More"
-msgstr ""
+msgstr "Παρακάτω"
 
 #. I18N: This is a setting for alignment of the "More..." prompt in text windows
 #: engines/glk/dialogs.cpp:369
 msgid "Align:"
-msgstr ""
+msgstr "Στοίχιση:"
 
 #: engines/glk/dialogs.cpp:370
 msgid "Alignment of the \"More...\" marker on the window"
-msgstr ""
+msgstr "Στοίχιση για την ένδειξη \"Παρακάτω...\" στο παράθυρο"
 
 #: engines/glk/dialogs.cpp:375
-#, fuzzy
-#| msgid "SoundFont:"
 msgid "Font:"
-msgstr "SoundFont:"
+msgstr "Γραμματοσειρά:"
 
 #: engines/glk/dialogs.cpp:375
 msgid "Font for the \"More...\" marker"
-msgstr ""
+msgstr "Γραμματοσειρά για την ένδειξη \"Παρακάτω...\""
 
 #: engines/glk/glulx/glulx.cpp:81
 msgid "This is too short to be a valid Glulx file."
@@ -11242,10 +11219,8 @@ msgstr ""
 "(πόντοι για υγεία) και spell points (πόντοι για ξόρκια)."
 
 #: engines/mm/metaengine.cpp:183
-#, fuzzy
-#| msgid "Might and Magic 1"
 msgid "Might and Magic"
-msgstr "Might and Magic 1"
+msgstr "Might and Magic"
 
 #: engines/mm/mm1/metaengine.cpp:55
 msgid "View party member 1"
@@ -11508,29 +11483,21 @@ msgstr ""
 "γρηγορότερα στο παιχνίδι."
 
 #: engines/mohawk/dialogs.cpp:364
-#, fuzzy
-#| msgid "Disabled"
 msgctxt "riven-transition"
 msgid "Disabled"
 msgstr "Απενεργοποιημένες"
 
 #: engines/mohawk/dialogs.cpp:365
-#, fuzzy
-#| msgid "Fastest"
 msgctxt "riven-transition"
 msgid "Fastest"
 msgstr "Σύντομες"
 
 #: engines/mohawk/dialogs.cpp:366
-#, fuzzy
-#| msgid "Normal"
 msgctxt "riven-transition"
 msgid "Normal"
 msgstr "Κανονικές"
 
 #: engines/mohawk/dialogs.cpp:367
-#, fuzzy
-#| msgid "Best"
 msgctxt "riven-transition"
 msgid "Best"
 msgstr "Βέλτιστες"
@@ -11889,8 +11856,8 @@ msgid ""
 "Fix instances where missing something earlier in the game blocks you from "
 "progressing any further."
 msgstr ""
-"Διορθώνει περιπτώσεις όπου αν σας διέφυγε κάτι νωρίτερα στο παιχνίδι, αυτό "
-"σας μπλοκάρει από το να προχωρήσετε παρακάτω."
+"Διορθώνει περιπτώσεις όπου, αν σας διέφυγε κάτι νωρίτερα στο παιχνίδι, αυτό "
+"θα σας εμπόδιζε από το να προχωρήσετε παρακάτω."
 
 #: engines/nancy/metaengine.cpp:82
 msgid "Fix annoyances"
@@ -12403,8 +12370,6 @@ msgid "Abort speech"
 msgstr "Ακύρωση ομιλίας"
 
 #: engines/saga/metaengine.cpp:344
-#, fuzzy
-#| msgid "Show dialogue"
 msgid "Show dialog"
 msgstr "Προβολή διαλόγου"
 
@@ -12682,12 +12647,10 @@ msgstr ""
 "παιχνιδιού, δεν γίνεται να φορτωθεί"
 
 #: engines/sci/graphics/video32.cpp:70
-#, fuzzy, c-format
-#| msgid ""
-#| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
+#, c-format
 msgid "Cannot play back %s video on a system with maximum color depth of 8bpp"
 msgstr ""
-"Αδυναμία αναπαραγωγής βίντεο %dbpp σε σύστημα με μέγιστο βάθος χρώματος 8bpp"
+"Αδυναμία αναπαραγωγής του βίντεο %s σε σύστημα με μέγιστο βάθος χρώματος 8bpp"
 
 #: engines/sci/metaengine.cpp:212
 msgid "SCI32 support not compiled in"
@@ -12992,12 +12955,14 @@ msgstr ""
 
 #: engines/scumm/dialogs.cpp:1226
 msgid "Show wait cursor when paused"
-msgstr ""
+msgstr "Προβολή του κέρσορα αναμονής σε κατάσταση παύσης"
 
 #: engines/scumm/dialogs.cpp:1227
 msgid ""
 "When paused, show the animated wait cursor from the original Sega CD version."
 msgstr ""
+"Όταν το παιχνίδι είναι σε παύση, να εμφανίζεται ο κινούμενος κέρσορας "
+"αναμονής από την πρωτότυπη έκδοση για Sega CD."
 
 #: engines/scumm/dialogs.cpp:1364
 msgid "Overture Timing:"
@@ -13797,16 +13762,17 @@ msgstr ""
 "πλήρη έκδοση του Maniac Mansion."
 
 #: engines/scumm/metaengine.cpp:839
-#, fuzzy
-#| msgid "Playback"
 msgid "Disable Playback"
-msgstr "Αναπαραγωγή"
+msgstr "Απενεργοποίηση μη διαδραστικής αναπαραγωγής"
 
 #: engines/scumm/metaengine.cpp:840
 msgid ""
 "Disable the scripted part of the demo (dangerous!). This makes it "
 "interactive, but as this was never intended, expect frequent crashes!"
 msgstr ""
+"Απενεργοποιεί το αυτοματοποιημένο μέρος του demo (επικίνδυνο!). Αυτό θα "
+"κάνει διαδραστικό το demo, αλλά καθώς δεν είναι σχεδιασμένο για κάτι τέτοιο, "
+"να περιμένετε απρόβλεπτη συμπεριφορά (κρασαρίσματα)!"
 
 #: engines/scumm/metaengine.cpp:848
 msgid "Use remastered audio"
@@ -13827,28 +13793,20 @@ msgid "Enable ambience sounds."
 msgstr "Ενεργοποίηση ατμοσφαιρικών ήχων."
 
 #: engines/scumm/metaengine.cpp:1001
-#, fuzzy
-#| msgid "Down Left"
 msgid "Down left"
-msgstr "Κάτω Αριστερά"
+msgstr "Κάτω αριστερά"
 
 #: engines/scumm/metaengine.cpp:1014
-#, fuzzy
-#| msgid "Down Right"
 msgid "Down right"
-msgstr "Κάτω Δεξιά"
+msgstr "Κάτω δεξιά"
 
 #: engines/scumm/metaengine.cpp:1034
-#, fuzzy
-#| msgid "Upper left item"
 msgid "Up left"
-msgstr "Πάνω αριστερά αντικείμενο"
+msgstr "Πάνω αριστερά"
 
 #: engines/scumm/metaengine.cpp:1047
-#, fuzzy
-#| msgid "Up Right"
 msgid "Up right"
-msgstr "Πάνω Δεξιά"
+msgstr "Πάνω δεξιά"
 
 #: engines/scumm/metaengine.cpp:1059
 msgid "Switch weapon"
@@ -13946,6 +13904,11 @@ msgid ""
 "dialog definitions. Look for a 'The Dig f' folder on your CD. Any one from "
 "its sub-folders should be what you need."
 msgstr ""
+"Το '%s' φαίνεται να μην είναι έγκυρο εκτελέσιμο για το The Dig. Μπορεί να "
+"πρόκειται για τον πλοηγό (launcher) που βρίσκεται στον αρχικό κατάλογο του "
+"CD, ο οποίος δεν περιέχει τους απαραίτητους ορισμούς για μενού και "
+"διαλόγους. Αναζητήστε έναν κατάλογο 'The Dig f' στο CD σας. Οποιοσδήποτε από "
+"τους υπο-καταλόγους του μπορεί να χρησιμοποιηθεί εδώ."
 
 #: engines/scumm/scumm.cpp:1570
 msgid ""
@@ -13954,6 +13917,12 @@ msgid ""
 "Since the One-Stop Fun Shop series makes extensive use of TTF fonts,\n"
 "some of the graphics on screen will be missing."
 msgstr ""
+"Φαίνεται ότι αυτή η έκδοση του ScummVM δεν εμπεριέχει υποστήριξη για "
+"γραμματοσειρές TrueType (TTF).\n"
+"\n"
+"Καθώς η σειρά παιχνιδιών One-Stop Fun Shop κάνει εκτενή χρήση των "
+"γραμματοσειρών TTF,\n"
+"κάποια από τα γραφικά επί της οθόνης θα λείπουν."
 
 #: engines/scumm/scumm.cpp:1836
 msgid ""
@@ -14264,15 +14233,13 @@ msgstr "Διάταξη πλακιδίων"
 #. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a journal, this action is used to go back 10 pages in the journal
 #: engines/sherlock/metaengine.cpp:501 engines/sherlock/metaengine.cpp:910
 msgid "Go back 10 pages"
-msgstr ""
+msgstr "10 σελίδες πίσω"
 
 #. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to go forward 10 pages in the journal
 #. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a journal, this action is used to go forward 10 pages in the journal
 #: engines/sherlock/metaengine.cpp:507 engines/sherlock/metaengine.cpp:895
-#, fuzzy
-#| msgid "Show journal"
 msgid "Go forward 10 pages"
-msgstr "Προβολή ημερολογίου"
+msgstr "10 σελίδες παρακάτω"
 
 #. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to go to the first page of the journal
 #: engines/sherlock/metaengine.cpp:521 engines/sherlock/metaengine.cpp:924
@@ -14305,16 +14272,12 @@ msgid "Select option"
 msgstr "Επιλογή Ηθοποιού 1"
 
 #: engines/sherlock/metaengine.cpp:692
-#, fuzzy
-#| msgid "Toggle Combat"
 msgid "Toggle portraits"
-msgstr "Εναλλαγή Ετοιμότητας για Μάχη"
+msgstr "Εναλλαγή πορτραίτων"
 
 #: engines/sherlock/metaengine.cpp:697
-#, fuzzy
-#| msgid "Change font size"
 msgid "Change font style"
-msgstr "Αλλαγή μεγέθους γραμματοσειράς"
+msgstr "Αλλαγή στυλ γραμματοσειράς"
 
 #: engines/sherlock/metaengine.cpp:707
 #, fuzzy
@@ -14367,16 +14330,12 @@ msgid "Menu scrolling keymappings"
 msgstr "Πλήκτρα παιχνιδιού"
 
 #: engines/sherlock/metaengine.cpp:784
-#, fuzzy
-#| msgid "Save/Load keymappings"
 msgid "Save / load menu keymappings"
-msgstr "Πλήκτρα για Αποθήκευση/Φόρτωση"
+msgstr "Πλήκτρα για αποθήκευση/φόρτωση"
 
 #: engines/sherlock/metaengine.cpp:785
-#, fuzzy
-#| msgid "Game keymappings"
 msgid "Save files name editing keymappings"
-msgstr "Πλήκτρα παιχνιδιού"
+msgstr "Πλήκτρα για επεξεργασία ονόματος αποθηκευμένου παιχνιδιού"
 
 #: engines/sherlock/metaengine.cpp:786
 #, fuzzy
@@ -14385,51 +14344,37 @@ msgid "Foolscap puzzle keymappings"
 msgstr "Πλήκτρα για Escape"
 
 #: engines/sherlock/metaengine.cpp:788
-#, fuzzy
-#| msgid "Game keymappings"
 msgid "Options menu keymappings"
-msgstr "Πλήκτρα παιχνιδιού"
+msgstr "Πλήκτρα για μενού ρυθμίσεων"
 
 #: engines/sherlock/metaengine.cpp:789
-#, fuzzy
-#| msgid "Game keymappings"
 msgid "Password entry keymappings"
-msgstr "Πλήκτρα παιχνιδιού"
+msgstr "Πλήκτρα για καταχώρηση συνθηματικού"
 
 #: engines/sherlock/metaengine.cpp:791
-#, fuzzy
-#| msgid "Index keymappings"
 msgid "Talk options keymappings"
-msgstr "Πλήκτρα επιλογής"
+msgstr "Πλήκτρα επιλογών ομιλίας"
 
 #: engines/sherlock/metaengine.cpp:793
-#, fuzzy
-#| msgid "Move left"
 msgid "Move / Examine / Select"
-msgstr "Κίνηση αριστερά"
+msgstr "Κίνηση / Εξέταση / Επιλογή"
 
 #. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) This action changes the speed of the game (walking, animations, etc.)
 #: engines/sherlock/metaengine.cpp:810
-#, fuzzy
-#| msgid "Change sound"
 msgid "Change speed"
-msgstr "Αλλαγή ήχου"
+msgstr "Αλλαγή ταχύτητας"
 
 #: engines/sherlock/metaengine.cpp:833
-#, fuzzy
-#| msgid "Show journal"
 msgid "Open journal"
-msgstr "Προβολή ημερολογίου"
+msgstr "Άνοιγμα ημερολογίου"
 
 #: engines/sherlock/metaengine.cpp:846 engines/touche/metaengine.cpp:147
 msgid "Open options menu"
 msgstr "Άνοιγμα μενού επιλογών"
 
 #: engines/sherlock/metaengine.cpp:862
-#, fuzzy
-#| msgid "Fit to window"
 msgid "Exit / Close window"
-msgstr "Προσαρμογή στο παράθυρο"
+msgstr "Έξοδος / κλείσιμο παραθύρου"
 
 #: engines/sherlock/metaengine.cpp:882 engines/sherlock/metaengine.cpp:949
 msgid "Change selected option to the left"
@@ -14440,10 +14385,8 @@ msgid "Change selected option to the right"
 msgstr ""
 
 #: engines/sherlock/metaengine.cpp:972
-#, fuzzy
-#| msgid "Skip minigame"
 msgid "Skip darts minigame"
-msgstr "Παράλειψη μίνι παιχνιδιού"
+msgstr "Παράλειψη του μίνι παιχνιδιού βελάκια"
 
 #. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a map, this action is used to scroll to the top left of the map
 #: engines/sherlock/metaengine.cpp:983
@@ -14474,22 +14417,16 @@ msgid "Scroll to start"
 msgstr "Κύλιση λίστας πάνω"
 
 #: engines/sherlock/metaengine.cpp:1072
-#, fuzzy
-#| msgid "Go to next dialogue"
 msgid "Go to next save file slot"
-msgstr "Πήγαινε στον επόμενο διάλογο"
+msgstr "Επόμενη θυρίδα αποθηκευμένου παιχνιδιού"
 
 #: engines/sherlock/metaengine.cpp:1078
-#, fuzzy
-#| msgid "Go to start of save/load menu"
 msgid "Go to next page of save files"
-msgstr "Έναρξη του μενού αποθήκευσης/φόρτωσης"
+msgstr "Επόμενη σελίδα αποθηκευμένων παιχνιδιών"
 
 #: engines/sherlock/metaengine.cpp:1083
-#, fuzzy
-#| msgid "Select backup file"
 msgid "Select save file"
-msgstr "Επιλέξτε αντίγραφο ασφαλείας"
+msgstr "Επιλογή αποθηκευμένου παιχνιδιού"
 
 #. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) save file name input field has 2 modes, insert and overwrite, this action toggles between them
 #. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) save password input field has 2 modes, insert and overwrite, this action toggles between them
@@ -14501,32 +14438,25 @@ msgstr "Εναλλαγή γρήγορης λειτουργίας"
 
 #. I18N: (Game name: The Lost Files of Sherlock Holmes: The Case of the Rose Tattoo) The game has a foolscap puzzle, where the player has to decode a hidden message on a piece of paper called a foolscap. this action is used to exit the puzzle
 #: engines/sherlock/metaengine.cpp:1135
-#, fuzzy
-#| msgid "Close popup"
 msgid "Close puzzle"
-msgstr "Κλείσιμο αναδυόμενου παραθύρου"
+msgstr "Κλείσιμο γρίφου"
 
 #: engines/sherlock/metaengine.cpp:1177
 msgid "Exit inventory / Close verb menu / Cancel item use action"
 msgstr ""
+"Έξοδος από υπάρχοντα / Κλείσιμο μενού ενεργειών / Ακύρωση χρήσης αντικειμένου"
 
 #: engines/sherlock/metaengine.cpp:1239
-#, fuzzy
-#| msgid "Select Next Actor"
 msgid "Select next option"
-msgstr "Επόμενος Ηθοποιός"
+msgstr "Επιλογή επόμενης ρύθμισης"
 
 #: engines/sherlock/metaengine.cpp:1261
-#, fuzzy
-#| msgid "Go to next dialogue"
 msgid "Go to next talk option"
-msgstr "Πήγαινε στον επόμενο διάλογο"
+msgstr "Επόμενη επιλογή ομιλίας"
 
 #: engines/sherlock/metaengine.cpp:1267
-#, fuzzy
-#| msgid "Go to previous dialogues"
 msgid "Go to previous talk option"
-msgstr "Πήγαινε στον προηγούμενο διάλογο"
+msgstr "Προηγούμενη επιλογή ομιλίας"
 
 #: engines/sky/compact.cpp:140
 msgid "The \"sky.cpt\" engine data file has an incorrect size."
@@ -14545,8 +14475,6 @@ msgid "Open control panel"
 msgstr "Άνοιγμα πίνακα ελέγχου"
 
 #: engines/sky/metaengine.cpp:136
-#, fuzzy
-#| msgid "Toggle really fast mode on/off"
 msgid "Toggle really fast mode"
 msgstr "Εναλλαγή πολύ γρήγορης λειτουργίας"
 
@@ -14567,114 +14495,84 @@ msgstr ""
 "αυτή τη μηχανή"
 
 #: engines/sludge/keymapper_tables.h:34
-#, fuzzy
-#| msgid "Default keymappings"
 msgid "Debug keymappings"
-msgstr "Προκαθορισμένες αντιστοιχίσεις"
+msgstr "Πλήκτρα αποσφαλμάτωσης"
 
 #: engines/sludge/keymapper_tables.h:36
-#, fuzzy
-#| msgid "Game keymappings"
 msgid "Minigame keymappings"
-msgstr "Πλήκτρα παιχνιδιού"
+msgstr "Πλήκτρα μίνι-παιχνιδιού"
 
 #: engines/sludge/keymapper_tables.h:46
-#, fuzzy
-#| msgid "Change game options"
 msgid "Change action"
-msgstr "Αλλαγή επιλογών παιχνιδιού"
+msgstr "Αλλαγή ενέργειας"
 
 #: engines/sludge/keymapper_tables.h:70 engines/sludge/keymapper_tables.h:293
-#, fuzzy
-#| msgid "Select dialogue"
 msgid "Speed up dialog"
-msgstr "Επιλογή διαλόγου"
+msgstr "Επιτάχυνση διαλόγου"
 
 #: engines/sludge/keymapper_tables.h:76 engines/sludge/keymapper_tables.h:298
-#, fuzzy
-#| msgid "Slow down virtual mouse"
 msgid "Slow down dialog"
-msgstr "Επιβράδυνση εικονικού ποντικιού"
+msgstr "Επιβράδυνση διαλόγου"
 
 #: engines/sludge/keymapper_tables.h:101 engines/sludge/keymapper_tables.h:150
-#, fuzzy
-#| msgid "Unnamed autosave"
 msgid "Load auto save"
-msgstr "Ανώνυμη αυτόματη αποθήκευση"
+msgstr "Φόρτωση αυτόματα αποθηκευμένου παιχνιδιού"
 
 #: engines/sludge/keymapper_tables.h:200 engines/sludge/keymapper_tables.h:435
 #: engines/sludge/keymapper_tables.h:552
 msgid "DEBUG: Show floor"
-msgstr ""
+msgstr "ΑΠΟΣΦΑΛΜΑΤΩΣΗ: Προβολή πατώματος"
 
 #: engines/sludge/keymapper_tables.h:205 engines/sludge/keymapper_tables.h:440
 #: engines/sludge/keymapper_tables.h:547
 msgid "DEBUG: Show boxes"
-msgstr ""
+msgstr "ΑΠΟΣΦΑΛΜΑΤΩΣΗ: Προβολή κουτιών"
 
 #: engines/sludge/keymapper_tables.h:237
-#, fuzzy
-#| msgid "Inventory"
 msgid "Inventory / Examine"
-msgstr "Υπάρχοντα"
+msgstr "Υπάρχοντα / Εξέταση"
 
 #: engines/sludge/keymapper_tables.h:281 engines/sword25/metaengine.cpp:118
-#, fuzzy
-#| msgid "Skip dialogue"
 msgid "Examine / Skip dialog"
-msgstr "Παράκαμψη διαλόγου"
+msgstr "Εξέταση / Παράκαμψη διαλόγου"
 
 #: engines/sludge/keymapper_tables.h:287 engines/sludge/keymapper_tables.h:398
 #: engines/sludge/keymapper_tables.h:522
-#, fuzzy
-#| msgid "Skip cutscene"
 msgid "Pause / Skip cutscene"
-msgstr "Παράλειψη ταινίας"
+msgstr "Παύση / Παράλειψη σκηνής"
 
 #: engines/sludge/keymapper_tables.h:328
 msgid "Smell"
-msgstr ""
+msgstr "Μύρισε"
 
 #: engines/sludge/keymapper_tables.h:338
 msgid "Consume"
-msgstr ""
+msgstr "Κατανάλωσε"
 
 #: engines/sludge/keymapper_tables.h:361
-#, fuzzy
-#| msgid "Cast Spell"
 msgid "Cast earth spell"
-msgstr "Κάνε Ξόρκι"
+msgstr "Κάνε ξόρκι της γης"
 
 #: engines/sludge/keymapper_tables.h:367
-#, fuzzy
-#| msgid "Cast Spell"
 msgid "Cast air spell"
-msgstr "Κάνε Ξόρκι"
+msgstr "Κάνε ξόρκι του αέρα"
 
 #: engines/sludge/keymapper_tables.h:373
-#, fuzzy
-#| msgid "Cast Spell"
 msgid "Cast fire spell"
-msgstr "Κάνε Ξόρκι"
+msgstr "Κάνε ξόρκι της φωτιάς"
 
 #: engines/sludge/keymapper_tables.h:379
-#, fuzzy
-#| msgid "Cast Spell"
 msgid "Cast water spell"
-msgstr "Κάνε Ξόρκι"
+msgstr "Κάνε ξόρκι του νερού"
 
 #: engines/sludge/keymapper_tables.h:423 engines/sludge/keymapper_tables.h:510
 #: engines/sword25/metaengine.cpp:112
-#, fuzzy
-#| msgid "Go to next dialogue"
 msgid "Move / Interact / Skip dialog"
-msgstr "Πήγαινε στον επόμενο διάλογο"
+msgstr "Μετακίνηση / Αλληλεπίδραση / Παράλειψη διαλόγου"
 
 #: engines/sludge/keymapper_tables.h:516
-#, fuzzy
-#| msgid "Skip dialogue"
 msgid "Inventory / Skip dialog"
-msgstr "Παράκαμψη διαλόγου"
+msgstr "Υπάρχοντα / Παράλειψη διαλόγου"
 
 #: engines/stark/metaengine.cpp:41
 msgid "Load modded assets"
