@@ -146,7 +146,7 @@ static unsigned comp_work_size(void) {
  * Obtain aligned pointer to CompWork inside work_buff.
  */
 static CompWork *get_comp_work(char *work_buff) {
-	unsigned long addr = (unsigned long)(byte *)work_buff;
+	intptr addr = (intptr)(byte *)work_buff;
 	addr = (addr + 15u) & ~15u;
 	return (CompWork *)(byte *)addr;
 }
@@ -246,8 +246,8 @@ static unsigned rb_in(CompWork *w) {
  * @param di	
  */
 static void dict_link(CompWork *w, unsigned di) {
-	unsigned word = w->lempel[di] | ((unsigned)w->lempel[(di + 1) & (LEMPEL - 1)] << 8);
-	unsigned key = (word & (HASH - 1)) + LEMPEL + 1;  // key index
+	unsigned dictWord = w->lempel[di] | ((unsigned)w->lempel[(di + 1) & (LEMPEL - 1)] << 8);
+	unsigned key = (dictWord & (HASH - 1)) + LEMPEL + 1;  // key index
 	unsigned di2 = di;  // word index = di
 
 	unsigned bx = w->hash[key];

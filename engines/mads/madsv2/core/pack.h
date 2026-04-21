@@ -177,7 +177,7 @@ extern word (*pack_pFABexp2_routine)(
 
 
 extern byte *pack_special_buffer;
-extern void (*(pack_special_function))();
+extern void (*pack_special_function)();
 
 
 extern word pack_read_memory(char *buffer, word *size);
