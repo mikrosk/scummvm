@@ -1639,9 +1639,11 @@ static void kernel_hot_check(int hot, int id, int seg_id) {
 		if (seg_id == (int)kernel_dynamic_hot[hot].auto_segment[count]) {
 
 			scale = image_list[id].scale;
+			int spriteIndex = (image_list[id].sprite_id & SPRITE_MASK) - 1;
+
 			if (scale == IMAGE_UNSCALED) {
-				xs = series_list[image_list[id].series_id]->index[image_list[id].sprite_id - 1].xs;
-				ys = series_list[image_list[id].series_id]->index[image_list[id].sprite_id - 1].ys;
+				xs = series_list[image_list[id].series_id]->index[spriteIndex].xs;
+				ys = series_list[image_list[id].series_id]->index[spriteIndex].ys;
 				x = image_list[id].x;
 				y = image_list[id].y;
 				x1 = x;
@@ -1649,8 +1651,8 @@ static void kernel_hot_check(int hot, int id, int seg_id) {
 				x2 = x + xs - 1;
 				y2 = y + ys - 1;
 			} else {
-				xs = (series_list[image_list[id].series_id]->index[image_list[id].sprite_id - 1].xs * image_list[id].scale) / 200;
-				ys = (series_list[image_list[id].series_id]->index[image_list[id].sprite_id - 1].ys * image_list[id].scale) / 100;
+				xs = (series_list[image_list[id].series_id]->index[spriteIndex].xs * image_list[id].scale) / 200;
+				ys = (series_list[image_list[id].series_id]->index[spriteIndex].ys * image_list[id].scale) / 100;
 				x = image_list[id].x;
 				y = image_list[id].y;
 				x1 = x - xs;
