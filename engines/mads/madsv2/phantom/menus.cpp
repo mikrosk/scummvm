@@ -326,14 +326,10 @@ static void global_menu_save_restore(int save) {
 				Common::strcpy_s(save_game_name, GAME_MAX_SAVE_LENGTH, menu_quote(quote_menu_unnamed));
 			}
 			status = global_save(selection);
-			game_write_save_directory();
+
 		} else {
 			status = global_restore(selection);
 		}
-	}
-
-	if (save) {
-		game_write_save_directory();
 	}
 
 	if (status >= 0) {

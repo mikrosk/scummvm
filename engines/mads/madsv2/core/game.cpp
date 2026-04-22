@@ -2392,50 +2392,13 @@ void chain_execute() {
  * Reads the list of save files.
  */
 static void game_read_save_directory() {
-	int error_flag = true;
-	int mem_to_read;
-	Common::SeekableReadStream *handle = NULL;
+	SaveStateList list = g_engine->listSaves();
+	memset(game_save_directory, 0, GAME_MAX_SAVE_SLOTS * (GAME_MAX_SAVE_LENGTH + 1));
 
-	mem_to_read = GAME_SAVE_SLOT_MEMORY;
-
-	handle = env_open(game_save_file, "rb");
-	if (handle == NULL) goto done;
-
-	if (!fileio_fread_f(game_save_directory, mem_to_read, 1, handle)) goto done;
-
-	error_flag = false;
-
-done:
-	delete handle;
-	if (error_flag) {
-		memset(game_save_directory, 0, mem_to_read);
+	for (auto it = list.begin(); it != list.end(); ++it) {
+		char *slot = game_save_directory + it->getSaveSlot() * (GAME_MAX_SAVE_LENGTH + 1);
+		Common::strcpy_s(slot, GAME_MAX_SAVE_LENGTH + 1, it->getDescription().c_str());
 	}
-}
-
-void game_write_save_directory() {
-#ifdef TODO
-	int error_flag = true;
-	int mem_to_write;
-	Common::SeekableReadStream *handle = NULL;
-
-	mem_to_write = GAME_SAVE_SLOT_MEMORY;
-
-	handle = env_open(game_save_file, "wb");
-	if (handle == NULL) goto done;
-
-	if (!fileio_fwrite_f(game_save_directory, mem_to_write, 1, handle)) goto done;
-
-	error_flag = false;
-
-done:
-	if (handle != NULL) fclose(handle);
-
-	if (error_flag) {
-		error_report(ERROR_WRITE_SAVE_DIRECTORY, WARNING, MODULE_GAME_MENU, mem_to_write, 0);
-	}
-#else
-	error("TODO: game_write_save_directory");
-#endif
 }
 
 void game_menu_setup() {

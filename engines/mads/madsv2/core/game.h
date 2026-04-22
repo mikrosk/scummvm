@@ -245,11 +245,6 @@ extern void game_debugger_reset(void);
 extern void game_debugger(void);
 
 /**
- * Writes the list of save files.
- */
-extern void game_write_save_directory(void);
-
-/**
  * Sets up for the main menu routines to run--this mainly involves
  * getting enough memory to hold the save directory and menu heap.
  */
