@@ -1549,7 +1549,7 @@ void game_control() {
 				buffer_rect_fill(scr_main, 0, viewing_at_y + scr_work.y, video_x, video_y, 0);
 			}
 
-			// pl conv_restore_running = -1;
+			conv_restore_running = -1;
 			player.target_x = player.x;
 			player.target_y = player.y;
 			player.target_facing = player.turn_to_facing = player.facing;

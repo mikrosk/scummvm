@@ -179,6 +179,10 @@ void player_new_stop_walker() {
 	id = player.series_base + player.series;
 	walker = series_list[id]->walker;
 
+	// WORKAROUND: For ROTP opera scene
+	if (!walker)
+		return;
+
 	if (!walker->num_secondary) {
 		player.sprite = 1;
 		goto done;
@@ -219,6 +223,11 @@ void player_select_series() {
 	player.series = player_facing_to_series[player.facing];
 
 	if (!player.available[player.series]) {
+		// WORKAROUND: During the ROTP opera cutscene, player.series can be 0.
+		// So we have guard against series becoming negative
+		if (player.series == 0 && player.series_base == 0)
+			return;
+
 		player.series -= 4;
 		player.mirror = MIRROR_MASK;
 	}
@@ -323,6 +332,10 @@ void player_stationary_update() {
 
 	id = player.series_base + player.series;
 	walker = series_list[id]->walker;
+
+	// WORKAROUND: For ROTP Opera scene
+	if (!walker)
+		return;
 
 	if (walker->num_secondary > 0) {
 		abs_stop = ABS(player.stop_walker_sequence);
