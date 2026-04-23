@@ -98,7 +98,7 @@ static void room_502_initialize_panels() {
 
 static void room_502_load_cycling_info() {
 	int error_code = 0;
-	int count;
+	int count, num;
 	int cycle;
 	int num_colors;
 	int total_colors = 0;
@@ -110,7 +110,7 @@ static void room_502_load_cycling_info() {
 
 	local->cycle_pointer = NULL;
 
-	chunk = (byte *)mem_get(mem_get_avail() - 256);
+	chunk = (byte *)mem_get(512 * sizeof(RGBcolor));
 	if (chunk == NULL) goto done;
 
 	color_marker = (RGBcolor *)chunk;
@@ -122,11 +122,7 @@ static void room_502_load_cycling_info() {
 	}
 
 	for (count = 0; count < num_cycle_stages; count++) {
-
-		if (!fileio_fread_f(&local->cycle_list[count], sizeof(CycleList), 1, handle)) {
-			error_code = 200 + count;
-			goto done;
-		}
+		local->cycle_list[count].load(handle);
 
 		num_colors = 0;
 		for (cycle = 0; cycle < local->cycle_list[count].num_cycles; cycle++) {
@@ -136,10 +132,8 @@ static void room_502_load_cycling_info() {
 
 		local->cycle_color[count] = color_marker;
 
-		if (!fileio_fread_f(color_marker, sizeof(RGBcolor) * num_colors, 1, handle)) {
-			error_code = 300 + count;
-			goto done;
-		}
+		for (num = 0; num < num_colors; ++num)
+			color_marker[num].load(handle);
 
 		color_marker += num_colors;
 		total_colors += num_colors;
