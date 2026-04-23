@@ -567,8 +567,8 @@ void Draw::drawButton(uint16 id, int16 left, int16 top, int16 right, int16 botto
 				str2++;
 				str2 = strchr(str2, '\\');
 			} while (str2);
-			deltaY = (bottom - right + 1 - (strLen * _fonts[fontIndex]->getCharHeight())) / (strLen + 1);
-			offY = right + deltaY;
+			deltaY = (bottom - top + 1 - (strLen * _fonts[fontIndex]->getCharHeight())) / (strLen + 1);
+			offY = top + deltaY;
 			for (int i = 0; paramStr[i]; i++) {
 				int j = 0;
 				while (paramStr[i] && paramStr[i] != 92)
@@ -579,7 +579,7 @@ void Draw::drawButton(uint16 id, int16 left, int16 top, int16 right, int16 botto
 				_textToPrint = str;
 				width = stringLength(str, fontIndex);
 				adjustCoords(1, &width, nullptr);
-				_destSpriteX += (top - left + 1 - width) / 2;
+				_destSpriteX += (right - left + 1 - width) / 2;
 				spriteOperation(DRAW_PRINTTEXT);
 				offY += deltaY + _fonts[fontIndex]->getCharHeight();
 			}
