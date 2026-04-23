@@ -862,7 +862,14 @@ void player_new_command() {
 
 	// Be sure player moves immediately even if in the middle of a long
 	// stop-walker frame.
-	player.clock = MIN(player.clock, kernel.clock + series_list[player.series_base + player.series]->walker->frame_rate);
+	// WORKAROUND: For ROTP chandelier fight cutscene
+	if (!series_list[player.series_base + player.series])
+		return;
+	WalkerInfoPtr walker = series_list[player.series_base + player.series]->walker;
+	if (!walker)
+		return;
+
+	player.clock = MIN(player.clock, kernel.clock + walker->frame_rate);
 }
 
 void player_new_walk() {
