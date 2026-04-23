@@ -604,10 +604,11 @@ int kernel_room_startup(int newRoom, int initial_variant, const char *interface,
 	pal_white(master_palette);
 
 	// Load up popup box frame
-	// if (popup_box_load()) {
-	// error_code = ERROR_KERNEL_NO_POPUP;
-	// goto done;
-	// }
+	if (g_engine->getGameID() == GType_Phantom && popup_box_load()) {
+		error_code = ERROR_KERNEL_NO_POPUP;
+		goto done;
+	}
+
 	// Initialize the matteing system
 	matte_init(false);
 
