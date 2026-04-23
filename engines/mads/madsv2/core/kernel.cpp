@@ -1188,16 +1188,22 @@ void kernel_seq_correction(long old_clock, long new_clock) {
 void kernel_draw_to_background(int series_id, int sprite_id,
 	int x, int y,
 	int depth, int scale) {
+
+	// WORKAROUND: In the ROTP mask puzzle room, the x/y are passed
+	// as KERNEL_HOME, but sprite_id == KERNEL_LAST, which is negative
+	int sprite_index = (sprite_id != KERNEL_LAST) ? sprite_id :
+		series_list[series_id]->num_sprites;
+
 	if (x == KERNEL_HOME) {
-		x = series_list[series_id]->index[sprite_id - 1].x;
+		x = series_list[series_id]->index[sprite_index - 1].x;
 	}
 
 	if (y == KERNEL_HOME) {
-		y = series_list[series_id]->index[sprite_id - 1].y;
+		y = series_list[series_id]->index[sprite_index - 1].y;
 	}
 
 	sprite_draw_3d_scaled_big(series_list[series_id],
-		sprite_id,
+		sprite_index,
 		&scr_orig, &scr_depth,
 		x - picture_map.pan_base_x,
 		y - picture_map.pan_base_y,
