@@ -176,10 +176,11 @@ void player_new_stop_walker() {
 	int abs_stop;
 	WalkerInfoPtr walker;
 
+	// WORKAROUND: For ROTP opera and final chandelier fight cutscene
 	id = player.series_base + player.series;
+	if (!series_list[id])
+		return;
 	walker = series_list[id]->walker;
-
-	// WORKAROUND: For ROTP opera scene
 	if (!walker)
 		return;
 
@@ -216,6 +217,7 @@ done:
 
 void player_select_series() {
 	int id;
+	WalkerInfoPtr walker;
 
 	player_clear_stop_walkers();
 
@@ -232,16 +234,22 @@ void player_select_series() {
 		player.mirror = MIRROR_MASK;
 	}
 
+	// WORKAROUND: For ROTP final confrontation on Chandelier
 	id = player.series_base + player.series;
+	if (!series_list[id])
+		return;
+	walker = series_list[id]->walker;
+	if (!walker)
+		return;
 
-	player.velocity = MAX<int>(series_list[id]->walker->velocity, 100);
+	player.velocity = MAX<int>(walker->velocity, 100);
 
 	player_set_base_frame_rate();
 
-	player.high_sprite = series_list[id]->walker->num_primary;
+	player.high_sprite = walker->num_primary;
 	if (player.high_sprite == 0) player.high_sprite = series_list[id]->num_sprites;
 
-	player.center_of_gravity = series_list[id]->walker->center_of_gravity;
+	player.center_of_gravity = walker->center_of_gravity;
 
 	if ((player.sprite <= 0) || (player.sprite > player.high_sprite)) {
 		player.sprite = 1;
@@ -330,10 +338,11 @@ void player_stationary_update() {
 		goto done;
 	}
 
+	// WORKAROUND: For ROTP Opera scene and final chandelier fight
 	id = player.series_base + player.series;
+	if (!series_list[id])
+		return;
 	walker = series_list[id]->walker;
-
-	// WORKAROUND: For ROTP Opera scene
 	if (!walker)
 		return;
 
