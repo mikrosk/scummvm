@@ -490,8 +490,7 @@ bool VideoPlayer::play(int slot, Properties &properties) {
 
 		bool playFrameResult = playFrame(slot, properties);
 		if ((_vm->getGameType() == kGameTypeAdibou2 || _vm->getGameType() == kGameTypeAdi4) &&
-				!playFrameResult &&
-				slot < kLiveVideoSlotCount) {
+				!playFrameResult) {
 			_vm->_util->processInput();
 			_vm->_video->retrace();
 			_vm->_util->delay(5);
