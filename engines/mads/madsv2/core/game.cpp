@@ -2233,14 +2233,18 @@ static void game_main_loop() {
 	if ((inter_awaiting == AWAITING_COMMAND) && !mouse_button) {
 		if (inter_spot_class == STROKE_INTERFACE) {
 			id = inter_spot_index - spot_base[STROKE_INTERFACE - 1];
-			if (id < room_num_spots) {
-				id = room_num_spots - (id + 1);
-				cursor_id = room_spots[id].cursor_number;
-			} else {
-				id -= room_num_spots;
-				cursor_id = kernel_dynamic_hot[id].cursor;
+
+			// WORKAROUND: In ROTP entering underground from pillar
+			if (id >= 0) {
+				if (id < room_num_spots) {
+					id = room_num_spots - (id + 1);
+					cursor_id = room_spots[id].cursor_number;
+				} else {
+					id -= room_num_spots;
+					cursor_id = kernel_dynamic_hot[id].cursor;
+				}
+				if (!cursor_id) cursor_id = 1;
 			}
-			if (!cursor_id) cursor_id = 1;
 		}
 	}
 	if (!player.commands_allowed && ((conv_control.running < 0) || conv_control.status == CONV_STATUS_HOLDING))
