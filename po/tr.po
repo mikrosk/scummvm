@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-21 19:16+0000\n"
+"POT-Creation-Date: 2026-04-23 00:52+0000\n"
 "PO-Revision-Date: 2024-10-10 12:33+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Turkish <https://translations.scummvm.org/projects/scummvm/"
@@ -14364,7 +14364,7 @@ msgstr ""
 msgid "Go to end of save / load menu"
 msgstr ""
 
-#: engines/tinsel/tinsel.cpp:1058
+#: engines/tinsel/tinsel.cpp:1061
 msgid "Discworld Noir needs ScummVM with TinyGL enabled"
 msgstr ""
 
