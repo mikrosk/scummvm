@@ -32,6 +32,7 @@
 #include "mads/madsv2/core/matte.h"
 #include "mads/madsv2/core/object.h"
 #include "mads/madsv2/core/player.h"
+#include "mads/madsv2/core/popup.h"
 #include "mads/madsv2/core/timer.h"
 #include "mads/madsv2/phantom/main.h"
 #include "mads/core/sound.h"
@@ -69,6 +70,7 @@ MADSV2Engine::~MADSV2Engine() {
 
 void MADSV2Engine::initGlobals() {
 	init_player();
+	init_popup();
 }
 
 void MADSV2Engine::readConfigFile() {

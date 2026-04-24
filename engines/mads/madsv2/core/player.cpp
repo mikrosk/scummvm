@@ -385,7 +385,7 @@ void player_set_facing() {
 	int mode;
 	int s1, s2;
 	int angle_factor;
-	word ddx, ddy, dddx;
+	word dddx;
 	word ssy;
 	word pixels;
 
@@ -404,9 +404,6 @@ void player_set_facing() {
 	dx = ABS(dx);
 	dy = ABS(dy);
 	ds = ABS(s2 - s1);
-
-	ddx = ((word)dx) * 100;
-	ddy = ((word)dy) * 100;
 
 	dddx = ((word)dx) * 33;
 

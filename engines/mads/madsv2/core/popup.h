@@ -402,7 +402,6 @@ extern int popup_asking_number;
 
 extern int popup_available;
 
-
 extern int popup_preserve_initiator[3];
 
 extern byte popup_colors[24];
@@ -410,6 +409,7 @@ extern byte popup_num_colors;
 
 extern BoxParam box_param;
 
+extern void init_popup();
 
 int  popup_create(int horiz_pieces, int x, int y);
 void popup_add_icon(SeriesPtr series, int id, int center);
