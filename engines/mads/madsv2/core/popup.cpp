@@ -2662,7 +2662,6 @@ static int popup_savelist_mouse(PopupItem *item) {
 	bool in_up_arrow;
 	bool in_down_arrow;
 	bool in_main_box;
-	bool in_main_range;
 	int update_sign;
 	int force_update;
 	int old_status;
@@ -2742,7 +2741,7 @@ static int popup_savelist_mouse(PopupItem *item) {
 			}
 
 		} else {
-			if (in_main_range) {
+			if (in_main_box) {
 				y = mouse_y - (item->y + 2);
 				relative = y / list->list_ys;
 				if (relative < 0) relative = 0;
