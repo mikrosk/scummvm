@@ -2742,7 +2742,6 @@ static int popup_savelist_mouse(PopupItem *item) {
 			}
 
 		} else {
-
 			if (in_main_range) {
 				y = mouse_y - (item->y + 2);
 				relative = y / list->list_ys;

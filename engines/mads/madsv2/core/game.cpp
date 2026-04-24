@@ -457,36 +457,6 @@ void problem() {
 	debug("\nA slight problem . . .\n\n");
 }
 
-static void show_walk() {
-	int y, x;
-	int xx, yy;
-	int ox, oy;
-	byte *scan;
-	int walk;
-
-	for (y = 0; y < display_y; y++) {
-		ox = picture_map.pan_base_x;
-		oy = y + picture_map.pan_base_y;
-		scan = buffer_pointer(&scr_orig, ox, oy);
-		for (x = 0; x < video_x; x++) {
-			xx = x + picture_view_x;
-			yy = y + picture_view_y;
-			walk = attr_walk(&scr_walk, xx, yy);
-
-			if (walk) {
-				*scan = 2;
-			} else if (*scan == 2) {
-				*scan = 0;
-			}
-
-			scan++;
-		}
-	}
-
-	matte_refresh_work();
-}
-
-
 static void game_fix_save_name() {
 	char *mark;
 
@@ -508,34 +478,16 @@ void game_save_name(int id) {
 
 
 static void game_player_status() {
-	int image, flags, count;
 	char work_buf[80];
 	char temp_buf_3[80];
 
-	image = -1;
-	flags = -9;
-	for (count = 0; count < (int)image_marker; count++) {
-		if (image_list[count].segment_id == KERNEL_SEGMENT_PLAYER) {
-			if (image_list[count].flags >= flags) {
-				image = count;
-				flags = image_list[count].flags;
-			}
-		}
-	}
 	Common::strcpy_s(temp_buf_3, "Room: ");
 	Common::strcat_s(temp_buf_3, mads_itoa(room_id, work_buf, 10));
 	Common::strcat_s(temp_buf_3, " (From: ");
 	Common::strcat_s(temp_buf_3, mads_itoa(previous_room, work_buf, 10));
 	Common::strcat_s(temp_buf_3, ")");
 
-	popup_alert(20, "PLAYER GRAPHICS STATUS",
-		"  ",
-		temp_buf_3,
-		// temp_buf,
-		// temp_buf_2,
-		// temp_buf_4,
-		// temp_buf_5,
-		NULL);
+	popup_alert(20, "PLAYER GRAPHICS STATUS", "  ", temp_buf_3, NULL);
 }
 
 
@@ -1975,14 +1927,14 @@ static void game_main_loop() {
 	int temp_message_4 = 0;
 	long one_clock, two_clock;
 	static char temp_buf[20];
+
+#if 0
 	static char temp_buf_2[20];
 	static char temp_buf_3[20];
 	static char temp_buf_4[20];
-
-#if 0
-	// these 3 are for the background efx
 	int yy;
 	long dif;
+
 	if (global[10]) {  // please play the damn targets
 
 		// this is for the background sound efx
@@ -2747,7 +2699,6 @@ static void game_conversation() {
 	int my_status;
 	char temp_buf[80];
 	Conv *my_conv;
-	ConvData *my_data;
 
 	if (conv_control.running != previous_running) {
 		game_debugger_reset();
@@ -2765,7 +2716,6 @@ static void game_conversation() {
 	}
 
 	my_conv = conv[conv_control.index];
-	my_data = conv_data[conv_control.index];
 
 	temp_buf[0] = 0;
 	if (conv_control.status == CONV_STATUS_HOLDING) {

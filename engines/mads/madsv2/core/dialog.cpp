@@ -96,14 +96,6 @@ static char say_dialog_work[SAY_DIALOG_SIZE];
 #define abort_option    0x02
 #define fail_option     0x03
 
-Dialog crit_dialog;
-char crit_work[256];
-
-extern void dialog_24_server(void);
-
-static int   dialog_server_installed = false;
-static dword dialog_old_24_server;
-
 
 int dialog_read_dir_to_list(ListPtr target, const char *wild, int dirflag) {
 	warning("TODO: dialog_read_dir_to_list");
@@ -1209,13 +1201,17 @@ static void dialog_update_window(DialogPtr dialog, ItemPtr item) {
 			} else {
 				my_color = dialog->select_color;
 			}
-			*screenptr++;
+
+			screenptr++;
+
 			if (*screenptr != (char)dialog->select_color) {
 				*(screenptr++) = (char)my_color;
 			} else {
 				screenptr++;
 			}
+
 			out_count = 0;
+
 			if (id < list->elements) {
 				while ((out_count < list->entry_width) && (*textptr != 0)) {
 					*(screenptr++) = *(textptr++);
@@ -1228,7 +1224,9 @@ static void dialog_update_window(DialogPtr dialog, ItemPtr item) {
 				*(screenptr++) = (char)my_color;
 				out_count++;
 			}
-			*screenptr++;
+
+			screenptr++;
+
 			if (*screenptr != (char)dialog->select_color) {
 				*(screenptr++) = (char)my_color;
 			}
@@ -3705,16 +3703,10 @@ int dialog_get_number(DialogPtr dialog, ItemPtr item) {
 	return atoi(buf);
 }
 
-static void dialog_critical_error_handler() {
-	// No implementation in ScummVM
-}
-
 void dialog_trap_critical() {
-	dialog_server_installed = true;
 }
 
 void dialog_restore_critical(void) {
-	dialog_server_installed = false;
 }
 
 } // namespace MADSV2
