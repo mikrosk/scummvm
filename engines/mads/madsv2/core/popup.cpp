@@ -1341,10 +1341,7 @@ Popup *popup_dialog_create(void *memory, long heap_size, int max_items) {
 	if ((heap_size == 0) && (memory == NULL)) heap_size = 2048;
 	if (!max_items) max_items = 10;
 
-	if (heap_size < (sizeof(Popup) + 400)) goto done;
-
 	if (memory == NULL) {
-
 		status |= POPUP_STATUS_DYNAMIC;
 		block = (byte *)mem_get_name(heap_size, "$popheap");
 		if (block == NULL) goto done;
@@ -1353,9 +1350,7 @@ Popup *popup_dialog_create(void *memory, long heap_size, int max_items) {
 		memory = block;
 
 	} else {
-
 		dlg = (Popup *)memory;
-
 	}
 
 	heap_declare(&dlg->heap, MODULE_POPUP, (char *)memory + sizeof(Popup),
@@ -1877,7 +1872,6 @@ static int popup_button_x_size(PopupItem *item) {
 
 
 static int popup_button_y_size(PopupItem *item) {
-	item = NULL;  // delete if this routine is to be used
 	return (box_param.font->max_y_size + 4 + 2);
 }
 
@@ -2076,7 +2070,6 @@ static int popup_menu_x_size(PopupItem *item) {
 
 
 static int popup_menu_y_size(PopupItem *item) {
-	item = NULL;  // delete if this routine is to be used
 	return(box_param.menu->index[0].ys);
 }
 
@@ -3202,15 +3195,9 @@ PopupItem *popup_sprite(SeriesPtr series, int sprite, int x, int y) {
 
 
 
-PopupItem *popup_savelist(const char *data,
-	const char *empty_string,
-	int elements,
-	int element_offset,
-	int element_max_length,
-	int pixel_width,
-	int rows,
-	int accept_input,
-	int default_element) {
+PopupItem *popup_savelist(char *data, char *empty_string,
+		int elements, int element_offset, int element_max_length,
+		int pixel_width, int rows, int accept_input, int default_element) {
 	PopupItem *item;
 	PopupList *list;
 	PopupBuffer *buffer;
@@ -3229,8 +3216,8 @@ PopupItem *popup_savelist(const char *data,
 
 	item->list = list = list_allocate();
 
-	item->prompt = (char *)empty_string;
-	list->data = (char *)data;
+	item->prompt = empty_string;
+	list->data = data;
 
 	list->elements = elements;
 	list->element_offset = element_offset;

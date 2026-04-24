@@ -467,15 +467,9 @@ PopupItem *popup_cancel_button(const char *prompt);
 PopupItem *popup_message(const char *prompt, int x, int y);
 PopupItem *popup_execute(void);
 
-PopupItem *popup_savelist(const char *data,
-	const char *empty_string,
-	int elements,
-	int element_offset,
-	int element_max_length,
-	int pixel_width,
-	int rows,
-	int accept_input,
-	int default_element);
+PopupItem *popup_savelist(char *data, char *empty_string,
+	int elements, int element_offset, int element_max_length,
+	int pixel_width, int rows, int accept_input, int default_element);
 
 void popup_blank(int num_lines);
 void popup_blank_line(void);
