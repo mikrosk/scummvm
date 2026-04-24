@@ -109,8 +109,8 @@ extern ConfigFile config_file;
 
 extern void read_config_file();
 extern void write_config_file();
-extern void global_load_config_parameters();
-extern void global_unload_config_parameters();
+//extern void global_load_config_parameters();
+//extern void global_unload_config_parameters();
 
 } // namespace MADSV2
 } // namespace MADS

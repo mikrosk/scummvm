@@ -36,7 +36,9 @@ ConfigFile config_file = { 0, 0x220,
 			   0, true,
 			   0, 0,
 			   false, 'D',
-			   false };
+			   false,
+			   false,
+			   7, 0, 0, 0, 0 };
 
 void read_config_file() {
 	ConfMan.registerDefault("music_mute", false);

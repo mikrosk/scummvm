@@ -2197,14 +2197,14 @@ static void dialog_do_search(DialogPtr dialog, ItemPtr item) {
 static void dialog_set_new_directory(DialogPtr dialog, ItemPtr item) {
 	int buf;
 	//int newdrive;
-	ItemPtr baseitem, fileitem, pathitem;
+	ItemPtr baseitem; //, fileitem, pathitem;
 
 	baseitem = &dialog->item[item->status];
-	fileitem = &dialog->item[baseitem->status];
+	//fileitem = &dialog->item[baseitem->status];
 	buf = baseitem->buf_id;
 
 	Common::strcpy_s(temp_buf, dialog->buffer[buf]);
-	pathitem = dialog->path_item;
+	//pathitem = dialog->path_item;
 #ifdef TODO
 	if (temp_buf[1] == ':') {
 		// Change to a new drive, if requested
@@ -2955,7 +2955,7 @@ ItemPtr dialog_execute(DialogPtr dialog, ItemPtr active_item, ItemPtr default_bu
 	int mykey;
 	int count;
 	int buf;
-	int savedpath;
+	//int savedpath;
 	int savedrive = 0;
 	int return_code;
 	char savepath[80];
@@ -2977,7 +2977,7 @@ ItemPtr dialog_execute(DialogPtr dialog, ItemPtr active_item, ItemPtr default_bu
 	}
 
 	if (dialog->status & DD_FILEMENU) {
-		savedpath = (mads_getcwd(savepath, 80) != NULL);
+		//savedpath = (mads_getcwd(savepath, 80) != NULL);
 		savedrive = mads_getdrive();
 
 		if (dialog->path_item != NULL) {
