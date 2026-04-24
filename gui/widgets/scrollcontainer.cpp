@@ -262,6 +262,10 @@ Widget *ScrollContainerWidget::findWidget(int x, int y) {
 	_childUnderMouse = Widget::findWidgetInChain(_firstWidget, x + _scrolledX, y + _scrolledY);
 	if (_childUnderMouse == _verticalScroll) 
 		_childUnderMouse = nullptr;
+
+	if (_childUnderMouse && _childUnderMouse->wantsFocus())
+		return _childUnderMouse;
+
 	return this;
 }
 
