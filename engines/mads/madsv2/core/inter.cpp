@@ -208,10 +208,6 @@ int paul_object_showing = -1;
 #define OUAF_OBJECT_Y    5
 
 
-void inter_spin_object(int object_id);
-void inter_turn_off_object(void);
-
-
 void VerbBuf::synchronize(Common::Serializer &s) {
 	s.syncAsUint16LE(id);
 	s.syncAsByte(verb_type);
