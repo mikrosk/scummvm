@@ -620,13 +620,6 @@ int tile_fake_map(int tile_type,
 	int           x,
 	int           y) {
 	int error_flag = true;
-	int x_buffer;
-
-	if (tile_type == TILE_PICTURE) {
-		x_buffer = x;
-	} else {
-		x_buffer = x >> 1;
-	}
 
 	tile_map->tile_type = tile_type;
 	tile_map->one_to_one = true;
