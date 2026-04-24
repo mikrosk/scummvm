@@ -137,7 +137,6 @@ void pal_unlock() {
 }
 
 int pal_deallocate(int use_flag) {
-	int return_code = PAL_ERR_BADFLAG;
 	int count;
 	dword mask;
 
@@ -155,14 +154,10 @@ int pal_deallocate(int use_flag) {
 		}
 	}
 
-	if (!flag_used[use_flag]) {
-		return_code = PAL_ERR_FLAGNOTUSED;
+	if (!flag_used[use_flag])
 		goto done;
-	}
+
 	flag_used[use_flag] = false;
-
-	return_code = false;
-
 	pal_exec(pal_manager_update, 4);
 
 done:
@@ -306,7 +301,6 @@ int pal_allocate(ColorListPtr new_list, ShadowListPtr shadow_list, int pal_flags
 	int search_start;
 	int search_stop;
 	dword mask;
-	dword reserved_mask;
 	dword cycle_mask;
 	dword bonus;
 	ShadowList incoming_shadow;
@@ -377,12 +371,6 @@ int pal_allocate(ColorListPtr new_list, ShadowListPtr shadow_list, int pal_flags
 		}
 	}
 	sort_insertion_8(new_list->num_colors, reordering_index, reordering_hash);
-
-	if (pal_flags & PAL_MAP_RESERVED) {
-		reserved_mask = 0xffffffff;
-	} else {
-		reserved_mask = 0xfffffffe;
-	}
 
 	// Now, for each color in our color list, find an appropriate mapping or
 	// create a new one from available color space.
