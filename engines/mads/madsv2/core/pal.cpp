@@ -543,7 +543,7 @@ int pal_get_colors() {
 	return(out);
 }
 
-void pal_interface(Palette fixpal) {
+void pal_interface(Palette &fixpal) {
 	int intensity, red, green, blue;
 	int base, newCol;
 	int color;
@@ -568,7 +568,7 @@ void pal_interface(Palette fixpal) {
 
 
 
-void pal_white(Palette fixpal) {
+void pal_white(Palette &fixpal) {
 	int count;
 	byte num[4] = { 0, 21, 42, 63 };
 
@@ -580,7 +580,7 @@ void pal_white(Palette fixpal) {
 }
 
 
-void pal_grey(Palette fixpal, int base_color, int num_colors,
+void pal_grey(Palette &fixpal, int base_color, int num_colors,
 	int low_grey, int high_grey) {
 	int count;
 	int dif;
