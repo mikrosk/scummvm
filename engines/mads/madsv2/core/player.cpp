@@ -37,12 +37,19 @@
 namespace MADS {
 namespace MADSV2 {
 
-Player player = { 0 };
-Player2 player2 = { 0 };
+Player player;
+Player2 player2;
 
-byte player_facing_to_series[10] = { 0, 7, 4, 3, 6, 0, 2, 5, 0, 1 };
-byte player_clockwise[10] = { 9, 4, 1, 2, 7, 9, 3, 8, 9, 6 };
-byte player_counter_clockwise[10] = { 7, 2, 3, 6, 1, 7, 9, 4, 7, 8 };
+static const byte player_facing_to_series[10] = { 0, 7, 4, 3, 6, 0, 2, 5, 0, 1 };
+const byte player_clockwise[10] = { 9, 4, 1, 2, 7, 9, 3, 8, 9, 6 };
+static const byte player_counter_clockwise[10] = { 7, 2, 3, 6, 1, 7, 9, 4, 7, 8 };
+
+
+void init_player() {
+	memset(&player, 0, sizeof(Player));
+	memset(&player2, 0, sizeof(Player2));
+}
+
 
 void Player::synchronize(Common::Serializer &s) {
 	s.syncAsSint16LE(walking);

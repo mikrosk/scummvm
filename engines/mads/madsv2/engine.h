@@ -37,8 +37,9 @@ namespace MADSV2 {
 
 class MADSV2Engine : public MADSEngine {
 private:
+	void initGlobals();
 	void syncGame(Common::Serializer &s);
-
+	
 protected:
 	Graphics::Screen *_screen = nullptr;
 	Common::Stack<Common::KeyState> _keyEvents;

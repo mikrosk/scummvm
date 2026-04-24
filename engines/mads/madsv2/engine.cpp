@@ -31,6 +31,7 @@
 #include "mads/madsv2/core/kernel.h"
 #include "mads/madsv2/core/matte.h"
 #include "mads/madsv2/core/object.h"
+#include "mads/madsv2/core/player.h"
 #include "mads/madsv2/core/timer.h"
 #include "mads/madsv2/phantom/main.h"
 #include "mads/core/sound.h"
@@ -56,12 +57,18 @@ MADSV2Engine::MADSV2Engine(OSystem *syst, const MADSGameDescription *gameDesc) :
 	MADSEngine(syst, gameDesc) {
 	g_engine = this;
 	_speechFlag = true;
+
+	initGlobals();
 }
 
 MADSV2Engine::~MADSV2Engine() {
 	g_engine = nullptr;
 	delete _screen;
 	delete _soundManager;
+}
+
+void MADSV2Engine::initGlobals() {
+	init_player();
 }
 
 void MADSV2Engine::readConfigFile() {
