@@ -513,6 +513,9 @@ int kernel_game_startup(int game_video_mode, int load_flag,
 		}
 	}
 
+	buffer_fill(scr_live, 0);
+	mcga_setpal(&master_palette);
+
 	error_flag = false;
 
 done:
