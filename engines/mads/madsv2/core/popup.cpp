@@ -2427,7 +2427,7 @@ static void popup_savelist_element_draw(PopupItem *item, int element) {
 		Common::strcpy_s(temp_buf, item->buffer->data);
 	} else {
 		text_locator = popup_savelist_string(item, element);
-		Common::strcpy_s(temp_buf, text_locator);
+		Common::strcpy_s(temp_buf, text_locator ? text_locator : "");
 		if (!strlen(temp_buf) && (item->prompt != NULL) && (element != list->picked_element)) {
 			Common::strcpy_s(temp_buf, item->prompt);
 		}

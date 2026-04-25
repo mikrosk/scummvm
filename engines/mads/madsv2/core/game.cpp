@@ -2352,8 +2352,10 @@ static void game_read_save_directory() {
 	memset(game_save_directory, 0, GAME_MAX_SAVE_SLOTS * (GAME_MAX_SAVE_LENGTH + 1));
 
 	for (auto it = list.begin(); it != list.end(); ++it) {
-		char *slot = game_save_directory + it->getSaveSlot() * (GAME_MAX_SAVE_LENGTH + 1);
-		Common::strcpy_s(slot, GAME_MAX_SAVE_LENGTH + 1, it->getDescription().c_str());
+		if (it->getSaveSlot() > 0) {
+			char *slot = game_save_directory + (it->getSaveSlot() - 1) * (GAME_MAX_SAVE_LENGTH + 1);
+			Common::strcpy_s(slot, GAME_MAX_SAVE_LENGTH + 1, it->getDescription().c_str());
+		}
 	}
 }
 

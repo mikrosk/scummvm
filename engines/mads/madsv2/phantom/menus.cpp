@@ -65,12 +65,12 @@ int global_menu_force_restart;
 char *menu_quotes = NULL;
 
 
-static int global_save(int id) {
+static int global_save(int id, const char *save_game_name) {
 	int status;
 
 	game_save_name(id + 1);
 
-	if (g_engine->saveGameState(id, save_game_buf).getCode() == Common::kNoError)
+	if (g_engine->saveGameState(id + 1, save_game_name).getCode() == Common::kNoError)
 		status = SAVE_SUCCESSFUL;
 	else
 		status = SAVE_FAILED;
@@ -81,7 +81,7 @@ static int global_save(int id) {
 static int global_restore(int id) {
 	int status;
 
-	if (g_engine->loadGameState(id).getCode() == Common::kNoError)
+	if (g_engine->loadGameState(id + 1).getCode() == Common::kNoError)
 		status = RESTORE_SUCCESSFUL;
 	else
 		status = RESTORE_FAILED;
@@ -250,7 +250,7 @@ static void global_menu_save_restore(int save) {
 	}
 	popup_blank(4);
 
-	save_list = popup_savelist(nullptr, menu_quote(quote_menu_empty),
+	save_list = popup_savelist(game_save_directory, menu_quote(quote_menu_empty),
 		GAME_MAX_SAVE_SLOTS,
 		GAME_MAX_SAVE_LENGTH + 1,
 		GAME_MAX_SAVE_LENGTH,
@@ -325,7 +325,7 @@ static void global_menu_save_restore(int save) {
 			if (!strlen(save_game_name)) {
 				Common::strcpy_s(save_game_name, GAME_MAX_SAVE_LENGTH, menu_quote(quote_menu_unnamed));
 			}
-			status = global_save(selection);
+			status = global_save(selection, save_game_name);
 
 		} else {
 			status = global_restore(selection);
