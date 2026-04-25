@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-25 09:46+0000\n"
+"POT-Creation-Date: 2026-04-25 16:34+0000\n"
 "PO-Revision-Date: 2026-04-21 16:22+0000\n"
 "Last-Translator: Hoseok Seo <ddinghoya@gmail.com>\n"
 "Language-Team: Korean <https://translations.scummvm.org/projects/scummvm/"
@@ -3013,7 +3013,7 @@ msgstr ""
 "이 설정은 나중에 옵션 대화 상자의 기타 탭에서 \n"
 "변경할 수 있습니다."
 
-#: gui/widget.cpp:467 gui/widget.cpp:469 gui/widget.cpp:474 gui/widget.cpp:476
+#: gui/widget.cpp:465 gui/widget.cpp:467 gui/widget.cpp:472 gui/widget.cpp:474
 msgid "Clear value"
 msgstr "값 지우기"
 
