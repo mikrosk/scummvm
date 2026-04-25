@@ -912,15 +912,13 @@ int kernel_seq_backward_scroll(int series_id, int mirror,
 	word start_ticks,
 	int expire) {
 	int depth = 0;
-	SpritePtr sprite;
-
-	sprite = &series_list[series_id]->index[0];
 
 	return (kernel_seq_add(series_id, mirror,
 		series_list[series_id]->num_sprites,
 		0, 0, AA_LINEAR, -1, depth, 100, true, 0, 0,
 		ticks, interval_ticks, start_ticks, expire));
 }
+
 void kernel_synch(int slave_type, int slave_id, int master_type, int master_id) {
 	long master_time;
 

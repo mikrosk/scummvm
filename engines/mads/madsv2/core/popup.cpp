@@ -64,11 +64,12 @@ int popup_asking_number = false;
 
 int popup_available = false;
 
-BoxParam box_param = { NULL };
+BoxParam box_param;
 Popup *popup = NULL;
 word popup_default_status = POPUP_STATUS_BAR;
 
 static char *popup_savelist_string(PopupItem *item, int element);
+
 
 void init_popup() {
 	memset(&box_param, 0, sizeof(BoxParam));
@@ -88,7 +89,7 @@ void init_popup() {
 		0,   0,  0,  0,  3,  0,  0,  0
 	};
 	Common::copy(POPUP_COLORS, POPUP_COLORS + 24, popup_colors);
-	memset(popup_preserve_initiator, BUFFER_PRESERVE, 3);
+	memset(&popup_preserve_initiator[0], BUFFER_PRESERVE, 3);
 }
 
 int popup_create(int horiz_pieces, int x, int y) {

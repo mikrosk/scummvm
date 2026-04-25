@@ -1918,7 +1918,6 @@ static void inter_exec_function(void (*(target))()) {
 }
 
 void inter_spin_object(int object_id) {
-	int error_flag = true;
 	char temp_buf[80];
 
 	inter_turn_off_object();
@@ -1968,8 +1967,6 @@ void inter_spin_object(int object_id) {
 	mcga_setpal_range(&master_palette, 246, 6);
 
 	inter_object_sprite = 1;
-
-	error_flag = false;
 
 done:
 	sprite_force_memory = NULL;
