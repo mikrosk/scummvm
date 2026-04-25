@@ -2961,7 +2961,7 @@ void ScummEngine_v5::o5_startScript() {
 			script = 205;
 		// Copy protection was disabled in KIXX XL release (Amiga Disk) and
 		// in LucasArts Classic Adventures (PC Disk)
-		if (_game.id == GID_MONKEY_VGA && script == 152)
+		if ((_game.id == GID_MONKEY_VGA || _game.id == GID_MONKEY_EGA) && script == 152)
 			return;
 		// Copy protection was disabled in LucasArts Mac CD Game Pack II (Macintosh CD)
 		if (_game.id == GID_MONKEY && _game.platform == Common::kPlatformMacintosh && script == 155)
