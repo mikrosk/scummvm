@@ -93,6 +93,7 @@ public:
 	}
 	Common::Error saveGameStream(Common::WriteStream *stream, bool isAutosave) override;
 	Common::Error loadGameStream(Common::SeekableReadStream *stream) override;
+	virtual void syncRoom(Common::Serializer &s) = 0;
 	SaveStateList listSaves() const;
 
 	virtual void global_init_code() = 0;

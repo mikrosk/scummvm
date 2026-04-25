@@ -128,7 +128,7 @@ namespace MADSV2 {
 
 #define KERNEL_MAX_ANIMATIONS         10       /* Max number of animations    */
 
-#define KERNEL_SCRATCH_SIZE           256     /* Size of game scratch area   */
+#define KERNEL_SCRATCH_SIZE           512     /* Size of game scratch area   */
 
 #define KERNEL_HOME                   -32000  /* Sprite home location        */
 
@@ -307,7 +307,7 @@ typedef struct {
 
 struct KernelGame {
 	byte going;							/* Game is running OK          */
-	int16 scratch[KERNEL_SCRATCH_SIZE];	/* Scratch variables for room  */
+	byte scratch[KERNEL_SCRATCH_SIZE * 2];	/* Scratch variables for room  */
 	int8 difficulty;					/* Difficulty level            */
 	int16  last_save;					/* Most recent save slot #     */
 

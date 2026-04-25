@@ -22,6 +22,7 @@
 #ifndef MADS_CORE_GAME_H
 #define MADS_CORE_GAME_H
 
+#include "common/serializer.h"
 #include "mads/madsv2/core/general.h"
 #include "mads/madsv2/core/global.h"
 #include "mads/madsv2/core/player.h"

@@ -161,7 +161,7 @@ static void kernel_animation_get_sprite(int handle, int id);
 void KernelGame::synchronize(Common::Serializer &s) {
 	s.syncAsByte(going);
 	s.skip(1);
-	s.syncMultipleLE(scratch);
+	s.syncBytes(scratch, KERNEL_SCRATCH_SIZE);
 	s.syncAsByte(difficulty);
 	s.skip(1);
 	s.syncAsSint16LE(last_save);

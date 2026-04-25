@@ -382,6 +382,10 @@ void PhantomEngine::global_section_constructor() {
 	Phantom::global_section_constructor();
 }
 
+void PhantomEngine::syncRoom(Common::Serializer &s) {
+	Phantom::sync_room(s);
+}
+
 void PhantomEngine::global_daemon_code() {
 	if (player.walker_visible && !global[stop_walker_disabled] && (player.commands_allowed || (conv_control.running >= 0)) && !player.walking &&
 		(player.facing == player.turn_to_facing)) {

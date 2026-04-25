@@ -40,6 +40,7 @@ public:
 	~PhantomEngine() override {}
 
 	Common::Error run() override;
+	void syncRoom(Common::Serializer &s) override;
 
 	void global_init_code() override;
 	void section_music(int section_num) override;

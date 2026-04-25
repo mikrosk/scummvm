@@ -20,6 +20,7 @@
  */
 
 #include "common/system.h"
+#include "common/memstream.h"
 #include "engines/util.h"
 #include "mads/mads.h"
 #include "mads/madsv2/engine.h"
@@ -130,8 +131,24 @@ done:
 }
 	
 void MADSV2Engine::syncGame(Common::Serializer &s) {
+	if (s.isSaving()) {
+		// Write the room specific locals to the game scratchpad
+		Common::fill(game.scratch, game.scratch + KERNEL_SCRATCH_SIZE, 0);
+		Common::MemoryWriteStream scratchStream(game.scratch, KERNEL_SCRATCH_SIZE);
+		Common::Serializer s2(nullptr, &scratchStream);
+		syncRoom(s2);
+	}
+
 	game.synchronize(s);
 	s.syncAsSint16LE(new_room);
+
+	if (s.isLoading()) {
+		// Unpack the loaded scratch data for the room
+		Common::MemoryReadStream scratchStream(game.scratch, KERNEL_SCRATCH_SIZE);
+		Common::Serializer s2(&scratchStream, nullptr);
+		syncRoom(s2);
+	}
+
 	player2.synchronize(s);
 
 	s.syncAsSint16LE(inven_num_objects);
