@@ -669,10 +669,20 @@ void global_game_menu() {
 			global_menu_main();
 			break;
 		case GAME_SAVE_MENU:
-			global_menu_save_restore(true);
+			if (config_file.original_save_load) {
+				global_menu_save_restore(true);
+			} else {
+				kernel.activate_menu = GAME_NO_MENU;
+				g_engine->saveGameDialog();
+			}
 			break;
 		case GAME_RESTORE_MENU:
-			global_menu_save_restore(false);
+			if (config_file.original_save_load) {
+				global_menu_save_restore(false);
+			} else {
+				kernel.activate_menu = GAME_NO_MENU;
+				g_engine->loadGameDialog();
+			}
 			break;
 		case GAME_OPTIONS_MENU:
 			global_menu_options();

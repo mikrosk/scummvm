@@ -96,7 +96,7 @@ struct ConfigFile {
 	int show_speech_boxes;        /* Show text during speech       */
 
 	int sound_card_irq;
-	int misc2;
+	bool original_save_load;
 	int misc3;
 	int misc4;
 	int misc5;

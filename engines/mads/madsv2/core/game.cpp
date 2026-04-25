@@ -1041,7 +1041,13 @@ int game_parse_keystroke(int mykey) {
 
 	case f5_key:
 		if (room_id != 199 && section_id != 9) {
-			kernel.activate_menu = GAME_OPTIONS_MENU;
+			kernel.activate_menu = GAME_SAVE_MENU;
+		}
+		break;
+
+	case f7_key:
+		if (room_id != 199 && section_id != 9) {
+			kernel.activate_menu = GAME_RESTORE_MENU;
 		}
 		break;
 
