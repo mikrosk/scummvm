@@ -37,7 +37,7 @@ namespace MADSV2 {
 namespace Phantom {
 namespace Rooms {
 
-Scratch scratch;
+static Scratch scratch;
 
 void room_101_init(void) {
 	kernel.disable_fastwalk = true;
@@ -629,6 +629,18 @@ done:
 	;
 }
 
+void room_101_preload(void) {
+	room_init_code_pointer = room_101_init;
+	room_pre_parser_code_pointer = room_101_pre_parser;
+	room_parser_code_pointer = room_101_parser;
+	room_daemon_code_pointer = room_101_daemon;
+
+	section_1_walker();
+	section_1_interface();
+
+	vocab_make_active(words_Monsieur_Brie);
+}
+
 void room_101_synchronize(Common::Serializer &s) {
 	s.syncMultipleLE(local->sprite);
 	s.syncMultipleLE(local->sequence);
@@ -649,18 +661,6 @@ void room_101_synchronize(Common::Serializer &s) {
 		local->anim_0_running,
 		local->anim_1_running,
 		local->converse_counter);
-}
-
-void room_101_preload(void) {
-	room_init_code_pointer = room_101_init;
-	room_pre_parser_code_pointer = room_101_pre_parser;
-	room_parser_code_pointer = room_101_parser;
-	room_daemon_code_pointer = room_101_daemon;
-
-	section_1_walker();
-	section_1_interface();
-
-	vocab_make_active(words_Monsieur_Brie);
 }
 
 } // namespace Rooms
