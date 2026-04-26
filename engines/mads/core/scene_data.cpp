@@ -28,7 +28,6 @@
 #include "mads/nebular/nebular_scenes.h"
 #ifdef ENABLE_MADSV2
 #include "mads/dragonsphere/dragonsphere_scenes.h"
-#include "mads/forest/forest_scenes.h"
 #endif
 
 namespace MADS {
@@ -120,10 +119,6 @@ SceneInfo *SceneInfo::init(RexNebularEngine *vm) {
 #ifdef ENABLE_MADSV2
 	case GType_Dragonsphere:
 		return new Dragonsphere::SceneInfoDragonsphere(vm);
-	case GType_Phantom:
-		return nullptr; // new Phantom::SceneInfoPhantom(vm);
-	case GType_Forest:
-		return new Forest::SceneInfoForest(vm);
 #endif
 	default:
 		error("SceneInfo: Unknown game");

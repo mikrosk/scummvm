@@ -27,7 +27,6 @@
 #include "mads/nebular/nebular_scenes.h"
 #ifdef ENABLE_MADSV2
 #include "mads/dragonsphere/dragonsphere_scenes.h"
-#include "mads/forest/forest_scenes.h"
 #endif
 
 namespace MADS {
@@ -133,12 +132,6 @@ void Scene::loadSceneLogic() {
 #ifdef ENABLE_MADSV2
 	case GType_Dragonsphere:
 		_sceneLogic = Dragonsphere::SceneFactory::createScene(_vm);
-		break;
-	case GType_Phantom:
-		_sceneLogic = nullptr;// Phantom::SceneFactory::createScene(_vm);
-		break;
-	case GType_Forest:
-		_sceneLogic = Forest::SceneFactory::createScene(_vm);
 		break;
 #endif
 	default:

@@ -58,9 +58,6 @@ MODULE_OBJS += \
 	dragonsphere/dragonsphere_scenes.o \
 	dragonsphere/dragonsphere_scenes1.o \
 	dragonsphere/globals_dragonsphere.o \
-	forest/game_forest.o \
-	forest/forest_scenes.o \
-	forest/globals_forest.o \
 	madsv2/console.o \
 	madsv2/engine.o \
 	madsv2/core/anim.o \
@@ -181,7 +178,8 @@ MODULE_OBJS += \
 	madsv2/phantom/main_menu.o \
 	madsv2/phantom/menus.o \
 	madsv2/phantom/main.o \
-	madsv2/phantom/sound_phantom.o
+	madsv2/phantom/sound_phantom.o \
+	madsv2/forest/forest.o
 endif
 
 # This module can be built as a plugin

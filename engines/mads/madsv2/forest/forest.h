@@ -19,27 +19,42 @@
  *
  */
 
-#include "mads/forest/globals_forest.h"
+#ifndef MADS_FOREST_FOREST_H
+#define MADS_FOREST_FOREST_H
+
+#include "mads/madsv2/engine.h"
 
 namespace MADS {
+namespace MADSV2 {
 namespace Forest {
 
-ForestGlobals::ForestGlobals()
-	: Globals() {
-	// Initialize lists
-	resize(140);
-	_spriteIndexes.resize(30);
-	_sequenceIndexes.resize(30);
-	_animationIndexes.resize(30);
-}
+class ForestEngine : public MADSV2Engine {
+private:
+	static void global_object_sprite();
+	static void stop_walker_basic();
+	static void stop_walker_tricks();
 
-void ForestGlobals::synchronize(Common::Serializer &s) {
-	Globals::synchronize(s);
+public:
+	ForestEngine(OSystem *syst, const MADSGameDescription *gameDesc) :
+		MADSV2Engine(syst, gameDesc) {}
+	~ForestEngine() override {}
 
-	_spriteIndexes.synchronize(s);
-	_sequenceIndexes.synchronize(s);
-	_animationIndexes.synchronize(s);
-}
+	Common::Error run() override;
+	void syncRoom(Common::Serializer &s) override;
+
+	void global_init_code() override;
+	void section_music(int section_num) override;
+	void global_section_constructor() override;
+	void global_daemon_code() override;
+	void global_pre_parser_code() override;
+	void global_parser_code() override;
+	void global_error_code() override;
+	void global_room_init() override;
+	void global_sound_driver() override;
+};
 
 } // namespace Forest
+} // namespace MADSV2
 } // namespace MADS
+
+#endif

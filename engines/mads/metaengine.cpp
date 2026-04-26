@@ -41,6 +41,7 @@
 #include "mads/detection.h"
 #ifdef ENABLE_MADSV2
 #include "mads/madsv2/phantom/phantom.h"
+#include "mads/madsv2/forest/forest.h"
 #endif
 
 #define MAX_SAVES 99
@@ -218,6 +219,8 @@ Common::Error MADSMetaEngine::createInstance(OSystem *syst, Engine **engine, con
 #ifdef ENABLE_MADSV2
 	if (desc->gameID == MADS::GType_Phantom)
 		*engine = new MADS::MADSV2::Phantom::PhantomEngine(syst, desc);
+	else if (desc->gameID == MADS::GType_Forest)
+		*engine = new MADS::MADSV2::Forest::ForestEngine(syst, desc);
 	else
 #endif
 
