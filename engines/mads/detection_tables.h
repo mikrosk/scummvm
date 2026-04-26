@@ -152,7 +152,7 @@ static const MADSGameDescription gameDescriptions[] = {
 		{
 			"phantom",
 			0,
-			AD_ENTRY1s("section1.hag", "76e2d47a7aebafe48edc9884b3d91782", 1130939),
+			AD_ENTRY1s("global.hag", "bdce9ca93a015f0883d1bc0fabd0cdfa", 812150),
 			Common::EN_ANY,
 			Common::kPlatformDOS,
 			ADGF_UNSTABLE,
@@ -167,10 +167,10 @@ static const MADSGameDescription gameDescriptions[] = {
 		{
 			"phantom",
 			"CD",
-			AD_ENTRY1s("global.idx", "cf17ab33b5ab084763cf83c76a8d9634", 4638),
+			AD_ENTRY1s("global.hag", "8a51c984eb4c64e8b30a7e6670f6bddb", 101154000),
 			Common::EN_ANY,
 			Common::kPlatformDOS,
-			ADGF_UNSTABLE,
+			ADGF_UNSTABLE | ADGF_CD,
 			GUIO7(GUIO_NOMIDI, GAMEOPTION_EASY_MOUSE, GAMEOPTION_ANIMATED_INVENTORY, GAMEOPTION_ANIMATED_INTERFACE, GAMEOPTION_NAUGHTY_MODE, GAMEOPTION_COPY_PROTECTION, GAMEOPTION_ORIGINAL_SAVELOAD)
 		},
 		GType_Phantom,
