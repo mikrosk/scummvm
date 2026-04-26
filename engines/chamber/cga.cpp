@@ -196,7 +196,7 @@ void CGARenderer::blitToScreen(int16 dx, int16 dy, int16 w, int16 h) {
 				for (int16 c = 0; c < 4; c++) {
 					byte color = (colors & 0xC0) >> 6;
 					colors <<= 2;
-					*dst++ = color;	
+					*dst++ = color;
 				}
 			}
         }
@@ -204,7 +204,7 @@ void CGARenderer::blitToScreen(int16 dx, int16 dy, int16 w, int16 h) {
 		g_system->copyRectToScreen((const byte *)mainSurface->getBasePtr(dx, dy), mainSurface->pitch, dx, dy, w * (0x8 / g_vm->_screenBits), h);
 		g_system->updateScreen();
 		return;
-	} 
+	}
 	dx = 0;
 	dy = 0;
 	w = 320;
@@ -213,46 +213,46 @@ void CGARenderer::blitToScreen(int16 dx, int16 dy, int16 w, int16 h) {
 	if (mainSurface->w != 720) {
 		mainSurface->free();
 		mainSurface->create(720, 348, Graphics::PixelFormat::createFormatCLUT8());
-		memset(mainSurface->getPixels(), 0, 720 * 348); 
+		memset(mainSurface->getPixels(), 0, 720 * 348);
 	}
 
 	int16 startY = dy;
 	int16 endY = dy + h;
 
-	if (endY > 200) 
+	if (endY > 200)
 		endY = 200;
 
-	int16 startX_bytes = dx / 4; 
-	int16 endX_bytes = (dx + w + 3) / 4; 
-		
-	if (endX_bytes > 80) 
+	int16 startX_bytes = dx / 4;
+	int16 endX_bytes = (dx + w + 3) / 4;
+
+	if (endX_bytes > 80)
 		endX_bytes = 80;
 
 	for (int y = startY; y < endY; y++) {
 		uint16 bank = (y % 2) * 8192;
 		uint16 line = (y / 2) * 80;
-		
-		int destY = y + 74; 
+
+		int destY = y + 74;
 		int destX = 40 + (startX_bytes * 8);
-		
-		byte *dst = (byte *)mainSurface->getBasePtr(destX, destY); 
-		
+
+		byte *dst = (byte *)mainSurface->getBasePtr(destX, destY);
+
 		for (int x_bytes = startX_bytes; x_bytes < endX_bytes; x_bytes++) {
 			byte cga_byte = SCREENBUFFER[bank + line + x_bytes];
 			for (int p = 0; p < 4; p++) {
 				byte color = (cga_byte >> (6 - p * 2)) & 3;
 				byte finalColor = (color == 0) ? 0 : 1;
 				*dst++ = finalColor;
-				*dst++ = finalColor; 
+				*dst++ = finalColor;
 			}
 		}
 	}
-		
+
 	int renderX = 40 + (startX_bytes * 8);
 	int renderY = startY + 74;
 	int renderW = (endX_bytes - startX_bytes) * 8;
 	int renderH = endY - startY;
-	
+
 	g_system->copyRectToScreen((const byte *)mainSurface->getBasePtr(renderX, renderY), mainSurface->pitch, renderX, renderY, renderW, renderH);
 	g_system->updateScreen();
 	return;
@@ -615,7 +615,7 @@ void CGARenderer::printChar(byte c, byte *target) {
 
 	} else if (g_vm->_videoMode == Common::RenderMode::kRenderHercG) {
 		const int16 START_X = char_draw_coords_x++;
-		const int16 START_Y = char_draw_coords_y;           
+		const int16 START_Y = char_draw_coords_y;
 		for (i = 0; i < g_vm->_fontHeight; i++) {
 			uint16 ofs = HGA_CalcXY_p(START_X, START_Y + i);
 			c = *font++;
