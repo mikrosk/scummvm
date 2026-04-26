@@ -1352,6 +1352,7 @@ static void dialog_show_message(DialogPtr dialog, ItemPtr item) {
 	mouse_show();
 }
 
+#if 0
 /**
  * Clears a message previously output with dialog_show_message ().
  * Currently, the only kind of message that could change (and thus
@@ -1377,6 +1378,7 @@ static void dialog_clear_message(DialogPtr dialog, ItemPtr item) {
 
 	mouse_show();
 }
+#endif
 
 /**
  * Displays (and updates) a checkbox item

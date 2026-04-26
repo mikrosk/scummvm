@@ -227,7 +227,7 @@ typedef struct {
 	byte prep;
 	byte cursor;
 	byte syntax;
-	char auto_anim;
+	int8 auto_anim;
 	byte auto_segment[KERNEL_DYNAMIC_MAX_SEGMENTS];
 } KernelDynamicHotSpot;
 
