@@ -123,8 +123,10 @@ static const uint8 PALETTE_CGA2[4 * 3] = {
   Switch to CGA 320x200x2bpp mode
 */
 void CGARenderer::switchToGraphicsMode() {
-	if (g_system->getWidth() == 720) {
+	if (g_vm->_renderMode == Common::kRenderHercG) {
 		g_system->getPaletteManager()->setPalette(Graphics::HGC_G_PALETTE, 0, 2);
+	} else if (g_vm->_renderMode == Common::kRenderHercA) {
+		g_system->getPaletteManager()->setPalette(Graphics::HGC_A_PALETTE, 0, 2);
 	} else {
 		g_system->getPaletteManager()->setPalette(PALETTE_CGA, 0, 4);
 	}
@@ -146,9 +148,12 @@ void waitVBlank(void) {
 }
 
 void CGARenderer::colorSelect(byte csel) {
-	if (g_system->getWidth() == 720) {
+	if (g_vm->_renderMode == Common::kRenderHercG) {
 		g_system->getPaletteManager()->setPalette(Graphics::HGC_G_PALETTE, 0, 2);
 		g_system->setCursorPalette(Graphics::HGC_G_PALETTE, 0, 2);
+	} else if (g_vm->_renderMode == Common::kRenderHercA) {
+		g_system->getPaletteManager()->setPalette(Graphics::HGC_A_PALETTE, 0, 2);
+		g_system->setCursorPalette(Graphics::HGC_A_PALETTE, 0, 2);
 	} else {
 		const byte *pal;
 		if (csel & 0x10)
@@ -165,7 +170,7 @@ void CGARenderer::blitToScreen(int16 dx, int16 dy, int16 w, int16 h) {
 	if (!mainSurface) {
 		mainSurface = new Graphics::Surface();
 	}
-	if (g_system->getWidth() != 720) {
+	if (g_vm->_renderMode == Common::kRenderCGA) {
 		if (mainSurface->w != g_vm->_screenW) {
 			mainSurface->free();
 			mainSurface->create(g_vm->_screenW, g_vm->_screenH, Graphics::PixelFormat::createFormatCLUT8());

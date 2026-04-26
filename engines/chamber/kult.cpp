@@ -308,8 +308,11 @@ Common::Error ChamberEngine::init() {
 			g_vm->_renderer->colorSelect(0x30);
 			g_vm->_renderer->backBufferToRealFull();
 		} else {
-			/* Set authentic Hercules Green phosphor palette */
-			g_system->getPaletteManager()->setPalette(Graphics::HGC_G_PALETTE, 0, 2);
+			if (_renderMode == Common::kRenderHercG)
+				g_system->getPaletteManager()->setPalette(Graphics::HGC_G_PALETTE, 0, 2);
+			else
+				g_system->getPaletteManager()->setPalette(Graphics::HGC_A_PALETTE, 0, 2);
+
 			g_vm->_renderer->backBufferToRealFull();
 		}
 	}

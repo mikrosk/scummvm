@@ -83,6 +83,7 @@ public:
 	bool _prioritycommand_2;
 
 	Common::RenderMode _videoMode;
+	Common::RenderMode _renderMode;
 
 	byte *_pxiData;
 

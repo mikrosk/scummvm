@@ -55,11 +55,14 @@ ChamberEngine::ChamberEngine(OSystem *syst, const ADGameDescription *desc)
 	_prioritycommand_2 = false;
 	_pxiData = NULL;
 
-	Common::RenderMode renderMode = Common::parseRenderMode(ConfMan.get("render_mode"));
-	if (renderMode == Common::kRenderEGA || renderMode == Common::kRenderHercG || renderMode == Common::kRenderHercA)
-		_videoMode = renderMode;
+	_renderMode = Common::parseRenderMode(ConfMan.get("render_mode"));
+	if (_renderMode == Common::kRenderEGA || _renderMode == Common::kRenderHercG || _renderMode == Common::kRenderHercA)
+		_videoMode = _renderMode;
 	else
 		_videoMode = Common::kRenderCGA;
+
+	if (_renderMode == Common::kRenderHercA)
+		_videoMode = Common::kRenderHercG;
 
 	_screenH = _screenW = _screenBits = _screenBPL = _screenPPB = 0;
 	_line_offset = _line_offset2 = _fontHeight = _fontWidth = 0;
@@ -105,7 +108,7 @@ void ChamberEngine::syncGameStream(Common::Serializer &s) {
 }
 
 int ChamberEngine::getX(int original_x) {
-	return original_x; 
+	return original_x;
 }
 
 int ChamberEngine::getY(int original_y) {
