@@ -527,9 +527,9 @@ ys = sprite->ys;
 
 #ifdef attribute
 								{
-									byte sprite_depth_bits = depth_code;
+									byte sprite_depth_bits = draw_depth;  /* write target depth, not current depth */
 									byte stored_depth = draw_depth;
-									if (stored_depth > bit_off)  /* reusing bit_off as shift here per asm */
+									if (stored_depth > shift)  /* original asm compared against shift (0 or 4), not bit_off (which can be -1) */
 										goto pixel_DUMP_no_attr;
 									full_attr_byte = (full_attr_byte & 0xf0) | sprite_depth_bits;
 									/* ror full_attr_byte, shift */
@@ -691,8 +691,8 @@ pixel_RLE:
 #ifdef attribute
 									{
 										byte full_ab = attr_byte;
-										byte sprite_d = attr_byte & 0x0f;
-										if (draw_depth > bit_off)  goto pixel_RLE_no_attr;
+										byte sprite_d = draw_depth;  /* write target depth, not current depth */
+										if (draw_depth > shift)  goto pixel_RLE_no_attr;  /* original asm compared against shift (0 or 4), not bit_off */
 										full_ab = (full_ab & 0xf0) | sprite_d;
 										full_ab = (byte)((full_ab >> shift) | (full_ab << (8 - shift)));
 										attr_row[byte_off] = full_ab;
@@ -863,8 +863,8 @@ pixel_IRLE:
 #ifdef attribute
 									{
 										byte full_ab = attr_byte;
-										byte sprite_d = attr_byte & 0x0f;
-										if (draw_depth > bit_off)  goto pixel_IRLE_run_no_attr;
+										byte sprite_d = draw_depth;  /* write target depth, not current depth */
+										if (draw_depth > shift)  goto pixel_IRLE_run_no_attr;  /* original asm compared against shift (0 or 4), not bit_off */
 										full_ab = (full_ab & 0xf0) | sprite_d;
 										full_ab = (byte)((full_ab >> shift) | (full_ab << (8 - shift)));
 										attr_row[byte_off] = full_ab;
@@ -1005,8 +1005,8 @@ pixel_IRLE_run_next:
 #ifdef attribute
 								{
 									byte full_ab = attr_byte;
-									byte sprite_d = attr_byte & 0x0f;
-									if (draw_depth > bit_off)  goto pixel_IRLE_image_no_attr;
+									byte sprite_d = draw_depth;  /* write target depth, not current depth */
+									if (draw_depth > shift)  goto pixel_IRLE_image_no_attr;  /* original asm compared against shift (0 or 4), not bit_off */
 									full_ab = (full_ab & 0xf0) | sprite_d;
 									full_ab = (byte)((full_ab >> shift) | (full_ab << (8 - shift)));
 									attr_row[byte_off] = full_ab;
