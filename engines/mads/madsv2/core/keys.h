@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -270,6 +270,8 @@ extern void keys_remove();
 extern int keys_check_install();
 extern void keys_enable();
 extern void keys_disable();
+
+extern void init_keys();
 
 } // namespace MADSV2
 } // namespace MADS

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -61,6 +61,8 @@ extern void rail_disconnect_node(int id);
  *                                   > RAIL_WEIGHT_MASK means no solution.
  */
 extern void rail_check_path(int allow_one_illegal);
+
+extern void init_rail();
 
 } // namespace MADSV2
 } // namespace MADS

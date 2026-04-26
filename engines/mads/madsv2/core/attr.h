@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -47,6 +47,8 @@ extern int attr_load(char *base_name, int item_type, int variant,
 	Buffer *target, int size_x, int size_y);
 
 extern int attr_load_error;
+
+extern void init_attr();
 
 } // namespace MADSV2
 } // namespace MADS

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -276,6 +276,8 @@ extern void flag_parse(const char **myscan);
 
 extern void show_logo();
 extern void show_version();
+
+extern void init_game();
 
 } // namespace MADSV2
 } // namespace MADS

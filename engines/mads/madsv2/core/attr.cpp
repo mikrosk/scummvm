@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -173,6 +173,10 @@ done:
 	}
 
 	return error_flag;
+}
+
+void init_attr() {
+	attr_load_error = 0;
 }
 
 } // namespace MADSV2

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -123,6 +123,16 @@ void cycle_colors(void) {
 	}
 
 	cycling_delay = 0;
+}
+
+void init_cycle() {
+	memset(&cycling_palette, 0, sizeof(Palette));
+	memset(&cycle_list, 0, sizeof(CycleList));
+	cycling_active = false;
+	cycling_delay = 0;
+	cycling_threshold = 0;
+	total_cycle_colors = 0;
+	memset(cycle_timing, 0, sizeof(cycle_timing));
 }
 
 } // namespace MADSV2

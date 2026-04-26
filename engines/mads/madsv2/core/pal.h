@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -163,6 +163,8 @@ extern void pal_grey(Palette &fixpal, int base_color, int num_colors,
 extern int pal_get_color(RGBcolor color, int color_handle,
 	int override_reserved, int *color_number);
 extern void pal_change_color(int color, int r, int g, int b);
+
+extern void init_pal();
 
 } // namespace MADSV2
 } // namespace MADS

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -245,6 +245,14 @@ int font_string_width(FontPtr font, const char *out_string, int auto_spacing) {
 	}
 
 	return (width);
+}
+
+void init_font() {
+	font_inter = NULL;
+	font_main = NULL;
+	font_conv = NULL;
+	font_menu = NULL;
+	font_misc = NULL;
 }
 
 } // namespace MADSV2

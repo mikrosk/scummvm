@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -222,6 +222,14 @@ int hspot_which_reverse(int coord_x, int coord_y, int video_mode) {
 	}
 
 	return 0;
+}
+
+void init_hspot() {
+	memset(spot, 0, sizeof(spot));
+	numspots = 0;
+	memset(hs_stack, 0, sizeof(hs_stack));
+	hs_stack_pointer = 0;
+	memset(hotkeys, 0, sizeof(hotkeys));
 }
 
 } // namespace MADSV2

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -56,6 +56,8 @@ extern int font_write(FontPtr font, Buffer *target, const char *out_string,
 	int x, int y, int auto_spacing);
 extern void font_set_colors(int background, int high_intense, int med_intense, int low_intense);
 extern int font_string_width(FontPtr font, const char *out_string, int auto_spacing);
+
+extern void init_font();
 
 } // namespace MADSV2
 } // namespace MADS

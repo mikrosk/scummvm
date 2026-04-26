@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -1328,6 +1328,35 @@ void matte_inter_frame(int update_live, int clear_chaff) {
 		image++;
 	}
 	image_inter_marker = new_marker;
+}
+
+void init_matte() {
+	memset(series_list, 0, sizeof(series_list));
+	memset(series_name, 0, sizeof(series_name));
+	memset(series_user, 0, sizeof(series_user));
+	memset(image_list, 0, sizeof(image_list));
+	memset(matte_list, 0, sizeof(matte_list));
+	memset(depth_list_id, 0, sizeof(depth_list_id));
+	memset(depth_list, 0, sizeof(depth_list));
+	memset(message_list, 0, sizeof(message_list));
+	series_list_marker = 0;
+	picture_view_x = 0;
+	picture_view_y = 0;
+	viewing_at_x = 0;
+	viewing_at_y = 0;
+	matte_disable_screen_update = false;
+	attr_packed = false;
+	image_marker = 0;
+	matte_guard_depth_0 = false;
+	work_screen_ems_handle = -1;
+	memset(&picture_map, 0, sizeof(TileMapHeader));
+	memset(&depth_map, 0, sizeof(TileMapHeader));
+	memset(&picture_resource, 0, sizeof(TileResource));
+	memset(&depth_resource, 0, sizeof(TileResource));
+	memset(image_inter_list, 0, sizeof(image_inter_list));
+	memset(matte_inter_list, 0, sizeof(matte_inter_list));
+	inter_viewing_at_y = 0;
+	image_inter_marker = 0;
 }
 
 } // namespace MADSV2

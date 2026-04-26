@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -248,6 +248,17 @@ void rail_check_path(int allow_one_illegal) {
 		: RAIL_ALLOW_LEGAL_ONLY;
 
 	recursive_check_path(start_node, 0, allow_mode, 0);
+}
+
+void init_rail() {
+	rail_solution_stack_pointer = 0;
+	rail_solution_stack_weight = 0;
+	memset(rail_visited, 0, sizeof(rail_visited));
+	memset(rail_working_stack, 0, sizeof(rail_working_stack));
+	memset(rail_solution_stack, 0, sizeof(rail_solution_stack));
+	rail_num_nodes = 0;
+	rail_base = NULL;
+	memset(rail_active, 0, sizeof(rail_active));
 }
 
 } // namespace MADSV2

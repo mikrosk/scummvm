@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -68,6 +68,8 @@ extern void camera_init_default();
 extern void camera_jump_to(int x, int y);
 extern void camera_pan_to(Camera *camera, int target);
 extern void camera_update();
+
+extern void init_camera();
 
 } // namespace MADSV2
 } // namespace MADS

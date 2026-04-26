@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -165,6 +165,10 @@ void quote_split_string(const char *source, char *target1, char *target2) {
 	do {
 		*(target2++) = *mark;
 	} while (*(mark++));
+}
+
+void init_quote() {
+	quote_emergency = false;
 }
 
 } // namespace MADSV2

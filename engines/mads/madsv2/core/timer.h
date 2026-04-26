@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -84,6 +84,8 @@ byte *timer_get_interrupt_stack();
 
 int timer_set_copy_protect(int protect);
 int timer_get_copy_protect();
+
+extern void init_timer();
 
 } // namespace MADSV2
 } // namespace MADS

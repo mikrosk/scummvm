@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -1200,6 +1200,13 @@ void sprite_free(SeriesPtr *series, int free_memory) {
 
 done:
 	;
+}
+
+void init_sprite() {
+	sprite_error = 0;
+	sprite_force_memory = NULL;
+	sprite_force_size = 0;
+	kidney = false;
 }
 
 } // namespace MADSV2

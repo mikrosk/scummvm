@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -115,6 +115,8 @@ extern void object_set_quality(int object_id, int quality_id, long quality_value
  * greys out main area, then loads & displays object sprite.
  */
 extern int object_examine(int number, long message, int speech);
+
+extern void init_object();
 
 } // namespace MADSV2
 } // namespace MADS

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -150,6 +150,8 @@ void matte_refresh_work(void);
 void matte_inter_frame(int update_live, int clear_chaff);
 int  matte_allocate_inter_image(void);
 void matte_refresh_inter(void);
+
+extern void init_matte();
 
 } // namespace MADSV2
 } // namespace MADS

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -672,6 +672,22 @@ void pal_change_color(int color, int r, int g, int b) {
 	master_palette[color].g = (byte)g;
 	master_palette[color].b = (byte)b;
 	mcga_setpal_range((Palette *)master_palette, color, 1);
+}
+
+void init_pal() {
+	memset(&master_palette, 0, sizeof(Palette));
+	master_shadow = NULL;
+	memset(color_status, 0, sizeof(color_status));
+	memset(flag_used, 0, sizeof(flag_used));
+	palette_locked = false;
+	palette_ever_initialized = false;
+	palette_reserved_bottom = 0;
+	palette_reserved_top = 0;
+	palette_low_search_limit = 0;
+	palette_high_search_limit = 0;
+	pal_manager_update = NULL;
+	pal_manager_active = false;
+	pal_manager_colors = 0;
 }
 
 } // namespace MADSV2

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -93,6 +93,8 @@ extern int hspot_which(int x, int y, int video_mode);
  *
  */
 extern int hspot_which_reverse(int x, int y, int video_mode);
+
+extern void init_hspot();
 
 } // namespace MADSV2
 } // namespace MADS

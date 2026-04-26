@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -333,6 +333,8 @@ extern void inter_reset_dialog(void);
 extern int inter_add_dialog(char *string, int result);
 
 extern int inter_load_background(const char *name, Buffer *target);
+
+extern void init_inter();
 
 } // namespace MADSV2
 } // namespace MADS

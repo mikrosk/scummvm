@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -43,6 +43,8 @@ extern void speech_go();
 extern void global_speech_load(int id);
 extern void global_speech_go(int id);
 extern void global_speech(int id);
+
+extern void init_speech();
 
 } // namespace MADSV2
 } // namespace MADS

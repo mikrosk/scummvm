@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -91,6 +91,8 @@ extern int vocab_active_id(word id);
 extern int vocab_make_active(int id);
 extern int vocab_load_active(void);
 extern char *vocab_string(int vocab_id);
+
+extern void init_vocab();
 
 } // namespace MADSV2
 } // namespace MADS

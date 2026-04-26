@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -622,6 +622,8 @@ extern void kernel_room_scale(int front_y, int front_scale, int back_y, int back
  */
 extern void kernel_background_shutdown();
 extern int kernel_background_startup(int new_room, int initial_variant);
+
+extern void init_kernel();
 
 } // namespace MADSV2
 } // namespace MADS

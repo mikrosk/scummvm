@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -95,6 +95,19 @@ void timer_activate_low_priority(void (*(routine))()) {
 
 byte *timer_get_interrupt_stack() {
 	return _interrupt_stack;
+}
+
+void init_timer() {
+	_timer_clock = 0;
+	timer_service_active = false;
+	timer_sound_on = 0;
+	timer_noise_on = 0;
+	timer_copy_protect_in = 0;
+	timer_copy_protect_out = 0;
+	timer_low_priority = 0;
+	timer_low_semaphore = 0;
+	timer_low_stacking = 0;
+	timer_low_deferred = 0;
 }
 
 } // namespace MADSV2

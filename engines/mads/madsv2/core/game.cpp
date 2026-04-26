@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -3012,6 +3012,73 @@ int main_normal_key(int mykey) {
 
 int main_copy_verify() {
 	return g_engine->main_copy_verify();
+}
+
+void init_game() {
+	win_status = WIN_NOTHING;
+	game_restore_flag = false;
+	game_autosaved = false;
+	game_mouse_cursor_fix = false;
+	abort_value = 0;
+	abort_clock = 0;
+	memset(chain_line, 0, sizeof(chain_line));
+	chain_flag = false;
+	force_chain = false;
+	key_abort_level = 0;
+	report_version = false;
+	game_menu_routine = NULL;
+	game_menu_init = NULL;
+	game_menu_exit = NULL;
+	game_emergency_save = NULL;
+	debugger = false;
+	debugger_state = DEBUGGER_MAIN;
+	debugger_matte_before = false;
+	debugger_memory_skip = 0;
+	debugger_memory_all = false;
+	debugger_memory_keywait = false;
+	debugger_reset = NULL;
+	debugger_update = NULL;
+	memset(int_sprite, 0, sizeof(int_sprite));
+	selected_intro = false;
+	correction_clock = 0;
+	memset(save_game_key, 0, sizeof(save_game_key));
+	memset(restart_game_key, 0, sizeof(restart_game_key));
+	memset(save_game_buf, 0, sizeof(save_game_buf));
+	last_keypressed = -1;
+	section_preload_code_pointer = NULL;
+	section_init_code_pointer = NULL;
+	section_room_constructor = NULL;
+	section_daemon_code_pointer = NULL;
+	section_pre_parser_code_pointer = NULL;
+	section_parser_code_pointer = NULL;
+	section_error_code_pointer = NULL;
+	section_music_reset_pointer = NULL;
+	room_preload_code_pointer = NULL;
+	room_init_code_pointer = NULL;
+	room_daemon_code_pointer = NULL;
+	room_pre_parser_code_pointer = NULL;
+	room_parser_code_pointer = NULL;
+	room_error_code_pointer = NULL;
+	room_shutdown_code_pointer = NULL;
+	game_any_emergency = false;
+	game_keystroke = 0;
+	game_any_keystroke = 0;
+	lets_get_a_move_on_anim = true;
+	noise_clock = 0;
+	noise_timer = 0;
+	noise_length = -1;
+	move_your_butt_enabled = 1;
+	move_your_butt_clock = 0;
+	move_your_butt_timer = 0;
+	move_your_butt_anim_handle = -1;
+	move_your_butt_anim_frame = -1;
+	last_bird_sound = (byte)-1;
+	Common::strcpy_s(game_save_file, "SAVES.DIR");
+	game_save_directory = NULL;
+	game_preserve_handle = 0;
+	debugger_previous = DEBUGGER_NONE;
+	debugger_watch = 0;
+	memset(debugger_watch_index, 0, sizeof(debugger_watch_index));
 }
 
 } // namespace MADSV2

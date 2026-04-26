@@ -24,17 +24,33 @@
 #include "engines/util.h"
 #include "mads/mads.h"
 #include "mads/madsv2/engine.h"
+#include "mads/madsv2/core/anim.h"
+#include "mads/madsv2/core/attr.h"
 #include "mads/madsv2/core/camera.h"
 #include "mads/madsv2/core/config.h"
 #include "mads/madsv2/core/conv.h"
+#include "mads/madsv2/core/cursor.h"
+#include "mads/madsv2/core/cycle.h"
+#include "mads/madsv2/core/dialog.h"
+#include "mads/madsv2/core/font.h"
 #include "mads/madsv2/core/game.h"
+#include "mads/madsv2/core/global.h"
+#include "mads/madsv2/core/hspot.h"
 #include "mads/madsv2/core/inter.h"
 #include "mads/madsv2/core/kernel.h"
+#include "mads/madsv2/core/keys.h"
 #include "mads/madsv2/core/matte.h"
 #include "mads/madsv2/core/object.h"
+#include "mads/madsv2/core/pal.h"
 #include "mads/madsv2/core/player.h"
 #include "mads/madsv2/core/popup.h"
+#include "mads/madsv2/core/quote.h"
+#include "mads/madsv2/core/rail.h"
+#include "mads/madsv2/core/room.h"
+#include "mads/madsv2/core/speech.h"
+#include "mads/madsv2/core/sprite.h"
 #include "mads/madsv2/core/timer.h"
+#include "mads/madsv2/core/vocab.h"
 #include "mads/madsv2/phantom/main.h"
 #include "mads/core/sound.h"
 
@@ -70,8 +86,32 @@ MADSV2Engine::~MADSV2Engine() {
 }
 
 void MADSV2Engine::initGlobals() {
+	init_anim();
+	init_attr();
+	init_camera();
+	init_conv();
+	init_cursor();
+	init_cycle();
+	init_dialog();
+	init_font();
+	init_game();
+	init_global();
+	init_hspot();
+	init_inter();
+	init_kernel();
+	init_keys();
+	init_matte();
+	init_object();
+	init_pal();
 	init_player();
 	init_popup();
+	init_quote();
+	init_rail();
+	init_room();
+	init_speech();
+	init_sprite();
+	init_timer();
+	init_vocab();
 }
 
 void MADSV2Engine::readConfigFile() {

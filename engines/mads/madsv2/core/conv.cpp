@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -1747,6 +1747,26 @@ int conv_expand(Common::SeekableReadStream *handle) {
 	}
 
 	return 0;
+}
+
+void init_conv() {
+	conv_system_cleanup();
+	active_conv = NULL;
+	active_conv_data = NULL;
+	conv_imports = NULL;
+	conv_entry_flags = NULL;
+	conv_varsDataPtr = NULL;
+	conv_vars0ValPtr = NULL;
+	conv_restore_running = -1;
+	Common::fill((byte *)&conv_control, (byte *)&conv_control + sizeof(ConvControl), 0);
+	conv_control.running = -1;
+	memset(&conv_box, 0, sizeof(Box));
+	conv_my_next_start = NULL;
+	conv_error_code = 0;
+	conv_dlg_script_ptr = 0;
+	conv_dlg_script_end = 0;
+	Common::fill(conv, conv + CONV_MAX_DATA, (Conv *)nullptr);
+	Common::fill(conv_data, conv_data + CONV_MAX_DATA, (ConvData *)nullptr);
 }
 
 } // namespace MADSV2

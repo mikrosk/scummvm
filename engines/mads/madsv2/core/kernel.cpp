@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -2875,6 +2875,66 @@ done:
 	}
 
 	return error_flag;
+}
+
+void init_kernel() {
+	memset(room_state, 0, sizeof(room_state));
+	video_mode = 0;
+	room = NULL;
+	room_id = KERNEL_STARTING_GAME;
+	section_id = KERNEL_STARTING_GAME;
+	room_variant = 0;
+	new_room = 101;
+	new_section = 1;
+	previous_room = 0;
+	previous_section = 0;
+	kernel_initial_variant = 0;
+	room_spots = NULL;
+	room_num_spots = 0;
+	kernel_room_series_marker = 0;
+	kernel_room_bound_dif = 0;
+	kernel_room_scale_dif = 0;
+	kernel_allow_peel = false;
+	kernel_panning_speed = 0;
+	kernel_screen_fade = 0;
+	memset(kernel_anim, 0, sizeof(kernel_anim));
+	memset(&kernel_shadow_main, 0, sizeof(ShadowList));
+	memset(&kernel_shadow_inter, 0, sizeof(ShadowList));
+	kernel_shadow_inter.num_shadow_colors = 1;
+	kernel_shadow_inter.shadow_color[0] = 15;
+	kernel_ok_to_fail_load = false;
+	kernel_mode = KERNEL_GAME_LOAD;
+	memset(kernel_cheating_password, 0, sizeof(kernel_cheating_password));
+	kernel_cheating_allowed = 0;
+	kernel_cheating_forbidden = 0;
+	memset(kernel_dynamic_hot, 0, sizeof(kernel_dynamic_hot));
+	kernel_num_dynamic = 0;
+	kernel_dynamic_changed = 0;
+	cursor = NULL;
+	cursor_id = 1;
+	cursor_last = -1;
+	memset(&kernel, 0, sizeof(Kernel));
+	memset(&game, 0, sizeof(KernelGame));
+	memset(sequence_list, 0, sizeof(sequence_list));
+	stop_speech_on_run_anim = true;
+	memset(kernel_message, 0, sizeof(kernel_message));
+	kernel_message_font = NULL;
+	kernel_message_spacing = 0;
+	kernel_sound_handle = 0;
+	memset(random_message_handle, 0, sizeof(random_message_handle));
+	memset(random_message_quote, 0, sizeof(random_message_quote));
+	random_max_messages = 1;
+	memset(random_quote_list, 0, sizeof(random_quote_list));
+	random_quote_list_size = 0;
+	random_min_x = 0;
+	random_max_x = video_x;
+	random_min_y = 0;
+	random_max_y = display_y;
+	random_spacing = 0;
+	random_teletype_rate = 0;
+	random_message_color = 0;
+	random_message_duration = 0;
+	memset(kernel_interface_loaded, 0, sizeof(kernel_interface_loaded));
 }
 
 } // namespace MADSV2

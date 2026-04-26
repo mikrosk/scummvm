@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -3708,6 +3708,17 @@ void dialog_trap_critical() {
 }
 
 void dialog_restore_critical(void) {
+}
+
+void init_dialog() {
+	dialog_error = 0;
+	dialog_quicksearch_flag = true;
+	dialog_wildcard_exits = false;
+	dialog_timeout = 0;
+	dialog_language = DIALOG_ENGLISH;
+	alert_normal_color = DD_DEFAULT_NORMAL_COLOR;
+	alert_select_color = DD_DEFAULT_SELECT_COLOR;
+	alert_hilite_color = DD_DEFAULT_HILITE_COLOR;
 }
 
 } // namespace MADSV2

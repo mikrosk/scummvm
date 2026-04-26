@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -228,6 +228,8 @@ extern void conv_release();
 extern void conv_flush();
 extern int conv_append(Common::WriteStream *handle);
 extern int conv_expand(Common::SeekableReadStream *handle);
+
+extern void init_conv();
 
 } // namespace MADSV2
 } // namespace MADS

@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -49,6 +49,8 @@ extern void cursor_get_pos(int *x, int *y);
 extern void cursor_set_mode(int my_type);
 extern void cursor_toggle_insert();
 extern void cursor_set_follow(int follow);
+
+extern void init_cursor();
 
 } // namespace MADSV2
 } // namespace MADS

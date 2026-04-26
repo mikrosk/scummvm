@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -450,6 +450,12 @@ int object_examine(int number, long message, int speech) {
 	inter_spin_object(inven[active_inven]);
 
 	return (restored_screen);
+}
+
+void init_object() {
+	object = NULL;
+	num_objects = 0;
+	object_ems_handle = BUFFER_PRESERVE;
 }
 
 } // namespace MADSV2

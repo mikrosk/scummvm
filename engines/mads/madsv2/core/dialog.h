@@ -1,4 +1,4 @@
-/* ScummVM - Graphic Adventure Engine
+﻿/* ScummVM - Graphic Adventure Engine
  *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
@@ -454,6 +454,8 @@ extern void dialog_trap_critical();
 extern void dialog_restore_critical();
 
 extern void dialog_watch_point(const char *string, long x, long y);
+
+extern void init_dialog();
 
 } // namespace MADSV2
 } // namespace MADS
