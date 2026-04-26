@@ -554,6 +554,10 @@ static void conv_purge_any_popup() {
 		box = my_box;
 		conv_control.popup_is_up = 0;
 		conv_control.popup_clock = kernel.clock;
+
+		// TODO: Determine where original turns off speech.
+		// There may be a more appropriate place
+		speech_all_off();
 	}
 }
 
