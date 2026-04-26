@@ -37,7 +37,7 @@ static const ADGameDescription gameDescriptions[] = {
 		Common::UNK_LANG, // EN/FR/DE
 		Common::kPlatformDOS,
 		ADGF_UNSTABLE,
-		GUIO0()
+		GUIO3(GUIO_RENDERHERCGREEN, GUIO_RENDERHERCAMBER, GUIO_RENDERCGA)
 	},
 
 	{
@@ -47,7 +47,7 @@ static const ADGameDescription gameDescriptions[] = {
 		Common::EN_USA,
 		Common::kPlatformDOS,
 		ADGF_UNSTABLE,
-		GUIO0()
+		GUIO3(GUIO_RENDERHERCGREEN, GUIO_RENDERHERCAMBER, GUIO_RENDERCGA)
 	},
 
 	AD_TABLE_END_MARKER
