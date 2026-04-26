@@ -268,7 +268,7 @@ void CGARenderer::blitToScreen(int16 ofs, int16 w, int16 h) {
 	int16 dy = ofs / byte_per_line;
 	int16 dx = (ofs % byte_per_line) * (0x8 / g_vm->_screenBits);
 
-	g_vm->_renderer->blitToScreen(dx, dy, w, h);
+	blitToScreen(dx, dy, w, h);
 }
 
 void CGARenderer::backBufferToRealFull() {
@@ -303,7 +303,7 @@ void CGARenderer::backBufferToRealFull() {
 			srcPtr += CGA_BYTES_PER_LINE;
 		}
 	}
-	g_vm->_renderer->blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
+	blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
 }
 
 void CGARenderer::realBufferToBackFull() {
@@ -323,7 +323,7 @@ void CGARenderer::copyScreenBlock(byte *source, uint16 w, uint16 h, byte *target
 	}
 
 	if (target == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
+		blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
 }
 
 /*
@@ -341,7 +341,7 @@ void CGARenderer::swapRealBackBuffer() {
 		*d++ = t;
 	}
 
-	g_vm->_renderer->blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
+	blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
 }
 
 
@@ -364,7 +364,7 @@ void CGARenderer::swapScreenRect(byte *pixels, uint16 w, uint16 h, byte *screen,
 	}
 
 	if (screen == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
+		blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
 }
 
 /*
@@ -433,7 +433,7 @@ void CGARenderer::blit(byte *pixels, uint16 pw, uint16 w, uint16 h, byte *screen
 	}
 
 	if (screen == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), h);
+		blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), h);
 }
 
 /*
@@ -455,7 +455,7 @@ void CGARenderer::fill(byte pixel, uint16 w, uint16 h, byte *screen, uint16 ofs)
 	}
 
 	if (screen == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), h);
+		blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), h);
 }
 
 void CGARenderer::fillAndWait(byte pixel, uint16 w, uint16 h, byte *screen, uint16 ofs) {
@@ -523,7 +523,7 @@ void CGARenderer::drawVLine(uint16 x, uint16 y, uint16 l, byte color, byte *targ
 	mask >>= (x % g_vm->_screenPPB) * g_vm->_screenPPB;
 	pixel >>= (x % g_vm->_screenPPB) * g_vm->_screenPPB;
 
-	ofs = g_vm->_renderer->calcXY_p(x / g_vm->_screenPPB, y);
+	ofs = calcXY_p(x / g_vm->_screenPPB, y);
 
 	uint16 ol = l;
 	while (l--) {
@@ -534,7 +534,7 @@ void CGARenderer::drawVLine(uint16 x, uint16 y, uint16 l, byte color, byte *targ
 	}
 
 	if (target == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(x, y, 1, ol);
+		blitToScreen(x, y, 1, ol);
 }
 
 /*
@@ -556,7 +556,7 @@ void CGARenderer::drawHLine(uint16 x, uint16 y, uint16 l, byte color, byte *targ
 	mask >>= (x % g_vm->_screenPPB) * g_vm->_screenPPB;
 	pixel >>= (x % g_vm->_screenPPB) * g_vm->_screenPPB;
 
-	ofs = g_vm->_renderer->calcXY_p(x / g_vm->_screenPPB, y);
+	ofs = calcXY_p(x / g_vm->_screenPPB, y);
 
 	uint16 ol = l;
 	while (l--) {
@@ -574,7 +574,7 @@ void CGARenderer::drawHLine(uint16 x, uint16 y, uint16 l, byte color, byte *targ
 		}
 	}
 	if (target == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(x, y, ol, 1);
+		blitToScreen(x, y, ol, 1);
 }
 
 /*
@@ -592,7 +592,7 @@ uint16 CGARenderer::drawHLineWithEnds(uint16 bmask, uint16 bpix, byte color, uin
 		ofs += g_vm->_screenBPL;
 
 	if (target == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, l * 4 + 2, 1);
+		blitToScreen(oofs, l * 4 + 2, 1);
 
 	return ofs;
 }
@@ -616,7 +616,7 @@ void CGARenderer::printChar(byte c, byte *target) {
 		}
 
 		if (target == SCREENBUFFER)
-			g_vm->_renderer->blitToScreen((char_draw_coords_x - 1) * g_vm->_fontWidth, char_draw_coords_y,  g_vm->_fontWidth, g_vm->_fontHeight);
+			blitToScreen((char_draw_coords_x - 1) * g_vm->_fontWidth, char_draw_coords_y,  g_vm->_fontWidth, g_vm->_fontHeight);
 
 	} else if (g_vm->_videoMode == Common::RenderMode::kRenderHercG) {
 		const int16 START_X = char_draw_coords_x++;
@@ -629,7 +629,7 @@ void CGARenderer::printChar(byte c, byte *target) {
 		}
 
 		if (target == SCREENBUFFER)
-			g_vm->_renderer->blitToScreen(START_X, START_Y, g_vm->_fontWidth, g_vm->_fontHeight);
+			blitToScreen(START_X, START_Y, g_vm->_fontWidth, g_vm->_fontHeight);
 	}
 }
 
@@ -654,7 +654,7 @@ void CGARenderer::blitScratchBackSprite(uint16 sprofs, uint16 w, uint16 h, byte 
 	}
 
 	if (screen == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
+		blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
 }
 
 void CGARenderer::blitFromBackBuffer(byte w, byte h, byte *screen, uint16 ofs) {
@@ -679,7 +679,7 @@ void CGARenderer::blitSprite(byte *pixels, int16 pw, uint16 w, uint16 h, byte *s
 	}
 
 	if (screen == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
+		blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
 }
 
 /*
@@ -700,7 +700,7 @@ void CGARenderer::blitSpriteFlip(byte *pixels, int16 pw, uint16 w, uint16 h, byt
 	}
 
 	if (screen == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
+		blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
 }
 
 /*
@@ -727,7 +727,7 @@ void CGARenderer::blitSpriteBak(byte *pixels, int16 pw, uint16 w, uint16 h, byte
 	}
 
 	if (screen == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
+		blitToScreen(oofs, w * (0x8 / g_vm->_screenBits), oh);
 }
 
 
@@ -974,7 +974,7 @@ void CGARenderer::hideScreenBlockLiftToDown(uint16 n, byte *screen, byte *source
 		memcpy(target + tofs, source + tofs, w);
 
 		if (screen == SCREENBUFFER) {
-			g_vm->_renderer->blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenW);
+			blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenW);
 		}
 
 		waitVBlank();
@@ -1019,7 +1019,7 @@ void CGARenderer::hideScreenBlockLiftToUp(uint16 n, byte *screen, byte *source, 
 		memcpy(target + tofs, source + tofs, w);
 
 		if (screen == SCREENBUFFER) {
-			g_vm->_renderer->blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
+			blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
 		}
 
 		waitVBlank();
@@ -1058,7 +1058,7 @@ void CGARenderer::hideScreenBlockLiftToLeft(uint16 n, byte *screen, byte *source
 		}
 
 		if (screen == SCREENBUFFER) {
-			g_vm->_renderer->blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
+			blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
 		}
 
 		waitVBlank();
@@ -1095,7 +1095,7 @@ void CGARenderer::hideScreenBlockLiftToRight(uint16 n, byte *screen, byte *sourc
 		}
 
 		if (screen == SCREENBUFFER) {
-			g_vm->_renderer->blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
+			blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
 		}
 
 		waitVBlank();
@@ -1278,15 +1278,15 @@ void CGARenderer::traceLine(uint16 sx, uint16 ex, uint16 sy, uint16 ey, byte *so
 	dy = h * 2;
 
 	if (g_vm->_videoMode == Common::RenderMode::kRenderCGA) {
-		ofs = g_vm->_renderer->calcXY_p(sx / 4, sy);
+		ofs = calcXY_p(sx / 4, sy);
 		mask = 0xC0 >> ((sx % 4) * 2);
 	} else {
-		ofs = g_vm->_renderer->calcXY_p(sx / 8, sy);
+		ofs = calcXY_p(sx / 8, sy);
 		mask = 0x80 >> (sx % 8); // TODO: check this
 	}
 
 	/*
-	ofs = g_vm->_renderer->calcXY_p(sx / 4, sy);
+	ofs = calcXY_p(sx / 4, sy);
 	mask = 0xC0 >> ((sx % 4) * 2);
 	*/
 
@@ -1330,7 +1330,7 @@ void CGARenderer::traceLine(uint16 sx, uint16 ex, uint16 sy, uint16 ey, byte *so
 	}
 
 	if (target == SCREENBUFFER)
-		g_vm->_renderer->blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
+		blitToScreen(0, 0, g_vm->_screenW, g_vm->_screenH);
 }
 
 /*TODO: get rid of this structure and pass everything relevant as arguments?*/
@@ -1695,7 +1695,7 @@ void CGARenderer::zoomInplaceXY(byte *pixels, byte w, byte h, byte nw, byte nh, 
 	zoom.eh = h - 1;
 	zoom.xbase = x % 4;
 
-	cga_ZoomInplace(&zoom, nw, nh, target, target, g_vm->_renderer->calcXY_p(x, y));
+	cga_ZoomInplace(&zoom, nw, nh, target, target, calcXY_p(x, y));
 }
 
 } // End of namespace Chamber
