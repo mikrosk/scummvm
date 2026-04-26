@@ -25,9 +25,6 @@
 #include "mads/nebular/nebular.h"
 #include "mads/core/audio.h"
 #include "mads/nebular/nebular_scenes.h"
-#ifdef ENABLE_MADSV2
-#include "mads/dragonsphere/dragonsphere_scenes.h"
-#endif
 
 namespace MADS {
 
@@ -129,11 +126,6 @@ void Scene::loadSceneLogic() {
 	case GType_RexNebular:
 		_sceneLogic = Nebular::SceneFactory::createScene(_vm);
 		break;
-#ifdef ENABLE_MADSV2
-	case GType_Dragonsphere:
-		_sceneLogic = Dragonsphere::SceneFactory::createScene(_vm);
-		break;
-#endif
 	default:
 		error("Scene logic: Unknown game");
 	}

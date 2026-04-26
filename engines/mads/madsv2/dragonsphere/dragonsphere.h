@@ -19,27 +19,42 @@
  *
  */
 
-#include "mads/dragonsphere/globals_dragonsphere.h"
+#ifndef MADS_DRAGONSPHERE_H
+#define MADS_DRAGONSPHERE_H
+
+#include "mads/madsv2/engine.h"
 
 namespace MADS {
+namespace MADSV2 {
 namespace Dragonsphere {
 
-DragonsphereGlobals::DragonsphereGlobals()
-	: Globals() {
-	// Initialize lists
-	resize(140);
-	_spriteIndexes.resize(30);
-	_sequenceIndexes.resize(30);
-	_animationIndexes.resize(30);
-}
+class DragonsphereEngine : public MADSV2Engine {
+private:
+	static void global_object_sprite();
+	static void stop_walker_basic();
+	static void stop_walker_tricks();
 
-void DragonsphereGlobals::synchronize(Common::Serializer &s) {
-	Globals::synchronize(s);
+public:
+	DragonsphereEngine(OSystem *syst, const MADSGameDescription *gameDesc) :
+		MADSV2Engine(syst, gameDesc) {}
+	~DragonsphereEngine() override {}
 
-	_spriteIndexes.synchronize(s);
-	_sequenceIndexes.synchronize(s);
-	_animationIndexes.synchronize(s);
-}
+	Common::Error run() override;
+	void syncRoom(Common::Serializer &s) override;
+
+	void global_init_code() override;
+	void section_music(int section_num) override;
+	void global_section_constructor() override;
+	void global_daemon_code() override;
+	void global_pre_parser_code() override;
+	void global_parser_code() override;
+	void global_error_code() override;
+	void global_room_init() override;
+	void global_sound_driver() override;
+};
 
 } // namespace Dragonsphere
+} // namespace MADSV2
 } // namespace MADS
+
+#endif

@@ -41,6 +41,7 @@
 #include "mads/detection.h"
 #ifdef ENABLE_MADSV2
 #include "mads/madsv2/phantom/phantom.h"
+#include "mads/madsv2/dragonsphere/dragonsphere.h"
 #include "mads/madsv2/forest/forest.h"
 #endif
 
@@ -221,6 +222,8 @@ Common::Error MADSMetaEngine::createInstance(OSystem *syst, Engine **engine, con
 		*engine = new MADS::MADSV2::Phantom::PhantomEngine(syst, desc);
 	else if (desc->gameID == MADS::GType_Forest)
 		*engine = new MADS::MADSV2::Forest::ForestEngine(syst, desc);
+	else if (desc->gameID == MADS::GType_Dragonsphere)
+		*engine = new MADS::MADSV2::Dragonsphere::DragonsphereEngine(syst, desc);
 	else
 #endif
 

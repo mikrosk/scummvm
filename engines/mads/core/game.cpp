@@ -34,9 +34,6 @@
 #include "mads/core/msurface.h"
 #include "mads/core/resources.h"
 #include "mads/nebular/game_nebular.h"
-#ifdef ENABLE_MADSV2
-#include "mads/dragonsphere/game_dragonsphere.h"
-#endif
 
 namespace MADS {
 
@@ -44,10 +41,6 @@ Game *Game::init(RexNebularEngine *vm) {
 	switch (vm->getGameID()) {
 	case GType_RexNebular:
 		return new Nebular::GameNebular(vm);
-#ifdef ENABLE_MADSV2
-	case GType_Dragonsphere:
-		return new Dragonsphere::GameDragonsphere(vm);
-#endif
 	default:
 		error("Game::init(): Unknown game");
 	}

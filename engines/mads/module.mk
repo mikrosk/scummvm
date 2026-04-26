@@ -54,10 +54,6 @@ MODULE_OBJS := \
 
 ifdef ENABLE_MADSV2
 MODULE_OBJS += \
-	dragonsphere/game_dragonsphere.o \
-	dragonsphere/dragonsphere_scenes.o \
-	dragonsphere/dragonsphere_scenes1.o \
-	dragonsphere/globals_dragonsphere.o \
 	madsv2/console.o \
 	madsv2/engine.o \
 	madsv2/core/anim.o \
@@ -179,6 +175,7 @@ MODULE_OBJS += \
 	madsv2/phantom/menus.o \
 	madsv2/phantom/main.o \
 	madsv2/phantom/sound_phantom.o \
+	madsv2/dragonsphere/dragonsphere.o \
 	madsv2/forest/forest.o
 endif
 
