@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.9.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-26 15:41+0000\n"
+"POT-Creation-Date: 2026-04-26 21:33+0000\n"
 "PO-Revision-Date: 2026-04-21 22:05+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Ukrainian <https://translations.scummvm.org/projects/scummvm/"
@@ -3893,7 +3893,7 @@ msgstr "Мапа клавіш гри за замовчунням"
 #: engines/hugo/metaengine.cpp:134 engines/illusions/metaengine.cpp:94
 #: engines/kyra/engine/eobcommon.cpp:369 engines/kyra/engine/lol.cpp:505
 #: engines/lure/metaengine.cpp:177 engines/made/metaengine.cpp:137
-#: engines/mads/metaengine.cpp:315 engines/mm/metaengine.cpp:186
+#: engines/mads/metaengine.cpp:318 engines/mm/metaengine.cpp:186
 #: engines/mtropolis/metaengine.cpp:161 engines/nancy/input.cpp:181
 #: engines/parallaction/metaengine.cpp:138 engines/saga/metaengine.cpp:278
 #: engines/sludge/keymapper_tables.h:561 engines/sludge/keymapper_tables.h:580
@@ -3926,7 +3926,7 @@ msgstr "Середній клік"
 #: engines/hopkins/metaengine.cpp:217 engines/hugo/metaengine.cpp:141
 #: engines/illusions/metaengine.cpp:101 engines/kyra/engine/eobcommon.cpp:370
 #: engines/kyra/engine/lol.cpp:506 engines/lure/metaengine.cpp:183
-#: engines/made/metaengine.cpp:144 engines/mads/metaengine.cpp:321
+#: engines/made/metaengine.cpp:144 engines/mads/metaengine.cpp:324
 #: engines/mm/metaengine.cpp:192 engines/mtropolis/metaengine.cpp:167
 #: engines/nancy/input.cpp:188 engines/parallaction/metaengine.cpp:144
 #: engines/saga/metaengine.cpp:289 engines/sludge/keymapper_tables.h:567
@@ -6284,7 +6284,7 @@ msgstr "Перевірити оновлення..."
 #: engines/hugo/metaengine.cpp:129 engines/hypno/metaengine.cpp:128
 #: engines/illusions/metaengine.cpp:89 engines/lab/metaengine.cpp:149
 #: engines/lure/metaengine.cpp:168 engines/made/metaengine.cpp:132
-#: engines/mads/metaengine.cpp:309 engines/neverhood/metaengine.cpp:185
+#: engines/mads/metaengine.cpp:312 engines/neverhood/metaengine.cpp:185
 #: engines/ngi/metaengine.cpp:115 engines/petka/metaengine.cpp:113
 #: engines/prince/metaengine.cpp:227 engines/private/metaengine.cpp:127
 #: engines/queen/metaengine.cpp:146 engines/sherlock/metaengine.cpp:313
@@ -6601,7 +6601,7 @@ msgstr ""
 #: engines/crab/metaengine.cpp:34 engines/darkseed/dialogs.cpp:95
 #: engines/drascula/metaengine.cpp:42 engines/dreamweb/metaengine.cpp:48
 #: engines/got/metaengine.cpp:35 engines/groovie/metaengine.cpp:53
-#: engines/m4/metaengine.cpp:37 engines/mads/metaengine.cpp:115
+#: engines/m4/metaengine.cpp:37 engines/mads/metaengine.cpp:116
 #: engines/nancy/metaengine.cpp:104 engines/neverhood/dialogs.cpp:47
 #: engines/phoenixvr/metaengine.cpp:38 engines/sci/detection_options.h:105
 #: engines/sherlock/metaengine.cpp:47 engines/toltecs/metaengine.cpp:44
@@ -6615,7 +6615,7 @@ msgstr "Використовувати ориг. екрани збереженн
 #: engines/crab/metaengine.cpp:35 engines/darkseed/dialogs.cpp:96
 #: engines/drascula/metaengine.cpp:43 engines/dreamweb/metaengine.cpp:49
 #: engines/got/metaengine.cpp:36 engines/groovie/metaengine.cpp:54
-#: engines/m4/metaengine.cpp:38 engines/mads/metaengine.cpp:116
+#: engines/m4/metaengine.cpp:38 engines/mads/metaengine.cpp:117
 #: engines/nancy/metaengine.cpp:105 engines/neverhood/dialogs.cpp:48
 #: engines/phoenixvr/metaengine.cpp:39 engines/sci/detection_options.h:106
 #: engines/sherlock/metaengine.cpp:48 engines/toltecs/metaengine.cpp:45
@@ -6696,7 +6696,7 @@ msgstr "Додати меню швидкості гри (подібно до в�
 
 #: engines/agi/metaengine.cpp:195 engines/agos/dialogs.cpp:38
 #: engines/dreamweb/metaengine.cpp:36 engines/gob/metaengine.cpp:45
-#: engines/lure/metaengine.cpp:41 engines/mads/metaengine.cpp:55
+#: engines/lure/metaengine.cpp:41 engines/mads/metaengine.cpp:56
 #: engines/mm/metaengine.cpp:46 engines/saga/metaengine.cpp:52
 #: engines/scumm/dialogs.cpp:1233 engines/scumm/metaengine.cpp:821
 #: engines/tot/metaengine.cpp:37
@@ -6705,7 +6705,7 @@ msgstr "Ввімкнути захист від копіювання"
 
 #: engines/agi/metaengine.cpp:196 engines/agos/dialogs.cpp:39
 #: engines/dreamweb/metaengine.cpp:37 engines/gob/metaengine.cpp:46
-#: engines/lure/metaengine.cpp:42 engines/mads/metaengine.cpp:56
+#: engines/lure/metaengine.cpp:42 engines/mads/metaengine.cpp:57
 #: engines/mm/metaengine.cpp:47 engines/saga/metaengine.cpp:53
 #: engines/scumm/dialogs.cpp:1234 engines/scumm/metaengine.cpp:822
 msgid "Enable any copy protection that would otherwise be bypassed by default."
@@ -6840,7 +6840,7 @@ msgstr "Головна AGOS"
 #: engines/hypno/metaengine.cpp:267 engines/hypno/metaengine.cpp:311
 #: engines/illusions/metaengine.cpp:90 engines/lab/metaengine.cpp:152
 #: engines/lure/metaengine.cpp:169 engines/made/metaengine.cpp:133
-#: engines/mads/metaengine.cpp:310 engines/neverhood/metaengine.cpp:186
+#: engines/mads/metaengine.cpp:313 engines/neverhood/metaengine.cpp:186
 #: engines/queen/metaengine.cpp:147 engines/saga/metaengine.cpp:268
 #: engines/sludge/keymapper_tables.h:33 engines/stark/metaengine.cpp:185
 #: engines/sword1/metaengine.cpp:267 engines/tinsel/metaengine.cpp:241
@@ -7334,7 +7334,7 @@ msgstr "Чіт для ока Soldier 714"
 #: engines/bbvs/metaengine.cpp:111 engines/cruise/metaengine.cpp:223
 #: engines/freescape/movement.cpp:107 engines/got/metaengine.cpp:78
 #: engines/hugo/metaengine.cpp:197 engines/lure/metaengine.cpp:209
-#: engines/mads/metaengine.cpp:327 engines/mm/mm1/metaengine.cpp:42
+#: engines/mads/metaengine.cpp:330 engines/mm/mm1/metaengine.cpp:42
 #: engines/mm/mm1/metaengine.cpp:48 engines/saga/metaengine.cpp:328
 #: engines/tinsel/metaengine.cpp:258 engines/tsage/metaengine.cpp:190
 #: engines/tucker/metaengine.cpp:221 engines/twine/metaengine.cpp:388
@@ -7636,7 +7636,7 @@ msgstr "Перемкнути приватність підказок"
 #: engines/freescape/games/eclipse/eclipse.cpp:351
 #: engines/hopkins/metaengine.cpp:236 engines/hugo/metaengine.cpp:165
 #: engines/lure/metaengine.cpp:191 engines/made/metaengine.cpp:192
-#: engines/mads/metaengine.cpp:340 engines/mohawk/myst.cpp:583
+#: engines/mads/metaengine.cpp:343 engines/mohawk/myst.cpp:583
 #: engines/mohawk/riven.cpp:864 engines/pegasus/pegasus.cpp:2825
 #: engines/petka/metaengine.cpp:198 engines/prince/metaengine.cpp:243
 #: engines/saga/metaengine.cpp:442 engines/sherlock/metaengine.cpp:462
@@ -7712,7 +7712,7 @@ msgstr "База даних доказів"
 #: engines/freescape/games/dark/dark.cpp:236
 #: engines/freescape/games/driller/driller.cpp:135
 #: engines/freescape/games/eclipse/eclipse.cpp:361
-#: engines/mads/metaengine.cpp:396 engines/phoenixvr/metaengine.cpp:80
+#: engines/mads/metaengine.cpp:399 engines/phoenixvr/metaengine.cpp:80
 #: engines/saga/metaengine.cpp:437 engines/sherlock/metaengine.cpp:359
 #: engines/sherlock/metaengine.cpp:618 engines/sherlock/metaengine.cpp:852
 #: engines/stark/metaengine.cpp:280 engines/sword1/metaengine.cpp:295
@@ -7983,7 +7983,7 @@ msgstr "Ввімкнути генератор мови для об'єктів т
 
 #: engines/cge2/metaengine.cpp:60 engines/draci/metaengine.cpp:45
 #: engines/dreamweb/metaengine.cpp:74 engines/griffon/metaengine.cpp:41
-#: engines/lure/metaengine.cpp:54 engines/mads/metaengine.cpp:141
+#: engines/lure/metaengine.cpp:54 engines/mads/metaengine.cpp:142
 #: engines/parallaction/metaengine.cpp:53 engines/prince/metaengine.cpp:41
 #: engines/sci/detection_options.h:222 engines/sherlock/metaengine.cpp:121
 #: engines/supernova/metaengine.cpp:54 engines/teenagent/metaengine.cpp:50
@@ -10067,7 +10067,7 @@ msgid "Repeat last line"
 msgstr "Повторити останній рядок"
 
 #: engines/hugo/metaengine.cpp:172 engines/lure/metaengine.cpp:197
-#: engines/mads/metaengine.cpp:346 engines/tsage/metaengine.cpp:247
+#: engines/mads/metaengine.cpp:349 engines/tsage/metaengine.cpp:247
 msgid "Restore game"
 msgstr "Відновити гру"
 
@@ -10248,7 +10248,7 @@ msgstr "Мапа клавіш паузи"
 msgid "Direction keymappings"
 msgstr "Мапа клавіш напрямку"
 
-#: engines/hypno/metaengine.cpp:316 engines/mads/metaengine.cpp:384
+#: engines/hypno/metaengine.cpp:316 engines/mads/metaengine.cpp:387
 #: engines/tsage/metaengine.cpp:259
 msgid "Show credits"
 msgstr "Показати авторів"
@@ -10770,7 +10770,7 @@ msgstr ""
 msgid "This puzzle is not available in the trial version of the game"
 msgstr "Ця головоломка недоступна у пробній версії гри"
 
-#: engines/lure/metaengine.cpp:53 engines/mads/metaengine.cpp:140
+#: engines/lure/metaengine.cpp:53 engines/mads/metaengine.cpp:141
 #: engines/sherlock/metaengine.cpp:120 engines/twine/metaengine.cpp:144
 msgid "TTS Narrator"
 msgstr "Ведучий TTS"
@@ -10875,59 +10875,59 @@ msgstr "Курсор направо"
 msgid "Repeat last message"
 msgstr "Повторити останнє повідомлення"
 
-#: engines/mads/metaengine.cpp:67
+#: engines/mads/metaengine.cpp:68
 msgid "Easy mouse interface"
 msgstr "Простий інтерфейс для миші"
 
-#: engines/mads/metaengine.cpp:68
+#: engines/mads/metaengine.cpp:69
 msgid "Shows object names when hovering the mouse over them"
 msgstr "Показувати мітки для об'єктів при наведенні миші"
 
-#: engines/mads/metaengine.cpp:79 engines/mads/metaengine.cpp:80
+#: engines/mads/metaengine.cpp:80 engines/mads/metaengine.cpp:81
 msgid "Animated inventory items"
 msgstr "Анімований інвентар"
 
-#: engines/mads/metaengine.cpp:91 engines/mads/metaengine.cpp:92
+#: engines/mads/metaengine.cpp:92 engines/mads/metaengine.cpp:93
 msgid "Animated game interface"
 msgstr "Анімований інтерфейс гри"
 
-#: engines/mads/metaengine.cpp:103 engines/mads/metaengine.cpp:104
+#: engines/mads/metaengine.cpp:104 engines/mads/metaengine.cpp:105
 msgid "Naughty game mode"
 msgstr "Відвертий режим гри"
 
-#: engines/mads/metaengine.cpp:311
+#: engines/mads/metaengine.cpp:314
 msgid "Start menu keymappings"
 msgstr "Мапа клавіш стартового меню"
 
-#: engines/mads/metaengine.cpp:334
+#: engines/mads/metaengine.cpp:337
 msgid "Open game menu"
 msgstr "Відкрити меню гри"
 
-#: engines/mads/metaengine.cpp:352
+#: engines/mads/metaengine.cpp:355
 msgid "Scroll bar up"
 msgstr "Прокручення догори"
 
-#: engines/mads/metaengine.cpp:358
+#: engines/mads/metaengine.cpp:361
 msgid "Scroll bar down"
 msgstr "Прокручення донизу"
 
-#: engines/mads/metaengine.cpp:366
+#: engines/mads/metaengine.cpp:369
 msgid "Start game"
 msgstr "Почати гру"
 
-#: engines/mads/metaengine.cpp:372
+#: engines/mads/metaengine.cpp:375
 msgid "Resume game"
 msgstr "Поновити гру"
 
-#: engines/mads/metaengine.cpp:378
+#: engines/mads/metaengine.cpp:381
 msgid "Show intro"
 msgstr "Показувати заставку"
 
-#: engines/mads/metaengine.cpp:390
+#: engines/mads/metaengine.cpp:393
 msgid "Show quotes"
 msgstr "Показувати цитати"
 
-#: engines/mads/metaengine.cpp:403
+#: engines/mads/metaengine.cpp:406
 msgid "Restart animation"
 msgstr "Запустити анімацію наново"
 
