@@ -164,9 +164,9 @@ systems without an external DSP clock, these frequencies are converted to
 the exact value; it will be rounded automatically to the nearest suitable
 value.
 
-"output_channels" in scummvm.ini: mono (1) or stereo (2) mixing. Please note
-that Falcon doesn't allow mixing in 16-bit mono, so this will have no effect on
-this machine.
+"output_channels" in scummvm.ini: mono (1) or stereo (2) mixing. Falcon always
+reports 16-bit stereo used but internally a mono-to-stereo conversion is done
+(so I encourage everyone to use mono when music playback is too demanding).
 
 "audio_buffer_size" in scummvm.ini: number of samples to preload. Default is
 2048 which equals to about 83ms of audio lag and seems to be about right for
@@ -175,6 +175,12 @@ most games on my CT60@66 MHz.
 If you want to play with "audio_buffer_size", the rule of thumb is: (lag in ms)
 = (audio_buffer_size / output_rate) * 1000. But it's totally OK just to double
 the samples value to get rid of stuttering in a heavier game.
+
+Please note that unlike previous versions, these values will never be written
+back to scummvm.ini. This is beneficial if you want to switch between Falcon
+and TT or between Falcon with and without external DSP clock (as mentioned,
+DOS/Windows friendly values are automatically converted to a frequency which
+TT/Falcon supports).
 
 "gaudio" debug channel: used for optimising sample playback (where
 available). It prints input and output sample format as well as the name of the
@@ -399,15 +405,20 @@ Mute vs. "No music"
 
 Currently ScummVM requires each backend to mix samples, even though they may
 contain muted output (i.e. zeroes). This is because the progression of sample
-playback tells ScummVM how much time has passed in e.g. an animation.
+playback tells ScummVM how much time has passed in e.g. an animation. However,
+one part of the pending audio mixing changes is an optimisation: the input
+stream is still loaded and decoded but it is not mixed which alone leads to an
+enormous performance boost!
 
 "No music" means using the null audio plugin which prevents generating any MIDI
 music (and therefore avoiding the expensive synthesis emulation) but beware, it
-doesn't affect CD (*.wav) playback at all! Same applies for speech and sfx.
+doesn't affect CD (*.wav) playback at all! Same applies for speech and sfx. So
+mute one or all of those if frame rate drops noticeably.
 
 The least amount of cycles is spent when:
 - "No music" as "Preferred device": This prevents MIDI/OPL synthesis of any
   kind.
+- "Mute all" in "Volume" setting.
 - "output_rate" set to a DOS/Windows compatible value (default). Even if game
   uses 22050 Hz and your Falcon supports 22050 Hz, it is always faster to use
   11025 Hz!
@@ -451,8 +462,9 @@ So how do you know which frequency to set as "output_rate" ? This is where
 converters are being used and for what input/values. So you can easily verify
 whether the given game's demands match your setting.
 
-Unfortunately, currently per-game "output_rate" / "output_channels" is not
-possible but this may change in the future.
+Good news is that "output_rate", "output_channels", "audio_buffer_size" and
+even "print_rate" are now possible to set per-game so one can fine-tune every
+game separately.
 
 Slow GUI
 ~~~~~~~~

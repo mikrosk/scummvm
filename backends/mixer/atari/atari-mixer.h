@@ -32,9 +32,10 @@
 class AtariMixerManager : public MixerManager, Common::EventObserver {
 public:
 	AtariMixerManager();
-	virtual ~AtariMixerManager();
+	~AtariMixerManager() override;
 
-	virtual void init() override;
+	void init() override;
+	void deinit();
 	void update();
 
 	void suspendAudio() override;
@@ -45,13 +46,15 @@ public:
 private:
 	int _outputRate = 0;
 	int _outputChannels = 0;
+	bool _emulated16bitMono = false;
+	bool _downsample = false;
 	int _samples = 0;
-	uint8 *_samplesBuf = nullptr;
+	int _sampleBufSize = 0;
+	byte *_sampleBuf = nullptr;
 
 	byte *_atariSampleBuffer = nullptr;
 	byte *_atariPhysicalSampleBuffer = nullptr;
 	byte *_atariLogicalSampleBuffer = nullptr;
-	bool _downsample = false;
 };
 
 #endif
