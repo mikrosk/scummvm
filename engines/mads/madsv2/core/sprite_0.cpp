@@ -86,16 +86,18 @@ byte *sprite_ptr;
 byte *target_ptr;
 int target_wrap;
 int xs, ys;
-int skip_y, draw_y, max_y, stop_y;
+int skip_y, max_y, stop_y;
 int skip_x, draw_x, max_x, stop_x;
 int line_finished;
 int mirror;
-int draw_count;
 SpritePtr sprite;
+#ifdef dump_mode
+int draw_count;
+#endif
 
 /*
-/*    Local variables for "three_d" depth coding
-*/
+ *    Local variables for "three_d" depth coding
+ */
 
 #if three_d
 byte *attr_ptr;
@@ -291,7 +293,7 @@ ys = sprite->ys;
 	}
 
 	skip_y = cx;
-	draw_y = bx;
+	//draw_y = bx;
 	stop_y = cx + bx;
 
 	if (bx <= 0)
@@ -822,6 +824,8 @@ pixel_IRLE:
 						/* pixel_IRLE_run_yesdraw */
 						if (run_value != SS_SKIP) {
 							byte out_byte = run_value;
+							// Hopefully stop warnings about it being unused for some functions
+							(void)out_byte;
 
 #if three_d
 							{
@@ -1021,7 +1025,6 @@ pixel_IRLE_image_no_attr:;
 
 #if translate
 						{
-							byte full_color = out_byte;
 							if (out_byte >= 16) {
 								if (thatch_flag != 0) {
 									out_byte >>= 4;

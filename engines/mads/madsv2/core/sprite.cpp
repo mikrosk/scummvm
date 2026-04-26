@@ -803,9 +803,15 @@ word sprite_pack_line_irle(byte *target, Buffer *source, byte *palette_map, byte
 			/* if run exists, write it */
 			if (run_len > 0) {
 				switch (run_len) {
-				case 3: *(unto++) = run_byte;
-				case 2: *(unto++) = run_byte;
-				case 1: *(unto++) = run_byte;    break;
+				case 3:
+					*(unto++) = run_byte;
+					// Fall through
+				case 2:
+					*(unto++) = run_byte;
+					// Fall through
+				case 1:
+					*(unto++) = run_byte;
+					break;
 				default:
 					*(unto++) = SS_RUN;      /* mark as a run */
 					*(unto++) = run_len;

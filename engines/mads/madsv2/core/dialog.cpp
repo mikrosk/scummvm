@@ -47,7 +47,6 @@ static int mouse_orig_stroke_type;      /* First radio button pressed     */
 static int mouse_override;              /* Override repeat damper         */
 static int stroke_going;                /* Currently processing a stroke  */
 static int resolved_mouse;              /* Have resolved stroke this pass */
-static long mouse_timing_clock;         /* Stroke timer for logitech      */
 static ItemPtr mouse_scroll_item;       /* Recent mouse item              */
 static ListPtr mouse_scroll_list;       /* Recent mouse list              */
 static char temp_buf[80];               /* A convenient buffer            */
