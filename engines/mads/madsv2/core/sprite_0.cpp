@@ -758,11 +758,17 @@ pixel_RLE_no_output:;
 #endif
 							*pixel_ptr = out_byte;
 #endif
+#ifdef on_black
 pixel_RLE_no_output2:;
+#endif
 						}
-
+#if interface || three_d || translate
 pixel_RLE_run_skip_n_pop:;
+#endif
+#if three_d
 pixel_RLE_run_skip:
+#endif
+
 #if translate
 						thatch_flag ^= 1;
 #endif
@@ -770,9 +776,8 @@ pixel_RLE_run_skip:
 
 pixel_RLE_run_nodraw:
 						draw_x_pos++;
-
-pixel_RLE_run_next:
 #if bresenham
+pixel_RLE_run_next :
 						scan_x++;
 #endif
 
@@ -923,11 +928,16 @@ pixel_IRLE_run_no_output:;
 #endif
 							*pixel_ptr = out_byte;
 #endif
+#ifdef on_black
 pixel_IRLE_run_no_output2:;
+#endif
 						}
-
+#if three_d || interface || translate
 pixel_IRLE_run_skip_n_pop:;
+#endif
+#if three_d
 pixel_IRLE_run_skip:
+#endif
 #if translate
 						thatch_flag ^= 1;
 #endif
@@ -935,8 +945,9 @@ pixel_IRLE_run_skip:
 
 pixel_IRLE_run_nodraw:
 						draw_x_pos++;
-
+#if bresenham
 pixel_IRLE_run_next:
+#endif
 #if bresenham
 						scan_x++;
 #endif
@@ -1059,11 +1070,17 @@ pixel_IRLE_image_no_output:;
 #endif
 						*pixel_ptr = out_byte;
 #endif
+#ifdef on_black
 pixel_IRLE_image_no_output2:;
+#endif
 					}
-
+#if three_d || interface || translate
 pixel_IRLE_image_skip_n_pop:;
+#endif
+#if three_d
 pixel_IRLE_image_skip:
+#endif
+
 #if translate
 					thatch_flag ^= 1;
 #endif
@@ -1071,8 +1088,10 @@ pixel_IRLE_image_skip:
 
 pixel_IRLE_image_nodraw:
 					draw_x_pos++;
-
+#if bresenham
 pixel_IRLE_image_next:
+#endif
+
 #if bresenham
 					scan_x++;
 #endif
