@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.8.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-26 07:30+0000\n"
+"POT-Creation-Date: 2026-04-26 15:41+0000\n"
 "PO-Revision-Date: 2021-03-21 08:24+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Belarusian <https://translations.scummvm.org/projects/scummvm/"
@@ -616,7 +616,7 @@ msgstr "Грф"
 
 #: gui/editgamedialog.cpp:164 gui/options.cpp:2075 gui/options.cpp:2254
 #: backends/graphics/atari/atari-graphics.cpp:1056
-#: backends/graphics/sdl/sdl-graphics.cpp:488
+#: backends/graphics/sdl/sdl-graphics.cpp:487
 msgid "Graphics"
 msgstr "Графіка"
 
@@ -1902,7 +1902,7 @@ msgstr "Спампаваць файлы гульні"
 msgid "Check on the scummvm.org website for updates of shader packs"
 msgstr "Правяраю абнаўленні..."
 
-#: gui/options.cpp:1700 backends/graphics/sdl/sdl-graphics.cpp:479
+#: gui/options.cpp:1700 backends/graphics/sdl/sdl-graphics.cpp:478
 msgid "Fullscreen mode"
 msgstr "Поўнаэкранны рэжым"
 
@@ -4258,7 +4258,7 @@ msgid "Choose a new folder"
 msgstr "Абярыце файл для загрузкі"
 
 #: backends/graphics/atari/atari-graphics.cpp:1060
-#: backends/graphics/sdl/sdl-graphics.cpp:515 engines/scumm/help.cpp:103
+#: backends/graphics/sdl/sdl-graphics.cpp:514 engines/scumm/help.cpp:103
 msgid "Toggle aspect ratio correction"
 msgstr "Пераключыць карэкцыю суадносін бакоў"
 
@@ -4287,37 +4287,37 @@ msgstr "Расцягнуць да акна"
 msgid "Fit to window (4:3)"
 msgstr "Падагнаць пад акно (4:3)"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:975
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:966
 #, c-format
 msgid "Resolution: %dx%d"
 msgstr "Адрозненне: %dx%d"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1019
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1010
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2869
 msgid "Active graphics filter:"
 msgstr "Актыўны графічны фільтр:"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1040
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1031
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2903
 msgid "Enabled aspect ratio correction"
 msgstr "Карэкцыя суадносін бакоў уключана"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1042
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1033
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2909
 msgid "Disabled aspect ratio correction"
 msgstr "Карэкцыя суадносін бакоў выключана"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1055
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1046
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2925
 msgid "Filtering enabled"
 msgstr "Фільтрацыя ўключана"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1057
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1048
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2927
 msgid "Filtering disabled"
 msgstr "Фільтрацыя выключана"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1083
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1074
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2954
 msgid "Stretch mode"
 msgstr "Рэжым расцягу"
@@ -4331,35 +4331,35 @@ msgstr ""
 msgid "SDL Surface (forced 8bpp mode)"
 msgstr ""
 
-#: backends/graphics/sdl/sdl-graphics.cpp:421
+#: backends/graphics/sdl/sdl-graphics.cpp:420
 #, fuzzy, c-format
 msgid "Saved screenshot '%s'"
 msgstr "Захаваць скрыншот"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:436
+#: backends/graphics/sdl/sdl-graphics.cpp:435
 #, fuzzy
 msgid "Could not save screenshot"
 msgstr "Захаваць скрыншот"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:481
+#: backends/graphics/sdl/sdl-graphics.cpp:480
 msgid "Windowed mode"
 msgstr "Аконны рэжым"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:168
+#: backends/graphics/sdl/sdl-graphics.cpp:491 engines/colony/metaengine.cpp:168
 #: engines/scumm/help.cpp:88
 msgid "Toggle fullscreen"
 msgstr "Пераключэнне на ўвесь экран"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:499 engines/scumm/help.cpp:100
+#: backends/graphics/sdl/sdl-graphics.cpp:498 engines/scumm/help.cpp:100
 #: engines/wintermute/keymapper_tables.h:960
 msgid "Toggle mouse capture"
 msgstr "Пераключэнне перахопу мышы"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:504
+#: backends/graphics/sdl/sdl-graphics.cpp:503
 msgid "Toggle resizable window"
 msgstr ""
 
-#: backends/graphics/sdl/sdl-graphics.cpp:509 engines/stark/metaengine.cpp:240
+#: backends/graphics/sdl/sdl-graphics.cpp:508 engines/stark/metaengine.cpp:240
 #: engines/wintermute/keymapper_tables.h:646
 #: engines/wintermute/keymapper_tables.h:695
 #: engines/wintermute/keymapper_tables.h:1098
@@ -4372,28 +4372,28 @@ msgstr ""
 msgid "Save screenshot"
 msgstr "Захаваць скрыншот"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:522
+#: backends/graphics/sdl/sdl-graphics.cpp:521
 msgid "Toggle linear filtered scaling"
 msgstr "Пераключыць лінейную фільтрацыю для пры маштабаванні"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:529
+#: backends/graphics/sdl/sdl-graphics.cpp:528
 msgid "Cycle through stretch modes"
 msgstr "Пераключыць рэжым расцягу"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:535
+#: backends/graphics/sdl/sdl-graphics.cpp:534
 msgid "Increase the scale factor"
 msgstr "Павялічыць маштаб"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:541
+#: backends/graphics/sdl/sdl-graphics.cpp:540
 msgid "Decrease the scale factor"
 msgstr "Паменшыць маштаб"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:548
+#: backends/graphics/sdl/sdl-graphics.cpp:547
 #, fuzzy
 msgid "Switch to the next scaler"
 msgstr "Перайсці да маштабавання TV 2x"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:553
+#: backends/graphics/sdl/sdl-graphics.cpp:552
 #, fuzzy
 msgid "Switch to the previous scaler"
 msgstr "Перайсці да маштабавання па найблізкім суседзе"
