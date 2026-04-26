@@ -21,11 +21,12 @@
 
 #include "engines/util.h"
 #include "mads/madsv2/console.h"
-#include "mads/madsv2/dragonsphere/dragonsphere.h"
 #include "mads/madsv2/core/game.h"
 #include "mads/madsv2/core/imath.h"
 #include "mads/madsv2/core/kernel.h"
 #include "mads/madsv2/core/screen.h"
+#include "mads/madsv2/dragonsphere/dragonsphere.h"
+#include "mads/madsv2/dragonsphere/global.h"
 
 namespace MADS {
 namespace MADSV2 {
@@ -45,6 +46,7 @@ Common::Error DragonsphereEngine::run() {
 
 	// Run the game
 	// TODO
+	global_section_constructor();	// Test call
 
 	return Common::kNoError;
 }

@@ -177,6 +177,13 @@ MODULE_OBJS += \
 	madsv2/phantom/sound_phantom.o \
 	madsv2/dragonsphere/dragonsphere.o \
 	madsv2/dragonsphere/global.o \
+	madsv2/dragonsphere/rooms/section1.o \
+	madsv2/dragonsphere/rooms/section2.o \
+	madsv2/dragonsphere/rooms/section3.o \
+	madsv2/dragonsphere/rooms/section4.o \
+	madsv2/dragonsphere/rooms/section5.o \
+	madsv2/dragonsphere/rooms/section6.o \
+	madsv2/dragonsphere/rooms/section9.o \
 	madsv2/forest/forest.o
 endif
 

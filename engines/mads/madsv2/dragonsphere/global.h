@@ -30,11 +30,6 @@ namespace MADSV2 {
 namespace Dragonsphere {
 
 enum {
-// -------------------- System variables ---------------------
-
-	walker_timing                   =   0,   // Stop walker timing (long)
-	walker_timing_2                 =   1,
-
 // ----------------- Global to all sections ------------------
 
 	player_persona                  =  10,  // Player is King or Pid
