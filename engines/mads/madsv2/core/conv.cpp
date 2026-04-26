@@ -605,7 +605,7 @@ static void conv_generate_text(Conv *convIn, ConvData * /*convData*/,
 	popup_write_string(textBuf);
 
 	// Render the popup, saving the underlying screen region.
-	popup_draw(true, false);
+	popup_draw(true, true);
 
 	// Restore the caller's box and record that a conversation popup is live.
 	box = savedBox;
