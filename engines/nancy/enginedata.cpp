@@ -910,8 +910,8 @@ UICL::UICL(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 UICO::UICO(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	readFilename(*chunkStream, imageName);
-	// TODO
+	readUIPopupHeader(*chunkStream, header);
+	readRect(*chunkStream, textRect);
 }
 
 UIIV::UIIV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {

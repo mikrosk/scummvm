@@ -23,6 +23,7 @@
 #define NANCY_ENGINEDATA_H
 
 #include "engines/nancy/commontypes.h"
+#include "engines/nancy/util.h"
 
 #include "common/hash-str.h"
 #include "common/path.h"
@@ -536,11 +537,16 @@ struct UICL : public EngineData {
 	Common::Path imageName;
 };
 
-// New conversation popup UI. Introduced in Nancy 10
+// New conversation popup UI (the text strip that appears above the taskbar
+// when a character is speaking). Introduced in Nancy 10.
+// Note: response hotspots are NOT in this chunk — they live in a separate
+// TextBoxSummaryChunk, each carrying a response-sound filename referenced
+// by ProcessConversation when STOP_VIDEO transitions to PLAYER_RESPONSE_SOUND.
 struct UICO : public EngineData {
 	UICO(Common::SeekableReadStream *chunkStream);
 
-	Common::Path imageName;
+	UIPopupHeader header;
+	Common::Rect textRect;      // Text-drawing rect inside the popup overlay
 };
 
 // New inventory UI. Introduced in Nancy 10
