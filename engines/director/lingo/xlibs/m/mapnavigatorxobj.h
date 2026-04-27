@@ -24,9 +24,23 @@
 
 namespace Director {
 
+struct NavNode {
+	int16 background_picture;
+	int16 hotspot_count;
+	int16 unknown_04;
+	int16 hotspot_list_offset;
+	Common::String name;
+};
+
 class MapNavigatorXObject : public Object<MapNavigatorXObject> {
 public:
 	MapNavigatorXObject(ObjectType objType);
+
+	Common::String _filename;
+	int16 _nodeCount;
+	int16 _hotspotCount;
+	int16 _firstNodeIndex;
+	Common::Array<NavNode> _nodes;
 };
 
 namespace MapNavigatorXObj {

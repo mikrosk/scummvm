@@ -20,6 +20,7 @@
  */
 
 #include "common/system.h"
+#include "common/file.h"
 
 #include "director/director.h"
 #include "director/lingo/lingo.h"
@@ -129,9 +130,41 @@ void MapNavigatorXObj::close(ObjectType type) {
 }
 
 void MapNavigatorXObj::m_new(int nargs) {
-	g_lingo->printSTUBWithArglist("MapNavigatorXObj::m_new", nargs);
-	g_lingo->dropStack(nargs);
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	me->_filename = g_lingo->pop().asString();
+	Common::File in;
+
+	if (!in.open(Common::Path(me->_filename))) {
+		warning("MapNavigatorXObj::m_new(): Cannot open file %s", me->_filename.c_str());
+		g_lingo->push(g_lingo->_state->me);
+		return;
+	}
+
+	me->_nodeCount = in.readUint16BE();
+	me->_hotspotCount = in.readUint16BE();
+	me->_firstNodeIndex = in.readUint16BE();
+
+	debug(1, "nodes: %d  hotspots: %d, firstNodeIdx: %d", me->_nodeCount, me->_hotspotCount, me->_firstNodeIndex);
+
+	for (int i = 0; i < me->_nodeCount; i++) {
+		NavNode n;
+		n.background_picture = in.readUint16BE();
+		n.hotspot_count = in.readUint16BE();
+		n.unknown_04 = in.readUint16BE();
+		n.hotspot_list_offset = in.readUint16BE();
+		n.name = in.readPascalString();
+
+		if (in.pos() % 2) // align to a word
+			(void)in.readByte();
+
+		debug(1, "%d: pict: %04x hotspots: %04x unk04: %04x listoff: %04x name: %s", i, n.background_picture, n.hotspot_count, n.unknown_04, n.hotspot_list_offset, n.name.c_str());
+
+		me->_nodes.push_back(n);
+	}
+
 	g_lingo->push(g_lingo->_state->me);
+
 }
 
 XOBJSTUBNR(MapNavigatorXObj::m_dispose)
