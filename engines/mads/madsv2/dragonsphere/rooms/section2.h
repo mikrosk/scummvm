@@ -29,6 +29,9 @@ namespace MADSV2 {
 namespace Dragonsphere {
 namespace Rooms {
 
+extern void section_2_walker();
+extern void section_2_interface();
+extern void section_2_music();
 
 } // namespace Rooms
 } // namespace Dragonsphere

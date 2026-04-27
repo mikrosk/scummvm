@@ -73,7 +73,7 @@ void global_section_constructor() {
 		section_preload_code_pointer = Rooms::section_5_preload;
 		break;
 	case 6:
-		section_preload_code_pointer = Rooms::section_5_preload;
+		section_preload_code_pointer = Rooms::section_6_preload;
 		break;
 	case 9:
 		section_preload_code_pointer = Rooms::section_9_preload;

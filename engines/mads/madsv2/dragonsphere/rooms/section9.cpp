@@ -19,6 +19,10 @@
  *
  */
 
+#include "mads/madsv2/core/game.h"
+#include "mads/madsv2/core/kernel.h"
+#include "mads/madsv2/core/player.h"
+#include "mads/madsv2/core/room.h"
 #include "mads/madsv2/dragonsphere/global.h"
 #include "mads/madsv2/dragonsphere/rooms/section9.h"
 
@@ -27,7 +31,43 @@ namespace MADSV2 {
 namespace Dragonsphere {
 namespace Rooms {
 
+extern void room_909_preload();
+
+void section_9_init() {
+	player.scaling_velocity = true;
+}
+
+void section_9_walker() {
+}
+
+void section_9_interface() {
+}
+
+void section_9_music() {
+}
+
+void section_9_constructor() {
+	room_preload_code_pointer = NULL;
+	room_init_code_pointer = NULL;
+	room_daemon_code_pointer = NULL;
+	room_pre_parser_code_pointer = NULL;
+	room_parser_code_pointer = NULL;
+	room_error_code_pointer = NULL;
+	room_shutdown_code_pointer = NULL;
+
+	if (new_room == 909) {
+		room_preload_code_pointer = room_909_preload;
+	}
+
+	room_himem_preload(new_room, SECTION);
+}
+
 void section_9_preload() {
+	section_init_code_pointer = section_9_init;
+	section_room_constructor = section_9_constructor;
+	section_music_reset_pointer = section_9_music;
+	section_daemon_code_pointer = NULL;
+	section_parser_code_pointer = NULL;
 }
 
 } // namespace Rooms

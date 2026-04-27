@@ -178,12 +178,81 @@ MODULE_OBJS += \
 	madsv2/dragonsphere/dragonsphere.o \
 	madsv2/dragonsphere/global.o \
 	madsv2/dragonsphere/rooms/section1.o \
+	madsv2/dragonsphere/rooms/room101.o \
 	madsv2/dragonsphere/rooms/section2.o \
 	madsv2/dragonsphere/rooms/section3.o \
 	madsv2/dragonsphere/rooms/section4.o \
 	madsv2/dragonsphere/rooms/section5.o \
 	madsv2/dragonsphere/rooms/section6.o \
 	madsv2/dragonsphere/rooms/section9.o \
+	madsv2/dragonsphere/rooms/room101.o \
+	madsv2/dragonsphere/rooms/room102.o \
+	madsv2/dragonsphere/rooms/room103.o \
+	madsv2/dragonsphere/rooms/room104.o \
+	madsv2/dragonsphere/rooms/room105.o \
+	madsv2/dragonsphere/rooms/room106.o \
+	madsv2/dragonsphere/rooms/room107.o \
+	madsv2/dragonsphere/rooms/room108.o \
+	madsv2/dragonsphere/rooms/room109.o \
+	madsv2/dragonsphere/rooms/room110.o \
+	madsv2/dragonsphere/rooms/room111.o \
+	madsv2/dragonsphere/rooms/room112.o \
+	madsv2/dragonsphere/rooms/room113.o \
+	madsv2/dragonsphere/rooms/room114.o \
+	madsv2/dragonsphere/rooms/room115.o \
+	madsv2/dragonsphere/rooms/room116.o \
+	madsv2/dragonsphere/rooms/room117.o \
+	madsv2/dragonsphere/rooms/room118.o \
+	madsv2/dragonsphere/rooms/room119.o \
+	madsv2/dragonsphere/rooms/room201.o \
+	madsv2/dragonsphere/rooms/room203.o \
+	madsv2/dragonsphere/rooms/room204.o \
+	madsv2/dragonsphere/rooms/room205.o \
+	madsv2/dragonsphere/rooms/room206.o \
+	madsv2/dragonsphere/rooms/room301.o \
+	madsv2/dragonsphere/rooms/room302.o \
+	madsv2/dragonsphere/rooms/room303.o \
+	madsv2/dragonsphere/rooms/room401.o \
+	madsv2/dragonsphere/rooms/room402.o \
+	madsv2/dragonsphere/rooms/room403.o \
+	madsv2/dragonsphere/rooms/room404.o \
+	madsv2/dragonsphere/rooms/room405.o \
+	madsv2/dragonsphere/rooms/room406.o \
+	madsv2/dragonsphere/rooms/room407.o \
+	madsv2/dragonsphere/rooms/room408.o \
+	madsv2/dragonsphere/rooms/room409.o \
+	madsv2/dragonsphere/rooms/room410.o \
+	madsv2/dragonsphere/rooms/room411.o \
+	madsv2/dragonsphere/rooms/room412.o \
+	madsv2/dragonsphere/rooms/room454.o \
+	madsv2/dragonsphere/rooms/room501.o \
+	madsv2/dragonsphere/rooms/room502.o \
+	madsv2/dragonsphere/rooms/room503.o \
+	madsv2/dragonsphere/rooms/room504.o \
+	madsv2/dragonsphere/rooms/room505.o \
+	madsv2/dragonsphere/rooms/room506.o \
+	madsv2/dragonsphere/rooms/room507.o \
+	madsv2/dragonsphere/rooms/room508.o \
+	madsv2/dragonsphere/rooms/room509.o \
+	madsv2/dragonsphere/rooms/room510.o \
+	madsv2/dragonsphere/rooms/room511.o \
+	madsv2/dragonsphere/rooms/room512.o \
+	madsv2/dragonsphere/rooms/room557.o \
+	madsv2/dragonsphere/rooms/room601.o \
+	madsv2/dragonsphere/rooms/room602.o \
+	madsv2/dragonsphere/rooms/room603.o \
+	madsv2/dragonsphere/rooms/room604.o \
+	madsv2/dragonsphere/rooms/room605.o \
+	madsv2/dragonsphere/rooms/room606.o \
+	madsv2/dragonsphere/rooms/room607.o \
+	madsv2/dragonsphere/rooms/room608.o \
+	madsv2/dragonsphere/rooms/room609.o \
+	madsv2/dragonsphere/rooms/room610.o \
+	madsv2/dragonsphere/rooms/room611.o \
+	madsv2/dragonsphere/rooms/room612.o \
+	madsv2/dragonsphere/rooms/room613.o \
+	madsv2/dragonsphere/rooms/room614.o \
+	madsv2/dragonsphere/rooms/room909.o \
 	madsv2/forest/forest.o
 endif
 

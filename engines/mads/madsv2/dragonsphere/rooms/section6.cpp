@@ -19,6 +19,10 @@
  *
  */
 
+#include "mads/madsv2/core/game.h"
+#include "mads/madsv2/core/kernel.h"
+#include "mads/madsv2/core/player.h"
+#include "mads/madsv2/core/room.h"
 #include "mads/madsv2/dragonsphere/global.h"
 #include "mads/madsv2/dragonsphere/rooms/section6.h"
 
@@ -27,7 +31,97 @@ namespace MADSV2 {
 namespace Dragonsphere {
 namespace Rooms {
 
+extern void room_601_preload();
+extern void room_602_preload();
+extern void room_603_preload();
+extern void room_604_preload();
+extern void room_605_preload();
+extern void room_606_preload();
+extern void room_607_preload();
+extern void room_608_preload();
+extern void room_609_preload();
+extern void room_610_preload();
+extern void room_611_preload();
+extern void room_612_preload();
+extern void room_613_preload();
+extern void room_614_preload();
+
+void section_6_init() {
+	player.scaling_velocity = true;
+}
+
+void section_6_walker() {
+}
+
+void section_6_interface() {
+}
+
+void section_6_music() {
+}
+
+void section_6_constructor() {
+	room_preload_code_pointer = NULL;
+	room_init_code_pointer = NULL;
+	room_daemon_code_pointer = NULL;
+	room_pre_parser_code_pointer = NULL;
+	room_parser_code_pointer = NULL;
+	room_error_code_pointer = NULL;
+	room_shutdown_code_pointer = NULL;
+
+	switch (new_room) {
+	case 601:
+		room_preload_code_pointer = room_601_preload;
+		break;
+	case 602:
+		room_preload_code_pointer = room_602_preload;
+		break;
+	case 603:
+		room_preload_code_pointer = room_603_preload;
+		break;
+	case 604:
+		room_preload_code_pointer = room_604_preload;
+		break;
+	case 605:
+		room_preload_code_pointer = room_605_preload;
+		break;
+	case 606:
+		room_preload_code_pointer = room_606_preload;
+		break;
+	case 607:
+		room_preload_code_pointer = room_607_preload;
+		break;
+	case 608:
+		room_preload_code_pointer = room_608_preload;
+		break;
+	case 609:
+		room_preload_code_pointer = room_609_preload;
+		break;
+	case 610:
+		room_preload_code_pointer = room_610_preload;
+		break;
+	case 611:
+		room_preload_code_pointer = room_611_preload;
+		break;
+	case 612:
+		room_preload_code_pointer = room_612_preload;
+		break;
+	case 613:
+		room_preload_code_pointer = room_613_preload;
+		break;
+	case 614:
+		room_preload_code_pointer = room_614_preload;
+		break;
+	}
+
+	room_himem_preload(new_room, SECTION);
+}
+
 void section_6_preload() {
+	section_init_code_pointer = section_6_init;
+	section_room_constructor = section_6_constructor;
+	section_music_reset_pointer = section_6_music;
+	section_daemon_code_pointer = NULL;
+	section_parser_code_pointer = NULL;
 }
 
 } // namespace Rooms

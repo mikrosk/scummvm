@@ -22,13 +22,17 @@
 #ifndef MADS_DRAGONSPHERE_SECTION1_H
 #define MADS_DRAGONSPHERE_SECTION1_H
 
-#include "mads/madsv2/core/general.h"
+#include "mads/madsv2/core/vocabh.h"
+#include "mads/madsv2/dragonsphere/global.h"
 
 namespace MADS {
 namespace MADSV2 {
 namespace Dragonsphere {
 namespace Rooms {
 
+extern void section_1_walker();
+extern void section_1_interface();
+extern void section_1_music();
 
 } // namespace Rooms
 } // namespace Dragonsphere

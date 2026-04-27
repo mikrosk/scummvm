@@ -79,7 +79,7 @@ struct Scratch {        /* Room local variables */
 #define PLAYER_X_FROM_504       186
 #define PLAYER_Y_FROM_504       122
 
-#define WALK_TO_X_FROM_504      301
+#define WALK_TO_X_FROM_504      303
 #define WALK_TO_Y_FROM_504      98
 
 #define DYNAMIC_CHR_WALK_TO_X   79
