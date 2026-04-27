@@ -507,11 +507,26 @@ struct TASK : public EngineData {
 	Common::Path imageName;
 };
 
-// New web browser UI. Introduced in Nancy 10
+// Web browser popup UI (used from the cell phone to view in-game "web
+// pages"). Introduced in Nancy 10
 struct UIBW : public EngineData {
+	struct Hotspot {
+		uint16 id = 0;
+		Common::Rect rect;
+	};
+
+	struct UrlPage {
+		Common::Path imageName;
+		Common::Array<Hotspot> hotspots;
+	};
+
 	UIBW(Common::SeekableReadStream *chunkStream);
 
+	static const uint kUrlRecordSize = 215;
+	static const uint kMaxHotspotsPerPage = 10;
+
 	Common::Path imageName;
+	Common::Array<UrlPage> pages;
 };
 
 // New cell phone popup UI. Introduced in Nancy 10

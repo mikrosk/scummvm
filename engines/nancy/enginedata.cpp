@@ -877,7 +877,31 @@ TASK::TASK(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 
 UIBW::UIBW(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	readFilename(*chunkStream, imageName);
-	// TODO
+
+	// Read URL records one at a time, stopping when the remaining bytes
+	// are no longer enough for a full record or when the record has an
+	// empty (zero-byte) name — the game pads the array with empty slots.
+	while (chunkStream->size() - chunkStream->pos() >= (int64)kUrlRecordSize) {
+		UrlPage page;
+		readFilename(*chunkStream, page.imageName);
+		if (page.imageName.empty()) {
+			// Skip the remainder of the (empty) record: 215 - 33 bytes.
+			chunkStream->skip(kUrlRecordSize - 33);
+			continue;
+		}
+
+		uint16 hotspotCount = chunkStream->readUint16LE();
+		for (uint i = 0; i < kMaxHotspotsPerPage; ++i) {
+			Hotspot h;
+			h.id = chunkStream->readUint16LE();
+			readRect(*chunkStream, h.rect);
+			if (i < hotspotCount) {
+				page.hotspots.push_back(h);
+			}
+		}
+
+		pages.push_back(page);
+	}
 }
 
 UICL::UICL(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
