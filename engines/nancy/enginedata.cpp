@@ -870,9 +870,23 @@ SHUI::SHUI(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 TASK::TASK(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	chunkStream->skip(97);
 	readFilename(*chunkStream, imageName);
-	// TODO
+
+	readRect(*chunkStream, srcRect);
+	readRect(*chunkStream, dstRect);
+	readRect(*chunkStream, unkRect1);
+	readRect(*chunkStream, unkRect2);
+
+	char nameBuf[34];
+	for (uint i = 0; i < kNumButtons; ++i) {
+		readUIButton(*chunkStream, buttons[i].button);
+		chunkStream->read(buttons[i].unknownPad, sizeof(buttons[i].unknownPad));
+		for (uint s = 0; s < kNumAltSounds; ++s) {
+			chunkStream->read(nameBuf, 33);
+			nameBuf[33] = '\0';
+			buttons[i].clickSoundName[s] = nameBuf;
+		}
+	}
 }
 
 UIBW::UIBW(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {

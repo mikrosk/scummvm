@@ -501,11 +501,37 @@ struct SCTB : public EngineData {
 	Common::Path imageName;
 };
 
-// New task list UI. Introduced in Nancy 10
+enum TaskButton {
+	kTaskButtonMenu = 0,
+	kTaskButtonInventory = 1,
+	kTaskButtonNotebook = 2,
+	kTaskButtonCellphone = 3,
+	kTaskButtonHelp = 4
+};
+
+// Taskbar (the always-on strip at the bottom of the screen with MENU /
+// inventory / notebook / cellphone / HELP buttons). Introduced in Nancy 10.
 struct TASK : public EngineData {
+	struct ButtonRecord {
+		UIButtonRecord button;
+		byte unknownPad[16];
+		Common::String clickSoundName[3];
+	};
+
 	TASK(Common::SeekableReadStream *chunkStream);
 
+	static const uint kNumButtons = 5;
+	static const uint kButtonRecordSize = 354;
+	static const uint kNumAltSounds = 3;
+
 	Common::Path imageName;
+
+	Common::Rect srcRect;
+	Common::Rect dstRect;
+	Common::Rect unkRect1;
+	Common::Rect unkRect2;
+
+	ButtonRecord buttons[kNumButtons];
 };
 
 // Web browser popup UI (used from the cell phone to view in-game "web

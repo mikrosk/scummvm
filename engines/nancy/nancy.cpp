@@ -482,7 +482,7 @@ void NancyEngine::bootGameEngine() {
 	// FONT chunk has been moved into a separate file
 	// FR0 chunk has been removed
 	LOAD_BOOT(SHUI)	// Shared UI elements
-	LOAD_BOOT(TASK)	// Task list UI
+	LOAD_BOOT(TASK)	// Task bar (main UI)
 	LOAD_BOOT(UIIV)	// Inventory UI
 	LOAD_BOOT(UICO)	// Conversation UI
 	LOAD_BOOT(UICL) // Cell phone UI
