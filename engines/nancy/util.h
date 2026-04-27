@@ -26,7 +26,13 @@
 #include "common/rect.h"
 #include "common/serializer.h"
 
+#include "engines/nancy/commontypes.h"
+
 namespace Nancy {
+
+void readUIButton(Common::SeekableReadStream &stream, UIButtonRecord &dst);
+void readUISlider(Common::SeekableReadStream &stream, UISliderRecord &dst);
+void readUIPopupHeader(Common::SeekableReadStream &stream, UIPopupHeader &dst);
 
 void readRect(Common::SeekableReadStream &stream, Common::Rect &inRect);
 void readRect(Common::Serializer &stream, Common::Rect &inRect, Common::Serializer::Version minVersion = 0, Common::Serializer::Version maxVersion = Common::Serializer::kLastVersion);
