@@ -22,8 +22,6 @@
 #include "audio/fmopl.h"
 #include "common/memstream.h"
 #include "mads/core/sound.h"
-#include "mads/nebular/nebular.h"
-#include "mads/nebular/sound_nebular.h"
 
 namespace Audio {
 class Mixer;

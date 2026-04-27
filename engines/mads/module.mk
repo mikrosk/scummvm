@@ -1,6 +1,7 @@
 MODULE := engines/mads
 
 MODULE_OBJS := \
+	core/sound.o \
 	nebular/nebular.o \
 	nebular/debugger.o \
 	nebular/dialogs_nebular.o \
@@ -17,38 +18,37 @@ MODULE_OBJS := \
 	nebular/nebular_scenes6.o \
 	nebular/nebular_scenes7.o \
 	nebular/nebular_scenes8.o \
-	core/action.o \
-	core/animation.o \
-	core/assets.o \
-	core/audio.o \
-	core/camera.o \
-	core/compression.o \
-	core/conversations.o \
-	core/dialogs.o \
-	core/events.o \
-	core/font.o \
-	core/game.o \
-	core/game_data.o \
-	core/globals.o \
-	core/hag.o \
-	core/hotspots.o \
-	core/inventory.o \
-	core/menu_views.o \
-	core/messages.o \
-	core/msurface.o \
-	core/mps_installer.o \
-	core/palette.o \
-	core/player.o \
-	core/rails.o \
-	core/resources.o \
-	core/scene.o \
-	core/scene_data.o \
-	core/screen.o \
-	core/sequence.o \
-	core/sound.o \
-	core/sprites.o \
-	core/staticres.o \
-	core/user_interface.o \
+	nebular/core/action.o \
+	nebular/core/animation.o \
+	nebular/core/assets.o \
+	nebular/core/audio.o \
+	nebular/core/camera.o \
+	nebular/core/compression.o \
+	nebular/core/conversations.o \
+	nebular/core/dialogs.o \
+	nebular/core/events.o \
+	nebular/core/font.o \
+	nebular/core/game.o \
+	nebular/core/game_data.o \
+	nebular/core/globals.o \
+	nebular/core/hag.o \
+	nebular/core/hotspots.o \
+	nebular/core/inventory.o \
+	nebular/core/menu_views.o \
+	nebular/core/messages.o \
+	nebular/core/msurface.o \
+	nebular/core/mps_installer.o \
+	nebular/core/palette.o \
+	nebular/core/player.o \
+	nebular/core/rails.o \
+	nebular/core/resources.o \
+	nebular/core/scene.o \
+	nebular/core/scene_data.o \
+	nebular/core/screen.o \
+	nebular/core/sequence.o \
+	nebular/core/sprites.o \
+	nebular/core/staticres.o \
+	nebular/core/user_interface.o \
 	metaengine.o \
 	mads.o
 

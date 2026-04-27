@@ -36,8 +36,8 @@
 #include "common/translation.h"
 #include "graphics/surface.h"
 
-#include "mads/core/events.h"
-#include "mads/core/game.h"
+#include "mads/nebular/core/events.h"
+#include "mads/nebular/core/game.h"
 #include "mads/detection.h"
 #ifdef ENABLE_MADSV2
 #include "mads/madsv2/phantom/phantom.h"
@@ -227,7 +227,7 @@ Common::Error MADSMetaEngine::createInstance(OSystem *syst, Engine **engine, con
 	else
 #endif
 
-	*engine = new MADS::RexNebularEngine(syst,desc);
+	*engine = new MADS::Nebular::RexNebularEngine(syst,desc);
 	return Common::kNoError;
 }
 
@@ -239,7 +239,7 @@ SaveStateList MADSMetaEngine::listSaves(const char *target) const {
 	Common::StringArray filenames;
 	Common::String saveDesc;
 	Common::String pattern = Common::String::format("%s.0##", target);
-	MADS::MADSSavegameHeader header;
+	MADS::Nebular::MADSSavegameHeader header;
 
 	filenames = saveFileMan->listSavefiles(pattern);
 
@@ -252,7 +252,7 @@ SaveStateList MADSMetaEngine::listSaves(const char *target) const {
 			Common::InSaveFile *in = g_system->getSavefileManager()->openForLoading(*file);
 
 			if (in) {
-				if (MADS::Game::readSavegameHeader(in, header))
+				if (MADS::Nebular::Game::readSavegameHeader(in, header))
 					saveList.push_back(SaveStateDescriptor(this, slot, header._saveName));
 				delete in;
 			}
@@ -285,8 +285,8 @@ SaveStateDescriptor MADSMetaEngine::querySaveMetaInfos(const char *target, int s
 	Common::InSaveFile *f = g_system->getSavefileManager()->openForLoading(filename);
 
 	if (f) {
-		MADS::MADSSavegameHeader header;
-		if (!MADS::Game::readSavegameHeader(f, header, false)) {
+		MADS::Nebular::MADSSavegameHeader header;
+		if (!MADS::Nebular::Game::readSavegameHeader(f, header, false)) {
 			delete f;
 			return SaveStateDescriptor();
 		}
