@@ -185,7 +185,6 @@ MODULE_OBJS += \
 	madsv2/dragonsphere/rooms/section5.o \
 	madsv2/dragonsphere/rooms/section6.o \
 	madsv2/dragonsphere/rooms/section9.o \
-	madsv2/dragonsphere/rooms/room101.o \
 	madsv2/dragonsphere/rooms/room102.o \
 	madsv2/dragonsphere/rooms/room103.o \
 	madsv2/dragonsphere/rooms/room104.o \
