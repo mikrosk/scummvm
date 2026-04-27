@@ -30,10 +30,6 @@
 
 namespace Nancy {
 
-void readUIButton(Common::SeekableReadStream &stream, UIButtonRecord &dst);
-void readUISlider(Common::SeekableReadStream &stream, UISliderRecord &dst);
-void readUIPopupHeader(Common::SeekableReadStream &stream, UIPopupHeader &dst);
-
 void readRect(Common::SeekableReadStream &stream, Common::Rect &inRect);
 void readRect(Common::Serializer &stream, Common::Rect &inRect, Common::Serializer::Version minVersion = 0, Common::Serializer::Version maxVersion = Common::Serializer::kLastVersion);
 void readRectArray(Common::SeekableReadStream &stream, Common::Array<Common::Rect> &inArray, uint num, uint totalNum = 0);
@@ -62,6 +58,11 @@ void readFilenameArray(Common::SeekableReadStream &stream, Common::Array<Common:
 void readFilenameArray(Common::Serializer &stream, Common::Array<Common::Path> &inArray, uint num, Common::Serializer::Version minVersion = 0, Common::Serializer::Version maxVersion = Common::Serializer::kLastVersion);
 
 void assembleTextLine(char *rawCaption, Common::String &output, uint size);
+
+void readUIButton(Common::SeekableReadStream &stream, UIButtonRecord &dst);
+void readUISlider(Common::SeekableReadStream &stream, UISliderRecord &dst);
+void readUIPopupHeader(Common::SeekableReadStream &stream, UIPopupHeader &dst);
+void readUIButtonSlot(Common::SeekableReadStream &stream, UIButtonSlot &dst);
 
 // Abstract base class used for loading data that would take too much time in a single frame
 class DeferredLoader {

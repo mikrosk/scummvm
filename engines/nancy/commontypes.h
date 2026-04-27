@@ -367,6 +367,15 @@ struct UIButtonRecord {
 	SoundDescription clickSound;
 };
 
+// A UIButton slot. Used for the notebook tab strip (UINB) and the
+// inventory category-filter strip (UIIV).
+struct UIButtonSlot {
+	static const uint kRecordSize = 247;
+	uint32 enabled = 0;
+	uint32 id = 0;         // slot identifier (filter category / tab)
+	UIButtonRecord button;
+};
+
 // Reusable slider widget embedded in Nancy 10+ popup UIs.
 struct UISliderRecord {
 	static const uint kRecordSize = 198;

@@ -269,6 +269,12 @@ void readUIButton(Common::SeekableReadStream &stream, UIButtonRecord &dst) {
 	dst.clickSound.readNormal(stream);
 }
 
+void readUIButtonSlot(Common::SeekableReadStream &stream, UIButtonSlot &dst) {
+	dst.enabled = stream.readUint32LE();
+	dst.id = stream.readUint32LE();
+	readUIButton(stream, dst.button);
+}
+
 void readUISlider(Common::SeekableReadStream &stream, UISliderRecord &dst) {
 	// Read common fields for both buttons and sliders
 	readFilename(stream, dst.primaryImageName);
