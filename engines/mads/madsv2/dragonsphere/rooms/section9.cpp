@@ -27,7 +27,7 @@ namespace MADSV2 {
 namespace Dragonsphere {
 namespace Rooms {
 
-void section_0_preload() {
+void section_9_preload() {
 }
 
 } // namespace Rooms

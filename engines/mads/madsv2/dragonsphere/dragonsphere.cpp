@@ -46,7 +46,7 @@ Common::Error DragonsphereEngine::run() {
 
 	// Run the game
 	// TODO
-	global_section_constructor();	// Test call
+	Dragonsphere::global_section_constructor();	// Test call
 
 	return Common::kNoError;
 }
