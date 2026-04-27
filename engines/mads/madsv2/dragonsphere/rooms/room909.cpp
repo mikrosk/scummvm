@@ -45,11 +45,9 @@ void room_909_daemon() {
 }
 
 void room_909_pre_parser() {
-
 }
 
 void room_909_parser() {
-
 }
 
 void room_909_synchronize(Common::Serializer &s) {
