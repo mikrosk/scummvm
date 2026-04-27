@@ -223,10 +223,13 @@ INV::INV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 			item.cantSound.readNormal(*chunkStream);
 		} else if (s.getVersion() >= kGameTypeNancy9) {
 			for (int j = 0; j < 3; ++j) {
+				if (s.getVersion() >= kGameTypeNancy10)
+					readFilename(s, item.cantSounds[j].name);
 				s.syncBytes(textBuf, 60);
 				textBuf[59] = '\0';
 				assembleTextLine((char *)textBuf, item.cantTexts[j], 60);
-				readFilename(s, item.cantSounds[j].name);
+				if (s.getVersion() == kGameTypeNancy9)
+					readFilename(s, item.cantSounds[j].name);
 			}
 
 			item.cantText = item.cantTexts[0]; // Default text is the first one
