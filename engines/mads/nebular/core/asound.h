@@ -19,111 +19,15 @@
  *
  */
 
-#ifndef MADS_SOUND_H
-#define MADS_SOUND_H
+#ifndef MADS_NEBULAR_CORE_ASOUND_H
+#define MADS_NEBULAR_CORE_ASOUND_H
 
-#include "common/array.h"
-#include "common/file.h"
-#include "common/mutex.h"
-#include "common/queue.h"
-
-namespace Audio {
-class Mixer;
-}
-
-namespace OPL {
-class OPL;
-}
+#include "mads/core/sound_manager.h"
 
 namespace MADS {
+namespace Nebular {
 
 class ASound;
-
-class SoundManager {
-protected:
-	Audio::Mixer *_mixer;
-	bool &_soundFlag;
-	OPL::OPL *_opl = nullptr;
-	ASound *_driver = nullptr;
-	bool _pollSoundEnabled = false;
-	bool _soundPollFlag = false;
-	bool _newSoundsPaused = false;
-	Common::Queue<int> _queuedCommands;
-	int _masterVolume = 255;
-
-protected:
-	/**
-	 * Load the particular section sound handler
-	 * @param sectionNum	Section number
-	 */
-	virtual void loadDriver(int sectionNum) = 0;
-
-public:
-	SoundManager(Audio::Mixer *mixer, bool &soundFlag);
-	virtual ~SoundManager();
-
-	virtual void validate() = 0;
-
-	bool _preferRoland;
-
-	/**
-	 * Initializes the sound driver for a given game section
-	 */
-	void init(int sectionNumber);
-
-	/**
-	 * Stop any currently active sound and remove the driver
-	 */
-	void closeDriver();
-
-	/**
-	 * Remove the driver
-	 */
-	void removeDriver();
-
-	/**
-	 * Sets the enabled status of the sound
-	 * @flag		True if sound should be enabled
-	 */
-	void setEnabled(bool flag);
-
-	/**
-	 * Temporarily pause the playback of any new sound commands
-	 */
-	void pauseNewCommands();
-
-	/**
-	 * Stop queueing sound commands, and execute any previously queued ones
-	 */
-	void startQueuedCommands();
-
-	/**
-	 * Set the master volume
-	 */
-	void setVolume(int volume);
-
-	//@{
-	/**
-	 * Executes a command on the sound driver
-	 * @param commandid		Command Id to execute
-	 * @param param			Optional paramater specific to a few commands
-	 */
-	int command(int commandId, int param = 0);
-
-	/**
-	 * Stops any currently playing sound
-	 */
-	void stop();
-
-	/**
-	 * Noise
-	 * Some sort of random noise generation?
-	 */
-	void noise();
-
-	//@}
-};
-
 
 /**
  * Represents the data for a channel on the Adlib
@@ -236,7 +140,7 @@ struct CachedDataEntry {
 /**
  * Base class for the sound player resource files
  */
-class ASound {
+class ASound : public SoundDriver {
 private:
 	Common::List<CachedDataEntry> _dataCache;
 	uint16 _randomSeed;
@@ -383,8 +287,6 @@ protected:
 		return 0;
 	}
 public:
-	Audio::Mixer *_mixer;
-	OPL::OPL *_opl;
 	AdlibChannel _channels[ADLIB_CHANNEL_COUNT];
 	AdlibChannel *_activeChannelPtr;
 	AdlibChannelData _channelData[11];
@@ -429,7 +331,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	virtual ~ASound();
+	~ASound() override;
 
 	/**
 	 * Validates the Adlib sound files
@@ -437,27 +339,19 @@ public:
 	static void validate();
 
 	/**
-	 * Execute a player command. Most commands represent sounds to play, but some
-	 * low number commands also provide control operations.
-	 * @param commandId		Player ommand to execute.
-	 * @param param			Optional parameter used by a few commands
-	 */
-	virtual int command(int commandId, int param) = 0;
-
-	/**
 	 * Stop all currently playing sounds
 	 */
-	int stop();
+	int stop() override;
 
 	/**
 	 * Main poll method to allow sounds to progress
 	 */
-	int poll();
+	int poll() override;
 
 	/**
 	 * General noise/note output
 	 */
-	void noise();
+	void noise() override;
 
 	/**
 	 * Return the current frame counter
@@ -474,9 +368,10 @@ public:
 	/**
 	 * Set the volume
 	 */
-	void setVolume(int volume);
+	void setVolume(int volume) override;
 };
 
+} // namespace Nebular
 } // namespace MADS
 
 #endif

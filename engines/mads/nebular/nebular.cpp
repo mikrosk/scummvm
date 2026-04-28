@@ -31,7 +31,6 @@
 #include "mads/nebular/core/screen.h"
 #include "mads/nebular/core/msurface.h"
 #include "mads/nebular/core/resources.h"
-#include "mads/core/sound.h"
 #include "mads/nebular/core/sprites.h"
 #include "mads/nebular/core/mps_installer.h"
 

@@ -21,107 +21,10 @@
 
 #include "audio/fmopl.h"
 #include "common/memstream.h"
-#include "mads/core/sound.h"
-
-namespace Audio {
-class Mixer;
-}
+#include "mads/nebular/core/asound.h"
 
 namespace MADS {
-
-SoundManager::SoundManager(Audio::Mixer *mixer, bool &soundFlag) : _mixer(mixer), _soundFlag(soundFlag) {
-	_opl = OPL::Config::create();
-	_opl->init();
-}
-
-SoundManager::~SoundManager() {
-	if (_driver) {
-		_driver->stop();
-		delete _driver;
-	}
-
-	delete _opl;
-}
-
-void SoundManager::init(int sectionNumber) {
-	assert(sectionNumber > 0 && sectionNumber < 10);
-
-	if (_driver != nullptr)
-		delete _driver;
-
-	// Load the correct driver for the section
-	loadDriver(sectionNumber);
-
-	// Set volume for newly loaded driver
-	_driver->setVolume(_masterVolume);
-}
-
-void SoundManager::closeDriver() {
-	if (_driver) {
-		command(0);
-		setEnabled(false);
-		stop();
-
-		removeDriver();
-	}
-}
-
-void SoundManager::removeDriver() {
-	delete _driver;
-	_driver = nullptr;
-}
-
-void SoundManager::setEnabled(bool flag) {
-	_pollSoundEnabled = flag;
-	_soundPollFlag = false;
-}
-
-void SoundManager::pauseNewCommands() {
-	_newSoundsPaused = true;
-}
-
-void SoundManager::startQueuedCommands() {
-	_newSoundsPaused = false;
-
-	while (!_queuedCommands.empty()) {
-		int commandId = _queuedCommands.pop();
-		command(commandId);
-	}
-}
-
-void SoundManager::setVolume(int volume) {
-	_masterVolume = volume;
-
-	if (_driver)
-		_driver->setVolume(volume);
-}
-
-int SoundManager::command(int commandId, int param) {
-	if (_newSoundsPaused) {
-		if (_queuedCommands.size() < 8)
-			_queuedCommands.push(commandId);
-		return _queuedCommands.size() - 1;
-	} else if (_driver) {
-		// Note: I don't know any way to identify music commands versus sfx
-		// commands, so if sfx is mute, then so is music
-		if (_soundFlag)
-			_driver->command(commandId, param);
-	}
-
-	return 0;
-}
-
-void SoundManager::stop() {
-	if (_driver)
-		_driver->stop();
-}
-
-void SoundManager::noise() {
-	if (_driver)
-		_driver->noise();
-}
-
-/*-----------------------------------------------------------------------*/
+namespace Nebular {
 
 bool AdlibChannel::_channelsEnabled;
 
@@ -251,7 +154,8 @@ AdlibSample::AdlibSample(Common::SeekableReadStream &s) {
 
 /*-----------------------------------------------------------------------*/
 
-ASound::ASound(Audio::Mixer *mixer, OPL::OPL *opl, const Common::Path &filename, int dataOffset) {
+ASound::ASound(Audio::Mixer *mixer, OPL::OPL *opl, const Common::Path &filename, int dataOffset) :
+	SoundDriver(mixer, opl) {
 	// Open up the appropriate sound file
 	if (!_soundFile.open(filename))
 		error("Could not open file - %s", filename.toString().c_str());
@@ -866,4 +770,5 @@ int ASound::command8() {
 	return result;
 }
 
+} // namespace Nebular
 } // namespace MADS

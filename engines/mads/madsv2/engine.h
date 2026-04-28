@@ -29,7 +29,7 @@
 #include "common/random.h"
 #include "graphics/screen.h"
 #include "mads/mads.h"
-#include "mads/core/sound.h"
+#include "mads/core/sound_manager.h"
 #include "mads/madsv2/core/speech.h"
 
 namespace MADS {

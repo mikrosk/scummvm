@@ -52,7 +52,7 @@
 #include "mads/madsv2/core/timer.h"
 #include "mads/madsv2/core/vocab.h"
 #include "mads/madsv2/phantom/main.h"
-#include "mads/core/sound.h"
+#include "mads/core/sound_manager.h"
 
 namespace MADS {
 namespace MADSV2 {

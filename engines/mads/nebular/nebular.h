@@ -39,7 +39,7 @@
 #include "mads/nebular/core/screen.h"
 #include "mads/nebular/core/msurface.h"
 #include "mads/nebular/core/resources.h"
-#include "mads/core/sound.h"
+#include "mads/nebular/sound_nebular.h"
 
 namespace MADS {
 namespace Nebular {

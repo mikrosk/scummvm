@@ -22,7 +22,7 @@
 #ifndef MADS_SOUND_NEBULAR_H
 #define MADS_SOUND_NEBULAR_H
 
-#include "mads/core/sound.h"
+#include "mads/nebular/core/asound.h"
 
 namespace MADS {
 namespace Nebular {

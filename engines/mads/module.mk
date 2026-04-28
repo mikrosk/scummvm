@@ -1,7 +1,7 @@
 MODULE := engines/mads
 
 MODULE_OBJS := \
-	core/sound.o \
+	core/sound_manager.o \
 	nebular/nebular.o \
 	nebular/debugger.o \
 	nebular/dialogs_nebular.o \
@@ -21,6 +21,7 @@ MODULE_OBJS := \
 	nebular/core/action.o \
 	nebular/core/animation.o \
 	nebular/core/assets.o \
+	nebular/core/asound.o \
 	nebular/core/audio.o \
 	nebular/core/camera.o \
 	nebular/core/compression.o \

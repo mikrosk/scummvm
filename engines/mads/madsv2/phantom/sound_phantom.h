@@ -22,11 +22,14 @@
 #ifndef MADS_PHANTOM_SOUND_H
 #define MADS_PHANTOM_SOUND_H
 
-#include "mads/core/sound.h"
+#include "mads/nebular/core/asound.h"
 
 namespace MADS {
 namespace MADSV2 {
 namespace Phantom {
+
+using Nebular::AdlibChannel;
+using Nebular::AdlibSample;
 
 class PhantomSoundManager : public SoundManager {
 protected:
@@ -41,7 +44,7 @@ public:
 	void validate() override;
 };
 
-class PhantomASound : public ASound {
+class PhantomASound : public Nebular::ASound {
 protected:
 	// Per-driver scripting register file (256 byte-sized registers)
 	byte _scratchArr[256];
