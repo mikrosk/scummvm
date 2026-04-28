@@ -72,6 +72,7 @@ public:
 	int16 _hotspotCount;
 	int16 _firstNodeIndex;
 	Common::Array<NavNode> _nodes;
+	Common::Array<byte> _hiddenFlags;
 };
 
 namespace MapNavigatorXObj {

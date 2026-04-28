@@ -130,6 +130,16 @@ void MapNavigatorXObj::close(ObjectType type) {
 	}
 }
 
+void mapnav_initialize_hidden_flags(MapNavigatorXObject *me) {
+	int n = 0;
+	for (int i = 0; i < me->_nodeCount; i++) {
+		for (int j = 0; j < me->_nodes[i].hotspot_count; j++) {
+			me->_hiddenFlags[n++] = me->_nodes[i].hotspots[j].initially_hidden;
+		}
+	}
+}
+
+
 void MapNavigatorXObj::m_new(int nargs) {
 	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
 
@@ -242,17 +252,73 @@ void MapNavigatorXObj::m_new(int nargs) {
 		 }
 	}
 
-	g_lingo->push(g_lingo->_state->me);
+	me->_hiddenFlags.resize(me->_hotspotCount);
 
+	mapnav_initialize_hidden_flags(me);
+
+	g_lingo->push(g_lingo->_state->me);
 }
 
+void MapNavigatorXObj::m_resetHidden(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	mapnav_initialize_hidden_flags(me);
+}
+
+void MapNavigatorXObj::m_getFirstNode(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	g_lingo->push(me->_firstNodeIndex + 1); // Lingo node indices are 1-based
+}
+
+void MapNavigatorXObj::m_getNodeName(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	Common::String nodeName = "";
+	int16 nodeIndex = g_lingo->pop().asInt();
+
+	if (nodeIndex >= 0 && nodeIndex < me->_nodeCount) {
+		nodeName = me->_nodes[nodeIndex].name;
+	} else {
+		warning("MapNavigatorXObj::m_getNodeName: Invalid node index %d", nodeIndex);
+	}
+
+	g_lingo->push(nodeName);
+}
+
+void MapNavigatorXObj::m_getBackgroundPicture(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int result = 0;
+	int16 nodeIndex = g_lingo->pop().asInt();
+
+	if (nodeIndex >= 0 && nodeIndex < me->_nodeCount) {
+		result = me->_nodes[nodeIndex].background_picture;
+	} else {
+		warning("MapNavigatorXObj::m_getBackgroundPicture: Invalid node index %d", nodeIndex);
+	}
+
+	g_lingo->push(result);
+}
+
+void MapNavigatorXObj::m_getHotSpotCount(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int result = 0;
+	int16 nodeIndex = g_lingo->pop().asInt();
+
+	if (nodeIndex >= 0 && nodeIndex < me->_nodeCount) {
+		result = me->_nodes[nodeIndex].hotspot_count;
+	} else {
+		warning("MapNavigatorXObj::m_getHotSpotCount: Invalid node index %d", nodeIndex);
+	}
+
+	g_lingo->push(result);
+}
+
+
 XOBJSTUBNR(MapNavigatorXObj::m_dispose)
-XOBJSTUB(MapNavigatorXObj::m_getFirstNode, 0)
-XOBJSTUBNR(MapNavigatorXObj::m_resetHidden)
-XOBJSTUB(MapNavigatorXObj::m_getNodeName, "")
 XOBJSTUB(MapNavigatorXObj::m_getNodeIndex, 0)
-XOBJSTUB(MapNavigatorXObj::m_getBackgroundPicture, 0)
-XOBJSTUB(MapNavigatorXObj::m_getHotSpotCount, 0)
 XOBJSTUBNR(MapNavigatorXObj::m_setHidden)
 XOBJSTUB(MapNavigatorXObj::m_getHidden, 0)
 XOBJSTUB(MapNavigatorXObj::m_pointInside, 0)
