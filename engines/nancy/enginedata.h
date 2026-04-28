@@ -556,11 +556,102 @@ struct UIBW : public EngineData {
 	Common::Array<UrlPage> pages;
 };
 
-// New cell phone popup UI. Introduced in Nancy 10
+// Cell-phone popup UI. Introduced in Nancy 10.
 struct UICL : public EngineData {
+	struct DialPadSlot {
+		Common::Rect srcRect;
+		Common::Rect destRect;
+		Common::String soundName;
+	};
+
+	struct ThreeRectWidget {
+		Common::Rect srcRectIdle;
+		Common::Rect srcRectPressed;
+		Common::Rect destRect;
+	};
+
+	struct Contact {
+		byte unknownPrefix[13];   // 13 bytes preceding the name (purpose not yet determined)
+		Common::String name;      // 20-byte null-terminated contact name
+		byte unknownSuffix[8];    // 8 bytes following the name (purpose not yet determined)
+	};
+
+	struct SrcDestRectPair {
+		Common::Rect srcRect;
+		Common::Rect destRect;
+	};
+
+	static const uint kNumDialPadSlots = 15;
+	static const uint kNumSubButtons = 10;
+	static const uint kNumStatusLabels = 3;        // No Signal / No Access / Old Email Only
+
 	UICL(Common::SeekableReadStream *chunkStream);
 
-	Common::Path imageName;
+	UIPopupHeader header;
+	Common::Path overlayImageName;
+	DialPadSlot dialPadSlots[kNumDialPadSlots];
+
+	// Screen-frame and label rects
+	SrcDestRectPair dialHilite;
+	Common::Rect screenOutSrcRect;
+	int32 statusTextX = 0;                    // text X-baseline
+	int32 statusTextY = 0;                    // text Y-baseline
+	SrcDestRectPair welcomeScreen;
+	Common::String statusLabels[kNumStatusLabels]; // "No Signal", "No Access", "Old Email Only"
+	SrcDestRectPair dialLabel;
+	SrcDestRectPair webLabel;
+	SrcDestRectPair dirLabel;
+
+	ThreeRectWidget callButton;
+
+	// Screen-content sprite block
+	Common::Path phoneUseSound;
+	Common::Rect signalSpriteSrc;
+	Common::Rect signalSpriteSrcAlt;
+	Common::Rect signalSpriteDest;
+	Common::Rect batterySpriteSrc;
+	Common::Rect batterySpriteSrcAlt;
+	Common::Rect batterySpriteDest;
+	SrcDestRectPair typeMessage;
+	SrcDestRectPair connectedLabel;
+	Common::Rect connectingSpriteSrc;
+	Common::Rect connectingSpriteSrcAlt;      // state-8 variant
+	Common::Rect connectingSpriteDest;
+	SrcDestRectPair onlineHeading;
+	Common::Rect fullEmptyScreenSrc;
+	Common::Rect emailListContainer;          // scrollbar/list container
+	Common::Rect dirArrowSrc;
+	Common::Rect dirCursorSrc;
+	SrcDestRectPair dirHeading;
+
+	ThreeRectWidget subButtons[kNumSubButtons];
+
+	// Heading/icon SRC+DEST pairs
+	SrcDestRectPair searchHeading;
+	Common::Rect emailIconUnread;
+	Common::Rect emailIconSelected;
+	SrcDestRectPair emailHeading;
+	SrcDestRectPair helpHeading;
+	SrcDestRectPair browserHeading;
+
+	Common::Path holdMusicSound;
+	Common::Path answeringMachineSound;       // chunk+0xCE4 (33B): "SHAMA02"
+	int16 holdLink1 = 0;
+	int16 holdLink2 = 0;
+	Common::Path urlSound;
+	int16 urlLink1 = 0;
+	int16 urlLink2 = 0;
+	int16 urlLink3 = 0;
+
+	uint16 fontId1 = 0;
+	uint16 fontId2 = 0;
+
+	Common::Path outgoingRingSound;           // Process case 2 (post-dial ring)
+	Common::Path pickupSound;                 // Process cases 0/4 (call connect)
+	Common::Path invalidNumberSound;          // Process case 7 (try again)
+
+	uint16 contactCount = 0;
+	Common::Array<Contact> contacts;
 };
 
 // New conversation popup UI (the text strip that appears above the taskbar

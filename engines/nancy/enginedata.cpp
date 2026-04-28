@@ -919,8 +919,126 @@ UIBW::UIBW(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 UICL::UICL(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	readFilename(*chunkStream, imageName);
-	// TODO
+	readUIPopupHeader(*chunkStream, header);
+
+	readFilename(*chunkStream, overlayImageName);
+
+	// Skip shared UIButton template - the sub-fields data is read
+	// separately for each button record below.
+	chunkStream->skip(206);
+
+	for (uint i = 0; i < kNumDialPadSlots; ++i) {
+		readRect(*chunkStream, dialPadSlots[i].srcRect);
+		readRect(*chunkStream, dialPadSlots[i].destRect);
+		char nameBuf[34];
+		chunkStream->read(nameBuf, 33);
+		nameBuf[33] = '\0';
+		dialPadSlots[i].soundName = nameBuf;
+	}
+
+	// Screen-frame and label rects
+	readRect(*chunkStream, dialHilite.srcRect);
+	readRect(*chunkStream, dialHilite.destRect);
+	readRect(*chunkStream, screenOutSrcRect);
+	statusTextX = chunkStream->readSint32LE();
+	statusTextY = chunkStream->readSint32LE();
+	readRect(*chunkStream, welcomeScreen.srcRect);
+	readRect(*chunkStream, welcomeScreen.destRect);
+
+	char labelBuf[21];
+	for (uint i = 0; i < kNumStatusLabels; ++i) {
+		chunkStream->read(labelBuf, 20);
+		labelBuf[20] = '\0';
+		statusLabels[i] = labelBuf;
+	}
+
+	readRect(*chunkStream, dialLabel.srcRect);
+	readRect(*chunkStream, dialLabel.destRect);
+	readRect(*chunkStream, webLabel.srcRect);
+	readRect(*chunkStream, webLabel.destRect);
+	readRect(*chunkStream, dirLabel.srcRect);
+	readRect(*chunkStream, dirLabel.destRect);
+
+	// Call/hang-up widget (3 rects).
+	readRect(*chunkStream, callButton.srcRectIdle);
+	readRect(*chunkStream, callButton.srcRectPressed);
+	readRect(*chunkStream, callButton.destRect);
+
+	// Screen-content sprite block
+	readFilename(*chunkStream, phoneUseSound);
+	readRect(*chunkStream, signalSpriteSrc);
+	readRect(*chunkStream, signalSpriteSrcAlt);
+	readRect(*chunkStream, signalSpriteDest);
+	readRect(*chunkStream, batterySpriteSrc);
+	readRect(*chunkStream, batterySpriteSrcAlt);
+	readRect(*chunkStream, batterySpriteDest);
+	readRect(*chunkStream, typeMessage.srcRect);
+	readRect(*chunkStream, typeMessage.destRect);
+	readRect(*chunkStream, connectedLabel.srcRect);
+	readRect(*chunkStream, connectedLabel.destRect);
+	readRect(*chunkStream, connectingSpriteSrc);
+	readRect(*chunkStream, connectingSpriteSrcAlt);
+	readRect(*chunkStream, connectingSpriteDest);
+	readRect(*chunkStream, onlineHeading.srcRect);
+	readRect(*chunkStream, onlineHeading.destRect);
+	readRect(*chunkStream, fullEmptyScreenSrc);
+	readRect(*chunkStream, emailListContainer);
+	readRect(*chunkStream, dirArrowSrc);
+	readRect(*chunkStream, dirCursorSrc);
+	readRect(*chunkStream, dirHeading.srcRect);
+	readRect(*chunkStream, dirHeading.destRect);
+
+	for (uint i = 0; i < kNumSubButtons; ++i) {
+		readRect(*chunkStream, subButtons[i].srcRectIdle);
+		readRect(*chunkStream, subButtons[i].srcRectPressed);
+		readRect(*chunkStream, subButtons[i].destRect);
+	}
+
+	// Heading/icon rect pairs
+	readRect(*chunkStream, searchHeading.srcRect);
+	readRect(*chunkStream, searchHeading.destRect);
+	readRect(*chunkStream, emailIconUnread);
+	readRect(*chunkStream, emailIconSelected);
+	readRect(*chunkStream, emailHeading.srcRect);
+	readRect(*chunkStream, emailHeading.destRect);
+	readRect(*chunkStream, helpHeading.srcRect);
+	readRect(*chunkStream, helpHeading.destRect);
+	readRect(*chunkStream, browserHeading.srcRect);
+	readRect(*chunkStream, browserHeading.destRect);
+
+	readFilename(*chunkStream, holdMusicSound);
+	readFilename(*chunkStream, answeringMachineSound);
+	holdLink1 = chunkStream->readSint16LE();
+	holdLink2 = chunkStream->readSint16LE();
+	readFilename(*chunkStream, urlSound);
+	urlLink1 = chunkStream->readSint16LE();
+	urlLink2 = chunkStream->readSint16LE();
+	urlLink3 = chunkStream->readSint16LE();
+
+	fontId1 = chunkStream->readUint16LE();
+	fontId2 = chunkStream->readUint16LE();
+
+	readFilename(*chunkStream, outgoingRingSound);
+	readFilename(*chunkStream, pickupSound);
+	readFilename(*chunkStream, invalidNumberSound);
+
+	contactCount = chunkStream->readUint16LE();
+
+	const int64 maxEntries = (chunkStream->size() - chunkStream->pos()) / 41;
+	const uint16 entries = MIN<uint16>(contactCount, (uint16)maxEntries);
+	contacts.resize(entries);
+	for (uint i = 0; i < entries; ++i) {
+		Contact &c = contacts[i];
+
+		chunkStream->read(c.unknownPrefix, sizeof(c.unknownPrefix));
+
+		char nameBuf[21];
+		chunkStream->read(nameBuf, 20);
+		nameBuf[20] = '\0';
+		c.name = nameBuf;
+
+		chunkStream->read(c.unknownSuffix, sizeof(c.unknownSuffix));
+	}
 }
 
 UICO::UICO(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
