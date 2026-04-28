@@ -47,6 +47,8 @@ BSUM::BSUM(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 
 	readFilename(s, conversationTextsFilename, kGameTypeNancy6);
 	readFilename(s, autotextFilename, kGameTypeNancy6);
+	readFilename(s, fontFilename, kGameTypeNancy12);
+	readFilename(s, flagsFilename, kGameTypeNancy12);
 
 	s.syncAsUint16LE(firstScene.sceneID);
 	s.skip(0xC, kGameTypeVampire, kGameTypeVampire); // Palette name + unknown 2 bytes
@@ -62,7 +64,7 @@ BSUM::BSUM(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	s.skip(0xA4, kGameTypeVampire, kGameTypeNancy2);
 	s.skip(3); // Number of object, frame, and logo images
 	if (g_nancy->getEngineData("PLG0")) {
-		// Parner logos were introduced with nancy4, but at least one nancy3 release
+		// Partner logos were introduced with nancy4, but at least one nancy3 release
 		// had one as well. For some reason they didn't port over the code from the
 		// later games, but implemented it the same way the other BSUM images work.
 		// Hence, we skip an extra byte indicating the number of partner logos.
@@ -112,16 +114,6 @@ BSUM::BSUM(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	s.syncAsByte(overrideMovementTimeDeltas);
 	s.syncAsSint16LE(slowMovementTimeDelta);
 	s.syncAsSint16LE(fastMovementTimeDelta);
-
-	// FIXME: Data fixup/HACK for Nancy12. The BSUM data format changed
-	// significantly, but we want to be able to start the game without
-	// crashing, even if the data is wrong.
-	if (g_nancy->getGameType() >= kGameTypeNancy12) {
-		numFonts = 18;
-		rTrans = 0;
-		gTrans = 31;
-		bTrans = 0;
-	}
 }
 
 VIEW::VIEW(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {

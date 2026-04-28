@@ -46,6 +46,10 @@ struct BSUM : public EngineData {
 	Common::Path conversationTextsFilename;
 	Common::Path autotextFilename;
 
+	// Nancy12+
+	Common::Path fontFilename;
+	Common::Path flagsFilename;
+
 	// Game start section
 	SceneChangeDescription firstScene;
 	uint16 startTimeHours;
