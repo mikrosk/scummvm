@@ -85,6 +85,7 @@ void CuttingPuzzle::readData(Common::SeekableReadStream &stream) {
 	stream.skip(2);                                  // +0x534 skip
 
 	_cancelScene.readData(stream);                   // +0x536 (25 bytes)
+	readRect(stream, _exitHotspot);
 }
 
 void CuttingPuzzle::init() {
@@ -343,17 +344,19 @@ void CuttingPuzzle::handleInput(NancyInput &input) {
 	if (_state != kRun || _latheRunning)
 		return;
 
-	// Right-click cancels the puzzle (no dedicated exit hotspot in the data).
-	if (input.input & NancyInput::kRightMouseButtonUp) {
-		_cancelled = true;
-		_state = kActionTrigger;
-		return;
-	}
-
 	// Convert mouse position to viewport-local coordinates.
 	Common::Point localMouse = input.mousePos;
 	Common::Rect vpPos = NancySceneState.getViewport().getScreenPosition();
 	localMouse -= Common::Point(vpPos.left, vpPos.top);
+
+	if (!_exitHotspot.isEmpty() && _exitHotspot.contains(localMouse)) {
+		g_nancy->_cursor->setCursorType(CursorManager::kMoveBackward);
+		if (input.input & NancyInput::kLeftMouseButtonUp) {
+			_cancelled = true;
+			_state = kActionTrigger;
+			return;
+		}
+	}
 
 	// Lever: left half of the rect rotates the knob left (decrement depth),
 	// right half rotates right (increment depth).

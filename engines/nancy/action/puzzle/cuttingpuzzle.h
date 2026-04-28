@@ -113,6 +113,7 @@ protected:
 
 	SceneChangeDescription _missingGogglesScene;    // data+0x520  (20 bytes + 2-byte skip = 22 bytes total)
 	SceneChangeWithFlag    _cancelScene;   // data+0x536  (25 bytes)
+	Common::Rect _exitHotspot;
 
 	// ---- runtime state ----
 
