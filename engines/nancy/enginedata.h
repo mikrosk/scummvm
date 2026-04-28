@@ -575,18 +575,39 @@ struct UICO : public EngineData {
 	Common::Rect textRect;      // Text-drawing rect inside the popup overlay
 };
 
-// New inventory UI. Introduced in Nancy 10
+// New inventory popup UI (4x4 item grid with paging slider and category
+// filter tabs along the right edge). Introduced in Nancy 10.
 struct UIIV : public EngineData {
 	UIIV(Common::SeekableReadStream *chunkStream);
 
-	Common::Path imageName;
+	static const uint kNumFilters = 6;
+
+	UIPopupHeader header;
+	Common::Array<Common::Rect> slotSrcRects;       // 16 entries (image coords)
+	Common::Array<Common::Rect> slotDestRects;      // 16 entries (screen coords)
+	UIButtonSlot filters[kNumFilters];              // 6 entries
+	Common::Array<Common::Rect> tabCaptionSrcRects; // 6 entries
+	Common::Rect tabCaptionDestRect;                // on-screen target
 };
 
-// New notebook UI. Introduced in Nancy 10
+// New notebook UI. Introduced in Nancy 10.
 struct UINB : public EngineData {
 	UINB(Common::SeekableReadStream *chunkStream);
 
-	Common::Path imageName;
+	static const uint kNumTabs = 2;
+	static const uint kNumPageSoundsPerSet = 3;
+
+	UIPopupHeader header;
+	UIButtonSlot tabs[kNumTabs];
+	Common::Rect textRect;
+	uint16 primaryFontID = 0;
+	uint16 secondaryFontAttr = 0;
+	uint16 useFilenameTextFlag = 0;
+	Common::Path conditionalTextFilename;
+	Common::Path actionableClickSounds[kNumPageSoundsPerSet];
+	Common::Path noActionClickSounds[kNumPageSoundsPerSet];
+	Common::Array<Common::Rect> tabCaptionSrcRects;             // 2 entries
+	Common::Rect tabCaptionDestRect;                            // on-screen target
 };
 } // End of namespace Nancy
 

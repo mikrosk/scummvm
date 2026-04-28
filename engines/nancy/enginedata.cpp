@@ -929,13 +929,48 @@ UICO::UICO(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 UIIV::UIIV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	readFilename(*chunkStream, imageName);
-	// TODO
+	readUIPopupHeader(*chunkStream, header);
+
+	readRectArray(*chunkStream, slotSrcRects, 16);
+	readRectArray(*chunkStream, slotDestRects, 16);
+
+	chunkStream->skip(2);
+
+	for (uint i = 0; i < kNumFilters; ++i) {
+		readUIButtonSlot(*chunkStream, filters[i]);
+	}
+
+	readRectArray(*chunkStream, tabCaptionSrcRects, kNumFilters);
+
+	readRect(*chunkStream, tabCaptionDestRect);
 }
 
 UINB::UINB(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	readFilename(*chunkStream, imageName);
-	// TODO
+	readUIPopupHeader(*chunkStream, header);
+
+	for (uint i = 0; i < kNumTabs; ++i) {
+		readUIButtonSlot(*chunkStream, tabs[i]);
+	}
+
+	readRect(*chunkStream, textRect);
+	primaryFontID = chunkStream->readUint16LE();
+	secondaryFontAttr = chunkStream->readUint16LE();
+	useFilenameTextFlag = chunkStream->readUint16LE();
+	readFilename(*chunkStream, conditionalTextFilename);
+
+	// 3 sound names played at random when an item is marked complete
+	// (glyph attr -> 8)
+	for (uint i = 0; i < kNumPageSoundsPerSet; ++i) {
+		readFilename(*chunkStream, actionableClickSounds[i]);
+	}
+
+	// 3 sound names for no-action clicks
+	for (uint i = 0; i < kNumPageSoundsPerSet; ++i) {
+		readFilename(*chunkStream, noActionClickSounds[i]);
+	}
+
+	readRectArray(*chunkStream, tabCaptionSrcRects, kNumTabs);
+	readRect(*chunkStream, tabCaptionDestRect);
 }
 
 } // End of namespace Nancy
