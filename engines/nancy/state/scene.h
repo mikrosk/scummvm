@@ -60,6 +60,7 @@ class SpecialEffect;
 
 namespace UI {
 class Button;
+class Taskbar;
 class ViewportOrnaments;
 class TextboxOrnaments;
 class InventoryBoxOrnaments;
@@ -263,6 +264,7 @@ private:
 
 	UI::Button *_menuButton;
 	UI::Button *_helpButton;
+	UI::Taskbar *_taskbar;
 	Time _buttonPressActivationTime;
 
 	UI::ViewportOrnaments *_viewportOrnaments;

@@ -60,6 +60,7 @@ MODULE_OBJS = \
   ui/inventorybox.o \
   ui/ornaments.o \
   ui/scrollbar.o \
+  ui/taskbar.o \
   ui/textbox.o \
   ui/viewport.o \
   state/credits.o \
