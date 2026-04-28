@@ -21,6 +21,7 @@
 
 #include "common/system.h"
 #include "common/file.h"
+#include "common/memstream.h"
 
 #include "director/director.h"
 #include "director/lingo/lingo.h"
@@ -133,13 +134,19 @@ void MapNavigatorXObj::m_new(int nargs) {
 	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
 
 	me->_filename = g_lingo->pop().asString();
-	Common::File in;
+	Common::File file;
 
-	if (!in.open(Common::Path(me->_filename))) {
+	if (!file.open(Common::Path(me->_filename))) {
 		warning("MapNavigatorXObj::m_new(): Cannot open file %s", me->_filename.c_str());
 		g_lingo->push(g_lingo->_state->me);
 		return;
 	}
+
+	byte *data = (byte *)calloc(file.size(), 1);
+	file.read(data, file.size());
+
+	Common::MemoryReadStream in(data, file.size(), DisposeAfterUse::YES);
+
 
 	me->_nodeCount = in.readUint16BE();
 	me->_hotspotCount = in.readUint16BE();
@@ -158,9 +165,81 @@ void MapNavigatorXObj::m_new(int nargs) {
 		if (in.pos() % 2) // align to a word
 			(void)in.readByte();
 
-		debug(1, "%d: pict: %04x hotspots: %04x unk04: %04x listoff: %04x name: %s", i, n.background_picture, n.hotspot_count, n.unknown_04, n.hotspot_list_offset, n.name.c_str());
-
 		me->_nodes.push_back(n);
+	}
+
+	for (int i = 0; i < me->_nodeCount; i++) {
+		uint32 pos = me->_nodes[i].hotspot_list_offset;
+
+		debug(1, "%d: pict: %04x hotspots: %04x unk04: %04x listoff: %04x name: %s",
+			i, me->_nodes[i].background_picture, me->_nodes[i].hotspot_count, me->_nodes[i].unknown_04,
+			me->_nodes[i].hotspot_list_offset, me->_nodes[i].name.c_str());
+
+		for (int j = 0; j < me->_nodes[i].hotspot_count; j++) {
+			NavHotSpot h;
+
+			in.seek(pos);
+
+			h.record_size = in.readUint16BE();
+			h.left = in.readUint16BE();
+			h.top = in.readUint16BE();
+			h.right = in.readUint16BE();
+			h.bottom = in.readUint16BE();
+			h.cursor_id = in.readUint16BE();
+			h.initially_hidden = in.readByte();
+			h.unknown_0d = in.readByte();
+			h.condition_count = in.readUint16BE();
+			h.evaluation_name = in.readPascalString();
+
+			me->_nodes[i].hotspots.push_back(h);
+
+			debug(1, "  %d: size: %04x [%d, %d, %d, %d], cursorId: %d hidden: %d unk: %d condCnt: %d evalName: %s",
+				j, h.record_size, h.left, h.top, h.right, h.bottom, h.cursor_id, h.initially_hidden,
+				h.unknown_0d, h.condition_count, h.evaluation_name.c_str());
+
+			// Reading conditions
+			if (in.pos() % 2) // align to a word
+				(void)in.readByte();
+
+			int pos1 = in.pos();
+
+			for (int k = 0; k < h.condition_count; k++) {
+				NavCondition c;
+
+				in.seek(pos1);
+
+				c.record_size = in.readUint16BE();
+				c.destination_node = in.readUint16BE();
+				c.condition_id = in.readUint16BE();
+				c.instruction_count = in.readUint16BE();
+
+				debug(1, "    %d: size: %d destnode: %d condId: %d instCnt: %d", k, c.record_size, c.destination_node,
+						c.condition_id, c.instruction_count);
+
+				me->_nodes[i].hotspots[j].conditions.push_back(c);
+
+				// Reading instructions
+				for (int l = 0; l < c.instruction_count; l++) {
+					NavInstruction ii;
+
+					ii.instruction_type = in.readByte();
+					ii.reserved = in.readByte();;
+					ii.text = in.readPascalString();
+
+					if (in.pos() % 2) // align to a word
+						(void)in.readByte();
+
+					debug(1, "      %d: type: %d reserved: %d text: %s", l, ii.instruction_type,
+							ii.reserved, ii.text.c_str());
+
+					me->_nodes[i].hotspots[j].conditions[k].instructions.push_back(ii);
+				}
+
+				pos1 += c.record_size;
+			}
+
+			pos += h.record_size;
+		 }
 	}
 
 	g_lingo->push(g_lingo->_state->me);
