@@ -36,6 +36,8 @@
 #include "engines/nancy/ui/viewport.h"
 #include "engines/nancy/ui/textbox.h"
 #include "engines/nancy/ui/inventorybox.h"
+#include "engines/nancy/ui/inventorypopup.h"
+#include "engines/nancy/ui/notebookpopup.h"
 
 namespace Common {
 class SeekableReadStream;
@@ -261,6 +263,8 @@ private:
 	UI::Viewport _viewport;
 	UI::Textbox _textbox;
 	UI::InventoryBox _inventoryBox;
+	UI::InventoryPopup _inventoryPopup;
+	UI::NotebookPopup _notebookPopup;
 
 	UI::Button *_menuButton;
 	UI::Button *_helpButton;

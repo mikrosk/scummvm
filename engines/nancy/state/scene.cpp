@@ -350,7 +350,7 @@ void Scene::addItemToInventory(int16 id) {
 		if (g_nancy->getGameType() <= kGameTypeNancy9) {
 			_inventoryBox.addItem(id);
 		} else if (_inventoryPopup.isOpen()) {
-			//_inventoryPopup.refreshGrid();
+			_inventoryPopup.refreshGrid();
 		}
 	}
 }
@@ -374,7 +374,7 @@ void Scene::removeItemFromInventory(int16 id, bool pickUp) {
 		if (g_nancy->getGameType() <= kGameTypeNancy9) {
 			_inventoryBox.removeItem(id);
 		} else if (_inventoryPopup.isOpen()) {
-			//_inventoryPopup.refreshGrid();
+			_inventoryPopup.refreshGrid();
 		}
 	}
 }
@@ -613,8 +613,8 @@ void Scene::registerGraphics() {
 	if (g_nancy->getGameType() <= kGameTypeNancy9) {
 		_inventoryBox.registerGraphics();
 	} else {
-		//_inventoryPopup.registerGraphics();
-		//_notebookPopup.registerGraphics();
+		_inventoryPopup.registerGraphics();
+		_notebookPopup.registerGraphics();
 	}
 
 	_hotspotDebug.registerGraphics();
@@ -1143,8 +1143,8 @@ void Scene::handleInput() {
 	if (g_nancy->getGameType() <= kGameTypeNancy9) {
 		_inventoryBox.handleInput(input);
 	} else {
-		//_inventoryPopup.handleInput(input);
-		//_notebookPopup.handleInput(input);
+		_inventoryPopup.handleInput(input);
+		_notebookPopup.handleInput(input);
 	}
 
 	// Handle invisible map button
@@ -1196,10 +1196,10 @@ void Scene::handleInput() {
 				requestStateChange(NancyState::kMainMenu);
 				break;
 			case kTaskButtonInventory:
-				//_inventoryPopup.toggle();
+				_inventoryPopup.toggle();
 				break;
 			case kTaskButtonNotebook:
-				//_notebookPopup.toggle();
+				_notebookPopup.toggle();
 				break;
 			case kTaskButtonCellphone:
 				// TODO: open cell-phone popup (UICL)
@@ -1271,8 +1271,8 @@ void Scene::initStaticData() {
 	if (g_nancy->getGameType() <= kGameTypeNancy9) {
 		_inventoryBox.init();
 	} else {
-		//_inventoryPopup.init();
-		//_notebookPopup.init();
+		_inventoryPopup.init();
+		_notebookPopup.init();
 	}
 
 	// Init buttons
