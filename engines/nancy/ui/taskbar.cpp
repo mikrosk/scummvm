@@ -96,6 +96,10 @@ void Taskbar::drawButton(uint index, ButtonState state) {
 	_needsRedraw = true;
 }
 
+void Taskbar::toggleButton(uint index, bool enabled) {
+	drawButton(index, enabled ? kButtonIdle : kButtonDisabled);
+}
+
 void Taskbar::handleInput(NancyInput &input) {
 	auto *taskData = GetEngineData(TASK);
 	assert(taskData);

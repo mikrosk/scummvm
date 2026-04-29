@@ -42,15 +42,18 @@ public:
 	void registerGraphics() override;
 	void handleInput(NancyInput &input);
 
+	void toggleButton(uint index, bool enabled);
+
 	// Returns the index of the button that was clicked this frame, or -1
 	// if none. Cleared on the next call to handleInput().
 	int getClickedButton() const { return _clickedButton; }
 
 private:
 	enum ButtonState {
-		kButtonIdle    = 0,
-		kButtonHover   = 1,
-		kButtonPressed = 2
+		kButtonIdle     = 0,
+		kButtonHover    = 1,
+		kButtonPressed  = 2,
+		kButtonDisabled = 3
 	};
 
 	void drawButton(uint index, ButtonState state);
