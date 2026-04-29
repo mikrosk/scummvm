@@ -174,12 +174,10 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 			return new InteractiveVideo();	// Moved from 26 to 28 in Nancy10
 	case 29:
 		// Nancy 10+
-		warning("ControlUIItems - not implemented yet");
-		return nullptr;
+		return new ControlUIItems();
 	case 32:
 		// Nancy 10+
-		warning("UIPopupPrepScene - not implemented yet");
-		return nullptr;
+		return new UIPopupPrepScene();
 	case 40:
 		if (g_nancy->getGameType() <= kGameTypeNancy1)
 			return new LightningOn();	// Only used in TVD
@@ -258,8 +256,7 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		if (g_nancy->getGameType() <= kGameTypeNancy9 && type == 75) {
 			return new TextBoxWrite();
 		} else {
-			warning("FrameTextBox - not implemented yet");
-			return nullptr;
+			return new FrameTextBox(static_cast<FrameTextBox::Variant>(type));
 		}
 	case 76:
 		return new TextboxClear();
@@ -342,8 +339,7 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		return nullptr;
 	case 131:
 		// Nancy 10+
-		warning("AddSearchLink - not implemented yet");
-		return nullptr;
+		return new AddSearchLink();
 	case 140:
 		return new SetVolume();
 	case 148:
