@@ -185,7 +185,7 @@ void LoadSaveMenu::enterFilename() {
 			if (_enteredString.size()) {
 				_enteredString.deleteLastChar();
 			}
-		} else if (Common::isAlnum(key.ascii) || Common::isSpace(key.ascii)) {
+		} else if (Common::isAlnum(key.ascii) || key.ascii == ' ') {
 			_enteredString += key.ascii;
 		}
 	}
