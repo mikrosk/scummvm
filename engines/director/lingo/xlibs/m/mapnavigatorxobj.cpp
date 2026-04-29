@@ -335,7 +335,6 @@ void MapNavigatorXObj::m_getHotSpotCount(int nargs) {
 void MapNavigatorXObj::m_setHidden(int nargs) {
 	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
 
-	Common::String nodeName = "";
 	int flag = g_lingo->pop().asInt();
 	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
 	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
@@ -353,14 +352,245 @@ void MapNavigatorXObj::m_setHidden(int nargs) {
 	me->_nodes[nodeIndex].hotspots[hotspotIndex].isHidden = flag ? true : false;
 }
 
-XOBJSTUB(MapNavigatorXObj::m_getHidden, 0)
-XOBJSTUB(MapNavigatorXObj::m_pointInside, 0)
-XOBJSTUB(MapNavigatorXObj::m_getHotSpotRect, "")
-XOBJSTUB(MapNavigatorXObj::m_getHotSpotCursor, 0)
-XOBJSTUB(MapNavigatorXObj::m_getEvaluationFcn, "")
-XOBJSTUB(MapNavigatorXObj::m_getDestinationNode, 0)
-XOBJSTUB(MapNavigatorXObj::m_getInstructionCount, 0)
-XOBJSTUB(MapNavigatorXObj::m_getInstructionType, 0)
-XOBJSTUB(MapNavigatorXObj::m_getInstruction, "")
+void MapNavigatorXObj::m_getHidden(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_getHidden: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_getHidden: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	g_lingo->push(me->_nodes[nodeIndex].hotspots[hotspotIndex].isHidden ? 1 : 0);
+}
+
+void MapNavigatorXObj::m_pointInside(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int y = g_lingo->pop().asInt();
+	int x = g_lingo->pop().asInt();
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_pointInside: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_pointInside: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	Common::Rect rect(me->_nodes[nodeIndex].hotspots[hotspotIndex].top, me->_nodes[nodeIndex].hotspots[hotspotIndex].left,
+			me->_nodes[nodeIndex].hotspots[hotspotIndex].bottom,
+			me->_nodes[nodeIndex].hotspots[hotspotIndex].right);
+
+	g_lingo->push(rect.contains(x, y) ? 1 : 0);
+}
+
+void MapNavigatorXObj::m_getHotSpotRect(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_pointInside: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_pointInside: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	Common::String result = Common::String::format("%d,%d,%d,%d",
+			me->_nodes[nodeIndex].hotspots[hotspotIndex].top, me->_nodes[nodeIndex].hotspots[hotspotIndex].left,
+			me->_nodes[nodeIndex].hotspots[hotspotIndex].bottom, me->_nodes[nodeIndex].hotspots[hotspotIndex].right);
+
+	g_lingo->push(result);
+}
+
+void MapNavigatorXObj::m_getHotSpotCursor(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_getHotSpotCursor: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_getHotSpotCursor: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	g_lingo->push(me->_nodes[nodeIndex].hotspots[hotspotIndex].cursor_id);
+}
+
+void MapNavigatorXObj::m_getEvaluationFcn(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_getEvaluationFcn: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_getEvaluationFcn: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	g_lingo->push(me->_nodes[nodeIndex].hotspots[hotspotIndex].evaluation_name);
+}
+
+void MapNavigatorXObj::m_getDestinationNode(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int conditionIndex = g_lingo->pop().asInt() - 1; // Lingo condition indices are 1-based
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_getDestinationNode: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_getDestinationNode: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (conditionIndex < 0 || conditionIndex >= me->_nodes[nodeIndex].hotspots[hotspotIndex].condition_count) {
+		warning("MapNavigatorXObj::m_getDestinationNode: Invalid condition index %d for hotspot %d of node %d", conditionIndex, hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	g_lingo->push(me->_nodes[nodeIndex].hotspots[hotspotIndex].conditions[conditionIndex].destination_node + 1); // Lingo node indices are 1-based
+}
+
+void MapNavigatorXObj::m_getInstructionCount(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int conditionIndex = g_lingo->pop().asInt() - 1; // Lingo condition indices are 1-based
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_getInstructionCount: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_getInstructionCount: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (conditionIndex < 0 || conditionIndex >= me->_nodes[nodeIndex].hotspots[hotspotIndex].condition_count) {
+		warning("MapNavigatorXObj::m_getInstructionCount: Invalid condition index %d for hotspot %d of node %d", conditionIndex, hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	g_lingo->push(me->_nodes[nodeIndex].hotspots[hotspotIndex].conditions[conditionIndex].instruction_count);
+}
+
+void MapNavigatorXObj::m_getInstructionType(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int index = g_lingo->pop().asInt() - 1; // Lingo instruction indices are 1-based
+	int conditionIndex = g_lingo->pop().asInt() - 1; // Lingo condition indices are 1-based
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_getInstructionType: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_getInstructionType: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (conditionIndex < 0 || conditionIndex >= me->_nodes[nodeIndex].hotspots[hotspotIndex].condition_count) {
+		warning("MapNavigatorXObj::m_getInstructionType: Invalid condition index %d for hotspot %d of node %d", conditionIndex, hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (index < 0 || index >= me->_nodes[nodeIndex].hotspots[hotspotIndex].conditions[conditionIndex].instruction_count) {
+		warning("MapNavigatorXObj::m_getInstructionType: Invalid instruction index %d for condition %d of hotspot %d of node %d", index, conditionIndex, hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	g_lingo->push(me->_nodes[nodeIndex].hotspots[hotspotIndex].conditions[conditionIndex].instructions[index].instruction_type);
+}
+
+void MapNavigatorXObj::m_getInstruction(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	int index = g_lingo->pop().asInt() - 1; // Lingo instruction indices are 1-based
+	int conditionIndex = g_lingo->pop().asInt() - 1; // Lingo condition indices are 1-based
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_getInstruction: Invalid node index %d", nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_getInstruction: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (conditionIndex < 0 || conditionIndex >= me->_nodes[nodeIndex].hotspots[hotspotIndex].condition_count) {
+		warning("MapNavigatorXObj::m_getInstruction: Invalid condition index %d for hotspot %d of node %d", conditionIndex, hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	if (index < 0 || index >= me->_nodes[nodeIndex].hotspots[hotspotIndex].conditions[conditionIndex].instruction_count) {
+		warning("MapNavigatorXObj::m_getInstruction: Invalid instruction index %d for condition %d of hotspot %d of node %d", index, conditionIndex, hotspotIndex, nodeIndex);
+		g_lingo->push(0);
+		return;
+	}
+
+	g_lingo->push(me->_nodes[nodeIndex].hotspots[hotspotIndex].conditions[conditionIndex].instructions[index].text);
+}
 
 }
