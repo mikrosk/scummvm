@@ -1219,7 +1219,7 @@ bool LoadSaveMenu_V2::save() {
 		_enteringNewState = true;
 	}
 
-	if ((int)_saveExists.size() < _selectedSave) {
+	if ((int)_saveExists.size() <= _selectedSave) {
 		_saveExists.resize(_selectedSave + 1, false);
 	}
 
