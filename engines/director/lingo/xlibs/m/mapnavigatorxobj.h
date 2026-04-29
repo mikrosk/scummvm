@@ -50,6 +50,8 @@ struct NavHotSpot {
 	uint16 condition_count;
 	Common::String evaluation_name;
 
+	bool isHidden; // Not part of the original data, used to track current hidden state in ScummVM
+
 	Common::Array<NavCondition> conditions;
 };
 
@@ -72,7 +74,6 @@ public:
 	int16 _hotspotCount;
 	int16 _firstNodeIndex;
 	Common::Array<NavNode> _nodes;
-	Common::Array<byte> _hiddenFlags;
 };
 
 namespace MapNavigatorXObj {

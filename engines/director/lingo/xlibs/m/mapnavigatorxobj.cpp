@@ -131,10 +131,9 @@ void MapNavigatorXObj::close(ObjectType type) {
 }
 
 void mapnav_initialize_hidden_flags(MapNavigatorXObject *me) {
-	int n = 0;
 	for (int i = 0; i < me->_nodeCount; i++) {
 		for (int j = 0; j < me->_nodes[i].hotspot_count; j++) {
-			me->_hiddenFlags[n++] = me->_nodes[i].hotspots[j].initially_hidden;
+			 me->_nodes[i].hotspots[j].isHidden = me->_nodes[i].hotspots[j].initially_hidden;
 		}
 	}
 }
@@ -252,11 +251,17 @@ void MapNavigatorXObj::m_new(int nargs) {
 		 }
 	}
 
-	me->_hiddenFlags.resize(me->_hotspotCount);
-
 	mapnav_initialize_hidden_flags(me);
 
 	g_lingo->push(g_lingo->_state->me);
+}
+
+XOBJSTUBNR(MapNavigatorXObj::m_dispose)
+
+void MapNavigatorXObj::m_getFirstNode(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	g_lingo->push(me->_firstNodeIndex + 1); // Lingo node indices are 1-based
 }
 
 void MapNavigatorXObj::m_resetHidden(int nargs) {
@@ -265,17 +270,11 @@ void MapNavigatorXObj::m_resetHidden(int nargs) {
 	mapnav_initialize_hidden_flags(me);
 }
 
-void MapNavigatorXObj::m_getFirstNode(int nargs) {
-	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
-
-	g_lingo->push(me->_firstNodeIndex + 1); // Lingo node indices are 1-based
-}
-
 void MapNavigatorXObj::m_getNodeName(int nargs) {
 	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
 
 	Common::String nodeName = "";
-	int16 nodeIndex = g_lingo->pop().asInt();
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
 
 	if (nodeIndex >= 0 && nodeIndex < me->_nodeCount) {
 		nodeName = me->_nodes[nodeIndex].name;
@@ -286,11 +285,28 @@ void MapNavigatorXObj::m_getNodeName(int nargs) {
 	g_lingo->push(nodeName);
 }
 
+void MapNavigatorXObj::m_getNodeIndex(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
+
+	Common::String nodeName = g_lingo->pop().asString();
+
+	// The originakl used binary search since the node names were sorted. We ignore that
+	for (int i = 0; i < me->_nodeCount; i++) {
+		if (me->_nodes[i].name == nodeName) {
+			g_lingo->push(i + 1); // Lingo node indices are 1-based
+			return;
+		}
+	}
+	warning("MapNavigatorXObj::m_getNodeIndex: Node name '%s' not found", nodeName.c_str());
+
+	g_lingo->push(0);
+}
+
 void MapNavigatorXObj::m_getBackgroundPicture(int nargs) {
 	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
 
 	int result = 0;
-	int16 nodeIndex = g_lingo->pop().asInt();
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
 
 	if (nodeIndex >= 0 && nodeIndex < me->_nodeCount) {
 		result = me->_nodes[nodeIndex].background_picture;
@@ -305,7 +321,7 @@ void MapNavigatorXObj::m_getHotSpotCount(int nargs) {
 	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
 
 	int result = 0;
-	int16 nodeIndex = g_lingo->pop().asInt();
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
 
 	if (nodeIndex >= 0 && nodeIndex < me->_nodeCount) {
 		result = me->_nodes[nodeIndex].hotspot_count;
@@ -316,10 +332,27 @@ void MapNavigatorXObj::m_getHotSpotCount(int nargs) {
 	g_lingo->push(result);
 }
 
+void MapNavigatorXObj::m_setHidden(int nargs) {
+	MapNavigatorXObject *me = static_cast<MapNavigatorXObject *>(g_lingo->_state->me.u.obj);
 
-XOBJSTUBNR(MapNavigatorXObj::m_dispose)
-XOBJSTUB(MapNavigatorXObj::m_getNodeIndex, 0)
-XOBJSTUBNR(MapNavigatorXObj::m_setHidden)
+	Common::String nodeName = "";
+	int flag = g_lingo->pop().asInt();
+	int hotspotIndex = g_lingo->pop().asInt() - 1; // Lingo hotspot indices are 1-based
+	int nodeIndex = g_lingo->pop().asInt() - 1; // Lingo node indices are 1-based
+
+	if (nodeIndex < 0 || nodeIndex >= me->_nodeCount) {
+		warning("MapNavigatorXObj::m_setHidden: Invalid node index %d", nodeIndex);
+		return;
+	}
+
+	if (hotspotIndex < 0 || hotspotIndex >= me->_nodes[nodeIndex].hotspot_count) {
+		warning("MapNavigatorXObj::m_setHidden: Invalid hotspot index %d for node %d", hotspotIndex, nodeIndex);
+		return;
+	}
+
+	me->_nodes[nodeIndex].hotspots[hotspotIndex].isHidden = flag ? true : false;
+}
+
 XOBJSTUB(MapNavigatorXObj::m_getHidden, 0)
 XOBJSTUB(MapNavigatorXObj::m_pointInside, 0)
 XOBJSTUB(MapNavigatorXObj::m_getHotSpotRect, "")
