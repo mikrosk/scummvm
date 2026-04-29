@@ -19,6 +19,8 @@
  *
  */
 
+#define FORCE_TEXT_CONSOLE
+
 #include "gui/EventRecorder.h"
 
 #include "common/util.h"
@@ -414,6 +416,18 @@ void MixerImpl::stopHandle(SoundHandle handle) {
 
 void MixerImpl::muteSoundType(SoundType type, bool mute) {
 	assert(0 <= (int)type && (int)type < ARRAYSIZE(_soundTypeSettings));
+
+#ifdef PERMANENT_MUTE
+	// Permanent mute is one-way: only mute=true is honored. Attempts to
+	// unmute a sound type via the GMM/F5 dialog or an in-game audio menu
+	// are blocked and logged. The user is expected to set the mute state
+	// in the launcher before starting a game and not change it afterwards.
+	if (!mute && _soundTypeSettings[type].mute) {
+		warning("PERMANENT_MUTE: ignoring unmute request for sound type %d", (int)type);
+		return;
+	}
+#endif
+
 	_soundTypeSettings[type].mute = mute;
 
 	for (int i = 0; i != NUM_CHANNELS; ++i) {
@@ -425,6 +439,20 @@ void MixerImpl::muteSoundType(SoundType type, bool mute) {
 bool MixerImpl::isSoundTypeMuted(SoundType type) const {
 	assert(0 <= (int)type && (int)type < ARRAYSIZE(_soundTypeSettings));
 	return _soundTypeSettings[type].mute;
+}
+
+void MixerImpl::clearPermanentMute() {
+#ifdef PERMANENT_MUTE
+	Common::StackLock lock(_mutex);
+
+	// Reset per-type mute flags. Called only at game-launch boundaries
+	// (runGame() in base/main.cpp), so no channel-volume refresh is
+	// needed: the engine's upcoming syncSoundSettings() call will go
+	// through muteSoundType()/setVolumeForSoundType() and trigger any
+	// necessary notifyGlobalVolChange().
+	for (int i = 0; i != ARRAYSIZE(_soundTypeSettings); ++i)
+		_soundTypeSettings[i].mute = false;
+#endif
 }
 
 void MixerImpl::setChannelVolume(SoundHandle handle, byte volume) {
@@ -655,9 +683,26 @@ Channel::Channel(Mixer *mixer, Mixer::SoundType type, AudioStream *stream,
 	: _type(type), _mixer(mixer), _id(id), _permanent(permanent), _volume(Mixer::kMaxChannelVolume),
 	  _balance(0), _faderL(255), _faderR(255), _pauseLevel(0), _samplesConsumed(0), _samplesDecoded(0), _mixerTimeStamp(0),
 	  _pauseStartTime(0), _pauseTime(0), _converter(nullptr), _volL(0), _volR(0),
-	  _stream(stream, autofreeStream) {
+	  _stream(stream, DisposeAfterUse::NO) {
 	assert(mixer);
 	assert(stream);
+
+#ifdef PERMANENT_MUTE
+	// If the sound type is muted at the moment this channel is created,
+	// wrap the source so the underlying decoder is never invoked. The
+	// wrap is created here, in the same place as the rate converter, and
+	// stored in _stream which has no setter — so the decision is made
+	// once per channel and is structurally final for the channel's
+	// lifetime, regardless of any later mute toggling.
+	if (mixer->isSoundTypeMuted(type)) {
+		// MutedAudioStream takes ownership of `stream` per autofreeStream;
+		// our _stream then takes ownership of the wrapper.
+		_stream.reset(makeMutedAudioStream(stream, autofreeStream), DisposeAfterUse::YES);
+	} else
+#endif
+	{
+		_stream.reset(stream, autofreeStream);
+	}
 
 	// Get a rate converter instance
 	_converter = makeRateConverter(_stream->getRate(), mixer->getOutputRate(), _stream->isStereo(), mixer->getOutputStereo(), reverseStereo);

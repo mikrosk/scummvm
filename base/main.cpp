@@ -58,6 +58,7 @@
 #include "gui/message.h"
 
 #include "audio/mididrv.h"
+#include "audio/mixer.h"
 #include "audio/musicplugin.h"  /* for music manager */
 
 #include "graphics/cursorman.h"
@@ -217,6 +218,12 @@ static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const 
 	if (err.getCode() == Common::kNoError) {
 		// Inform backend that the engine is about to be created
 		system.engineBeforeCreate();
+
+		// Reset any permanent-mute state from a previous game so the
+		// engine's syncSoundSettings() (which some engines call from
+		// their constructor) can re-apply the launcher's current mute
+		// setting. No-op unless the mixer was built with PERMANENT_MUTE.
+		system.getMixer()->clearPermanentMute();
 
 		// Set default values for all of the custom engine options
 		// Apparently some engines query them in their constructor, thus we

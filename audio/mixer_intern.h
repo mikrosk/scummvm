@@ -115,6 +115,7 @@ public:
 
 	void muteSoundType(SoundType type, bool mute) override;
 	bool isSoundTypeMuted(SoundType type) const override;
+	void clearPermanentMute() override;
 
 	void setChannelVolume(SoundHandle handle, byte volume) override;
 	byte getChannelVolume(SoundHandle handle) const override;

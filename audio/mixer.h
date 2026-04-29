@@ -229,6 +229,18 @@ public:
 	virtual bool isSoundTypeMuted(SoundType type) const = 0;
 
 	/**
+	 * Clear any permanent-mute state held by the mixer. Intended to be
+	 * called at game-launch boundaries (i.e. from base/main.cpp's
+	 * runGame()) so that the next engine's syncSoundSettings can
+	 * re-apply the launcher's current mute setting, even if a previous
+	 * game muted some sound types.
+	 *
+	 * No-op unless the mixer was built with PERMANENT_MUTE; safe to
+	 * call unconditionally.
+	 */
+	virtual void clearPermanentMute() = 0;
+
+	/**
 	 * Set the channel volume for the given handle.
 	 *
 	 * @param handle  The sound to affect.

@@ -520,6 +520,28 @@ AudioStream *makeNullAudioStream();
  */
 AudioStream *makeSilentAudioStream(int rate, bool stereo);
 
+/**
+ * Create an AudioStream wrapper that swallows the parent stream's audio
+ * data without ever invoking the parent's decoder, while preserving the
+ * parent's timing (sample rate, channel layout, and total duration when
+ * known) so that engines that sync subtitles, lip-sync, or cutscene
+ * frames against the audio handle continue to behave correctly.
+ *
+ * If the parent is a SeekableAudioStream, the wrapper terminates after
+ * the parent's full length has elapsed. Otherwise it consumes silently
+ * indefinitely (mirroring an open-ended source such as a looped music
+ * track) until the channel is stopped externally.
+ *
+ * The returned stream takes ownership of @p parent according to
+ * @p disposeAfterUse.
+ *
+ * Note: readBuffer() does not zero the output buffer. This wrapper is
+ * intended to pair with a zero-volume consumer (the mixer's silent fast
+ * path) that does not read the buffer contents. If you need a stream
+ * that actually outputs zero samples, use makeSilentAudioStream().
+ */
+RewindableAudioStream *makeMutedAudioStream(AudioStream *parent, DisposeAfterUse::Flag disposeAfterUse = DisposeAfterUse::YES);
+
 /** @} */
 } // End of namespace Audio
 

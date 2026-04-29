@@ -513,4 +513,63 @@ AudioStream *makeSilentAudioStream(int rate, bool stereo) {
 	return new SilentAudioStream(rate, stereo);
 }
 
+/**
+ * AudioStream wrapper that emits "silence" in place of the parent stream's
+ * audio data. See makeMutedAudioStream() for full documentation.
+ *
+ * Implementation note: readBuffer() does NOT zero the output buffer. The
+ * wrapper is intended to be paired with a zero-volume consumer (the
+ * mixer's silent fast path in RateConverter_Impl) that never inspects
+ * the data — the only useful work is advancing the per-stream sample
+ * counter so end-of-stream is reached at the right time. If you use this
+ * wrapper outside that pairing and need actual zero samples, prefer
+ * makeSilentAudioStream() instead.
+ */
+class MutedAudioStream : public RewindableAudioStream {
+public:
+	MutedAudioStream(AudioStream *parent, DisposeAfterUse::Flag disposeAfterUse)
+		: _parent(parent, disposeAfterUse),
+		  _samplesRead(0),
+		  _totalSamples(0) {
+		SeekableAudioStream *seekable = dynamic_cast<SeekableAudioStream *>(parent);
+		if (seekable) {
+			const uint32 frames = seekable->getLength().convertToFramerate(getRate()).totalNumberOfFrames();
+			_totalSamples = frames * (isStereo() ? 2 : 1);
+		}
+	}
+
+	int readBuffer(int16 *buffer, const int numSamples) override {
+		int n = numSamples;
+		if (_totalSamples != 0) {
+			const uint32 left = _totalSamples - _samplesRead;
+			if ((uint32)n > left)
+				n = (int)left;
+		}
+		// Buffer contents are intentionally left untouched; see class doc.
+		_samplesRead += n;
+		return n;
+	}
+
+	bool endOfData() const override {
+		return _totalSamples != 0 && _samplesRead >= _totalSamples;
+	}
+
+	bool isStereo() const override { return _parent->isStereo(); }
+	int getRate() const override { return _parent->getRate(); }
+
+	bool rewind() override {
+		_samplesRead = 0;
+		return true;
+	}
+
+private:
+	Common::DisposablePtr<AudioStream> _parent;
+	uint32 _samplesRead;
+	uint32 _totalSamples;
+};
+
+RewindableAudioStream *makeMutedAudioStream(AudioStream *parent, DisposeAfterUse::Flag disposeAfterUse) {
+	return new MutedAudioStream(parent, disposeAfterUse);
+}
+
 } // End of namespace Audio
