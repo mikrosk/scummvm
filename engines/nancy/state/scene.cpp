@@ -863,6 +863,7 @@ void Scene::init() {
 		int saveSlot = ConfMan.getInt("save_slot", Common::ConfigManager::kTransientDomain);
 		if (saveSlot >= 0 && saveSlot <= g_nancy->getMetaEngine()->getMaximumSaveSlot()) {
 			g_nancy->loadGameState(saveSlot);
+			g_nancy->setState(NancyState::kScene);
 		}
 
 		// Remove key so clicking on "New Game" in start menu doesn't just reload the save
