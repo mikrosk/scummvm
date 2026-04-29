@@ -231,7 +231,7 @@ INV::INV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	bool isVampire = g_nancy->getGameType() == Nancy::GameType::kGameTypeVampire;
+	bool isVampire = g_nancy->getGameType() == kGameTypeVampire;
 
 	readRect(*chunkStream, scrollbarSrcBounds);
 
@@ -252,6 +252,17 @@ TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	if (g_nancy->getGameType() <= kGameTypeNancy9) {
 		readRectArray(*chunkStream, ornamentSrcs, 14);
 		readRectArray(*chunkStream, ornamentDests, 14);
+	}
+
+	if (g_nancy->getGameType() >= kGameTypeNancy10) {
+		chunkStream->skip(2);
+
+		maxScrollWidth = chunkStream->readSint32LE();
+		firstLineY = chunkStream->readSint32LE();
+		unknown1 = chunkStream->readSint32LE();
+		unknown2 = chunkStream->readSint32LE();
+		contentWidth = chunkStream->readSint32LE();
+		contentHeight = chunkStream->readSint32LE();
 	}
 
 	defaultFontID = chunkStream->readUint16LE();
@@ -279,6 +290,9 @@ TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 									(g << format.gShift) |
 									(b << format.bShift);
 
+		if (g_nancy->getGameType() >= kGameTypeNancy10)
+			chunkStream->skip(1);
+
 		r = chunkStream->readByte();
 		g = chunkStream->readByte();
 		b = chunkStream->readByte();
@@ -288,13 +302,6 @@ TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 									(b << format.bShift);
 	} else {
 		textBackground = highlightTextBackground = 0;
-	}
-
-	// FIXME: Data fixup/HACK for Nancy10 and later
-	if (g_nancy->getGameType() >= kGameTypeNancy10) {
-		highlightConversationFontID = conversationFontID;
-		tabWidth = 4;
-		leftOffset = rightOffset = 0;
 	}
 }
 

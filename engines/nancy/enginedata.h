@@ -177,6 +177,14 @@ struct TBOX : public EngineData {
 
 	uint32 textBackground;
 	uint32 highlightTextBackground;
+
+	// Nancy 10+ extra layout variables.
+	int32 maxScrollWidth = 0;
+	int32 firstLineY = 0; // added to the y-cursor when starting a new line
+	int32 unknown1 = 0;
+	int32 unknown2 = 0;
+	int32 contentWidth = 0;
+	int32 contentHeight = 0;
 };
 
 // Contains data about the map state. Only used in TVD and nancy1
