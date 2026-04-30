@@ -953,7 +953,7 @@ void ArcadePuzzle::wallAndPaddleCollision(int &ballLeft, int &ballTop, int &ball
 		brickCollision(ballLeft, ballTop, ballRight, ballBottom, ballCenterX, ballCenterY);
 	}
 
-	// Sanity: if ball is still outside field after all corrections → stuck
+	// Sanity: if ball is still outside field after all corrections -> stuck
 	if (ballTop < _fieldTop || _fieldBottom < ballBottom || ballLeft < _fieldLeft || _fieldRight < ballRight) {
 		_collisionType = 0x10;
 	}
@@ -992,7 +992,7 @@ bool ArcadePuzzle::brickCollision(int &ballLeft, int &ballTop, int &ballRight, i
 	int col = (ballCenterX - _brickAreaLeft) / _brickWidth;
 	int i   = row * _brickCols + col;
 
-	// Out of bounds or dead/pending → ball passes through freely (leave collisionType = -2)
+	// Out of bounds or dead/pending -> ball passes through freely (leave collisionType = -2)
 	if (i < 0 || i >= _totalBricks)
 		return false;
 	Brick &b = _bricks[i];
@@ -1004,7 +1004,7 @@ bool ArcadePuzzle::brickCollision(int &ballLeft, int &ballTop, int &ballRight, i
 	int prevCY = _ballPrevTop  + _ballHalfH;
 
 	// Check each exposed face using trajectory line-segment intersection.
-	// Priority order matches original: top(8) → bottom(10) → left(7) → right(9).
+	// Priority order matches original: top(8) -> bottom(10) -> left(7) -> right(9).
 	if (b.neighborUp == -1 &&
 	    segmentsCross(prevCX, prevCY, ballCenterX, ballCenterY,
 	                  b.vpRect.left, b.vpRect.top, b.vpRect.right, b.vpRect.top)) {
@@ -1241,7 +1241,7 @@ void ArcadePuzzle::addToExplosionList(int brickIdx, uint32 delay) {
 
 void ArcadePuzzle::playBrickHitSound() {
 	// Rotates through sounds[2], sounds[3], sounds[4] (brick hit A/B/C)
-	int slot = _brickSoundRotator + 2; // maps 0→2, 1→3, 2→4
+	int slot = _brickSoundRotator + 2; // maps 0->2, 1->3, 2->4
 	g_nancy->_sound->playSound(_sounds[slot]);
 	_brickSoundRotator = (_brickSoundRotator + 1) % 3;
 }

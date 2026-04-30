@@ -216,7 +216,7 @@ void CuttingPuzzle::execute() {
 					++_animFrame;
 					redrawSurface();
 				} else {
-					// Completed one full animation loop → one macro-cycle.
+					// Completed one full animation loop -> one macro-cycle.
 					_animFrame = 0;
 
 					// Play the lathe loop sound if it's not already playing.

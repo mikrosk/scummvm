@@ -483,7 +483,7 @@ void MatchPuzzle::checkForMatch(int col, int row) {
 	_matchColStart = cStart;
 	_matchColEnd   = cEnd;
 
-	int vLen = rEnd - rStart; // 2 → 3-match, 3 → 4-match, 4 → 5-match
+	int vLen = rEnd - rStart; // 2 -> 3-match, 3 -> 4-match, 4 -> 5-match
 	int hLen = cEnd - cStart;
 
 	// --- Score and mark: vertical match (>=3 flags) ---
