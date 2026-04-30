@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.10.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-30 08:16+0000\n"
+"POT-Creation-Date: 2026-04-30 16:56+0000\n"
 "PO-Revision-Date: 2026-04-18 06:04+0000\n"
 "Last-Translator: Lothar Serra Mari <lothar.serramari@scummvm.org>\n"
 "Language-Team: German <https://translations.scummvm.org/projects/scummvm/"
@@ -8268,11 +8268,11 @@ msgstr "Menü / Überspringen"
 msgid "Fire weapon"
 msgstr "Feuerwaffe"
 
-#: engines/colony/savegame.cpp:290
+#: engines/colony/savegame.cpp:295
 msgid "Saving is only available in first-person view."
 msgstr "Speichern wird nur in der first-person-Ansicht unterstützt."
 
-#: engines/colony/savegame.cpp:299
+#: engines/colony/savegame.cpp:304
 msgid "Loading is only available in first-person view."
 msgstr "Laden wird nur in der first-person-Ansicht unterstützt."
 
