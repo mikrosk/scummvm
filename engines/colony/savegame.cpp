@@ -279,7 +279,12 @@ bool findInvalidActiveObjectSlot(const Common::Array<Thing> &objects, uint32 &in
 bool ColonyEngine::hasFeature(EngineFeature f) const {
 	return f == kSupportsReturnToLauncher ||
 		f == kSupportsLoadingDuringRuntime ||
-		f == kSupportsSavingDuringRuntime;
+		f == kSupportsSavingDuringRuntime ||
+		// Skip the OpenGL backend's FBO compositing pass: render directly
+		// to the default framebuffer (Freescape's pattern, freescape.cpp:
+		// 1170). Side effect: the user-facing screenshot hotkey now reads
+		// the correct buffer because there's no FBO bound between frames.
+		f == kSupportsArbitraryResolutions;
 }
 
 bool ColonyEngine::canSaveGameStateCurrently(Common::U32String *msg) {

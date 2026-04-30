@@ -99,6 +99,11 @@ public:
 
 private:
 	void useColor(uint32 color);
+	// Set glLineWidth scaled to window/logical ratio. Mirrors Freescape
+	// (gfx_opengl_shaders.cpp:692). Cached so back-to-back same-width
+	// line draws don't re-issue the GL call.
+	void applyLineWidthForLines();
+	float _lineWidth = 1.0f;
 	GLuint _overlayTexId = 0;
 
 	OSystem *_system = nullptr;
@@ -166,6 +171,17 @@ void OpenGLRenderer::useColor(uint32 color) {
 	}
 }
 
+void OpenGLRenderer::applyLineWidthForLines() {
+	const int sysW = _system ? _system->getWidth() : 0;
+	float w = 1.0f;
+	if (sysW > _width)
+		w = MAX(1.0f, (float)sysW / (float)_width);
+	if (w != _lineWidth) {
+		glLineWidth(w);
+		_lineWidth = w;
+	}
+}
+
 void OpenGLRenderer::clear(uint32 color) {
 	float r, g, b;
 	if (color & 0xFF000000) {
@@ -184,6 +200,7 @@ void OpenGLRenderer::clear(uint32 color) {
 
 void OpenGLRenderer::drawLine(int x1, int y1, int x2, int y2, uint32 color) {
 	useColor(color);
+	applyLineWidthForLines();
 	glBegin(GL_LINES);
 	glVertex2i(x1, y1);
 	glVertex2i(x2, y2);
@@ -192,6 +209,7 @@ void OpenGLRenderer::drawLine(int x1, int y1, int x2, int y2, uint32 color) {
 
 void OpenGLRenderer::drawRect(const Common::Rect &rect, uint32 color) {
 	useColor(color);
+	applyLineWidthForLines();
 	glBegin(GL_LINE_LOOP);
 	glVertex2i(rect.left, rect.top);
 	glVertex2i(rect.right, rect.top);
@@ -328,6 +346,7 @@ void OpenGLRenderer::draw3DWall(int x1, int y1, int x2, int y2, uint32 color) {
 
 		// Draw colored wireframe edges
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		applyLineWidthForLines();
 		useColor(color);
 		glBegin(GL_QUADS);
 		glVertex3f(fx1, fy1, -160.0f);
@@ -572,6 +591,7 @@ void OpenGLRenderer::drawEllipse(int x, int y, int rx, int ry, uint32 color) {
 	glDisable(GL_DEPTH_TEST);
 
 	useColor(color);
+	applyLineWidthForLines();
 	glBegin(GL_LINE_LOOP);
 	for (int i = 0; i < 360; i += 10) {
 		float rad = i * M_PI / 180.0f;
@@ -636,9 +656,18 @@ void OpenGLRenderer::fillDitherRect(const Common::Rect &rect, uint32 color1, uin
 }
 
 void OpenGLRenderer::setPixel(int x, int y, uint32 color) {
+	// Draw as a 1×1 GL_QUADS instead of GL_POINTS. With kSupportsArbitrary
+	// Resolutions the viewport stretches logical coords to window pixels:
+	// a single GL_POINT renders as 1 framebuffer pixel (leaving gaps on
+	// HiDPI), while a 1×1 quad in logical coords gets scaled to cover the
+	// full logical-pixel cell — matching what the shader renderer does
+	// (renderer_opengl_shaders.cpp setPixel implementation).
 	useColor(color);
-	glBegin(GL_POINTS);
+	glBegin(GL_QUADS);
 	glVertex2i(x, y);
+	glVertex2i(x + 1, y);
+	glVertex2i(x + 1, y + 1);
+	glVertex2i(x, y + 1);
 	glEnd();
 }
 
@@ -652,6 +681,7 @@ void OpenGLRenderer::drawQuad(int x1, int y1, int x2, int y2, int x3, int y3, in
 	glEnd();
 	
 	glColor3ub(255, 255, 255);
+	applyLineWidthForLines();
 	glBegin(GL_LINE_LOOP);
 	glVertex2i(x1, y1);
 	glVertex2i(x2, y2);
@@ -669,8 +699,9 @@ void OpenGLRenderer::drawPolygon(const int *x, const int *y, int count, uint32 c
 		glVertex2i(x[i], y[i]);
 	}
 	glEnd();
-	
+
 	glColor3ub(255, 255, 255);
+	applyLineWidthForLines();
 	glBegin(GL_LINE_LOOP);
 	for (int i = 0; i < count; i++) {
 		glVertex2i(x[i], y[i]);

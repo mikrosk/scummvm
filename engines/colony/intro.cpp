@@ -72,20 +72,40 @@ public:
 				if (processEvent(event))
 					continue;
 
+				// MacDialog button rects are in _screen coordinates (engine
+				// logical, e.g. 853×480). With kSupportsArbitraryResolutions
+				// the framework rewrites g_system->getWidth/Height to window
+				// pixel size, so event.mouse arrives in window pixels —
+				// convert back to _screen coords before hit-testing.
+				auto toLocal = [this](const Common::Point &p) -> Common::Point {
+					const int sysW = g_system->getWidth();
+					const int sysH = g_system->getHeight();
+					if (sysW <= 0 || sysH <= 0 || (sysW == _screen->w && sysH == _screen->h))
+						return p;
+					return Common::Point((int)((int64)p.x * _screen->w / sysW),
+						(int)((int64)p.y * _screen->h / sysH));
+				};
+
 				switch (event.type) {
 				case Common::EVENT_QUIT:
 					shouldQuitEngine = true;
 					shouldQuit = true;
 					break;
-				case Common::EVENT_MOUSEMOVE:
-					mouseMove(event.mouse.x, event.mouse.y);
+				case Common::EVENT_MOUSEMOVE: {
+					const Common::Point p = toLocal(event.mouse);
+					mouseMove(p.x, p.y);
 					break;
-				case Common::EVENT_LBUTTONDOWN:
-					mouseClick(event.mouse.x, event.mouse.y);
+				}
+				case Common::EVENT_LBUTTONDOWN: {
+					const Common::Point p = toLocal(event.mouse);
+					mouseClick(p.x, p.y);
 					break;
-				case Common::EVENT_LBUTTONUP:
-					shouldQuit = mouseRaise(event.mouse.x, event.mouse.y);
+				}
+				case Common::EVENT_LBUTTONUP: {
+					const Common::Point p = toLocal(event.mouse);
+					shouldQuit = mouseRaise(p.x, p.y);
 					break;
+				}
 				case Common::EVENT_KEYDOWN:
 					if (event.kbd.keycode == Common::KEYCODE_ESCAPE) {
 						_pressedButton = -1;

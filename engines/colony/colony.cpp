@@ -294,6 +294,26 @@ ColonyEngine::~ColonyEngine() {
 	delete _wm;
 }
 
+Common::Point ColonyEngine::eventMouseToLogical(const Common::Point &p) const {
+	const int sysW = _system->getWidth();
+	const int sysH = _system->getHeight();
+	if (sysW <= 0 || sysH <= 0 || (sysW == _width && sysH == _height))
+		return p;
+	return Common::Point((int)((int64)p.x * _width / sysW),
+		(int)((int64)p.y * _height / sysH));
+}
+
+void ColonyEngine::warpMouseLogical(int x, int y) {
+	const int sysW = _system->getWidth();
+	const int sysH = _system->getHeight();
+	if (sysW <= 0 || sysH <= 0 || (sysW == _width && sysH == _height)) {
+		_system->warpMouse(x, y);
+		return;
+	}
+	_system->warpMouse((int)((int64)x * sysW / _width),
+		(int)((int64)y * sysH / _height));
+}
+
 void ColonyEngine::pauseEngineIntern(bool pause) {
 	if (pause && _gfx && _level >= 1 && _level <= 7) {
 		if (_savedScreen) {
@@ -494,7 +514,7 @@ void ColonyEngine::updateMouseCapture(bool recenter) {
 
 	if (_mouseLocked && recenter) {
 		_mousePos = Common::Point(_centerX, _centerY);
-		_system->warpMouse(_centerX, _centerY);
+		warpMouseLogical(_centerX, _centerY);
 		_system->getEventManager()->purgeMouseEvents();
 	}
 }
@@ -880,10 +900,26 @@ Common::Error ColonyEngine::run() {
 
 		Common::Event event;
 		while (_system->getEventManager()->pollEvent(event)) {
-			// Let MacWindowManager handle menu events first
+			// Let MacWindowManager handle menu events first. The menu bar is
+			// drawn into _menuSurface (engine logical coords, _width×_height
+			// per colony.cpp:570), so its hit-testing rects are in logical
+			// space. With kSupportsArbitraryResolutions, event.mouse arrives
+			// in window pixels — pass a coord-scaled copy so the WM resolves
+			// menu clicks correctly. The original event is preserved for the
+			// engine's own handlers downstream.
 			if (_wm) {
 				bool wasMenuActive = _wm->isMenuActive();
-				if (_wm->processEvent(event)) {
+				Common::Event wmEvent = event;
+				if (event.type == Common::EVENT_MOUSEMOVE
+						|| event.type == Common::EVENT_LBUTTONDOWN
+						|| event.type == Common::EVENT_LBUTTONUP
+						|| event.type == Common::EVENT_RBUTTONDOWN
+						|| event.type == Common::EVENT_RBUTTONUP
+						|| event.type == Common::EVENT_MBUTTONDOWN
+						|| event.type == Common::EVENT_MBUTTONUP) {
+					wmEvent.mouse = eventMouseToLogical(event.mouse);
+				}
+				if (_wm->processEvent(wmEvent)) {
 					// WM consumed the event (menu interaction)
 					if (!wasMenuActive && _wm->isMenuActive()) {
 						_system->lockMouse(false);
@@ -1028,8 +1064,10 @@ Common::Error ColonyEngine::run() {
 			} else if (event.type == Common::EVENT_LBUTTONDOWN && (_mouseLocked || _cursorShoot)) {
 				cShoot();
 			} else if (event.type == Common::EVENT_MOUSEMOVE) {
-				_mousePos = event.mouse;
+				_mousePos = eventMouseToLogical(event.mouse);
 				if (_mouseLocked) {
+					// relMouse stays in window-pixel deltas regardless of
+					// resolution mode — keep raw for mouselook feel.
 					mouseDX += event.relMouse.x;
 					mouseDY += event.relMouse.y;
 					mouseMoved = true;
@@ -1049,7 +1087,7 @@ Common::Error ColonyEngine::run() {
 			}
 			// Warp back to center and purge remaining mouse events
 			// to prevent the warp from generating phantom deltas (Freescape pattern)
-			_system->warpMouse(_centerX, _centerY);
+			warpMouseLogical(_centerX, _centerY);
 			_system->getEventManager()->purgeMouseEvents();
 			mouseMoved = false;
 			mouseDX = mouseDY = 0;

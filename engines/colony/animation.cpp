@@ -397,7 +397,7 @@ void ColonyEngine::playAnimation() {
 	_animationRunning = true;
 	_system->lockMouse(false);
 	_system->showMouse(true);
-	_system->warpMouse(_centerX, _centerY);
+	warpMouseLogical(_centerX, _centerY);
 	const char *cursorName = "default arrow cursor";
 	if (_renderMode == Common::kRenderMacintosh && _macArrowCursor) {
 		cursorName = "Mac arrow cursor";
@@ -591,17 +591,19 @@ void ColonyEngine::playAnimation() {
 				_gfx->computeScreenViewport();
 				needsDraw = true;
 			} else if (event.type == Common::EVENT_LBUTTONDOWN) {
-				int item = whichSprite(event.mouse);
+				int item = whichSprite(eventMouseToLogical(event.mouse));
 				if (item > 0) {
 					handleAnimationClick(item);
 					needsDraw = true;
 				}
 			} else if (event.type == Common::EVENT_RBUTTONDOWN) {
 				// DOS: right-click exits animation (AnimControl returns FALSE on button-up)
-				debugC(1, kColonyDebugAnimation, "Animation: RBUTTONDOWN exit at pos=%d,%d", event.mouse.x, event.mouse.y);
+				const Common::Point logical = eventMouseToLogical(event.mouse);
+				debugC(1, kColonyDebugAnimation, "Animation: RBUTTONDOWN exit at pos=%d,%d", logical.x, logical.y);
 				_animationRunning = false;
 			} else if (event.type == Common::EVENT_MOUSEMOVE) {
-				debugC(5, kColonyDebugAnimation, "Animation Mouse: %d, %d", event.mouse.x, event.mouse.y);
+				const Common::Point logical = eventMouseToLogical(event.mouse);
+				debugC(5, kColonyDebugAnimation, "Animation Mouse: %d, %d", logical.x, logical.y);
 			} else if (event.type == Common::EVENT_CUSTOM_ENGINE_ACTION_START) {
 				if (event.customType == kActionEscape) {
 					openMainMenuDialog();
@@ -1779,8 +1781,11 @@ void ColonyEngine::moveObject(int index) {
 		linked.push_back(index);
 	}
 
-	// Get initial mouse position and animation origin
-	Common::Point old = _system->getEventManager()->getMousePos();
+	// Get initial mouse position and animation origin. getMousePos() returns
+	// virtual-screen coords; with kSupportsArbitraryResolutions that's
+	// window pixels, but sprite xloc/yloc and _screenR are in engine-logical
+	// coords. Convert so drag deltas are in the same units as the sprites.
+	Common::Point old = eventMouseToLogical(_system->getEventManager()->getMousePos());
 	int ox = _screenR.left + (_screenR.width() - 416) / 2;
 	ox = (ox / 8) * 8;
 	int oy = _screenR.top + (_screenR.height() - 264) / 2;
@@ -1857,7 +1862,7 @@ void ColonyEngine::moveObject(int index) {
 		if (!buttonDown)
 			break;
 
-		Common::Point cur = _system->getEventManager()->getMousePos();
+		Common::Point cur = eventMouseToLogical(_system->getEventManager()->getMousePos());
 		int dx = cur.x - old.x;
 		int dy = cur.y - old.y;
 

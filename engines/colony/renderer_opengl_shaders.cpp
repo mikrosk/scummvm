@@ -97,6 +97,10 @@ private:
 	void uploadSolid(const float *positions, int vertCount);
 	void drawSolid(GLenum mode, const float *positions, int vertCount, const float rgba[4]);
 	void drawTexturedQuad(int x, int y, int w, int h);
+	// Set glLineWidth to scale with the window size (Freescape pattern,
+	// gfx_opengl_shaders.cpp:692). No-op when mode isn't a line primitive.
+	// Cached to avoid redundant state changes across same-width draws.
+	void applyLineWidth(GLenum mode);
 
 	void uploadSolid3D(const float *positions, int vertCount);
 	// allowStipple=true on the fill pass picks up _stippleActive; lines
@@ -133,6 +137,9 @@ private:
 	// elides a lot of uniform writes per frame.
 	float _solidLastColor[4] = { -1.0f, -1.0f, -1.0f, -1.0f };
 	float _solid3dLastColor[4] = { -1.0f, -1.0f, -1.0f, -1.0f };
+
+	// Cached glLineWidth so applyLineWidth() can short-circuit repeats.
+	float _lineWidth = 1.0f;
 
 	bool _wireframe = true;
 	int64_t _wireframeFillColor = 0; // -1 = no fill, else color (palette idx or ARGB)
@@ -315,6 +322,24 @@ void OpenGLShaderRenderer::uploadSolid(const float *positions, int vertCount) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * vertCount, positions, GL_DYNAMIC_DRAW);
 }
 
+void OpenGLShaderRenderer::applyLineWidth(GLenum mode) {
+	if (mode != GL_LINES && mode != GL_LINE_STRIP && mode != GL_LINE_LOOP)
+		return;
+	// Scale by window pixel width versus engine logical width — mirrors
+	// Freescape (gfx_opengl_shaders.cpp:692), MAX(1, ...) for safety.
+	// With kSupportsArbitraryResolutions, _system->getWidth() returns the
+	// overlay (window) pixel width; without it, getWidth() == _width and
+	// the ratio is 1.
+	const int sysW = _system ? _system->getWidth() : 0;
+	float w = 1.0f;
+	if (sysW > _width)
+		w = MAX(1.0f, (float)sysW / (float)_width);
+	if (w != _lineWidth) {
+		glLineWidth(w);
+		_lineWidth = w;
+	}
+}
+
 void OpenGLShaderRenderer::drawSolid(GLenum mode, const float *positions, int vertCount,
 		const float rgba[4]) {
 	if (vertCount <= 0)
@@ -331,6 +356,7 @@ void OpenGLShaderRenderer::drawSolid(GLenum mode, const float *positions, int ve
 		_solidLastColor[0] = rgba[0]; _solidLastColor[1] = rgba[1];
 		_solidLastColor[2] = rgba[2]; _solidLastColor[3] = rgba[3];
 	}
+	applyLineWidth(mode);
 	glDrawArrays(mode, 0, vertCount);
 }
 
@@ -807,6 +833,7 @@ void OpenGLShaderRenderer::drawSolid3D(GLenum mode, const float *positions, int 
 			_solid3dLastColor[2] = rgba[2]; _solid3dLastColor[3] = rgba[3];
 		}
 	}
+	applyLineWidth(mode);
 	glDrawArrays(mode, 0, vertCount);
 }
 
