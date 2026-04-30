@@ -35,6 +35,7 @@
 #include "engines/advancedDetector.h"
 #include "engines/engine.h"
 #include "graphics/pixelformat.h"
+#include "graphics/surface.h"
 
 namespace Common {
 class MacResManager;
@@ -48,7 +49,6 @@ class FrameLimiter;
 class MacMenu;
 class MacWindowManager;
 class ManagedSurface;
-struct Surface;
 }
 
 namespace Colony {
@@ -392,8 +392,22 @@ struct Sprite {
 	Common::Rect locate;
 	bool used;
 
-	Sprite() : fg(nullptr), mask(nullptr), used(false) {}
-	~Sprite() { delete fg; delete mask; }
+	// Per-sprite render cache: bit-pattern + mask are baked into an
+	// alpha-keyed RGBA surface and uploaded once via drawSurface, instead
+	// of issuing setPixel per pixel each frame. Invalidated when the
+	// (fgColor, bgColor) pair changes (level/palette transition).
+	Graphics::Surface *baked;
+	uint64 bakedKey;
+
+	Sprite() : fg(nullptr), mask(nullptr), used(false), baked(nullptr), bakedKey(0) {}
+	~Sprite() {
+		delete fg;
+		delete mask;
+		if (baked) {
+			baked->free();
+			delete baked;
+		}
+	}
 };
 
 struct ComplexSprite {
@@ -725,6 +739,10 @@ private:
 	Common::Array<ComplexSprite *> _lSprites;
 	Image *_backgroundMask = nullptr;
 	Image *_backgroundFG = nullptr;
+	// Same render cache convention as Sprite::baked, applied to the
+	// per-animation background image (no Sprite owner, so it lives here).
+	Graphics::Surface *_backgroundBaked = nullptr;
+	uint64 _backgroundBakedKey = 0;
 	Common::Rect _backgroundClip;
 	Common::Rect _backgroundLocate;
 	bool _backgroundActive;
@@ -774,7 +792,8 @@ private:
 	void updateAnimation();
 	void drawAnimation();
 	void drawComplexSprite(int index, int ox, int oy);
-	void drawAnimationImage(Image *img, Image *mask, int x, int y, uint32 fillColor = 0xFFFFFFFF);
+	void drawAnimationImage(Image *img, Image *mask, int x, int y, uint32 fillColor,
+			Graphics::Surface *&bakedCache, uint64 &bakedCacheKey);
 	uint32 resolveAnimColor(int16 bmEntry) const;
 	Image *loadImage(Common::SeekableReadStreamEndian &file);
 	void unpackBytes(Common::SeekableReadStreamEndian &file, byte *dst, uint32 len);

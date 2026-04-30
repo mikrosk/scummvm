@@ -971,12 +971,11 @@ bool ColonyEngine::timeSquare(const Common::String &str, const Graphics::Font *m
 			_gfx->setPalette(pal, textIndex, 1);
 		}
 
-		// Draw the blue gradient lines above/below the center band.
+		// Draw the blue gradient bands above/below the center band — each
+		// iteration is a 2-pixel-tall stripe in palette index 160+i.
 		for (int i = 0; i < 16; i++) {
-			_gfx->drawLine(0, centery - 2 - i * 2, _width, centery - 2 - i * 2, 160 + i);
-			_gfx->drawLine(0, centery - 2 - (i * 2 + 1), _width, centery - 2 - (i * 2 + 1), 160 + i);
-			_gfx->drawLine(0, centery + 16 + i * 2, _width, centery + 16 + i * 2, 160 + i);
-			_gfx->drawLine(0, centery + 16 + i * 2 + 1, _width, centery + 16 + i * 2 + 1, 160 + i);
+			_gfx->fillRect(Common::Rect(0, centery - 3 - i * 2, _width, centery - 1 - i * 2), 160 + i);
+			_gfx->fillRect(Common::Rect(0, centery + 16 + i * 2, _width, centery + 18 + i * 2), 160 + i);
 		}
 	} else {
 		// DOS warning band: white outer lines, gray inner lines, white text.

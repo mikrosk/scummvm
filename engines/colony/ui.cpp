@@ -233,25 +233,14 @@ Graphics::Surface *ColonyEngine::loadPictSurface(int resID) {
 	return result;
 }
 
-// Draw a PICT surface at a specific destination position using packRGB.
-// Matches original DrawPicture(pic, &rect) where rect is positioned at (destX, destY).
+// Draw a PICT surface at a specific destination position. The surface was
+// created by loadPictSurface() in the exact ARGB layout the renderer's
+// drawSurface() consumes, so this is a single textured-quad blit — no need
+// to walk pixels.
 void ColonyEngine::drawPictAt(Graphics::Surface *surf, int destX, int destY) {
 	if (!surf)
 		return;
-	for (int y = 0; y < surf->h; y++) {
-		int sy = destY + y;
-		if (sy < 0 || sy >= _height)
-			continue;
-		for (int x = 0; x < surf->w; x++) {
-			int sx = destX + x;
-			if (sx < 0 || sx >= _width)
-				continue;
-			uint32 pixel = surf->getPixel(x, y);
-			byte a, r, g, b;
-			surf->format.colorToARGB(pixel, a, r, g, b);
-			_gfx->setPixel(sx, sy, packRGB(r, g, b));
-		}
-	}
+	_gfx->drawSurface(surf, destX, destY);
 }
 
 void ColonyEngine::updateViewportLayout() {

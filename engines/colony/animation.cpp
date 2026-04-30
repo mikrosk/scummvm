@@ -371,6 +371,12 @@ void ColonyEngine::deleteAnimation() {
 	_backgroundMask = nullptr;
 	delete _backgroundFG;
 	_backgroundFG = nullptr;
+	if (_backgroundBaked) {
+		_backgroundBaked->free();
+		delete _backgroundBaked;
+		_backgroundBaked = nullptr;
+	}
+	_backgroundBakedKey = 0;
 	for (uint i = 0; i < _cSprites.size(); i++)
 		delete _cSprites[i];
 	_cSprites.clear();
@@ -799,7 +805,7 @@ void ColonyEngine::drawAnimation() {
 		}
 		drawAnimationImage(_backgroundFG, _backgroundMask,
 			ox + _backgroundLocate.left, oy + _backgroundLocate.top,
-			bgFill);
+			bgFill, _backgroundBaked, _backgroundBakedKey);
 	}
 
 	// Draw complex sprites
@@ -838,54 +844,73 @@ void ColonyEngine::drawComplexSprite(int index, int ox, int oy) {
 			fillColor = resolveAnimColor(0); // fallback to level-based
 	}
 
-	drawAnimationImage(s->fg, s->mask, x, y, fillColor);
+	drawAnimationImage(s->fg, s->mask, x, y, fillColor, s->baked, s->bakedKey);
 }
 
-void ColonyEngine::drawAnimationImage(Image *img, Image *mask, int x, int y, uint32 fillColor) {
+void ColonyEngine::drawAnimationImage(Image *img, Image *mask, int x, int y, uint32 fillColor,
+		Graphics::Surface *&bakedCache, uint64 &bakedCacheKey) {
 	if (!img || !img->data)
 		return;
 
-	const bool useColor = (_hasMacColors && _renderMode == Common::kRenderMacintosh);
 	// Mac QuickDraw srcBic+srcOr rendering:
 	//   mask bit=1 -> opaque (part of sprite)
 	//   fg bit=1   -> ForeColor (black)
 	//   fg bit=0   -> BackColor (fillColor from BMColor)
 	// Mac B&W: same — fg bit=1 is black (0), fg bit=0 is white (15).
 	// DOS MetaWINDOW: OPPOSITE — fg bit=1 is white (15), fg bit=0 is black (0).
+	const bool useColor = (_hasMacColors && _renderMode == Common::kRenderMacintosh);
 	const bool isMacMode = (_renderMode == Common::kRenderMacintosh);
-	uint32 fgColor, bgColor;
+
+	// Pixels written into the alpha-keyed RGBA cache. mask=0 → alpha 0
+	// (transparent), so drawSurface's alpha-blend skips them naturally.
+	const Graphics::PixelFormat fmt(4, 8, 8, 8, 8, 24, 16, 8, 0);
+	const uint32 black = fmt.ARGBToColor(255, 0, 0, 0);
+	const uint32 white = fmt.ARGBToColor(255, 255, 255, 255);
+	const uint32 transparent = 0;
+
+	uint32 fgPixel, bgPixel;
 	if (useColor) {
-		fgColor = (uint32)0xFF000000;
-		bgColor = fillColor;
+		fgPixel = black;
+		bgPixel = fmt.ARGBToColor(255,
+			(fillColor >> 16) & 0xFF, (fillColor >> 8) & 0xFF, fillColor & 0xFF);
 	} else if (isMacMode) {
-		fgColor = 0;
-		bgColor = 15;
+		fgPixel = black;
+		bgPixel = white;
 	} else {
-		fgColor = 15;
-		bgColor = 0;
+		fgPixel = white;
+		bgPixel = black;
 	}
 
-	for (int iy = 0; iy < img->height; iy++) {
-		for (int ix = 0; ix < img->width; ix++) {
-			int byteIdx = iy * img->rowBytes + (ix / 8);
-			int bitIdx = 7 - (ix % 8);
-
-			bool maskSet = true;
-			if (mask && mask->data) {
-				int mByteIdx = iy * mask->rowBytes + (ix / 8);
-				int mBitIdx = 7 - (ix % 8);
-				maskSet = (mask->data[mByteIdx] & (1 << mBitIdx)) != 0;
-			}
-
-			if (!maskSet)
-				continue;
-
-			bool fgSet = (img->data[byteIdx] & (1 << bitIdx)) != 0;
-			uint32 color = fgSet ? fgColor : bgColor;
-
-			_gfx->setPixel(x + ix, y + iy, color);
+	const uint64 key = ((uint64)fgPixel << 32) | bgPixel;
+	if (!bakedCache || bakedCacheKey != key
+			|| bakedCache->w != img->width || bakedCache->h != img->height) {
+		if (bakedCache) {
+			bakedCache->free();
+			delete bakedCache;
 		}
+		bakedCache = new Graphics::Surface();
+		bakedCache->create(img->width, img->height, fmt);
+
+		uint32 *pixels = (uint32 *)bakedCache->getPixels();
+		for (int iy = 0; iy < img->height; iy++) {
+			const byte *fgRow = img->data + iy * img->rowBytes;
+			const byte *maskRow = (mask && mask->data) ? mask->data + iy * mask->rowBytes : nullptr;
+			uint32 *dst = pixels + iy * img->width;
+			for (int ix = 0; ix < img->width; ix++) {
+				const int bitIdx = 7 - (ix & 7);
+				const bool maskSet = !maskRow || ((maskRow[ix >> 3] & (1 << bitIdx)) != 0);
+				if (!maskSet) {
+					dst[ix] = transparent;
+					continue;
+				}
+				const bool fgSet = (fgRow[ix >> 3] & (1 << bitIdx)) != 0;
+				dst[ix] = fgSet ? fgPixel : bgPixel;
+			}
+		}
+		bakedCacheKey = key;
 	}
+
+	_gfx->drawSurface(bakedCache, x, y);
 }
 
 Image *ColonyEngine::loadImage(Common::SeekableReadStreamEndian &file) {
