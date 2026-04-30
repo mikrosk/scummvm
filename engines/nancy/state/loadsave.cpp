@@ -207,7 +207,8 @@ bool LoadSaveMenu::save() {
 	if (sdlg && sdlg->dialogs.size() > 1) {
 		// nancy6 added a "Do you want to overwrite this save" dialog.
 		// First, check if we are actually overwriting
-		SaveStateDescriptor desc = g_nancy->getMetaEngine()->querySaveMetaInfos(ConfMan.getActiveDomainName().c_str(), _selectedSave + 1);
+		int slot = (g_nancy->getGameType() <= kGameTypeNancy7) ? _selectedSave + 1 : _selectedSave;
+		SaveStateDescriptor desc = g_nancy->getMetaEngine()->querySaveMetaInfos(ConfMan.getActiveDomainName().c_str(), slot);
 		if (desc.isValid()) {
 			if (!ConfMan.hasKey("sdlg_return", Common::ConfigManager::kTransientDomain)) {
 				// Request the dialog
@@ -1175,10 +1176,6 @@ void LoadSaveMenu_V2::enterFilename() {
 }
 
 bool LoadSaveMenu_V2::save() {
-	if (!LoadSaveMenu::save()) {
-		return false;
-	}
-
 	Common::String finalDesc = _enteredString;
 
 	// Look for a state with a matching name and overwrite it
@@ -1205,6 +1202,10 @@ bool LoadSaveMenu_V2::save() {
 				}
 			}
 		} while (shouldContinue);
+	}
+
+	if (!LoadSaveMenu::save()) {
+		return false;
 	}
 
 	g_nancy->saveGameState(_selectedSave, finalDesc, false);
