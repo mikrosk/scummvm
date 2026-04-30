@@ -115,6 +115,7 @@ private:
 };
 
 OpenGLRenderer::OpenGLRenderer(OSystem *system, int width, int height) : _system(system), _width(width), _height(height) {
+	debug(1, "Colony: using OpenGL fixed-function renderer");
 	_wireframe = true;
 	_wireframeFillColor = 0;
 	_stippleData = nullptr;
