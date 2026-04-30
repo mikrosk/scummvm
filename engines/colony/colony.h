@@ -66,6 +66,7 @@ enum ColonyAction {
 	kActionLookLeft,
 	kActionLookRight,
 	kActionLookBehind,
+	kActionFaceForward,
 	kActionToggleMouselook,
 	kActionToggleDashboard,
 	kActionToggleWireframe,
@@ -497,6 +498,13 @@ private:
 	bool _rotateLeft;
 	bool _rotateRight;
 	bool _sprint;
+
+	// Sub-unit accumulators for deltaTime-based smooth movement.
+	// Position uses 256-units-per-cell integers, angles are uint8 — these
+	// retain fractional progress between frames so low speeds aren't lost.
+	float _moveAccumX;
+	float _moveAccumY;
+	float _rotAccum;
 
 	Common::RandomSource _randomSource;
 	Common::Point _mousePos;

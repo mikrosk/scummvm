@@ -173,6 +173,9 @@ ColonyEngine::ColonyEngine(OSystem *syst, const ADGameDescription *gd) : Engine(
 	_rotateLeft = false;
 	_rotateRight = false;
 	_sprint = false;
+	_moveAccumX = 0.0f;
+	_moveAccumY = 0.0f;
+	_rotAccum = 0.0f;
 	_wm = nullptr;
 	_macMenu = nullptr;
 	_menuSurface = nullptr;
@@ -928,6 +931,9 @@ Common::Error ColonyEngine::run() {
 				case kActionLookBehind:
 					_me.look = _me.ang + 128;
 					break;
+				case kActionFaceForward:
+					_me.lookY = 0;
+					break;
 				case kActionToggleDashboard:
 					_showDashBoard = !_showDashBoard;
 					break;
@@ -1045,57 +1051,72 @@ Common::Error ColonyEngine::run() {
 			mouseDX = mouseDY = 0;
 		}
 
-		// Apply continuous movement/rotation from held keys,
-		// throttled to ~15 ticks/sec to match original key-repeat feel
-		if (now - lastMoveTick >= 66) {
+		// Smooth, deltaTime-based movement (Freescape-style). Top speed
+		// matches the previous 15Hz tick: units/sec = 120 * (1 << spd).
+		// Sprint (shift) bumps the speed level by 1; speed keys 1-5 select
+		// the base level. Diagonals are normalized so combined input is
+		// not faster than single-axis movement.
+		{
+			float dt = (now - lastMoveTick) / 1000.0f;
 			lastMoveTick = now;
-			const int spd = _sprint ? _speedShift + 1 : _speedShift;
-			const int moveX = (_cost[_me.look] * (1 << spd)) >> 4;
-			const int moveY = (_sint[_me.look] * (1 << spd)) >> 4;
-			const int rotSpeed = 1 << (_speedShift - 1);
+			if (dt > 0.1f)
+				dt = 0.1f; // clamp for first frame / pause-resume
 
-			if (_gameMode == kModeBattle) {
-				if (_moveForward)
-					battleCommand(_me.xloc + moveX, _me.yloc + moveY);
-				if (_moveBackward)
-					battleCommand(_me.xloc - moveX, _me.yloc - moveY);
-				if (_strafeLeft) {
-					uint8 strafeAngle = (uint8)((int)_me.look + 64);
-					int sx = (_cost[strafeAngle] * (1 << spd)) >> 4;
-					int sy = (_sint[strafeAngle] * (1 << spd)) >> 4;
-					battleCommand(_me.xloc + sx, _me.yloc + sy);
-				}
-				if (_strafeRight) {
-					uint8 strafeAngle = (uint8)((int)_me.look - 64);
-					int sx = (_cost[strafeAngle] * (1 << spd)) >> 4;
-					int sy = (_sint[strafeAngle] * (1 << spd)) >> 4;
-					battleCommand(_me.xloc + sx, _me.yloc + sy);
+			const int spd = CLIP(_sprint ? _speedShift + 1 : _speedShift, 1, 6);
+			const float speed = 120.0f * (float)(1 << spd); // world units/sec
+
+			float dirX = 0.0f, dirY = 0.0f;
+			if (_moveForward) {
+				dirX += _cost[_me.look];
+				dirY += _sint[_me.look];
+			}
+			if (_moveBackward) {
+				dirX -= _cost[_me.look];
+				dirY -= _sint[_me.look];
+			}
+			if (_strafeLeft) {
+				uint8 a = (uint8)((int)_me.look + 64);
+				dirX += _cost[a];
+				dirY += _sint[a];
+			}
+			if (_strafeRight) {
+				uint8 a = (uint8)((int)_me.look - 64);
+				dirX += _cost[a];
+				dirY += _sint[a];
+			}
+
+			if (dirX != 0.0f || dirY != 0.0f) {
+				const float len = sqrtf(dirX * dirX + dirY * dirY);
+				const float ux = dirX / len;
+				const float uy = dirY / len;
+				_moveAccumX += ux * speed * dt;
+				_moveAccumY += uy * speed * dt;
+				const int ix = (int)_moveAccumX;
+				const int iy = (int)_moveAccumY;
+				_moveAccumX -= ix;
+				_moveAccumY -= iy;
+				if (ix != 0 || iy != 0) {
+					if (_gameMode == kModeBattle)
+						battleCommand(_me.xloc + ix, _me.yloc + iy);
+					else
+						cCommand(_me.xloc + ix, _me.yloc + iy, true);
 				}
 			} else {
-				if (_moveForward)
-					cCommand(_me.xloc + moveX, _me.yloc + moveY, true);
-				if (_moveBackward)
-					cCommand(_me.xloc - moveX, _me.yloc - moveY, true);
-				if (_strafeLeft) {
-					uint8 strafeAngle = (uint8)((int)_me.look + 64);
-					int sx = (_cost[strafeAngle] * (1 << spd)) >> 4;
-					int sy = (_sint[strafeAngle] * (1 << spd)) >> 4;
-					cCommand(_me.xloc + sx, _me.yloc + sy, true);
-				}
-				if (_strafeRight) {
-					uint8 strafeAngle = (uint8)((int)_me.look - 64);
-					int sx = (_cost[strafeAngle] * (1 << spd)) >> 4;
-					int sy = (_sint[strafeAngle] * (1 << spd)) >> 4;
-					cCommand(_me.xloc + sx, _me.yloc + sy, true);
-				}
+				_moveAccumX = 0.0f;
+				_moveAccumY = 0.0f;
 			}
-			if (_rotateLeft) {
-				_me.ang += rotSpeed;
-				_me.look += rotSpeed;
-			}
-			if (_rotateRight) {
-				_me.ang -= rotSpeed;
-				_me.look -= rotSpeed;
+
+			if (_rotateLeft || _rotateRight) {
+				const float rotSpeed = (float)(1 << (_speedShift - 1)) * 15.0f;
+				_rotAccum += (_rotateLeft ? rotSpeed : -rotSpeed) * dt;
+				const int rint = (int)_rotAccum;
+				_rotAccum -= rint;
+				if (rint != 0) {
+					_me.ang = (uint8)((int)_me.ang + rint);
+					_me.look = (uint8)((int)_me.look + rint);
+				}
+			} else {
+				_rotAccum = 0.0f;
 			}
 		}
 

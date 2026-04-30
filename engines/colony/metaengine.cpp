@@ -149,6 +149,11 @@ Common::KeymapArray ColonyMetaEngine::initKeymaps(const char *target) const {
 	act->addDefaultInputMapping("x");
 	engineKeyMap->addAction(act);
 
+	act = new Common::Action("FACEFRWARD", _("Face forward"));
+	act->setCustomEngineActionEvent(kActionFaceForward);
+	act->addDefaultInputMapping("f");
+	engineKeyMap->addAction(act);
+
 	act = new Common::Action("MOUSE", _("Toggle mouselook"));
 	act->setCustomEngineActionEvent(kActionToggleMouselook);
 	act->addDefaultInputMapping("SPACE");
@@ -184,7 +189,7 @@ Common::KeymapArray ColonyMetaEngine::initKeymaps(const char *target) const {
 
 	act = new Common::Action("FIRE", _("Fire weapon"));
 	act->setCustomEngineActionEvent(kActionFire);
-	act->addDefaultInputMapping("f");
+	act->addDefaultInputMapping("LCTRL");
 	act->addDefaultInputMapping("JOY_B");
 	engineKeyMap->addAction(act);
 
