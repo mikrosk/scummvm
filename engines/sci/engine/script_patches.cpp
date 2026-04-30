@@ -26070,6 +26070,40 @@ static const uint16 sq6TrashCanPatch[] = {
 	PATCH_END
 };
 
+// WORKAROUND: Pathfinding algorithm difference
+//
+// In the shuttle bay entrance (room 440), clicking on either door button
+//  while the security guard Chesboro is on the floor causes Roger to skip
+//  walking to the door and instead animate from his current position.
+//
+// The polygon deadChesbroPoly is a barred-access polygon that extends beyond
+//  the room's contained-access polygon (gaurdsDead) by one. This causes our
+//  pathfinding algorithm to conclude that the door buttons are unreachable.
+//  This is unrelated to other pathfinding issues in this room, where Roger
+//  can walk up the walls when standing in the left or right alcoves.
+//
+// We work around this by lowering the top edge of deadChesbroPoly by one pixel.
+//
+// Applies to: All versions
+// Responsible method: deadChesbroPoly:init
+// Fixes bug: #9749
+static const uint16 sq6ChesboroPolygonSignature[] = {
+	SIG_MAGICDWORD,
+	0x38, SIG_UINT16(0x00cc),           // pushi 00cc [ x: 204 ]
+	0x39, 0x71,                         // pushi 71   [ y: 113 ]
+	0x38, SIG_UINT16(0x00dd),           // pushi 00dd [ x: 221 ]
+	0x39, 0x71,                         // pushi 71   [ y: 113 ]
+	SIG_END
+};
+
+static const uint16 sq6ChesboroPolygonPatch[] = {
+	PATCH_ADDTOOFFSET(+3),
+	0x39, 0x72,                         // pushi 72   [ y: 114 ]
+	PATCH_ADDTOOFFSET(+3),
+	0x39, 0x72,                         // pushi 72   [ y: 114 ]
+	PATCH_END
+};
+
 //          script, description,                                      signature                        patch
 static const SciScriptPatcherEntry sq6Signatures[] = {
 	{  true,     0, "fix slow transitions",                        1, sq6SlowTransitionSignature2,     sq6SlowTransitionPatch2 },
@@ -26084,6 +26118,7 @@ static const SciScriptPatcherEntry sq6Signatures[] = {
 	{  true,   330, "fix polysorbate lx music volume",             1, sq6PolysorbateVolumeSignature,   sq6PolysorbateVolumePatch },
 	{  true,   390, "fix trash can",                               1, sq6TrashCanSignature,            sq6TrashCanPatch },
 	{  true,   410, "fix slow transitions",                        1, sq6SlowTransitionSignature2,     sq6SlowTransitionPatch2 },
+	{  true,   440, "pathfinding: chesboro polygon",               1, sq6ChesboroPolygonSignature,     sq6ChesboroPolygonPatch },
 	{  true,   460, "fix invalid array construction",              1, sci21IntArraySignature,          sci21IntArrayPatch },
 	{  true,   490, "fix invalid cockpit icon bar",                1, sq6CockpitIconBarSignature,      sq6CockpitIconBarPatch },
 	{  true,   500, "fix slow transitions",                        1, sq6SlowTransitionSignature1,     sq6SlowTransitionPatch1 },
