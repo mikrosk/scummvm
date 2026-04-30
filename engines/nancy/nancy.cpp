@@ -115,7 +115,10 @@ Common::Error NancyEngine::loadGameState(int slot) {
 		ConfMan.setInt("display_slot", slot, Common::ConfigManager::kTransientDomain);
 	}
 
-	return Engine::loadGameState(slot);
+	Common::Error result = Engine::loadGameState(slot);
+	if (result.getCode() == Common::kNoError)
+		g_nancy->setState(NancyState::kScene);
+	return result;
 }
 
 Common::Error NancyEngine::loadGameStream(Common::SeekableReadStream *stream) {
