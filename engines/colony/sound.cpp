@@ -141,14 +141,14 @@ bool Sound::isPlaying() const {
 	return _vm->_mixer->isSoundHandleActive(_handle) || _speaker->isPlaying();
 }
 
-void Sound::play(int soundID) {
+void Sound::play(int soundID, bool loop) {
 	stop();
 
 	if (!_vm->isSoundEnabled())
 		return;
 
 	if (_vm->getPlatform() == Common::kPlatformMacintosh)
-		playMacSound(soundID);
+		playMacSound(soundID, loop);
 	else
 		playPCSpeaker(soundID);
 }
@@ -345,7 +345,7 @@ void Sound::playPCSpeaker(int soundID) {
 	}
 }
 
-bool Sound::playMacSound(int soundID) {
+bool Sound::playMacSound(int soundID, bool loop) {
 	// Primary resource IDs from original sound.c
 	int resID = -1;
 	switch (soundID) {
@@ -379,7 +379,7 @@ bool Sound::playMacSound(int soundID) {
 	default: break;
 	}
 
-	if (resID != -1 && playResource(resID))
+	if (resID != -1 && playResource(resID, loop))
 		return true;
 
 	// Fallback resource IDs for sounds missing from this binary version.
@@ -392,7 +392,7 @@ bool Sound::playMacSound(int soundID) {
 	default: break;
 	}
 
-	if (altResID != -1 && playResource(altResID))
+	if (altResID != -1 && playResource(altResID, loop))
 		return true;
 
 	// Fallback to DOS sounds if Mac resource is missing
@@ -400,7 +400,7 @@ bool Sound::playMacSound(int soundID) {
 	return false;
 }
 
-bool Sound::playResource(int resID) {
+bool Sound::playResource(int resID, bool loop) {
 	Common::SeekableReadStream *snd = nullptr;
 
 	// Search Zounds first (has most sounds)
@@ -426,7 +426,8 @@ bool Sound::playResource(int resID) {
 	snd->read(data, dataSize);
 	delete snd;
 
-	Audio::AudioStream *stream = Audio::makeRawStream(data, dataSize, 11127, Audio::FLAG_UNSIGNED, DisposeAfterUse::YES);
+	Audio::RewindableAudioStream *raw = Audio::makeRawStream(data, dataSize, 11127, Audio::FLAG_UNSIGNED, DisposeAfterUse::YES);
+	Audio::AudioStream *stream = loop ? Audio::makeLoopingAudioStream(raw, 0) : raw;
 	_vm->_mixer->playStream(Audio::Mixer::kSFXSoundType, &_handle, stream);
 	return true;
 }

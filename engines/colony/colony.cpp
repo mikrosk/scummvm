@@ -1164,7 +1164,7 @@ bool ColonyEngine::checkSkipRequested() {
 		case Common::EVENT_RETURN_TO_LAUNCHER:
 			return true;
 		case Common::EVENT_CUSTOM_ENGINE_ACTION_START:
-			if (event.customType == kActionSkipIntro)
+			if (event.customType == kActionEscape)
 				return true;
 			break;
 		case Common::EVENT_SCREEN_CHANGED:
@@ -1196,7 +1196,7 @@ bool ColonyEngine::waitForInput() {
 			case Common::EVENT_RETURN_TO_LAUNCHER:
 				return false;
 			case Common::EVENT_CUSTOM_ENGINE_ACTION_START:
-				if (event.customType == kActionSkipIntro)
+				if (event.customType == kActionEscape)
 					return true;
 				return false;
 			case Common::EVENT_KEYDOWN:

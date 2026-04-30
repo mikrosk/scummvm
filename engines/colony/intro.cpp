@@ -218,7 +218,10 @@ void ColonyEngine::playIntro() {
 			_gfx->clear(_gfx->black());
 			if (!drawPict(-32565))  // Color Colony
 				drawPict(-32748);   // B&W Colony
-			_sound->play(Sound::kMars);
+			// Original intro.c: PlayMars() → PlayCSound(mars), looped via VBL
+			// task. Mars stays alive across the next several intro sections
+			// until EndCSound() is called.
+			_sound->play(Sound::kMars, true);
 			qt = makeStars(_screenR, 0);
 
 			if (!qt) {
@@ -1044,8 +1047,9 @@ bool ColonyEngine::timeSquare(const Common::String &str, const Graphics::Font *m
 	_sound->stop();
 
 	// Phase 3: Mac resumes Mars here; DOS scrolls out silently.
+	// Original intro.c TimeSquare line 323: PlayMars() restarts the loop.
 	if (macStyle)
-		_sound->play(Sound::kMars);
+		_sound->play(Sound::kMars, true);
 	for (int x = targetX; x > endX; x -= stepX) {
 		_gfx->fillRect(textBand, 0);
 		_gfx->drawString(font, str, x, centery + 2, textIndex, Graphics::kTextAlignLeft);

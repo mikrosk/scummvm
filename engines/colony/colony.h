@@ -71,7 +71,6 @@ enum ColonyAction {
 	kActionToggleDashboard,
 	kActionToggleWireframe,
 	kActionToggleFullscreen,
-	kActionSkipIntro,
 	kActionEscape,
 	kActionFire
 };

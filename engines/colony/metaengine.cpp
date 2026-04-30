@@ -175,13 +175,7 @@ Common::KeymapArray ColonyMetaEngine::initKeymaps(const char *target) const {
 	act->addDefaultInputMapping("F11");
 	engineKeyMap->addAction(act);
 
-	act = new Common::Action("SKIP", _("Skip intro"));
-	act->setCustomEngineActionEvent(kActionSkipIntro);
-	act->addDefaultInputMapping("S+s");
-	act->addDefaultInputMapping("JOY_X");
-	engineKeyMap->addAction(act);
-
-	act = new Common::Action("ESCAPE", _("Menu"));
+	act = new Common::Action("ESCAPE", _("Menu / Skip intro"));
 	act->setCustomEngineActionEvent(kActionEscape);
 	act->addDefaultInputMapping("ESCAPE");
 	act->addDefaultInputMapping("JOY_BACK");
