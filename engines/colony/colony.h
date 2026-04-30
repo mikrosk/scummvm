@@ -714,6 +714,19 @@ private:
 	byte _topBG[8] = {};
 	byte _bottomBG[8] = {};
 	int16 _divideBG;
+
+	// Cache for the animation background pattern. Regenerated only when
+	// pattern bytes / colors / split point change. Replaces a 110k-pixel
+	// setPixel loop with one texture upload, fixing cursor choppiness
+	// during animations on the OpenGL renderer.
+	Graphics::Surface *_animPatternSurface = nullptr;
+	byte _animPatternKeyTopBG[8] = {};
+	byte _animPatternKeyBottomBG[8] = {};
+	int16 _animPatternKeyDivide = -1;
+	uint32 _animPatternKeyTopColor = 0;
+	uint32 _animPatternKeyBotColor = 0;
+	int _animPatternKeyMode = -1; // 0=DOS, 1=Mac B&W, 2=Mac color
+	bool _animPatternValid = false;
 	Common::String _animationName;
 	Common::Array<int16> _animBMColors;
 	bool _animationRunning;

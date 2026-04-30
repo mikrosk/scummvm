@@ -32,6 +32,7 @@
 #include "common/stream.h"
 #include "common/system.h"
 #include "graphics/cursorman.h"
+#include "graphics/surface.h"
 
 #include "colony/colony.h"
 #include "colony/renderer.h"
@@ -573,6 +574,12 @@ void ColonyEngine::playAnimation() {
 		_gfx->copyToScreen();
 	}
 
+	// drawAnimation is heavy (per-pixel setPixel calls for the 416x264 pattern)
+	// so cap it to the animation update cadence (50ms = 20fps). Between draws,
+	// only call updateScreen so the OpenGL backend re-composites with the
+	// current cursor position — keeps the pointer smooth without re-rendering.
+	uint32 lastDrawTime = 0;
+	bool needsDraw = true;
 	while (_animationRunning && !shouldQuit()) {
 		Common::Event event;
 		while (_system->getEventManager()->pollEvent(event)) {
@@ -581,10 +588,12 @@ void ColonyEngine::playAnimation() {
 				return;
 			} else if (event.type == Common::EVENT_SCREEN_CHANGED) {
 				_gfx->computeScreenViewport();
+				needsDraw = true;
 			} else if (event.type == Common::EVENT_LBUTTONDOWN) {
 				int item = whichSprite(event.mouse);
 				if (item > 0) {
 					handleAnimationClick(item);
+					needsDraw = true;
 				}
 			} else if (event.type == Common::EVENT_RBUTTONDOWN) {
 				// DOS: right-click exits animation (AnimControl returns FALSE on button-up)
@@ -596,6 +605,7 @@ void ColonyEngine::playAnimation() {
 				if (event.customType == kActionEscape) {
 					openMainMenuDialog();
 					_gfx->computeScreenViewport();
+					needsDraw = true;
 				}
 			} else if (event.type == Common::EVENT_KEYDOWN) {
 				int item = 0;
@@ -611,14 +621,28 @@ void ColonyEngine::playAnimation() {
 
 				if (item > 0) {
 					handleAnimationClick(item);
+					needsDraw = true;
 				}
 			}
 		}
 
+		// updateAnimation has its own 50ms throttle; only redraw when we know
+		// the visible state changed (click feedback) or the cadence is due.
+		const uint32 prevAnimUpdate = _lastAnimUpdate;
 		updateAnimation();
-		drawAnimation();
-		_gfx->copyToScreen();
-		responsiveAnimationDelay(_system, 4);
+		if (_lastAnimUpdate != prevAnimUpdate)
+			needsDraw = true;
+
+		const uint32 now = _system->getMillis();
+		if (needsDraw || now - lastDrawTime >= 50) {
+			drawAnimation();
+			_gfx->copyToScreen();
+			lastDrawTime = now;
+			needsDraw = false;
+		} else {
+			_system->updateScreen();
+		}
+		_system->delayMillis(2);
 	}
 
 	_system->lockMouse(true);
@@ -698,43 +722,75 @@ void ColonyEngine::drawAnimation() {
 	//   Top: BMColor[0]<0 -> system color; ==0 -> powered:c_char0+level-1.f, else:c_dwall.b
 	//   Bottom: powered -> c_lwall.f; unpowered -> inherits top BackColor
 	// B&W/DOS: preserve existing palette-index behavior (bit 1 -> 15, bit 0 -> 0).
+	//
+	// We render the pattern into a cached RGBA surface and blit it via
+	// drawSurface (one texture upload per change). The previous implementation
+	// did 416*264 = 109,824 individual setPixel calls per drawAnimation, each
+	// issuing its own glBegin/glEnd; on the OpenGL backend that took tens of
+	// milliseconds per frame and starved the cursor of refreshes.
+	const int patternMode = useColor ? 2 : (_renderMode == Common::kRenderMacintosh ? 1 : 0);
+	uint32 topColor = 0, botColor = 0;
 	if (useColor) {
 		const bool powered = (_corePower[_coreIndex] > 0);
-		uint32 topBG = resolveAnimColor(_animBMColors[0]);
-		// Bottom: only uses c_lwall.f when powered; unpowered inherits top color
-		uint32 botBG = powered ? packMacColorBG(_macColors[kMcLwall].fg) : topBG;
-		for (int y = 0; y < 264; y++) {
-			byte *pat = (y < _divideBG) ? _topBG : _bottomBG;
-			byte row = pat[y % 8];
-			uint32 bg = (y < _divideBG) ? topBG : botBG;
-			for (int x = 0; x < 416; x++) {
-				bool set = (row & (0x80 >> (x % 8))) != 0;
-				_gfx->setPixel(ox + x, oy + y, set ? (uint32)0xFF000000 : bg);
-			}
-		}
-	} else if (_renderMode == Common::kRenderMacintosh) {
-		// Mac QuickDraw FillRect: pattern bit=1 → ForeColor (black=0),
-		// bit=0 → BackColor (white=15).
-		for (int y = 0; y < 264; y++) {
-			byte *pat = (y < _divideBG) ? _topBG : _bottomBG;
-			byte row = pat[y % 8];
-			for (int x = 0; x < 416; x++) {
-				bool set = (row & (0x80 >> (x % 8))) != 0;
-				_gfx->setPixel(ox + x, oy + y, set ? 0 : 15);
-			}
-		}
-	} else {
-		// DOS MetaWINDOW: pattern bit=1 → pen color (white=15),
-		// bit=0 → background (black=0). Opposite of Mac QuickDraw.
-		for (int y = 0; y < 264; y++) {
-			byte *pat = (y < _divideBG) ? _topBG : _bottomBG;
-			byte row = pat[y % 8];
-			for (int x = 0; x < 416; x++) {
-				bool set = (row & (0x80 >> (x % 8))) != 0;
-				_gfx->setPixel(ox + x, oy + y, set ? 15 : 0);
-			}
-		}
+		topColor = resolveAnimColor(_animBMColors[0]);
+		botColor = powered ? packMacColorBG(_macColors[kMcLwall].fg) : topColor;
 	}
+
+	const bool keyChanged = !_animPatternValid
+		|| _animPatternKeyMode != patternMode
+		|| _animPatternKeyDivide != _divideBG
+		|| _animPatternKeyTopColor != topColor
+		|| _animPatternKeyBotColor != botColor
+		|| memcmp(_animPatternKeyTopBG, _topBG, 8) != 0
+		|| memcmp(_animPatternKeyBottomBG, _bottomBG, 8) != 0;
+
+	if (!_animPatternSurface) {
+		_animPatternSurface = new Graphics::Surface();
+		_animPatternSurface->create(416, 264, Graphics::PixelFormat(4, 8, 8, 8, 8, 24, 16, 8, 0));
+	}
+
+	if (keyChanged) {
+		const Graphics::PixelFormat &fmt = _animPatternSurface->format;
+		uint32 fgPixel, topBgPixel, botBgPixel;
+		switch (patternMode) {
+		case 2: // Mac color: bit=1 → black, bit=0 → topColor/botColor
+			fgPixel = fmt.ARGBToColor(255, 0, 0, 0);
+			topBgPixel = fmt.ARGBToColor(255,
+				(topColor >> 16) & 0xFF, (topColor >> 8) & 0xFF, topColor & 0xFF);
+			botBgPixel = fmt.ARGBToColor(255,
+				(botColor >> 16) & 0xFF, (botColor >> 8) & 0xFF, botColor & 0xFF);
+			break;
+		case 1: // Mac B&W: bit=1 → black, bit=0 → white
+			fgPixel = fmt.ARGBToColor(255, 0, 0, 0);
+			topBgPixel = botBgPixel = fmt.ARGBToColor(255, 255, 255, 255);
+			break;
+		default: // DOS: bit=1 → white, bit=0 → black
+			fgPixel = fmt.ARGBToColor(255, 255, 255, 255);
+			topBgPixel = botBgPixel = fmt.ARGBToColor(255, 0, 0, 0);
+			break;
+		}
+
+		uint32 *pixels = (uint32 *)_animPatternSurface->getPixels();
+		for (int y = 0; y < 264; y++) {
+			const byte row = ((y < _divideBG) ? _topBG : _bottomBG)[y % 8];
+			const uint32 bgPixel = (y < _divideBG) ? topBgPixel : botBgPixel;
+			uint32 *dst = pixels + y * 416;
+			for (int x = 0; x < 416; x++) {
+				const bool set = (row & (0x80 >> (x % 8))) != 0;
+				dst[x] = set ? fgPixel : bgPixel;
+			}
+		}
+
+		memcpy(_animPatternKeyTopBG, _topBG, 8);
+		memcpy(_animPatternKeyBottomBG, _bottomBG, 8);
+		_animPatternKeyDivide = _divideBG;
+		_animPatternKeyTopColor = topColor;
+		_animPatternKeyBotColor = botColor;
+		_animPatternKeyMode = patternMode;
+		_animPatternValid = true;
+	}
+
+	_gfx->drawSurface(_animPatternSurface, ox, oy);
 
 	// Draw background image if active.
 	// Original: BMColor[1] only applied when corepower[coreindex] > 0.

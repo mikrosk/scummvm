@@ -279,6 +279,10 @@ ColonyEngine::~ColonyEngine() {
 		_pictCompass->free();
 		delete _pictCompass;
 	}
+	if (_animPatternSurface) {
+		_animPatternSurface->free();
+		delete _animPatternSurface;
+	}
 	delete _frameLimiter;
 	delete _gfx;
 	delete _sound;
