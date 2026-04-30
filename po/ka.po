@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.8.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-26 21:33+0000\n"
+"POT-Creation-Date: 2026-04-30 08:16+0000\n"
 "PO-Revision-Date: 2026-03-27 06:22+0000\n"
 "Last-Translator: NorwayFun <temuri.doghonadze@gmail.com>\n"
 "Language-Team: Georgian <https://translations.scummvm.org/projects/scummvm/"
@@ -4060,7 +4060,7 @@ msgstr "ეკრანის ანაბეჭდის შენახვა 
 msgid "Windowed mode"
 msgstr "ფანჯრის რეჟიმი"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:491 engines/colony/metaengine.cpp:168
+#: backends/graphics/sdl/sdl-graphics.cpp:491 engines/colony/metaengine.cpp:173
 #: engines/scumm/help.cpp:88
 msgid "Toggle fullscreen"
 msgstr "მთელ ეკრანზე გატანის ჩართ/გამორთ"
@@ -5450,10 +5450,10 @@ msgstr "R2"
 #. I18N: Hardware key
 #: backends/platform/sdl/miyoo/miyoo.cpp:83
 #: backends/platform/sdl/miyoo/miyoo.cpp:114
-#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:179
-#: engines/grim/grim.cpp:545 engines/grim/grim.cpp:645
-#: engines/hdb/metaengine.cpp:264 engines/made/metaengine.cpp:186
-#: engines/phoenixvr/metaengine.cpp:101 engines/toltecs/metaengine.cpp:252
+#: engines/alcachofa/metaengine.cpp:110 engines/grim/grim.cpp:545
+#: engines/grim/grim.cpp:645 engines/hdb/metaengine.cpp:264
+#: engines/made/metaengine.cpp:186 engines/phoenixvr/metaengine.cpp:101
+#: engines/toltecs/metaengine.cpp:252
 msgid "Menu"
 msgstr "მენიუ"
 
@@ -7429,31 +7429,36 @@ msgid "Look behind"
 msgstr "დახედვა"
 
 #: engines/colony/metaengine.cpp:152
+#: engines/freescape/games/castle/castle.cpp:515
+#: engines/freescape/games/eclipse/eclipse.cpp:417
+msgid "Face forward"
+msgstr "სახე წინ"
+
+#: engines/colony/metaengine.cpp:157
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle mouselook"
 msgstr "დადუმების გადართვა"
 
-#: engines/colony/metaengine.cpp:158
+#: engines/colony/metaengine.cpp:163
 #, fuzzy
 #| msgid "Toggle sound"
 msgid "Toggle dashboard"
 msgstr "ხმის გადართვა"
 
-#: engines/colony/metaengine.cpp:163
+#: engines/colony/metaengine.cpp:168
 #, fuzzy
 #| msgid "Toggle frame by frame"
 msgid "Toggle wireframe"
 msgstr "კადრკადრ ჩვენების გადართვა"
 
-#: engines/colony/metaengine.cpp:173 engines/hypno/metaengine.cpp:146
-#: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
-#: engines/sherlock/metaengine.cpp:872 engines/teenagent/metaengine.cpp:232
-#: engines/toon/metaengine.cpp:98 engines/voyeur/metaengine.cpp:235
-msgid "Skip intro"
-msgstr "შესავლის გამოტოვება"
+#: engines/colony/metaengine.cpp:178
+#, fuzzy
+#| msgid "Menu / Skip"
+msgid "Menu / Skip intro"
+msgstr "მენიუ / გამოტოვება"
 
-#: engines/colony/metaengine.cpp:185 engines/ultima/ultima8/metaengine.cpp:89
+#: engines/colony/metaengine.cpp:184 engines/ultima/ultima8/metaengine.cpp:89
 msgid "Fire weapon"
 msgstr "იარაღის სროლა"
 
@@ -8299,11 +8304,6 @@ msgstr "ხმის გადართვა"
 #: engines/freescape/games/castle/castle.cpp:509
 msgid "Crawl"
 msgstr "ფორთხვა"
-
-#: engines/freescape/games/castle/castle.cpp:515
-#: engines/freescape/games/eclipse/eclipse.cpp:417
-msgid "Face forward"
-msgstr "სახე წინ"
 
 #: engines/freescape/games/castle/castle.cpp:526
 msgid "Run (hold)"
@@ -9454,6 +9454,13 @@ msgstr "ძირითადი სროლა"
 #: engines/hypno/metaengine.cpp:140
 msgid "Secondary shoot"
 msgstr "მეორადი სროლა"
+
+#: engines/hypno/metaengine.cpp:146 engines/lab/metaengine.cpp:209
+#: engines/ngi/metaengine.cpp:168 engines/sherlock/metaengine.cpp:872
+#: engines/teenagent/metaengine.cpp:232 engines/toon/metaengine.cpp:98
+#: engines/voyeur/metaengine.cpp:235
+msgid "Skip intro"
+msgstr "შესავლის გამოტოვება"
 
 #: engines/hypno/metaengine.cpp:167
 msgid "Exit menu keymappings"
