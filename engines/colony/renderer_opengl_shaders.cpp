@@ -122,6 +122,14 @@ private:
 	Math::Matrix4 _projection;
 	Math::Matrix4 _mvpMatrix;
 
+	// Cached "color" uniform values per shader. Uniforms persist with the
+	// program object across glUseProgram cycles, so once we've uploaded a
+	// color, subsequent draws can skip glUniform4fv when the color matches.
+	// Adjacent walls / dashboard primitives commonly share colors, so this
+	// elides a lot of uniform writes per frame.
+	float _solidLastColor[4] = { -1.0f, -1.0f, -1.0f, -1.0f };
+	float _solid3dLastColor[4] = { -1.0f, -1.0f, -1.0f, -1.0f };
+
 	bool _wireframe = true;
 	int64_t _wireframeFillColor = 0; // -1 = no fill, else color (palette idx or ARGB)
 
@@ -171,6 +179,15 @@ OpenGLShaderRenderer::OpenGLShaderRenderer(OSystem *system, int width, int heigh
 		3 * sizeof(float), 0);
 
 	glGenTextures(1, &_bitmapTexture);
+	// Texture parameters are per-texture-object state, so they only need to
+	// be set once at creation; they persist across glTexImage2D re-uploads.
+	// All blits (drawSurface, drawString) reuse this single texture handle
+	// and share the same NEAREST filter + CLAMP_TO_EDGE wrap.
+	glBindTexture(GL_TEXTURE_2D, _bitmapTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
@@ -257,8 +274,13 @@ void OpenGLShaderRenderer::uploadProjectionUniform() {
 // ---------------------------------------------------------------------------
 
 void OpenGLShaderRenderer::uploadSolid(const float *positions, int vertCount) {
+	// glBufferData (orphan) instead of glBufferSubData: tells the driver
+	// the previous contents are dead, so it can hand us fresh storage
+	// without waiting for the GPU to finish reading the old data. This
+	// matches Freescape's per-draw pattern (gfx_opengl_shaders.cpp:695,
+	// 717) and avoids implicit CPU/GPU sync stalls on Mac drivers.
 	glBindBuffer(GL_ARRAY_BUFFER, _solidVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 2 * vertCount, positions);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * vertCount, positions, GL_DYNAMIC_DRAW);
 }
 
 void OpenGLShaderRenderer::drawSolid(GLenum mode, const float *positions, int vertCount,
@@ -267,11 +289,16 @@ void OpenGLShaderRenderer::drawSolid(GLenum mode, const float *positions, int ve
 		return;
 	uploadSolid(positions, vertCount);
 	// "projection" is set once by uploadProjectionUniform() — it persists in
-	// the program object across draws. Only "color" varies per call.
-	// Shader stays bound between draws so Shader::use()'s _previousShader
-	// cache (graphics/opengl/shader.cpp:378-380) skips re-binding.
+	// the program object across draws. Shader stays bound between draws so
+	// Shader::use()'s _previousShader cache short-circuits the rebind.
 	_solidShader->use();
-	_solidShader->setUniform("color", Math::Vector4d(rgba[0], rgba[1], rgba[2], rgba[3]));
+	if (rgba[0] != _solidLastColor[0] || rgba[1] != _solidLastColor[1]
+			|| rgba[2] != _solidLastColor[2] || rgba[3] != _solidLastColor[3]) {
+		_solidShader->setUniform("color",
+			Math::Vector4d(rgba[0], rgba[1], rgba[2], rgba[3]));
+		_solidLastColor[0] = rgba[0]; _solidLastColor[1] = rgba[1];
+		_solidLastColor[2] = rgba[2]; _solidLastColor[3] = rgba[3];
+	}
 	glDrawArrays(mode, 0, vertCount);
 }
 
@@ -461,11 +488,9 @@ void OpenGLShaderRenderer::drawString(const Graphics::Font *font, const Common::
 	}
 	mask.free();
 
+	// Texture params are set once at construction. The shared _bitmapTexture
+	// keeps NEAREST filter + CLAMP_TO_EDGE for both drawString and drawSurface.
 	glBindTexture(GL_TEXTURE_2D, _bitmapTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaBuf);
 	delete[] rgbaBuf;
@@ -486,11 +511,8 @@ void OpenGLShaderRenderer::drawSurface(const Graphics::Surface *surf, int x, int
 	if (surf->format.bytesPerPixel != 4)
 		return;
 
+	// Texture params are set once at construction; just bind here.
 	glBindTexture(GL_TEXTURE_2D, _bitmapTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 	// The engine's surface format is PixelFormat(4,8,8,8,8,24,16,8,0) —
 	// R at bit 24, A at bit 0 — so GL_RGBA + GL_UNSIGNED_INT_8_8_8_8 reads
@@ -513,8 +535,9 @@ void OpenGLShaderRenderer::drawTexturedQuad(int x, int y, int w, int h) {
 		(float)x,       (float)(y + h), 0.0f, 1.0f,
 		(float)(x + w), (float)(y + h), 1.0f, 1.0f
 	};
+	// Orphan + write fresh — see uploadSolid.
 	glBindBuffer(GL_ARRAY_BUFFER, _bitmapVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verts), verts);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_DYNAMIC_DRAW);
 
 	// "projection" and "tex" are set once at init / on resolution change;
 	// they persist in the program object so we don't re-upload here.
@@ -680,8 +703,9 @@ void OpenGLShaderRenderer::end3D() {
 }
 
 void OpenGLShaderRenderer::uploadSolid3D(const float *positions, int vertCount) {
+	// See uploadSolid for the orphan-via-glBufferData rationale.
 	glBindBuffer(GL_ARRAY_BUFFER, _solid3dVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * vertCount, positions);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * vertCount, positions, GL_DYNAMIC_DRAW);
 }
 
 void OpenGLShaderRenderer::drawSolid3D(GLenum mode, const float *positions, int vertCount,
@@ -689,10 +713,17 @@ void OpenGLShaderRenderer::drawSolid3D(GLenum mode, const float *positions, int 
 	if (vertCount <= 0)
 		return;
 	uploadSolid3D(positions, vertCount);
-	// "mvpMatrix" is set in begin3D and persists in the program object —
-	// only "color" varies per draw. Same shader-bind caching as drawSolid.
+	// "mvpMatrix" is set in begin3D and persists in the program object.
+	// Skip the color upload when it matches the previous draw — adjacent
+	// corridor walls/quads commonly share a color.
 	_solid3dShader->use();
-	_solid3dShader->setUniform("color", Math::Vector4d(rgba[0], rgba[1], rgba[2], rgba[3]));
+	if (rgba[0] != _solid3dLastColor[0] || rgba[1] != _solid3dLastColor[1]
+			|| rgba[2] != _solid3dLastColor[2] || rgba[3] != _solid3dLastColor[3]) {
+		_solid3dShader->setUniform("color",
+			Math::Vector4d(rgba[0], rgba[1], rgba[2], rgba[3]));
+		_solid3dLastColor[0] = rgba[0]; _solid3dLastColor[1] = rgba[1];
+		_solid3dLastColor[2] = rgba[2]; _solid3dLastColor[3] = rgba[3];
+	}
 	glDrawArrays(mode, 0, vertCount);
 }
 
