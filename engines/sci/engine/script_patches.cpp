@@ -26104,6 +26104,33 @@ static const uint16 sq6ChesboroPolygonPatch[] = {
 	PATCH_END
 };
 
+// WORKAROUND: Pathfinding algorithm difference
+//
+// In Stella's brain (room 740) ego can walk out of bounds from the upper right
+//  area with the ship to the lower area. This skips solving a puzzle and leaves
+//  the game in a broken state.
+//
+// We work around this by adjusting the upper right polygon. It has a narrow
+//  spike with one point at the end, and our pathfinding algorithm seems to have
+//  trouble with that. By moving a second point near the end, the problematic
+//  spike shape is removed while keeping the same effective walking area.
+//
+// Applies to: All versions
+// Responsible method: rm740:init
+// Fixes bug: #9589
+static const uint16 sq6BrainPolygonSignature[] = {
+	SIG_MAGICDWORD,
+	0x38, SIG_UINT16(0x0337),           // pushi 0337 [ x: 823 ]
+	0x39, 0x0c,                         // pushi 0c   [ y: 12  ]
+	SIG_END
+};
+
+static const uint16 sq6BrainPolygonPatch[] = {
+	0x38, PATCH_UINT16(0x2df),          // pushi 02df [ x: 735 ]
+	0x39, 0x00,                         // pushi 00   [ y: 0   ]
+	PATCH_END
+};
+
 //          script, description,                                      signature                        patch
 static const SciScriptPatcherEntry sq6Signatures[] = {
 	{  true,     0, "fix slow transitions",                        1, sq6SlowTransitionSignature2,     sq6SlowTransitionPatch2 },
@@ -26124,6 +26151,7 @@ static const SciScriptPatcherEntry sq6Signatures[] = {
 	{  true,   500, "fix slow transitions",                        1, sq6SlowTransitionSignature1,     sq6SlowTransitionPatch1 },
 	{  true,   510, "fix invalid array construction",              1, sci21IntArraySignature,          sci21IntArrayPatch },
 	{  true,   690, "fix duplicate points",                        1, sq6DuplicatePointsSignature,     sq6DuplicatePointsPatch },
+	{  true,   740, "pathfinding: brain polygon",                  1, sq6BrainPolygonSignature,        sq6BrainPolygonPatch },
 	{  true,    40, "SQNarrator lockup fix",                       1, sq6NarratorLockupSignature,      sq6NarratorLockupPatch },
 	{  true,    40, "SQNarrator lockup fix",                       1, sciNarratorLockupLineSignature,  sciNarratorLockupLinePatch },
 	{  true, 64928, "Narrator lockup fix",                         1, sciNarratorLockupSignature,      sciNarratorLockupPatch },
