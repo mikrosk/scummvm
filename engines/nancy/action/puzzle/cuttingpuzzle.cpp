@@ -341,13 +341,33 @@ void CuttingPuzzle::execute() {
 }
 
 void CuttingPuzzle::handleInput(NancyInput &input) {
-	if (_state != kRun || _latheRunning)
+	if (_state != kRun)
 		return;
 
 	// Convert mouse position to viewport-local coordinates.
 	Common::Point localMouse = input.mousePos;
 	Common::Rect vpPos = NancySceneState.getViewport().getScreenPosition();
 	localMouse -= Common::Point(vpPos.left, vpPos.top);
+
+	// Allow stopping the lathe by clicking on the on/off switch hotspot.
+
+	// Start/stop switch: toggle the lathe (re-clicking while stopped is a no-op
+	// since the lathe auto-stops after 14 cycles).
+	if (_switchDest.contains(localMouse)) {
+		g_nancy->_cursor->setCursorType(CursorManager::kHotspot);
+
+		if (input.input & NancyInput::kLeftMouseButtonUp) {
+			_latheRunning = !_latheRunning;
+			_macroCycleCount = 0;
+			_animFrame = 0;
+			g_nancy->_sound->playSound(_startStopSound);
+			redrawSurface();
+		}
+		return;
+	}
+
+	if (_latheRunning)
+		return;
 
 	if (!_exitHotspot.isEmpty() && _exitHotspot.contains(localMouse)) {
 		g_nancy->_cursor->setCursorType(CursorManager::kMoveBackward);
@@ -373,21 +393,6 @@ void CuttingPuzzle::handleInput(NancyInput &input) {
 			else
 				_currentLeverDepth = (_currentLeverDepth + 1) % 4;
 			g_nancy->_sound->playSound(_depthSound);
-			redrawSurface();
-		}
-		return;
-	}
-
-	// Start/stop switch: start the lathe (re-clicking while stopped is a no-op
-	// since the lathe auto-stops after 14 cycles).
-	if (_switchDest.contains(localMouse)) {
-		g_nancy->_cursor->setCursorType(CursorManager::kHotspot);
-
-		if (input.input & NancyInput::kLeftMouseButtonUp) {
-			_latheRunning    = true;
-			_macroCycleCount = 0;
-			_animFrame       = 0;
-			g_nancy->_sound->playSound(_startStopSound);
 			redrawSurface();
 		}
 		return;
