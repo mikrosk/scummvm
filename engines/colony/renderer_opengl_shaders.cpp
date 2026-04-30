@@ -79,8 +79,8 @@ public:
 	void copyToScreen() override;
 	void setWireframe(bool enable, int64_t fillColor) override;
 	void setXorMode(bool enable) override {}
-	void setStippleData(const byte *data) override {}
-	void setMacColors(uint32 fg, uint32 bg) override {}
+	void setStippleData(const byte *data) override;
+	void setMacColors(uint32 fg, uint32 bg) override;
 	void setDepthState(bool testEnabled, bool writeEnabled) override;
 	void setDepthRange(float nearVal, float farVal) override;
 	void computeScreenViewport() override;
@@ -100,9 +100,14 @@ private:
 	void drawTexturedQuad(int x, int y, int w, int h);
 
 	void uploadSolid3D(const float *positions, int vertCount);
-	void drawSolid3D(GLenum mode, const float *positions, int vertCount, const float rgba[4]);
-	// Renders a filled+wireframe 3D primitive. Honors _wireframe and
-	// _wireframeFillColor exactly like OpenGLRenderer::draw3DWall/Quad/Polygon.
+	// allowStipple=true on the fill pass picks up _stippleActive; lines
+	// must always render unstippled (matches the fixed-function path,
+	// which only stipples GL_QUADS / GL_POLYGON, never lines).
+	void drawSolid3D(GLenum mode, const float *positions, int vertCount,
+			const float rgba[4], bool allowStipple = false);
+	// Renders a filled+wireframe 3D primitive. Honors _wireframe,
+	// _wireframeFillColor, and _stippleActive — same semantics as
+	// OpenGLRenderer::draw3DWall/Quad/Polygon.
 	void drawWireframeable3D(const float *positions, int vertCount, uint32 color);
 
 	OSystem *_system = nullptr;
@@ -132,6 +137,29 @@ private:
 
 	bool _wireframe = true;
 	int64_t _wireframeFillColor = 0; // -1 = no fill, else color (palette idx or ARGB)
+
+	// Stipple state. The shader emulates glPolygonStipple via a 128-int
+	// uniform array (Freescape pattern, GLES2-safe). _stippleActive is
+	// true when setStippleData() received a non-null pattern. fg/bg are
+	// the engine's encoded colors (high byte 0xFF = direct ARGB, else
+	// palette index); they are resolved to vec4 before upload.
+	//
+	// Defaults match OpenGLRenderer (fg = palette index 0 = black,
+	// bg = palette index 255 = white). B&W Mac mode never calls
+	// setMacColors and relies on these defaults.
+	int _stippleShaderArray[128] = {};
+	bool _stippleActive = false;
+	uint32 _stippleFg = 0;
+	uint32 _stippleBg = 255;
+	// Per-shader dirty flags. Track what the program object currently has
+	// so we can skip redundant uniform uploads (same idea as the color
+	// cache). _solid3dStippleEnabled = the value of "useStipple" most
+	// recently uploaded to _solid3dShader. _stippleColorsDirty starts true
+	// so the first stipple draw uploads the resolved colors even if the
+	// engine never calls setMacColors (the B&W Mac path).
+	bool _solid3dStippleEnabled = false;
+	bool _stipplePatternDirty = false;
+	bool _stippleColorsDirty = true;
 
 	// Solid VBO holds vec2 position only. Sized for the worst-case 2D
 	// primitive — the dither overlay can stream up to width*height/2 dots,
@@ -169,14 +197,19 @@ OpenGLShaderRenderer::OpenGLShaderRenderer(OSystem *system, int width, int heigh
 	_bitmapShader->enableVertexAttribute("texcoord", _bitmapVBO, 2, GL_FLOAT, GL_FALSE,
 		4 * sizeof(float), 2 * sizeof(float));
 
-	// 3D solid: shares colony_solid.fragment (uniform color → outColor) with
-	// the 2D path, but uses a vec3 vertex shader that consumes mvpMatrix.
+	// 3D solid: vec3 vertex consuming mvpMatrix; the fragment shader has
+	// its own stipple-emulation branch (Freescape pattern, GLES2 safe),
+	// so we use a dedicated colony_solid_3d.{vertex,fragment} pair.
 	static const char *solid3dAttribs[] = { "position", nullptr };
-	_solid3dShader = OpenGL::Shader::fromFiles("colony_solid_3d", "colony_solid", solid3dAttribs);
+	_solid3dShader = OpenGL::Shader::fromFiles("colony_solid_3d", solid3dAttribs);
 	_solid3dVBO = OpenGL::Shader::createBuffer(GL_ARRAY_BUFFER,
 		sizeof(float) * 3 * kSolid3DVertexCapacity, nullptr, GL_DYNAMIC_DRAW);
 	_solid3dShader->enableVertexAttribute("position", _solid3dVBO, 3, GL_FLOAT, GL_FALSE,
 		3 * sizeof(float), 0);
+	// Initial stipple state: disabled. The fragment shader takes the
+	// non-stippled path until setStippleData(non-null) marks otherwise.
+	_solid3dShader->use();
+	_solid3dShader->setUniform("useStipple", 0u);
 
 	glGenTextures(1, &_bitmapTexture);
 	// Texture parameters are per-texture-object state, so they only need to
@@ -607,6 +640,26 @@ void OpenGLShaderRenderer::setWireframe(bool enable, int64_t fillColor) {
 	_wireframeFillColor = fillColor;
 }
 
+void OpenGLShaderRenderer::setStippleData(const byte *data) {
+	const bool nowActive = (data != nullptr);
+	if (nowActive) {
+		// Widen the 128 pattern bytes into ints for the uniform array.
+		// Mark the pattern dirty so the next 3D draw uploads it.
+		for (int i = 0; i < 128; i++)
+			_stippleShaderArray[i] = data[i];
+		_stipplePatternDirty = true;
+	}
+	_stippleActive = nowActive;
+}
+
+void OpenGLShaderRenderer::setMacColors(uint32 fg, uint32 bg) {
+	if (_stippleFg != fg || _stippleBg != bg) {
+		_stippleFg = fg;
+		_stippleBg = bg;
+		_stippleColorsDirty = true;
+	}
+}
+
 void OpenGLShaderRenderer::setDepthState(bool testEnabled, bool writeEnabled) {
 	if (testEnabled)
 		glEnable(GL_DEPTH_TEST);
@@ -709,20 +762,51 @@ void OpenGLShaderRenderer::uploadSolid3D(const float *positions, int vertCount) 
 }
 
 void OpenGLShaderRenderer::drawSolid3D(GLenum mode, const float *positions, int vertCount,
-		const float rgba[4]) {
+		const float rgba[4], bool allowStipple) {
 	if (vertCount <= 0)
 		return;
 	uploadSolid3D(positions, vertCount);
 	// "mvpMatrix" is set in begin3D and persists in the program object.
-	// Skip the color upload when it matches the previous draw — adjacent
-	// corridor walls/quads commonly share a color.
 	_solid3dShader->use();
-	if (rgba[0] != _solid3dLastColor[0] || rgba[1] != _solid3dLastColor[1]
-			|| rgba[2] != _solid3dLastColor[2] || rgba[3] != _solid3dLastColor[3]) {
-		_solid3dShader->setUniform("color",
-			Math::Vector4d(rgba[0], rgba[1], rgba[2], rgba[3]));
-		_solid3dLastColor[0] = rgba[0]; _solid3dLastColor[1] = rgba[1];
-		_solid3dLastColor[2] = rgba[2]; _solid3dLastColor[3] = rgba[3];
+
+	// Toggle the shader's stipple branch only when the effective state
+	// changes. allowStipple=false short-circuits stipple for line passes.
+	const bool wantStipple = allowStipple && _stippleActive;
+	if (wantStipple != _solid3dStippleEnabled) {
+		_solid3dShader->setUniform("useStipple", wantStipple ? 1u : 0u);
+		_solid3dStippleEnabled = wantStipple;
+	}
+
+	if (wantStipple) {
+		// Pattern + fg/bg colors are uploaded only when they change.
+		if (_stipplePatternDirty) {
+			_solid3dShader->setUniform("stipple", 128, _stippleShaderArray);
+			_stipplePatternDirty = false;
+		}
+		if (_stippleColorsDirty) {
+			float fgRgba[4], bgRgba[4];
+			resolveColor(_stippleFg, fgRgba);
+			resolveColor(_stippleBg, bgRgba);
+			_solid3dShader->setUniform("stippleFg",
+				Math::Vector4d(fgRgba[0], fgRgba[1], fgRgba[2], fgRgba[3]));
+			_solid3dShader->setUniform("stippleBg",
+				Math::Vector4d(bgRgba[0], bgRgba[1], bgRgba[2], bgRgba[3]));
+			_stippleColorsDirty = false;
+		}
+		// "color" uniform isn't sampled when useStipple is set — skip the
+		// upload entirely. Invalidate the cache so a later non-stipple
+		// draw with the same rgba still uploads.
+		_solid3dLastColor[0] = -1.0f;
+	} else {
+		// Skip the color upload when it matches the previous draw —
+		// adjacent corridor walls/quads commonly share a color.
+		if (rgba[0] != _solid3dLastColor[0] || rgba[1] != _solid3dLastColor[1]
+				|| rgba[2] != _solid3dLastColor[2] || rgba[3] != _solid3dLastColor[3]) {
+			_solid3dShader->setUniform("color",
+				Math::Vector4d(rgba[0], rgba[1], rgba[2], rgba[3]));
+			_solid3dLastColor[0] = rgba[0]; _solid3dLastColor[1] = rgba[1];
+			_solid3dLastColor[2] = rgba[2]; _solid3dLastColor[3] = rgba[3];
+		}
 	}
 	glDrawArrays(mode, 0, vertCount);
 }
@@ -739,23 +823,27 @@ void OpenGLShaderRenderer::drawWireframeable3D(const float *positions, int vertC
 	}
 
 	if (_wireframe) {
-		if (_wireframeFillColor != -1) {
+		// Fill pass: stipple beats wireframeFillColor when active. Pass
+		// allowStipple=true so drawSolid3D picks up _stippleActive and
+		// uses the fg/bg uniforms; the fill color is ignored in that case.
+		if (_stippleActive || _wireframeFillColor != -1) {
 			glEnable(GL_POLYGON_OFFSET_FILL);
 			glPolygonOffset(1.1f, 4.0f);
 			float fillRgba[4];
-			resolveColor((uint32)_wireframeFillColor, fillRgba);
-			drawSolid3D(GL_TRIANGLE_FAN, positions, vertCount, fillRgba);
+			resolveColor(_stippleActive ? 0u : (uint32)_wireframeFillColor, fillRgba);
+			drawSolid3D(GL_TRIANGLE_FAN, positions, vertCount, fillRgba, true);
 			glDisable(GL_POLYGON_OFFSET_FILL);
 		}
+		// Edges: lines are never stippled in the fixed-function path.
 		float edgeRgba[4];
 		resolveColor(color, edgeRgba);
-		drawSolid3D(GL_LINE_LOOP, positions, vertCount, edgeRgba);
+		drawSolid3D(GL_LINE_LOOP, positions, vertCount, edgeRgba, false);
 	} else {
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.1f, 4.0f);
 		float rgba[4];
 		resolveColor(color, rgba);
-		drawSolid3D(GL_TRIANGLE_FAN, positions, vertCount, rgba);
+		drawSolid3D(GL_TRIANGLE_FAN, positions, vertCount, rgba, true);
 		glDisable(GL_POLYGON_OFFSET_FILL);
 	}
 }
