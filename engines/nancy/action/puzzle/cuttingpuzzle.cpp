@@ -399,9 +399,11 @@ void CuttingPuzzle::handleInput(NancyInput &input) {
 	}
 
 	// Blade-position needle: clicking the left half moves the blade left,
-	// clicking the right half moves it right.
+	// clicking the right half moves it right. The needle can only move
+	// when the lathe is clear of the wood.
 	if (_currentMarkerPos < _markerDest.size() &&
-	        _markerDest[_currentMarkerPos].contains(localMouse)) {
+		_markerDest[_currentMarkerPos].contains(localMouse) &&
+		_currentLeverDepth == 0) {
 		int midX = (_markerDest[_currentMarkerPos].left + _markerDest[_currentMarkerPos].right) / 2;
 		bool goLeft = localMouse.x < midX;
 
