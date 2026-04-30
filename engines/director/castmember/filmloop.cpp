@@ -254,15 +254,11 @@ void FilmLoopCastMember::unload() {
 }
 
 Common::Point FilmLoopCastMember::getRegistrationOffset() {
-	if (_center)
-		return Common::Point(_initialRect.width() / 2, _initialRect.height() / 2);
-	return Common::Point(0, 0);
+	return Common::Point(_initialRect.width() / 2, _initialRect.height() / 2);
 }
 
 Common::Point FilmLoopCastMember::getRegistrationOffset(int16 currentWidth, int16 currentHeight) {
-	if(_center)
-		return Common::Point(currentWidth / 2, currentHeight / 2);
-	return Common::Point(0, 0);
+	return Common::Point(currentWidth / 2, currentHeight / 2);
 }
 
 uint32 FilmLoopCastMember::getCastDataSize() {
