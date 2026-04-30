@@ -45,16 +45,6 @@
 
 namespace Colony {
 
-// Pack RGB into 32-bit ARGB with 0xFF000000 marker for direct RGB rendering.
-uint32 packRGB(byte r, byte g, byte b) {
-	return 0xFF000000 | ((uint32)r << 16) | ((uint32)g << 8) | b;
-}
-
-// Pack Mac 16-bit RGB into 32-bit ARGB.
-uint32 packMacColorUI(const uint16 rgb[3]) {
-	return 0xFF000000 | ((rgb[0] >> 8) << 16) | ((rgb[1] >> 8) << 8) | (rgb[2] >> 8);
-}
-
 bool drawMacTextPopup(Graphics::MacWindowManager *wm, Renderer *gfx,
 		int screenWidth, int screenHeight, int centerX, int centerY,
 		const Common::Array<Common::String> &lines, Graphics::TextAlign align, bool macColor) {
@@ -545,7 +535,7 @@ void ColonyEngine::drawDashboardMac() {
 	const bool macColor = _hasMacColors;
 	const uint32 colBlack = packRGB(0, 0, 0);
 	const uint32 colWhite = packRGB(255, 255, 255);
-	const uint32 colWinBg = macColor ? packMacColorUI(_macColors[7].bg) : colWhite;
+	const uint32 colWinBg = macColor ? packMacColor(_macColors[7].bg) : colWhite;
 	// power.c: ForeColor(blueColor)  on 1-bit display, blue maps to black
 	const uint32 colBlue = macColor ? packRGB(0, 0, 255) : colBlack;
 

@@ -34,6 +34,7 @@
 #include "common/rendermode.h"
 #include "engines/advancedDetector.h"
 #include "engines/engine.h"
+#include "graphics/pixelformat.h"
 
 namespace Common {
 class MacResManager;
@@ -54,6 +55,24 @@ namespace Colony {
 
 class Renderer;
 class Sound;
+
+// Engine-wide color packing. The OpenGL renderer's useColor() treats values
+// with the high byte == 0xFF as direct ARGB (R=bits 16-23, G=8-15, B=0-7) and
+// values with high byte 0 as palette indices. The PixelFormat below matches
+// that direct-ARGB layout exactly so we can build colors via ARGBToColor.
+inline const Graphics::PixelFormat &renderColorFormat() {
+	static const Graphics::PixelFormat fmt(4, 8, 8, 8, 8, 16, 8, 0, 24);
+	return fmt;
+}
+
+inline uint32 packRGB(byte r, byte g, byte b) {
+	return renderColorFormat().ARGBToColor(255, r, g, b);
+}
+
+// Mac native QuickDraw stores RGB as 16-bit-per-channel; we collapse to 8 bits.
+inline uint32 packMacColor(const uint16 rgb[3]) {
+	return packRGB((byte)(rgb[0] >> 8), (byte)(rgb[1] >> 8), (byte)(rgb[2] >> 8));
+}
 
 enum ColonyAction {
 	kActionNone,

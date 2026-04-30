@@ -63,11 +63,6 @@ const int kTunnelST[] = {
 
 const int kTunnelStraight[60] = {0};
 
-uint32 packTunnelMacColor(const uint16 rgb[3]) {
-	return 0xFF000000 | ((uint32)(rgb[0] >> 8) << 16) |
-		((uint32)(rgb[1] >> 8) << 8) | (uint32)(rgb[2] >> 8);
-}
-
 void fillTunnelPattern(Renderer *gfx, const Common::Rect &rect, uint32 fg, uint32 bg, int pattern) {
 	if (rect.isEmpty())
 		return;
@@ -801,8 +796,8 @@ void ColonyEngine::playTunnelAirlockEffect() {
 	const Common::Rect effectRect(0, _menuBarHeight, _width, _height);
 	const bool macColor = (_renderMode == Common::kRenderMacintosh && _hasMacColors);
 	const int tunnelColor = 24; // c_tunnel
-	const uint32 fillFg = macColor ? packTunnelMacColor(_macColors[tunnelColor].fg) : 0;
-	const uint32 fillBg = macColor ? packTunnelMacColor(_macColors[tunnelColor].bg) : 0;
+	const uint32 fillFg = macColor ? packMacColor(_macColors[tunnelColor].fg) : 0;
+	const uint32 fillBg = macColor ? packMacColor(_macColors[tunnelColor].bg) : 0;
 	const uint32 lineColor = macColor ? 0xFF000000 : 15;
 	int troy = 180;
 	int counter = 4;
@@ -899,8 +894,8 @@ void ColonyEngine::playTunnelEffect(bool falling) {
 	const bool macColor = (_renderMode == Common::kRenderMacintosh && _hasMacColors);
 	const int tunnelColor = 24; // c_tunnel
 	const int tunnelFrames = falling ? 10 : 49;
-	const uint32 fillFg = macColor ? packTunnelMacColor(_macColors[tunnelColor].fg) : 0;
-	const uint32 fillBg = macColor ? packTunnelMacColor(_macColors[tunnelColor].bg) : 0;
+	const uint32 fillFg = macColor ? packMacColor(_macColors[tunnelColor].fg) : 0;
+	const uint32 fillBg = macColor ? packMacColor(_macColors[tunnelColor].bg) : 0;
 	const uint32 lineColor = macColor ? 0xFF000000 : 15;
 	int troy = 180;
 	int cnt = 0;

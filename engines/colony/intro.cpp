@@ -1125,7 +1125,7 @@ bool ColonyEngine::drawPict(int resID) {
 						uint32 pixel = surface->getPixel(ix, iy);
 						surface->format.colorToRGB(pixel, r, g, b);
 					}
-					_gfx->setPixel(sx, sy, 0xFF000000 | ((uint32)r << 16) | ((uint32)g << 8) | b);
+					_gfx->setPixel(sx, sy, packRGB(r, g, b));
 				}
 			}
 			_gfx->copyToScreen();

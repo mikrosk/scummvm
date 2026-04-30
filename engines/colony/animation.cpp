@@ -243,11 +243,6 @@ uint32 macSysColorToARGB(int sysColor) {
 	}
 }
 
-uint32 packMacColorBG(const uint16 rgb[3]) {
-	return 0xFF000000 | ((uint32)(rgb[0] >> 8) << 16) |
-		((uint32)(rgb[1] >> 8) << 8) | (uint32)(rgb[2] >> 8);
-}
-
 int getAnimationStateCount(const Common::Array<ComplexSprite *> &sprites, int num) {
 	num--;
 	if (num >= 0 && num < (int)sprites.size()) {
@@ -692,15 +687,15 @@ uint32 ColonyEngine::resolveAnimColor(int16 bmEntry) const {
 		return macSysColorToARGB(-bmEntry);
 	} else if (bmEntry > 0) {
 		if (bmEntry < 145)
-			return packMacColorBG(_macColors[bmEntry].bg);
+			return packMacColor(_macColors[bmEntry].bg);
 		return 0xFFFFFFFF;
 	} else {
 		// Zero = level-based (original gamesprt.c DrawlSprite/DrawBackGround):
 		//   if(corepower[coreindex]) RGBBackColor(&cColor[c_char0+level-1].f);
 		//   else RGBBackColor(&cColor[c_dwall].b);
 		if (_corePower[_coreIndex] > 0 && _level >= 1 && _level <= 7)
-			return packMacColorBG(_macColors[kMcChar0 + _level - 1].fg);
-		return packMacColorBG(_macColors[kMcDwall].bg);
+			return packMacColor(_macColors[kMcChar0 + _level - 1].fg);
+		return packMacColor(_macColors[kMcDwall].bg);
 	}
 }
 
@@ -733,7 +728,7 @@ void ColonyEngine::drawAnimation() {
 	if (useColor) {
 		const bool powered = (_corePower[_coreIndex] > 0);
 		topColor = resolveAnimColor(_animBMColors[0]);
-		botColor = powered ? packMacColorBG(_macColors[kMcLwall].fg) : topColor;
+		botColor = powered ? packMacColor(_macColors[kMcLwall].fg) : topColor;
 	}
 
 	const bool keyChanged = !_animPatternValid
