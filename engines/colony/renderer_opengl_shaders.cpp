@@ -44,9 +44,9 @@
 
 namespace Colony {
 
-// Phase 2: programmable-pipeline 2D primitives. The 3D path (begin3D and
-// the corridor draws) and the deprecated state setters (XOR, polygon
-// stipple, wireframe) remain stubs and are filled in by later phases.
+// Phase 3: 2D primitives + the 3D corridor draw path are programmable.
+// XOR mode and polygon stipple are intentionally left stubbed — see the
+// renderer audit for why those are deferred.
 class OpenGLShaderRenderer : public Renderer {
 public:
 	OpenGLShaderRenderer(OSystem *system, int width, int height);
@@ -68,22 +68,21 @@ public:
 
 	void setPalette(const byte *palette, uint start, uint count) override;
 
-	// 3D path — Phase 3.
-	void begin3D(int camX, int camY, int camZ, int angle, int angleY, const Common::Rect &viewport) override {}
-	void draw3DWall(int x1, int y1, int x2, int y2, uint32 color) override {}
+	void begin3D(int camX, int camY, int camZ, int angle, int angleY, const Common::Rect &viewport) override;
+	void draw3DWall(int x1, int y1, int x2, int y2, uint32 color) override;
 	void draw3DQuad(float x1, float y1, float z1, float x2, float y2, float z2,
-			float x3, float y3, float z3, float x4, float y4, float z4, uint32 color) override {}
-	void draw3DPolygon(const float *x, const float *y, const float *z, int count, uint32 color) override {}
-	void draw3DLine(float x1, float y1, float z1, float x2, float y2, float z2, uint32 color) override {}
-	void end3D() override {}
+			float x3, float y3, float z3, float x4, float y4, float z4, uint32 color) override;
+	void draw3DPolygon(const float *x, const float *y, const float *z, int count, uint32 color) override;
+	void draw3DLine(float x1, float y1, float z1, float x2, float y2, float z2, uint32 color) override;
+	void end3D() override;
 
 	void copyToScreen() override;
-	void setWireframe(bool enable, int64_t fillColor) override {}
+	void setWireframe(bool enable, int64_t fillColor) override;
 	void setXorMode(bool enable) override {}
 	void setStippleData(const byte *data) override {}
 	void setMacColors(uint32 fg, uint32 bg) override {}
-	void setDepthState(bool testEnabled, bool writeEnabled) override {}
-	void setDepthRange(float nearVal, float farVal) override {}
+	void setDepthState(bool testEnabled, bool writeEnabled) override;
+	void setDepthRange(float nearVal, float farVal) override;
 	void computeScreenViewport() override;
 
 	void drawSurface(const Graphics::Surface *surf, int x, int y) override;
@@ -92,9 +91,19 @@ public:
 private:
 	void resolveColor(uint32 color, float rgba[4]) const;
 	void rebuildProjection();
+	// Push _projection to the 2D shaders. The matrix is constant between
+	// resolution changes, so this only needs to run from the constructor
+	// and computeScreenViewport — not per draw.
+	void uploadProjectionUniform();
 	void uploadSolid(const float *positions, int vertCount);
 	void drawSolid(GLenum mode, const float *positions, int vertCount, const float rgba[4]);
 	void drawTexturedQuad(int x, int y, int w, int h);
+
+	void uploadSolid3D(const float *positions, int vertCount);
+	void drawSolid3D(GLenum mode, const float *positions, int vertCount, const float rgba[4]);
+	// Renders a filled+wireframe 3D primitive. Honors _wireframe and
+	// _wireframeFillColor exactly like OpenGLRenderer::draw3DWall/Quad/Polygon.
+	void drawWireframeable3D(const float *positions, int vertCount, uint32 color);
 
 	OSystem *_system = nullptr;
 	int _width = 0;
@@ -104,16 +113,25 @@ private:
 
 	OpenGL::Shader *_solidShader = nullptr;
 	OpenGL::Shader *_bitmapShader = nullptr;
+	OpenGL::Shader *_solid3dShader = nullptr;
 	GLuint _solidVBO = 0;
 	GLuint _bitmapVBO = 0;
+	GLuint _solid3dVBO = 0;
 	GLuint _bitmapTexture = 0;
 
 	Math::Matrix4 _projection;
+	Math::Matrix4 _mvpMatrix;
+
+	bool _wireframe = true;
+	int64_t _wireframeFillColor = 0; // -1 = no fill, else color (palette idx or ARGB)
 
 	// Solid VBO holds vec2 position only. Sized for the worst-case 2D
 	// primitive — the dither overlay can stream up to width*height/2 dots,
 	// so leave room for typical screens (≈170k floats for an 800×600 split).
 	enum { kSolidVertexCapacity = 320 * 1024 };
+	// 3D VBO holds vec3 positions. Corridor polygons are typically <16
+	// vertices but a few features (sprite billboards, stairs) push higher.
+	enum { kSolid3DVertexCapacity = 1024 };
 };
 
 // ---------------------------------------------------------------------------
@@ -122,8 +140,7 @@ private:
 
 OpenGLShaderRenderer::OpenGLShaderRenderer(OSystem *system, int width, int height)
 	: _system(system), _width(width), _height(height) {
-	debug(1, "Colony: using OpenGL shader renderer (Phase 2: 2D primitives "
-		"functional; corridor 3D view is stubbed until Phase 3)");
+	debug(1, "Colony: using OpenGL shader renderer");
 	for (int i = 0; i < 256 * 3; i++)
 		_palette[i] = 255;
 
@@ -144,6 +161,15 @@ OpenGLShaderRenderer::OpenGLShaderRenderer(OSystem *system, int width, int heigh
 	_bitmapShader->enableVertexAttribute("texcoord", _bitmapVBO, 2, GL_FLOAT, GL_FALSE,
 		4 * sizeof(float), 2 * sizeof(float));
 
+	// 3D solid: shares colony_solid.fragment (uniform color → outColor) with
+	// the 2D path, but uses a vec3 vertex shader that consumes mvpMatrix.
+	static const char *solid3dAttribs[] = { "position", nullptr };
+	_solid3dShader = OpenGL::Shader::fromFiles("colony_solid_3d", "colony_solid", solid3dAttribs);
+	_solid3dVBO = OpenGL::Shader::createBuffer(GL_ARRAY_BUFFER,
+		sizeof(float) * 3 * kSolid3DVertexCapacity, nullptr, GL_DYNAMIC_DRAW);
+	_solid3dShader->enableVertexAttribute("position", _solid3dVBO, 3, GL_FLOAT, GL_FALSE,
+		3 * sizeof(float), 0);
+
 	glGenTextures(1, &_bitmapTexture);
 
 	glDisable(GL_DEPTH_TEST);
@@ -152,6 +178,12 @@ OpenGLShaderRenderer::OpenGLShaderRenderer(OSystem *system, int width, int heigh
 
 	computeScreenViewport();
 	rebuildProjection();
+	uploadProjectionUniform();
+
+	// The bitmap shader's sampler is permanently bound to texture unit 0.
+	// Setting it once here removes a per-draw setUniform("tex", 0).
+	_bitmapShader->use();
+	_bitmapShader->setUniform("tex", 0);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -160,8 +192,10 @@ OpenGLShaderRenderer::OpenGLShaderRenderer(OSystem *system, int width, int heigh
 OpenGLShaderRenderer::~OpenGLShaderRenderer() {
 	OpenGL::Shader::freeBuffer(_solidVBO);
 	OpenGL::Shader::freeBuffer(_bitmapVBO);
+	OpenGL::Shader::freeBuffer(_solid3dVBO);
 	delete _solidShader;
 	delete _bitmapShader;
+	delete _solid3dShader;
 	if (_bitmapTexture)
 		glDeleteTextures(1, &_bitmapTexture);
 }
@@ -204,6 +238,20 @@ void OpenGLShaderRenderer::rebuildProjection() {
 	_projection = m;
 }
 
+void OpenGLShaderRenderer::uploadProjectionUniform() {
+	// Push the current ortho matrix to both 2D shaders. The values persist
+	// in each program object until the next setUniform, so subsequent draws
+	// don't need to re-upload it. Color stays per-draw because it varies.
+	if (_solidShader) {
+		_solidShader->use();
+		_solidShader->setUniform("projection", _projection);
+	}
+	if (_bitmapShader) {
+		_bitmapShader->use();
+		_bitmapShader->setUniform("projection", _projection);
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Solid-color primitives
 // ---------------------------------------------------------------------------
@@ -218,11 +266,13 @@ void OpenGLShaderRenderer::drawSolid(GLenum mode, const float *positions, int ve
 	if (vertCount <= 0)
 		return;
 	uploadSolid(positions, vertCount);
+	// "projection" is set once by uploadProjectionUniform() — it persists in
+	// the program object across draws. Only "color" varies per call.
+	// Shader stays bound between draws so Shader::use()'s _previousShader
+	// cache (graphics/opengl/shader.cpp:378-380) skips re-binding.
 	_solidShader->use();
-	_solidShader->setUniform("projection", _projection);
 	_solidShader->setUniform("color", Math::Vector4d(rgba[0], rgba[1], rgba[2], rgba[3]));
 	glDrawArrays(mode, 0, vertCount);
-	_solidShader->unbind();
 }
 
 void OpenGLShaderRenderer::clear(uint32 color) {
@@ -466,14 +516,14 @@ void OpenGLShaderRenderer::drawTexturedQuad(int x, int y, int w, int h) {
 	glBindBuffer(GL_ARRAY_BUFFER, _bitmapVBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verts), verts);
 
+	// "projection" and "tex" are set once at init / on resolution change;
+	// they persist in the program object so we don't re-upload here.
 	_bitmapShader->use();
-	_bitmapShader->setUniform("projection", _projection);
-	_bitmapShader->setUniform("tex", 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, _bitmapTexture);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	_bitmapShader->unbind();
+	// Shader stays bound — see drawSolid for the rationale.
 }
 
 // ---------------------------------------------------------------------------
@@ -523,6 +573,211 @@ Graphics::Surface *OpenGLShaderRenderer::getScreenshot() {
 		GL_RGBA, GL_UNSIGNED_BYTE, surface->getPixels());
 	surface->flipVertical(Common::Rect(surface->w, surface->h));
 	return surface;
+}
+
+// ---------------------------------------------------------------------------
+// 3D corridor / scene rendering
+// ---------------------------------------------------------------------------
+
+void OpenGLShaderRenderer::setWireframe(bool enable, int64_t fillColor) {
+	_wireframe = enable;
+	_wireframeFillColor = fillColor;
+}
+
+void OpenGLShaderRenderer::setDepthState(bool testEnabled, bool writeEnabled) {
+	if (testEnabled)
+		glEnable(GL_DEPTH_TEST);
+	else
+		glDisable(GL_DEPTH_TEST);
+	glDepthMask(writeEnabled ? GL_TRUE : GL_FALSE);
+}
+
+void OpenGLShaderRenderer::setDepthRange(float nearVal, float farVal) {
+	glDepthRange(nearVal, farVal);
+}
+
+void OpenGLShaderRenderer::begin3D(int camX, int camY, int camZ, int angle, int angleY,
+		const Common::Rect &viewport) {
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	// Map the engine's logical viewport into system pixels (matches
+	// OpenGLRenderer::begin3D in renderer_opengl.cpp:246-257).
+	const float scaleX = (float)_screenViewport.width() / (float)_width;
+	const float scaleY = (float)_screenViewport.height() / (float)_height;
+	const int sysH = _system->getHeight();
+	const int vpX = _screenViewport.left + (int)(viewport.left * scaleX);
+	const int vpY = sysH - (_screenViewport.top + (int)(viewport.bottom * scaleY));
+	const int vpW = (int)(viewport.width() * scaleX);
+	const int vpH = (int)(viewport.height() * scaleY);
+	glViewport(vpX, vpY, vpW, vpH);
+	glScissor(vpX, vpY, vpW, vpH);
+	glEnable(GL_SCISSOR_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
+
+	// Perspective: 75° vertical FOV, near=1, far=10000 — matches the
+	// fixed-function path so geometry lands at the same screen positions.
+	const float aspectRatio = (float)viewport.width() / (float)viewport.height();
+	const float fov = 75.0f;
+	const float nearClip = 1.0f;
+	const float farClip = 10000.0f;
+	const float ymax = nearClip * tanf(fov * (float)M_PI / 360.0f);
+	const float xmax = ymax * aspectRatio;
+
+	// Build perspective frustum directly. Math::makeFrustumMatrix exists in
+	// math/glmath.h, but its sign convention requires a final transpose to
+	// match Math::Matrix4's row-major storage; constructing the matrix
+	// element-by-element here is clearer and easier to audit.
+	Math::Matrix4 proj;
+	for (int r = 0; r < 4; r++)
+		for (int c = 0; c < 4; c++)
+			proj(r, c) = 0.0f;
+	proj(0, 0) = 2.0f * nearClip / (xmax - (-xmax));
+	proj(1, 1) = 2.0f * nearClip / (ymax - (-ymax));
+	proj(0, 2) = (xmax + (-xmax)) / (xmax - (-xmax));
+	proj(1, 2) = (ymax + (-ymax)) / (ymax - (-ymax));
+	proj(2, 2) = -(farClip + nearClip) / (farClip - nearClip);
+	proj(2, 3) = -2.0f * farClip * nearClip / (farClip - nearClip);
+	proj(3, 2) = -1.0f;
+
+	// View transform: replicate the fixed-function chain
+	//   Rx(pitch) * Rx(-90) * Rz(yaw) * T(-cam)
+	// applied to column vectors (renderer_opengl.cpp:280-292).
+	Math::Matrix4 pitch;
+	pitch.buildAroundX((float)angleY * 360.0f / 256.0f);
+	Math::Matrix4 minus90;
+	minus90.buildAroundX(-90.0f);
+	Math::Matrix4 yaw;
+	yaw.buildAroundZ(-(float)angle * 360.0f / 256.0f + 90.0f);
+	Math::Matrix4 trans; // identity
+	trans.setPosition(Math::Vector3d((float)-camX, (float)-camY, (float)-camZ));
+
+	const Math::Matrix4 view = pitch * minus90 * yaw * trans;
+	Math::Matrix4 mvp = proj * view;
+	mvp.transpose(); // Math::Matrix4 is row-major; setUniform expects column-major.
+	_mvpMatrix = mvp;
+
+	// Push mvpMatrix to the 3D shader once per frame (here in begin3D),
+	// instead of on every primitive — it doesn't change between draws.
+	_solid3dShader->use();
+	_solid3dShader->setUniform("mvpMatrix", _mvpMatrix);
+}
+
+void OpenGLShaderRenderer::end3D() {
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glDepthRange(0.0, 1.0);
+	glDisable(GL_SCISSOR_TEST);
+
+	// Restore the 2D viewport so subsequent overlay draws (dashboard, menu,
+	// crosshair, automap) land in the right spot.
+	const int sysW = _system->getWidth();
+	const int sysH = _system->getHeight();
+	glViewport(0, 0, sysW, sysH);
+	glScissor(0, 0, sysW, sysH);
+	computeScreenViewport();
+}
+
+void OpenGLShaderRenderer::uploadSolid3D(const float *positions, int vertCount) {
+	glBindBuffer(GL_ARRAY_BUFFER, _solid3dVBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * vertCount, positions);
+}
+
+void OpenGLShaderRenderer::drawSolid3D(GLenum mode, const float *positions, int vertCount,
+		const float rgba[4]) {
+	if (vertCount <= 0)
+		return;
+	uploadSolid3D(positions, vertCount);
+	// "mvpMatrix" is set in begin3D and persists in the program object —
+	// only "color" varies per draw. Same shader-bind caching as drawSolid.
+	_solid3dShader->use();
+	_solid3dShader->setUniform("color", Math::Vector4d(rgba[0], rgba[1], rgba[2], rgba[3]));
+	glDrawArrays(mode, 0, vertCount);
+}
+
+void OpenGLShaderRenderer::drawWireframeable3D(const float *positions, int vertCount,
+		uint32 color) {
+	if (vertCount < 3) {
+		// Degenerate — render the line directly so callers don't have to
+		// special-case 2-vertex inputs.
+		float rgba[4];
+		resolveColor(color, rgba);
+		drawSolid3D(GL_LINE_STRIP, positions, vertCount, rgba);
+		return;
+	}
+
+	if (_wireframe) {
+		if (_wireframeFillColor != -1) {
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(1.1f, 4.0f);
+			float fillRgba[4];
+			resolveColor((uint32)_wireframeFillColor, fillRgba);
+			drawSolid3D(GL_TRIANGLE_FAN, positions, vertCount, fillRgba);
+			glDisable(GL_POLYGON_OFFSET_FILL);
+		}
+		float edgeRgba[4];
+		resolveColor(color, edgeRgba);
+		drawSolid3D(GL_LINE_LOOP, positions, vertCount, edgeRgba);
+	} else {
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.1f, 4.0f);
+		float rgba[4];
+		resolveColor(color, rgba);
+		drawSolid3D(GL_TRIANGLE_FAN, positions, vertCount, rgba);
+		glDisable(GL_POLYGON_OFFSET_FILL);
+	}
+}
+
+void OpenGLShaderRenderer::draw3DWall(int x1, int y1, int x2, int y2, uint32 color) {
+	// 256× scale and ±160 height match renderer_opengl.cpp:295-298.
+	const float fx1 = x1 * 256.0f, fy1 = y1 * 256.0f;
+	const float fx2 = x2 * 256.0f, fy2 = y2 * 256.0f;
+	const float verts[12] = {
+		fx1, fy1, -160.0f,
+		fx2, fy2, -160.0f,
+		fx2, fy2,  160.0f,
+		fx1, fy1,  160.0f,
+	};
+	drawWireframeable3D(verts, 4, color);
+}
+
+void OpenGLShaderRenderer::draw3DQuad(float x1, float y1, float z1, float x2, float y2, float z2,
+		float x3, float y3, float z3, float x4, float y4, float z4, uint32 color) {
+	const float verts[12] = {
+		x1, y1, z1,
+		x2, y2, z2,
+		x3, y3, z3,
+		x4, y4, z4,
+	};
+	drawWireframeable3D(verts, 4, color);
+}
+
+void OpenGLShaderRenderer::draw3DPolygon(const float *x, const float *y, const float *z,
+		int count, uint32 color) {
+	if (count < 3)
+		return;
+	if (count > kSolid3DVertexCapacity)
+		count = kSolid3DVertexCapacity;
+
+	float stack[3 * 32];
+	float *verts = (count <= 32) ? stack : new float[3 * count];
+	for (int i = 0; i < count; i++) {
+		verts[i * 3 + 0] = x[i];
+		verts[i * 3 + 1] = y[i];
+		verts[i * 3 + 2] = z[i];
+	}
+	drawWireframeable3D(verts, count, color);
+	if (verts != stack)
+		delete[] verts;
+}
+
+void OpenGLShaderRenderer::draw3DLine(float x1, float y1, float z1, float x2, float y2, float z2,
+		uint32 color) {
+	const float verts[6] = { x1, y1, z1, x2, y2, z2 };
+	float rgba[4];
+	resolveColor(color, rgba);
+	drawSolid3D(GL_LINES, verts, 2, rgba);
 }
 
 // ---------------------------------------------------------------------------
