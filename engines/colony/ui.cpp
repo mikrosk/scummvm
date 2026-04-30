@@ -943,6 +943,7 @@ void ColonyEngine::drawAutomap() {
 
 	const int lv = _level - 1;
 	const bool isMac = (_renderMode == Common::kRenderMacintosh);
+	const bool macColor = isMac && _hasMacColors;
 
 	const Common::Rect vp(0, _menuBarHeight, _width, _height);
 	const int vpW = vp.width();
@@ -950,7 +951,9 @@ void ColonyEngine::drawAutomap() {
 	if (vpW <= 0 || vpH <= 0)
 		return;
 
-	_gfx->fillRect(vp, isMac ? 0xFFA0D0FF : 15);
+	// Match the minimap: B&W Mac is white background + black lines, like the
+	// compass area; color Mac keeps its tinted background.
+	_gfx->fillRect(vp, macColor ? 0xFFA0D0FF : (isMac ? packRGB(255, 255, 255) : 15));
 	_gfx->drawRect(vp, 0);
 
 	const int lExt = MIN(vpW, vpH) / 12;
