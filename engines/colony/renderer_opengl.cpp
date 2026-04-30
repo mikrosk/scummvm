@@ -48,7 +48,6 @@ public:
 	void drawRect(const Common::Rect &rect, uint32 color) override;
 	void fillRect(const Common::Rect &rect, uint32 color) override;
 	void drawString(const Graphics::Font *font, const Common::String &str, int x, int y, uint32 color, Graphics::TextAlign align) override;
-	void scroll(int dx, int dy, uint32 background) override;
 	void drawEllipse(int x, int y, int rx, int ry, uint32 color) override;
 	void fillEllipse(int x, int y, int rx, int ry, uint32 color) override;
 	void fillDitherRect(const Common::Rect &rect, uint32 color1, uint32 color2) override;
@@ -552,9 +551,6 @@ void OpenGLRenderer::computeScreenViewport() {
 
 	glViewport(_screenViewport.left, screenHeight - _screenViewport.bottom, _screenViewport.width(), _screenViewport.height());
 	glScissor(_screenViewport.left, screenHeight - _screenViewport.bottom, _screenViewport.width(), _screenViewport.height());
-}
-
-void OpenGLRenderer::scroll(int dx, int dy, uint32 background) {
 }
 
 void OpenGLRenderer::drawEllipse(int x, int y, int rx, int ry, uint32 color) {
