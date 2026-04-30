@@ -378,20 +378,16 @@ void CuttingPuzzle::handleInput(NancyInput &input) {
 		}
 	}
 
-	// Lever: left half of the rect rotates the knob left (decrement depth),
-	// right half rotates right (increment depth).
+	// Lever: clicking it increases the depth (right rotation)
+	// and clicking it at max depth resets it to 0 (left rotation).
 	if (_leverDest.contains(localMouse)) {
-		int midX = (_leverDest.left + _leverDest.right) / 2;
-		bool rotateLeft = localMouse.x < midX;
+		bool rotateLeft = _currentLeverDepth == 3;
 
 		g_nancy->_cursor->setCursorType(rotateLeft ? CursorManager::kRotateCCW
 		                                            : CursorManager::kRotateCW);
 
 		if (input.input & NancyInput::kLeftMouseButtonUp) {
-			if (rotateLeft)
-				_currentLeverDepth = (_currentLeverDepth == 0) ? 3 : _currentLeverDepth - 1;
-			else
-				_currentLeverDepth = (_currentLeverDepth + 1) % 4;
+			_currentLeverDepth = (_currentLeverDepth == 3) ? 0 : _currentLeverDepth + 1;
 			g_nancy->_sound->playSound(_depthSound);
 			redrawSurface();
 		}
