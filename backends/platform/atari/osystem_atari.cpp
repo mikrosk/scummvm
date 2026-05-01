@@ -350,6 +350,11 @@ void OSystem_Atari::initBackend() {
 		ConfMan.set("mt32_device", "auto");
 	}
 #endif
+	// This produces hard pause even in most optimised engines
+	// and even on CT60...
+	if (!ConfMan.hasKey("autosave_period")) {
+		ConfMan.setInt("autosave_period", 0);
+	}
 
 	_mixerManager = new AtariMixerManager();
 	// Setup and start mixer
