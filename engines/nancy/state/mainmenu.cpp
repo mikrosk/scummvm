@@ -201,7 +201,7 @@ void MainMenu::stop() {
 		break;
 	case 6:
 		// Exit Game
-		if (g_nancy->getEngineData("SDLG") && Nancy::State::Scene::hasInstance() && !g_nancy->_hasJustSaved) {
+		if (g_nancy->getEngineData("SDLG") && Scene::hasInstance() && !g_nancy->_hasJustSaved) {
 			if (!ConfMan.hasKey("sdlg_return", Common::ConfigManager::kTransientDomain)) {
 				// Request the "Do you want to save before quitting" dialog
 				ConfMan.setInt("sdlg_id", 0, Common::ConfigManager::kTransientDomain);

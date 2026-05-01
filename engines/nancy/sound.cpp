@@ -613,7 +613,7 @@ void SoundManager::recalculateSoundEffects() {
 	_positionLerp = 0;
 
 	if (g_nancy->getGameType() >= kGameTypeNancy3) {
-		const Nancy::State::Scene::SceneSummary &sceneSummary = NancySceneState.getSceneSummary();
+		const State::Scene::SceneSummary &sceneSummary = NancySceneState.getSceneSummary();
 		SceneChangeDescription &sceneInfo = NancySceneState.getSceneInfo();
 		Math::Vector3d rotatedFrontVector = NancySceneState.getSceneInfo().listenerFrontVector;
 		rotatedFrontVector.normalize();
@@ -638,7 +638,7 @@ void SoundManager::recalculateSoundEffects() {
 void SoundManager::stopAndUnloadSceneSpecificSounds() {
 	byte numSSChans = g_nancy->getStaticData().soundChannelInfo.numSceneSpecificChannels;
 
-	if (g_nancy->getGameType() == kGameTypeVampire && Nancy::State::Map::hasInstance()) {
+	if (g_nancy->getGameType() == kGameTypeVampire && State::Map::hasInstance()) {
 		// Don't stop the map sound in certain scenes
 		uint nextScene = NancySceneState.getNextSceneInfo().sceneID;
 		if (nextScene != 0 && (nextScene < 15 || nextScene > 27)) {
@@ -655,7 +655,7 @@ void SoundManager::stopAndUnloadSceneSpecificSounds() {
 
 void SoundManager::pauseSceneSpecificSounds(bool pause) {
 	byte numSSChans = g_nancy->getStaticData().soundChannelInfo.numSceneSpecificChannels;
-	if (g_nancy->getGameType() == kGameTypeVampire && Nancy::State::Map::hasInstance()) {
+	if (g_nancy->getGameType() == kGameTypeVampire && State::Map::hasInstance()) {
 		if (!pause || g_nancy->getState() != NancyState::kMap) {
 			// Stop the map sound in certain scenes
 			uint currentScene = NancySceneState.getSceneInfo().sceneID;

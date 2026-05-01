@@ -73,10 +73,10 @@ namespace State {
 
 // The game state that handles all of the gameplay
 class Scene : public State, public Common::Singleton<Scene> {
-	friend class Nancy::Action::ActionRecord;
-	friend class Nancy::Action::ActionManager;
-	friend class Nancy::NancyConsole;
-	friend class Nancy::NancyEngine;
+	friend class Action::ActionRecord;
+	friend class Action::ActionManager;
+	friend class NancyConsole;
+	friend class NancyEngine;
 
 public:
 	struct SceneSummary {

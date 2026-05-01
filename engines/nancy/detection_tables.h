@@ -47,7 +47,7 @@ static const PlainGameDescriptor nancyGames[] = {
 #define NANCY6_7_GUIOPTIONS GUIO3(GAMEOPTION_AUTO_MOVE, GAMEOPTION_FIX_SOFTLOCKS, GAMEOPTION_ORIGINAL_SAVELOAD)
 #define NANCY8_GUIOPTIONS GUIO2(GAMEOPTION_AUTO_MOVE, GAMEOPTION_ORIGINAL_SAVELOAD)
 
-static const Nancy::NancyGameDescription gameDescriptions[] = {
+static const NancyGameDescription gameDescriptions[] = {
 
 	{ // MD5 by fracturehill
 		{
@@ -58,7 +58,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPLANGUAGE | ADGF_DROPPLATFORM,
 			VAMPIRE_GUIOPTIONS
 		},
-		Nancy::kGameTypeVampire
+		kGameTypeVampire
 	},
 	{ // MD5 by waltervn
 		{
@@ -69,7 +69,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy1
+		kGameTypeNancy1
 	},
 	{ // MD5 by fracturehill
 		{
@@ -80,7 +80,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy1
+		kGameTypeNancy1
 	},
 	{ // MD5 by fracturehill
 		{
@@ -95,10 +95,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::RU_RUS,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy1
+		kGameTypeNancy1
 	},
 	{ // MD5 by waltervn
 		{
@@ -109,7 +109,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY2_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy2
+		kGameTypeNancy2
 	},
 	{ // MD5 by fracturehill
 		{
@@ -120,7 +120,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY2_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy2
+		kGameTypeNancy2
 	},
 	{ // MD5 by fracturehill
 		{
@@ -134,10 +134,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::RU_RUS,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY2_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy2
+		kGameTypeNancy2
 	},
 	{ // MD5 by waltervn
 		{
@@ -148,7 +148,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy3
+		kGameTypeNancy3
 	},
 	{ // Steam version
 		{
@@ -159,7 +159,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy3
+		kGameTypeNancy3
 	},
 	{ // MD5 by fracturehill
 		{
@@ -173,10 +173,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy3
+		kGameTypeNancy3
 	},
 	{ // MD5 by waltervn
 		{
@@ -190,10 +190,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy3
+		kGameTypeNancy3
 	},
 	{ // MD5 by fracturehill
 		{
@@ -204,7 +204,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy3
+		kGameTypeNancy3
 	},
 	{ // MD5 by fracturehill
 		{
@@ -218,10 +218,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::RU_RUS,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy3
+		kGameTypeNancy3
 	},
 	{ // MD5 by waltervn
 		{
@@ -232,7 +232,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy4
+		kGameTypeNancy4
 	},
 	{ // Steam version
 		{
@@ -243,7 +243,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy4
+		kGameTypeNancy4
 	},
 	{ // MD5 by fracturehill
 		{
@@ -257,10 +257,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy4
+		kGameTypeNancy4
 	},
 	{ // MD5 by waltervn
 		{
@@ -274,10 +274,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy4
+		kGameTypeNancy4
 	},
 	{ // MD5 by eriktorbjorn
 		{
@@ -291,10 +291,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy4
+		kGameTypeNancy4
 	},
 	{ // MD5 by fracturehill
 		{
@@ -305,7 +305,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy4
+		kGameTypeNancy4
 	},
 	{ // MD5 by fracturehill
 		{
@@ -320,10 +320,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::RU_RUS,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy4
+		kGameTypeNancy4
 	},
 	{ // MD5 by waltervn
 		{
@@ -334,7 +334,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY5_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy5
+		kGameTypeNancy5
 	},
 	{ // MD5 by waltervn
 		{
@@ -348,10 +348,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY5_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy5
+		kGameTypeNancy5
 	},
 	{ // MD5 by fracturehill
 		{
@@ -365,10 +365,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY5_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy5
+		kGameTypeNancy5
 	},
 	/* Temporarily disabled; needs ciftree.dat
 	{ // MD5 by clone2727
@@ -382,10 +382,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY5_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy5
+		kGameTypeNancy5
 	},*/
 	{ // MD5 by fracturehill
 		{
@@ -396,7 +396,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY5_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy5
+		kGameTypeNancy5
 	},
 	{ // MD5 by fracturehill
 		{
@@ -411,10 +411,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::RU_RUS,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY5_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy5
+		kGameTypeNancy5
 	},
 	{ // MD5 by Strangerke
 		{
@@ -429,7 +429,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy6
+		kGameTypeNancy6
 	},
 	{ // MD5 by eriktorbjorn
 		{
@@ -443,10 +443,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy6
+		kGameTypeNancy6
 	},
 	{
 		{
@@ -460,10 +460,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy6
+		kGameTypeNancy6
 	},
 	{ // MD5 by fracturehill
 		{
@@ -477,10 +477,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy6
+		kGameTypeNancy6
 	},
 	{ // MD5 by fracturehill
 		{
@@ -491,7 +491,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy6
+		kGameTypeNancy6
 	},
 	{ // MD5 by fracturehill
 		{
@@ -505,10 +505,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::RU_RUS,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy6
+		kGameTypeNancy6
 	},
 	{ // MD5 by fracturehill
 		{
@@ -519,7 +519,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy7
+		kGameTypeNancy7
 	},
 	{ // MD5 by eriktorbjorn
 		{
@@ -533,10 +533,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy7
+		kGameTypeNancy7
 	},
 	{
 		{
@@ -550,10 +550,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy7
+		kGameTypeNancy7
 	},
 	{ // MD5 by fracturehill
 		{
@@ -564,7 +564,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_DROPPLATFORM,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy7
+		kGameTypeNancy7
 	},
 	{ // MD5 by fracturehill
 		{
@@ -578,10 +578,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::RU_RUS,
 			Common::kPlatformWindows,
-			ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY6_7_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy7
+		kGameTypeNancy7
 	},
 	{ // MD5 by fracturehill
 		{
@@ -592,7 +592,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_TESTING | ADGF_DROPPLATFORM,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy8
+		kGameTypeNancy8
 	},
 	{ // MD5 by fracturehill
 		{
@@ -606,10 +606,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_TESTING | ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_TESTING | ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy8
+		kGameTypeNancy8
 	},
 	{ // MD5 by fracturehill
 		{
@@ -620,7 +620,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_TESTING | ADGF_DROPPLATFORM,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy8
+		kGameTypeNancy8
 	},
 	{ // MD5 by fracturehill
 		{
@@ -634,10 +634,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::RU_RUS,
 			Common::kPlatformWindows,
-			ADGF_TESTING | ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_TESTING | ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy8
+		kGameTypeNancy8
 	},
 	{ // MD5 by fracturehill
 		{
@@ -652,7 +652,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_TESTING | ADGF_DROPPLATFORM,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy9
+		kGameTypeNancy9
 	},
 	{ // MD5 by fracturehill
 		{
@@ -666,10 +666,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_TESTING | ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_TESTING | ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy9
+		kGameTypeNancy9
 	},
 	{
 		{
@@ -684,7 +684,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy10
+		kGameTypeNancy10
 	},
 	{
 		{
@@ -698,10 +698,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_UNSTABLE | ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy10
+		kGameTypeNancy10
 	},
 	{
 		{
@@ -716,7 +716,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy11
+		kGameTypeNancy11
 	},
 	{
 		{
@@ -730,10 +730,10 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			},
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_UNSTABLE | ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM | GF_COMPRESSED,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy11
+		kGameTypeNancy11
 	},
 	{ // MD5 by bluegr
 		{
@@ -744,7 +744,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy12
+		kGameTypeNancy12
 	},
 	{ // MD5 by bluegr
 		{
@@ -755,11 +755,11 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
 			NANCY8_GUIOPTIONS
 		},
-		Nancy::kGameTypeNancy13
+		kGameTypeNancy13
 	},
 
 	// Do not delete
-	{ AD_TABLE_END_MARKER, Nancy::kGameTypeNone }
+	{ AD_TABLE_END_MARKER, kGameTypeNone }
 };
 
 } // End of namespace Nancy

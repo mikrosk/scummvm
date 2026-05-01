@@ -96,7 +96,7 @@ struct DependencyRecord {
 // will have to subclass RenderActionRecord.
 class ActionRecord {
 	friend class ActionManager;
-	friend class Nancy::NancyConsole;
+	friend class NancyConsole;
 
 public:
 	enum ExecutionState { kBegin, kRun, kActionTrigger };

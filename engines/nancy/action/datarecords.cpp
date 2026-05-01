@@ -413,7 +413,7 @@ void ModifyListEntry::readData(Common::SeekableReadStream &stream) {
 }
 
 void ModifyListEntry::execute() {
-	JournalData *journalData = (Nancy::JournalData *)NancySceneState.getPuzzleData(Nancy::JournalData::getTag());
+	JournalData *journalData = (JournalData *)NancySceneState.getPuzzleData(JournalData::getTag());
 	assert(journalData);
 
 	Common::Array<JournalData::Entry> &array = journalData->journalEntries[_surfaceID];

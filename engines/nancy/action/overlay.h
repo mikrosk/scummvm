@@ -68,7 +68,7 @@ public:
 	SceneChangeDescription _sceneChange;
 	MultiEventFlagDescription _flagsOnTrigger;
 
-	Nancy::SoundDescription _sound;
+	SoundDescription _sound;
 
 	// Describes a single frame in this animation
 	Common::Array<Common::Rect> _srcRects;

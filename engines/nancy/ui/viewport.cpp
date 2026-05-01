@@ -56,7 +56,7 @@ void Viewport::init() {
 }
 
 void Viewport::handleInput(NancyInput &input) {
-	const Nancy::State::Scene::SceneSummary &summary = NancySceneState.getSceneSummary();
+	const State::Scene::SceneSummary &summary = NancySceneState.getSceneSummary();
 	Time systemTime = g_system->getMillis();
 	byte direction = 0;
 

@@ -104,7 +104,7 @@ void LoadSaveMenu::onStateEnter(const NancyState::NancyState prevState) {
 
 		// Display the question dialog if we are in a scene, and if we are not
 		// in the middle of quitting the game, and a save has been requested
-		if (Nancy::State::Scene::hasInstance() && !saveAndQuit) {
+		if (Scene::hasInstance() && !saveAndQuit) {
 			GUI::MessageDialog saveOrLoad(_("Would you like to load or save a game?"), _("Load"), _("Save"));
 
 			int choice = saveOrLoad.runModal();
@@ -160,8 +160,8 @@ void LoadSaveMenu::scummVMLoad() {
 	_selectedSave = slot;
 
 	if (slot >= 0) {
-		if (Nancy::State::Scene::hasInstance())
-			Nancy::State::Scene::destroy();
+		if (Scene::hasInstance())
+			Scene::destroy();
 
 		ConfMan.setInt("save_slot", slot, Common::ConfigManager::kTransientDomain);
 
@@ -244,7 +244,7 @@ bool LoadSaveMenu::save() {
 void LoadSaveMenu::load() {
 	auto *sdlg = GetEngineData(SDLG);
 
-	if (sdlg && sdlg->dialogs.size() > 1 && Nancy::State::Scene::hasInstance() && !g_nancy->_hasJustSaved) {
+	if (sdlg && sdlg->dialogs.size() > 1 && Scene::hasInstance() && !g_nancy->_hasJustSaved) {
 		// nancy6 added a "Do you want load without saving" dialog.
 		if (!ConfMan.hasKey("sdlg_return", Common::ConfigManager::kTransientDomain)) {
 			// Request the dialog
@@ -274,8 +274,8 @@ void LoadSaveMenu::load() {
 		}
 	}
 
-	if (Nancy::State::Scene::hasInstance()) {
-		Nancy::State::Scene::destroy();
+	if (Scene::hasInstance()) {
+		Scene::destroy();
 	}
 
 	ConfMan.setInt("save_slot", scummVMSaveSlotToLoad(), Common::ConfigManager::kTransientDomain);
@@ -472,12 +472,12 @@ void LoadSaveMenu_V1::run() {
 	if (_enteringNewState) {
 		// State has changed, revert all relevant objects to an appropriate state
 		for (uint i = 0; i < _textboxes.size(); ++i) {
-			writeToTextbox(i, _filenameStrings[i], Nancy::State::Scene::hasInstance() ? _baseFont : _disabledFont);
+			writeToTextbox(i, _filenameStrings[i], Scene::hasInstance() ? _baseFont : _disabledFont);
 
 			// Set load button state depending on whether there exists a save in the corresponding slot
 			// Save buttons are always active
 			_loadButtons[i]->setDisabled(_saveExists[i] == false);
-			_saveButtons[i]->setDisabled(!Nancy::State::Scene::hasInstance());
+			_saveButtons[i]->setDisabled(!Scene::hasInstance());
 			_cancelButtonOverlays[i]->setVisible(false);
 
 			_loadButtons[i]->_isClicked = false;
@@ -526,7 +526,7 @@ void LoadSaveMenu_V1::run() {
 		_saveButtons[i]->handleInput(input);
 
 		if (_saveButtons[i]->_isClicked) {
-			if (Nancy::State::Scene::hasInstance()) {
+			if (Scene::hasInstance()) {
 				_state = kSave;
 				_enteringNewState = true;
 				_selectedSave = i;
@@ -546,7 +546,7 @@ void LoadSaveMenu_V1::run() {
 	bool hoversOverTextbox = false;
 	for (int i = 0; i < (int)_textboxes.size(); ++i) {
 		if (_textboxes[i]->getScreenPosition().contains(input.mousePos)) {
-			if (Nancy::State::Scene::hasInstance()) {
+			if (Scene::hasInstance()) {
 				hoversOverTextbox = true;
 				if (_selectedSave != i) {
 					if (_selectedSave != -1) {
@@ -899,11 +899,11 @@ void LoadSaveMenu_V2::run() {
 		// State has changed, revert all relevant objects to an appropriate state
 		goToPage(_currentPage);
 		for (uint i = 0; i < _textboxes.size(); ++i) {
-			writeToTextbox(i, _filenameStrings[i], Nancy::State::Scene::hasInstance() ? _baseFont : _disabledFont);
+			writeToTextbox(i, _filenameStrings[i], Scene::hasInstance() ? _baseFont : _disabledFont);
 		}
 
 		if (_currentPage == 0) {
-			_saveButton->setDisabled(!Nancy::State::Scene::hasInstance());
+			_saveButton->setDisabled(!Scene::hasInstance());
 			_saveButton->_isClicked = false;
 			_inputTextbox->setVisible(true);
 			_textboxes[0]->setVisible(false);
@@ -945,7 +945,7 @@ void LoadSaveMenu_V2::run() {
 	_saveButton->handleInput(input);
 
 	if (_saveButton->_isClicked) {
-		if (Nancy::State::Scene::hasInstance()) {
+		if (Scene::hasInstance()) {
 			_state = kSave;
 			_enteringNewState = true;
 			g_nancy->_sound->playSound("BULS");
@@ -1016,7 +1016,7 @@ void LoadSaveMenu_V2::run() {
 		}
 	}
 
-	if (Nancy::State::Scene::hasInstance() && _currentPage == 0 &&
+	if (Scene::hasInstance() && _currentPage == 0 &&
 			_inputTextbox && _inputTextbox->getScreenPosition().contains(input.mousePos)) {
 		hoversOverTextbox = true;
 
@@ -1338,7 +1338,7 @@ void LoadSaveMenu_V2::extractSaveNames(uint pageID) {
 	}
 
 	// Load the top textbox showing the name of the last save made
-	if (_enteredString.empty() && Nancy::State::Scene::hasInstance()) {
+	if (_enteredString.empty() && Scene::hasInstance()) {
 		bool textboxSet = false;
 
 		if (ConfMan.hasKey("display_slot", Common::ConfigManager::kTransientDomain)) {

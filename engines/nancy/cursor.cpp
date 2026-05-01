@@ -117,7 +117,7 @@ void CursorManager::setCursor(CursorType type, int16 itemID) {
 		return;
 	}
 
-	Nancy::GameType gameType = g_nancy->getGameType();
+	GameType gameType = g_nancy->getGameType();
 
 	if (type == _curCursorType && itemID == _curItemID) {
 		return;

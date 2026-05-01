@@ -40,7 +40,7 @@ class Scene;
 namespace UI {
 
 class InventoryBox : public RenderObject {
-	friend class Nancy::State::Scene;
+	friend class State::Scene;
 
 public:
 	struct ItemDescription {

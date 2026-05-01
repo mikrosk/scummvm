@@ -103,7 +103,7 @@ void NancyConsole::postEnter() {
 			while (!g_nancy->shouldQuit() && !dec->endOfVideo()) {
 				Common::Event event;
 				if (ev->pollEvent(event)) {
-					if (event.type == Common::EVENT_CUSTOM_ENGINE_ACTION_END && event.customType == Nancy::InputManager::kNancyActionLeftClick) {
+					if (event.type == Common::EVENT_CUSTOM_ENGINE_ACTION_END && event.customType == InputManager::kNancyActionLeftClick) {
 						break;
 					}
 				}
@@ -140,7 +140,7 @@ void NancyConsole::postEnter() {
 			while (!g_nancy->shouldQuit()) {
 				Common::Event event;
 				if (ev->pollEvent(event)) {
-					if (event.type == Common::EVENT_CUSTOM_ENGINE_ACTION_END && event.customType == Nancy::InputManager::kNancyActionLeftClick) {
+					if (event.type == Common::EVENT_CUSTOM_ENGINE_ACTION_END && event.customType == InputManager::kNancyActionLeftClick) {
 						break;
 					}
 
@@ -481,12 +481,12 @@ bool NancyConsole::Cmd_sceneID(int argc, const char **argv) {
 	return true;
 }
 
-void NancyConsole::printActionRecord(const Nancy::Action::ActionRecord *record, bool noDependencies) {
+void NancyConsole::printActionRecord(const Action::ActionRecord *record, bool noDependencies) {
 	debugPrintf("\n%s\n\ttype: %i, %s\n\texecType: %s",
 		record->_description.c_str(),
 		record->_type,
 		record->getRecordTypeName().c_str(),
-		record->_execType == Nancy::Action::ActionRecord::kRepeating ? "kRepeating" : "kOneShot");
+		record->_execType == Action::ActionRecord::kRepeating ? "kRepeating" : "kOneShot");
 
 	if (!noDependencies && record->_dependencies.children.size()) {
 		debugPrintf("\n\tDependencies:");
@@ -495,8 +495,8 @@ void NancyConsole::printActionRecord(const Nancy::Action::ActionRecord *record, 
 	}
 }
 
-void NancyConsole::recursePrintDependencies(const Nancy::Action::DependencyRecord &record) {
-	using namespace Nancy::Action;
+void NancyConsole::recursePrintDependencies(const Action::DependencyRecord &record) {
+	using namespace Action;
 
 	auto *inventoryData = GetEngineData(INV);
 	assert(inventoryData);
@@ -597,7 +597,7 @@ void NancyConsole::recursePrintDependencies(const Nancy::Action::DependencyRecor
 }
 
 bool NancyConsole::Cmd_listActionRecords(int argc, const char **argv) {
-	using namespace Nancy::Action;
+	using namespace Action;
 
 	if (argc == 1) {
 		// Print the current scene
