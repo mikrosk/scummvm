@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ScummVM 1.3.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
 "POT-Creation-Date: 2026-04-30 16:56+0000\n"
-"PO-Revision-Date: 2026-05-01 10:22+0000\n"
+"PO-Revision-Date: 2026-05-01 16:06+0000\n"
 "Last-Translator: Walter Agazzi <walter.agazzi@protonmail.com>\n"
 "Language-Team: Italian <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/it/>\n"
@@ -9521,7 +9521,7 @@ msgstr "Numero di righe di testo"
 
 #: engines/glk/dialogs.cpp:296
 msgid "Lock columns:"
-msgstr "Colonne fisse:"
+msgstr "Blocca colonne:"
 
 #: engines/glk/dialogs.cpp:296
 msgid "Check it to manually change the column count"
@@ -9529,7 +9529,7 @@ msgstr "Abilita questa opzione per impostare manualmente il numero di colonne"
 
 #: engines/glk/dialogs.cpp:297
 msgid "Lock rows:"
-msgstr "Righe fisse:"
+msgstr "Blocca righe:"
 
 #: engines/glk/dialogs.cpp:297
 msgid "Check it to manually change the row count"
@@ -9538,36 +9538,28 @@ msgstr "Abilita questa opzione per impostare manualmente il numero di righe"
 #. I18N: This is a setting for enabling text justification
 #: engines/glk/dialogs.cpp:301
 msgid "Justify:"
-msgstr ""
+msgstr "Giustifica:"
 
 #: engines/glk/dialogs.cpp:302
-#, fuzzy
-#| msgid "Enable short transitions"
 msgid "Enable text justification"
-msgstr "Abilita transizioni brevi"
+msgstr "Abilita giustificazione del testo"
 
 #. I18N: These is setting for type of text quote symbols
 #: engines/glk/dialogs.cpp:305
-#, fuzzy
-#| msgid "Graphics mode:"
 msgid "Typographic quotes:"
-msgstr "Modalità grafica:"
+msgstr "Virgolette:"
 
 #: engines/glk/dialogs.cpp:306
-#, fuzzy
-#| msgid "Color graphics"
 msgid "Choose typographic quotes"
-msgstr "Grafica a colori"
+msgstr "Seleziona tipologia di virgolette"
 
 #: engines/glk/dialogs.cpp:307
 msgctxt "quotes"
 msgid "Off"
-msgstr ""
+msgstr "Disattivate"
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
 #: engines/glk/dialogs.cpp:309
-#, fuzzy
-#| msgid "Normal"
 msgctxt "quotes"
 msgid "Normal"
 msgstr "Normali"
@@ -9576,92 +9568,84 @@ msgstr "Normali"
 #: engines/glk/dialogs.cpp:311
 msgctxt "quotes"
 msgid "Rabid"
-msgstr ""
+msgstr "Alternate ( „…“ )"
 
 #. I18N: This is a setting for forcing all input to be in uppercase
 #: engines/glk/dialogs.cpp:314
 msgid "Caps:"
-msgstr ""
+msgstr "Maiuscolo:"
 
 #: engines/glk/dialogs.cpp:314
 msgid "Force uppercase input"
-msgstr ""
+msgstr "Usa caratteri maiuscoli per l'input da tastiera"
 
 #. I18N: This is a setting for type of text dash symbols
 #: engines/glk/dialogs.cpp:317
 msgid "Dashes:"
-msgstr ""
+msgstr "Trattini:"
 
 #. I18N: This is a setting for type of text dash symbols
 #: engines/glk/dialogs.cpp:319
 msgid "Types of dashes"
-msgstr ""
+msgstr "Tipo di trattini"
 
 #: engines/glk/dialogs.cpp:320 engines/glk/dialogs.cpp:332
 msgid "Off"
-msgstr ""
+msgstr "Disattivati"
 
 #. I18N: This is a setting for using normal typographic dashes, which are like in most books, with the em dash being the longest and the en dash being half of it
 #: engines/glk/dialogs.cpp:322
 msgid "Em dashes"
-msgstr ""
+msgstr "Trattini lunghi"
 
 #. I18N: This is a setting for using "en+em" dashes, which are like normal typographic dashes but with the en dash being the same length as the em dash, like in some comic books
 #: engines/glk/dialogs.cpp:324
 msgid "En+Em dashes"
-msgstr ""
+msgstr "Trattini corti e lunghi"
 
 #: engines/glk/dialogs.cpp:326
-#, fuzzy
-#| msgid "Preferences"
 msgid "User experience"
-msgstr "Preferenze"
+msgstr "Esperienza utente"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:329
-#, fuzzy
-#| msgid "Space"
 msgid "Spaces:"
-msgstr "Spazio"
+msgstr "Spazi:"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:331
 msgid "Types of spaces"
-msgstr ""
+msgstr "Tipologia spazi"
 
 #. I18N: This is a setting for compressing double spaces into single ones in text
 #: engines/glk/dialogs.cpp:334
 msgid "Compress double spaces"
-msgstr ""
+msgstr "Comprimi spazi doppi"
 
 #. I18N: This is a setting for expanding single spaces into double ones in text
 #: engines/glk/dialogs.cpp:336
 msgid "Expand single spaces"
-msgstr ""
+msgstr "Espandi spazi singoli"
 
 #: engines/glk/dialogs.cpp:338
-#, fuzzy
-#| msgid "Graphics"
 msgid "Graphics:"
-msgstr "Grafica"
+msgstr "Grafica:"
 
 #: engines/glk/dialogs.cpp:338
 msgid "Turn graphics on/off"
-msgstr ""
+msgstr "Attiva/disattiva la grafica"
 
 #: engines/glk/dialogs.cpp:340
-#, fuzzy
-#| msgid "Window"
 msgid "Window margin"
-msgstr "Finestra"
+msgstr "Margini finestra"
 
 #: engines/glk/dialogs.cpp:341
 msgid "Horizontal margin for window"
-msgstr ""
+msgstr "Margine orizzontale finestra"
 
 #: engines/glk/dialogs.cpp:342
 msgid "Vertical margin for window"
-msgstr ""
+msgstr "Margine verticale finestra"
 
 #: engines/glk/dialogs.cpp:344
 #, fuzzy
