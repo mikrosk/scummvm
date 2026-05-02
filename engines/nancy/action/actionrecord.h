@@ -119,12 +119,12 @@ public:
 	virtual CursorManager::CursorType getHoverCursor() const { return CursorManager::kHotspot; }
 	virtual void handleInput(NancyInput &input) {}
 
+	// Used for debugging
+	virtual Common::String getRecordTypeName() const = 0;
+
 protected:
 	void finishExecution();
 	virtual bool canHaveHotspot() const { return false; } // Used for handling kCursorType dependency
-
-	// Used for debugging
-	virtual Common::String getRecordTypeName() const = 0;
 
 public:
 	Common::String _description;
