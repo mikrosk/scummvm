@@ -101,7 +101,7 @@ NancyEngine::~NancyEngine() {
 }
 
 NancyEngine *NancyEngine::create(GameType type, OSystem *syst, const NancyGameDescription *gd) {
-	if (type >= kGameTypeVampire && type <= kGameTypeNancy13) {
+	if (type >= kGameTypeVampire && type <= kGameTypeNancy32) {
 		return new NancyEngine(syst, gd);
 	}
 

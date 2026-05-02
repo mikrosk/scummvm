@@ -19,6 +19,8 @@
  *
  */
 
+#include "detection.h"
+
 namespace Nancy {
 
 static const PlainGameDescriptor nancyGames[] = {
@@ -37,6 +39,28 @@ static const PlainGameDescriptor nancyGames[] = {
 	{ "nancy11", "Nancy Drew: Curse of Blackmoor Manor" },
 	{ "nancy12", "Nancy Drew: Secret of the Old Clock" },
 	{ "nancy13", "Nancy Drew: Last Train to Blue Moon Canyon" },
+	{ "nancy14", "Nancy Drew: Danger by Design" },
+	{ "nancy15", "Nancy Drew: The Creature of Kapu Cave" },
+	{ "nancy16", "Nancy Drew: The White Wolf of Icicle Creek" },
+	{ "nancy17", "Nancy Drew: Legend of the Crystal Skull" },
+	{ "nancy18", "Nancy Drew: The Phantom of Venice" },
+	{ "nancy19", "Nancy Drew: The Haunting of Castle Malloy" },
+	{ "nancy20", "Nancy Drew: Ransom of the Seven Ships" },		// Discontinued
+	{ "nancy21", "Nancy Drew: Warnings at Waverly Academy" },
+	{ "nancy22", "Nancy Drew: Trail of the Twister" },
+	{ "nancy1new", "Nancy Drew: Secrets Can Kill Remastered" },
+	{ "nancy23", "Nancy Drew: Shadow at the Water's Edge" },
+	{ "nancy24", "Nancy Drew: The Captive Curse" },
+	{ "nancy25", "Nancy Drew: Alibi in Ashes" },
+	{ "nancy26", "Nancy Drew: Tomb of the Lost Queen" },
+	{ "nancy27", "Nancy Drew: The Deadly Device" },
+	{ "nancy28", "Nancy Drew: Ghost of Thornton Hall" },
+	{ "nancy29", "Nancy Drew: The Silent Spy" },
+	{ "nancy30", "Nancy Drew: The Shattered Medallion" },
+	{ "nancy31", "Nancy Drew: Labyrinth of Lies" },
+	{ "nancy32", "Nancy Drew: Sea of Darkness" },
+	// Midnight in Salem was made with Unity
+	// Mystery of the Seven Keys was made with Unity
 	{ nullptr, nullptr }
 };
 
@@ -756,6 +780,105 @@ static const NancyGameDescription gameDescriptions[] = {
 			NANCY8_GUIOPTIONS
 		},
 		kGameTypeNancy13
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy14", nullptr,
+			AD_ENTRY1s("ciftree.dat", "731ae1a9e194757c6d23fda799142bd7", 44679840),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy14
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy15", nullptr,
+			AD_ENTRY1s("ciftree.dat", "9c5af8a00225a528fe03f52d3664740d", 38659635),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy15
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy16", nullptr,
+			AD_ENTRY1s("ciftree.dat", "4014eba84276281456cdba1fa9c03389", 45713842),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy16
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy17", nullptr,
+			AD_ENTRY1s("ciftree.dat", "039950bfb8d1d614727ace5359ba6e20", 55775218),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy17
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy18", nullptr,
+			AD_ENTRY1s("ciftree.dat", "f414a802b64d3a9e28ba8e69e953a2b8", 50123969),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy18
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy19", nullptr,
+			AD_ENTRY1s("ciftree.dat", "e1d50b6fc3b72335863a45fdaf6f3da7", 53613856),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy19
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy21", nullptr,
+			AD_ENTRY1s("ciftree.dat", "25249fabe11f2b865203284e798b8c09", 58348182),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy21
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy22", nullptr,
+			AD_ENTRY1s("ciftree.dat", "2aa05fbc4f06f71ed98d092b60043c0e", 109670993),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy22
+	},
+	{ // MD5 by bluegr
+		{
+			"nancy1new", nullptr,
+			AD_ENTRY1s("ciftree.dat", "27dc04f52f2022c7eae8028b0b0dd215", 15296357),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy1New
 	},
 
 	// Do not delete
