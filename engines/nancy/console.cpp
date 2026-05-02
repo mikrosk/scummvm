@@ -174,7 +174,7 @@ bool NancyConsole::Cmd_cifExport(int argc, const char **argv) {
 	if (!g_nancy->_resource->exportCif((argc == 2 ? "" : argv[2]), argv[1]))
 		debugPrintf("Failed to export '%s'\n", argv[1]);
 
-	return cmdExit(0, nullptr);
+	return true;
 }
 
 bool NancyConsole::Cmd_ciftreeExport(int argc, const char **argv) {
@@ -193,7 +193,7 @@ bool NancyConsole::Cmd_ciftreeExport(int argc, const char **argv) {
 	if (!g_nancy->_resource->exportCifTree(argv[1], files))
 		debugPrintf("Failed to export '%s'\n", argv[1]);
 
-	return cmdExit(0, nullptr);
+	return true;
 }
 
 bool NancyConsole::Cmd_cifList(int argc, const char **argv) {

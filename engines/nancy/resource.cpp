@@ -264,6 +264,11 @@ Common::String ResourceManager::getCifDescription(const Common::String &treeName
 		error("Couldn't find CifInfo struct inside loaded CifTrees");
 	}
 
+	if (!tree->hasFile(name)) {
+		Common::String ret = Common::String::format("Couldn't find CIF %s\n", name.toString().c_str());
+		return ret;
+	}
+
 	const CifInfo &info = tree->getCifInfo(name);
 
 	Common::String desc;
