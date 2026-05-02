@@ -503,7 +503,18 @@ void NancyEngine::bootGameEngine() {
 	// Nancy 13+
 	// RCPR and RCLB chunks have been removed
 	// LOAD_BOOT(MMIX)
-	
+
+	// Nancy 14+
+	// LOAD_BOOT(UICM)
+
+	// Nancy 15+
+	// TASK, UIRC, UIIV, UICO, UICM, UICL,
+	// UIBW, UINB, SCTB, CURT, TMOD chunks have
+	// been removed
+	// LOAD_BOOT(LVLN)
+	// LOAD_BOOT(PCUI)
+	// LOAD_BOOT(LDSN)
+
 	_cursor->init(iff->getChunkStream("CURS"));
 
 	_graphics->init();
