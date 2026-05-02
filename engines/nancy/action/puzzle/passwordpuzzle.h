@@ -62,6 +62,8 @@ public:
 	SolveState _solveState = kNotSolved;
 
 	uint _maxStringLength = 0;
+	uint _maxNameLength = 0;
+	uint _maxPassLength = 0;
 
 protected:
 	Common::String getRecordTypeName() const override { return "PasswordPuzzle"; }
