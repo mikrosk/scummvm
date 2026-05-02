@@ -370,7 +370,7 @@ void MultiBuildPuzzle::handleInput(NancyInput &input) {
 	}
 
 	if (topmost != -1) {
-		g_nancy->_cursor->setCursorType(CursorManager::kHotspot);
+		g_nancy->_cursor->setCursorType(CursorManager::kCustom1);
 
 		if (input.input & NancyInput::kLeftMouseButtonUp) {
 			Piece &pp = _pieces[topmost];
