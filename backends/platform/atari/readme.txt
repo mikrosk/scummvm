@@ -165,8 +165,9 @@ the exact value; it will be rounded automatically to the nearest suitable
 value.
 
 "output_channels" in scummvm.ini: mono (1) or stereo (2) mixing. Falcon always
-reports 16-bit stereo used but internally a mono-to-stereo conversion is done
-(so I encourage everyone to use mono when music playback is too demanding).
+outputs 16-bit stereo however when set to mono, a fast mono-to-stereo
+conversion takes place (so I encourage everyone to use mono when music playback
+is too demanding).
 
 "audio_buffer_size" in scummvm.ini: number of samples to preload. Default is
 2048 which equals to about 83ms of audio lag and seems to be about right for
