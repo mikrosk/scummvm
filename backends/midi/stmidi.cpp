@@ -33,7 +33,6 @@
 
 // Disable symbol overrides so that we can use system headers.
 #define FORBIDDEN_SYMBOL_ALLOW_ALL
-#define FORCE_TEXT_CONSOLE
 
 #include "common/scummsys.h"
 
@@ -42,7 +41,6 @@
 #include <osbind.h>
 #include "audio/mpu401.h"
 #include "common/error.h"
-#include "common/system.h"
 #include "common/util.h"
 #include "audio/musicplugin.h"
 
@@ -54,49 +52,10 @@ public:
 	void close();
 	void send(uint32 b) override;
 	void sysEx(const byte *msg, uint16 length);
-	void setTimerCallback(void *timer_param, Common::TimerManager::TimerProc timer_proc) override;
 
 private:
 	bool _isOpen;
 };
-
-// --- Instrumentation (temporary) -----------------------------------------
-// Measures two things:
-//   1. Inter-tick spacing of the installed MPU401 timer callback; anything
-//      noticeably above the 10ms base tempo means the cooperative update()
-//      pump is starving.
-//   2. Wall-time of MidiDriver_STMIDI::send() and number of send() calls per
-//      tick, so we can see how much main-thread time Bconout's busy-wait is
-//      actually costing on dense ticks.
-static Common::TimerManager::TimerProc g_stmidiRealTimerProc = nullptr;
-static uint32 g_stmidiLastTickMillis = 0;
-static uint32 g_stmidiTickStartMillis = 0;
-static uint32 g_stmidiEventsThisTick = 0;
-
-static void stmidiTimerTrampoline(void *refCon) {
-	const uint32 now = g_system->getMillis(true);
-
-	if (g_stmidiLastTickMillis != 0) {
-		const uint32 delta = now - g_stmidiLastTickMillis;
-		if (delta > 15)
-			warning("STMIDI: tick delta=%u ms (prev tick: %u events, %u ms)",
-				delta, g_stmidiEventsThisTick,
-				g_stmidiLastTickMillis - g_stmidiTickStartMillis);
-	}
-
-	g_stmidiLastTickMillis = now;
-	g_stmidiTickStartMillis = now;
-	g_stmidiEventsThisTick = 0;
-
-	if (g_stmidiRealTimerProc)
-		g_stmidiRealTimerProc(refCon);
-
-	const uint32 tickMs = g_system->getMillis(true) - g_stmidiTickStartMillis;
-	if (tickMs >= 3)
-		warning("STMIDI: tick ran %u ms, %u send() calls",
-			tickMs, g_stmidiEventsThisTick);
-}
-// -------------------------------------------------------------------------
 
 int MidiDriver_STMIDI::open() {
 	if (_isOpen && (!Bcostat(4)))
@@ -111,19 +70,7 @@ void MidiDriver_STMIDI::close() {
 	_isOpen = false;
 }
 
-void MidiDriver_STMIDI::setTimerCallback(void *timer_param, Common::TimerManager::TimerProc timer_proc) {
-	g_stmidiRealTimerProc = timer_proc;
-	g_stmidiLastTickMillis = 0;
-	g_stmidiTickStartMillis = 0;
-	g_stmidiEventsThisTick = 0;
-	MidiDriver_MPU401::setTimerCallback(timer_param,
-		timer_proc ? stmidiTimerTrampoline : nullptr);
-}
-
 void MidiDriver_STMIDI::send(uint32 b) {
-	const uint32 sendStart = g_system->getMillis(true);
-	++g_stmidiEventsThisTick;
-
 	midiDriverCommonSend(b);
 
 	byte status_byte = (b & 0x000000FF);
@@ -151,10 +98,6 @@ void MidiDriver_STMIDI::send(uint32 b) {
 		fprintf(stderr, "Unknown : %08x\n", (int)b);
 		break;
 	}
-
-	const uint32 sendMs = g_system->getMillis(true) - sendStart;
-	if (sendMs >= 2)
-		warning("STMIDI: send(%08x) took %u ms", (unsigned)b, sendMs);
 }
 
 void MidiDriver_STMIDI::sysEx (const byte *msg, uint16 length) {
