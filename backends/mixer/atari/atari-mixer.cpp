@@ -43,7 +43,60 @@
 #define DEFAULT_SAMPLES 2048	// 83ms
 
 void AtariAudioShutdown() {
+	Jdisint(MFP_TIMERA);
 	AtariSoundSetupDeinitXbios();
+}
+
+static volatile enum PlaybackState {
+	kPlaybackStopped,
+	kPendingWriteTo1stHalf,
+	kPendingWriteTo2ndHalf
+} s_playbackState = kPlaybackStopped;
+
+static void __attribute__((interrupt)) timerA(void) {
+	if (s_playbackState == kPendingWriteTo2ndHalf && buffptr == bufferBeg_or_End) {
+		// skoncil playback 1st a nikto mu nenastavil novy pointer
+		buffptr = silenceBeg, silenceEnd
+		// s_playbackState = kPendingWriteTo1stHalf;
+		// a dole:
+		// ... else if (s_playbackState == kPendingWriteTo1stHalf) {
+		//	if (inSilence || (byte *)sPtr.play >= atariSampleBufferMid) {
+		//		... ech, asi to nie je take easy, lebo co ak silence pojde cez 83ms...
+		//	}
+		// }
+	}
+
+	// skonci playback 1st
+	// zavola sa irq (s nastavenym bufferom na 2nd a state pending1st)
+	//     no a ak je tu buffer stale na 1st (alebo koniec 1st, checknem), chceme ticho
+	//     a tu je otazka: ak teraz nastavim ticho, aplikuje sa hned? ak ano, kedy
+	//     mozem nastavit ne-ticho? (ale to je asi jedno, mozem zaviest mute flag
+	//     a podla toho robit porovnania z update())
+	// skonci playback 2nd
+	// zavola sa ieq (s nastavenym bufferom na 1st a state pending 2nd)
+
+	if (s_playbackState == kPendingWriteTo2ndHalf) {
+		if ((byte *)sPtr.play < atariSampleBufferMid) {
+			buf = atariSampleBufferMid;
+			Setbuffer(SR_PLAY, atariSampleBufferMid, atariSampleBufferEnd);
+			// cize prehravame prvu polovicu, pending prehravanie druhej
+			// (co sa stane, ked prva hodi IRQ, ze hotovo, a mame istotu, ze aj druha
+			// je nastavena, cize cakame, az ked aj ta druha dohra, hm)
+			// okej, cize co sa teraz moze stat? 2nd je nastavena, cize ak nepride
+			// update() dalsich 83ms, chceli by sme ticho
+			// cize problem je, ak podmienka sPtr.play >= atariSampleBufferMid je true
+			// a my nemame pending write to 2ndHalf
+			s_playbackState = kPendingWriteTo1stHalf;
+		}
+	} else if (s_playbackState == kPendingWriteTo1stHalf) {
+		if ((byte *)sPtr.play >= atariSampleBufferMid) {
+			buf = atariSampleBufferBeg;
+			Setbuffer(SR_PLAY, atariSampleBufferBeg, atariSampleBufferMid);
+			s_playbackState = kPendingWriteTo2ndHalf;
+		}
+	}
+
+	*((volatile byte *)0xFFFFFA0FL) = ~(1<<5);	// clear in service bit
 }
 
 AtariMixerManager::AtariMixerManager() : MixerManager() {
@@ -126,9 +179,16 @@ void AtariMixerManager::init() {
 	debug("audio buffer size: %d", _samples);
 
 	_atariSampleBufferSize = obtained.size * 2;	// two buffers
-	_atariSampleBuffer = (byte*)Mxalloc(_atariSampleBufferSize, MX_STRAM);
+	_atariSampleBuffer = (byte *)Mxalloc(_atariSampleBufferSize, MX_STRAM);
 	if (!_atariSampleBuffer) {
 		_atariSampleBufferSize = 0;
+		error("Failed to allocate memory in ST RAM");
+	}
+
+	_atariSilenceBufferSize = obtained.channels * (_downsample ? 1 : 2);
+	_atariSilenceBuffer = (byte *)Mxalloc(_atariSilenceBufferSize, MX_STRAM);
+	if (!_atariSilenceBuffer) {
+		_atariSilenceBufferSize = 0;
 		error("Failed to allocate memory in ST RAM");
 	}
 
@@ -137,6 +197,10 @@ void AtariMixerManager::init() {
 
 	_mixer = new Audio::MixerImpl(_outputRate, _outputChannels == 2, _samples, 4, false);
 	_mixer->setReady(true);
+
+	Setinterrupt(SI_TIMERA, SI_PLAY);
+	Xbtimer(XB_TIMERA, 1<<3, 1, timerA);	// event count mode, count to '1'
+	Jenabint(MFP_TIMERA);
 
 	resumeAudio();
 }
@@ -155,6 +219,10 @@ void AtariMixerManager::deinit() {
 	_atariSampleBuffer = nullptr;
 	_atariSampleBufferSize = 0;
 
+	Mfree(_atariSilenceBuffer);
+	_atariSilenceBuffer = nullptr;
+	_atariSilenceBufferSize = 0;
+
 	delete[] _sampleBuffer;
 	_sampleBuffer = nullptr;
 	_sampleBufferSize = 0;
@@ -165,7 +233,7 @@ void AtariMixerManager::suspendAudio() {
 	debug("suspendAudio");
 
 	Buffoper(0x00);
-	_playbackState = kPlaybackStopped;
+	s_playbackState = kPlaybackStopped;
 	_audioSuspended = true;
 }
 
@@ -181,9 +249,9 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	switch (event.type) {
 	case Common::EVENT_QUIT:
 	case Common::EVENT_RETURN_TO_LAUNCHER:
-		if (_playbackState != kPlaybackStopped) {
+		if (s_playbackState != kPlaybackStopped) {
 			Buffoper(0x00);
-			_playbackState = kPlaybackStopped;
+			s_playbackState = kPlaybackStopped;
 			debug("silencing the mixer");
 		}
 		return false;
@@ -201,11 +269,15 @@ void AtariMixerManager::update() {
 
 	assert(_mixer);
 
-	if (_playbackState == kPlaybackStopped) {
+	byte *atariSampleBufferBeg = _atariSampleBuffer;
+	byte *atariSampleBufferMid = _atariSampleBuffer + _atariSampleBufferSize/2;
+	byte *atariSampleBufferEnd = _atariSampleBuffer + _atariSampleBufferSize;
+
+	if (s_playbackState == kPlaybackStopped) {
 		memset(_atariSampleBuffer, 0, _atariSampleBufferSize);
-		Setbuffer(SR_PLAY, _atariSampleBuffer, _atariSampleBuffer + _atariSampleBufferSize);
+		Setbuffer(SR_PLAY, atariSampleBufferBeg, atariSampleBufferMid);
 		Buffoper(SB_PLA_ENA | SB_PLA_RPT);
-		_playbackState = kWriteTo2ndHalf;
+		s_playbackState = kPendingWriteTo2ndHalf;
 	}
 
 	SndBufPtr sPtr;
@@ -214,18 +286,18 @@ void AtariMixerManager::update() {
 		return;
 	}
 
-	byte *atariSampleBuffer1stHalf = _atariSampleBuffer;
-	byte *atariSampleBuffer2ndHalf = _atariSampleBuffer + _atariSampleBufferSize/2;
 	byte *buf = nullptr;
-	if (_playbackState == kWriteTo2ndHalf) {
-		if ((byte *)sPtr.play < atariSampleBuffer2ndHalf) {
-			buf = atariSampleBuffer2ndHalf;
-			_playbackState = kWriteTo1stHalf;
+	if (s_playbackState == kPendingWriteTo2ndHalf) {
+		if ((byte *)sPtr.play < atariSampleBufferMid) {	// toto je vzdy true az kym sa neprepne
+			buf = atariSampleBufferMid;
+			Setbuffer(SR_PLAY, atariSampleBufferMid, atariSampleBufferEnd);
+			s_playbackState = kPendingWriteTo1stHalf;
 		}
-	} else if (_playbackState == kWriteTo1stHalf) {
-		if ((byte *)sPtr.play >= atariSampleBuffer2ndHalf) {
-			buf = atariSampleBuffer1stHalf;
-			_playbackState = kWriteTo2ndHalf;
+	} else if (s_playbackState == kPendingWriteTo1stHalf) {
+		if ((byte *)sPtr.play >= atariSampleBufferMid) {	// toto je vzdy true az kym sa neprepne
+			buf = atariSampleBufferBeg;
+			Setbuffer(SR_PLAY, atariSampleBufferBeg, atariSampleBufferMid);
+			s_playbackState = kPendingWriteTo2ndHalf;
 		}
 	}
 	if (!buf)

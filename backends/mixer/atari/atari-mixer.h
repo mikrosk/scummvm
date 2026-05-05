@@ -44,12 +44,6 @@ public:
 	bool notifyEvent(const Common::Event &event) override;
 
 private:
-	enum PlaybackState {
-		kPlaybackStopped,
-		kWriteTo2ndHalf,
-		kWriteTo1stHalf
-	} _playbackState = kPlaybackStopped;
-
 	int _outputRate = 0;
 	int _outputChannels = 0;
 	bool _emulated16bitMono = false;
@@ -61,6 +55,9 @@ private:
 
 	int _atariSampleBufferSize = 0;
 	byte *_atariSampleBuffer = nullptr;
+
+	int _atariSilenceBufferSize = 0;
+	byte *_atariSilenceBuffer = nullptr;
 };
 
 #endif
