@@ -1,0 +1,13 @@
+If:
+  PathExclude: 
+    - "/usr/include/*"
+Index:
+  Background: Skip
+
+CompileFlags:
+  Add: [
+    "-nostdinc",
+    "-I/home/mikro/gnu-tools/m68000/m68k-atari-mintelf/sys-root/usr/include",
+    "-isystem", "/home/mikro/gnu-tools/m68000/m68k-atari-mintelf/sys-root/usr/include"
+  ]
+  Remove: ["-isystem", "/usr/include/*"]
