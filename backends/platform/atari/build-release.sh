@@ -36,7 +36,7 @@ then
 	--host=${PLATFORM} \
 	--enable-release \
 	--enable-verbose-build \
-	--disable-engine=hugo,director,cine,ultima,pink,wage \
+	--disable-engine=hugo,director,ultima,pink,wage \
 	${PLUGINS_FLAGS}
 fi
 

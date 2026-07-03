@@ -27,7 +27,6 @@
 #include "common/hashmap.h"
 
 class AtariGraphicsManager;
-class OSystem_Atari;
 
 /**
  * The Atari event source.
@@ -41,7 +40,6 @@ public:
 	void setGraphicsManager(AtariGraphicsManager *graphicsManager) { _graphicsManager = graphicsManager; }
 
 private:
-	OSystem_Atari *_system = nullptr;
 	AtariGraphicsManager *_graphicsManager = nullptr;
 
 	bool _lmbDown = false;
