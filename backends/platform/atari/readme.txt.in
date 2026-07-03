@@ -533,9 +533,6 @@ Known issues
     where monkey.00? files are located).
 
 - Following engines have been explicitly disabled:
-  - Cine (2 games)
-    - Incompatible with other engines / prone to freezes.
-    - https://wiki.scummvm.org/index.php?title=Cine
   - Director (many games)
     - Huge game list slows detection for other games, and would require
       (currently missing) localization support.
