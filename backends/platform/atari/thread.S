@@ -1,5 +1,5 @@
 /* ScummVM - Graphic Adventure Engine
-*
+ *
  * ScummVM is the legal property of its developers, whose names
  * are too numerous to list here. Please refer to the COPYRIGHT
  * file distributed with this source distribution.
@@ -26,18 +26,31 @@
  *
  * Thread0 is main thread inheriting context from application
  * Thread1 is task thread started via atari_thread_init().
- * 
+ *
  *  - Usermode threads only, does not preempt or yield
  *    threads which are in supervisor mode.
  *
  *  - Preempts by tail-calling yield from the 200hz timer
  *
+ *  - Preempts only when the interrupted USP or PC lies within our
+ *    TPA: under a multitasking OS (FreeMiNT, MagiC) the interrupted
+ *    user context may belong to a foreign process which must not
+ *    be touched. Addresses are unique system-wide (MiNT's memory
+ *    protection doesn't remap, virtual = physical). Neither check
+ *    alone is sufficient: our code may misuse a7 as a data register
+ *    (USP check fails) while plugins execute from heap-allocated
+ *    memory outside the TPA (PC check fails).
+ *
+ *  - The fake tail frame preserves the interrupted IPL (supervisor
+ *    bit forced, trace bits cleared) so that FreeMiNT's mint_vbl,
+ *    which inspects the stacked SR of what it believes is the
+ *    interrupted context, still performs its housekeeping.
+ *
  *  - Manual yield is provided by atari_thread_yield()
  *    Uses Trap #4 internally
  *
- *  - my_trap4 is guaranteed to always receive a stacked format0 frame.
- *    interrupts are disabled inside. the use of some global temp
- *    variable inside is safe.
+ *  - my_trap4 masks interrupts as its first instruction; the use
+ *    of some global temp variable inside is safe.
  *
  *  - threads spin-yield when waiting on mutex
  *    not super efficient and if needed we could/should add
@@ -90,10 +103,30 @@ old_200hz:
 	dc.l	0
 my_200hz:
 	addq.l	#1,SYM(atari_200hz_counter)
+	tst.l	_thread_func(pc)		/* threads enabled? */
+	beq.b	1f
+	btst.b	#5,(sp)					/* interrupted in supervisor? nothing to preempt */
+	bne.b	1f
+	move.l	a0,_temp2				/* interrupted in user mode: is it our process? */
+	move.l	%usp,a0
+	cmp.l	_tpa_lo(pc),a0
+	bcs.b	3f						/* usp outside our TPA: check the PC too, */
+	cmp.l	_tpa_hi(pc),a0			/* a7 may be misused as a data register */
+	bcs.b	4f						/* usp within our TPA: it's us */
+3:	move.l	2(sp),a0				/* interrupted PC */
+	cmp.l	_tpa_lo(pc),a0
+	bcs.b	2f						/* neither usp nor pc in our TPA: foreign */
+	cmp.l	_tpa_hi(pc),a0			/* process, leave its frame alone so the */
+	bcc.b	2f						/* OS can timeslice it normally */
+4:	move.l	_temp2(pc),a0
 	move.w	#0,-(sp)				/* push a fake format0 frame for tail-calling */
 	pea.l	my_trap4_from_isr(pc)	/* into thread scheduler after TOS timerC handler */
-	move.w	#0x2700,-(sp)			/* with interrupts disabled */
+	move.w	6(sp),-(sp)				/* copy the interrupted SR... */
+	and.w	#0x0700,(sp)			/* ...keep only its IPL */
+	or.w	#0x2000,(sp)			/* ...force supervisor mode, clear trace bits */
 	jmp		([old_200hz,pc])		/* now jump to the TOS timerC handler */
+2:	move.l	_temp2(pc),a0
+1:	jmp		([old_200hz,pc])		/* now jump to the TOS timerC handler */
 
 
 /* -------------------------------------------------------------------------
@@ -111,6 +144,10 @@ _tcb1_top:		ds.l 1
 	.align 16
 _thread_func:	dc.l 0
 _sav_sp:		dc.l 0
+_tpa_lo:		dc.l 0	/* our process' TPA start (basepage) */
+_tpa_hi:		dc.l 0	/* our process' TPA end (p_hitpa) */
+_temp:			dc.l 0	/* my_trap4 scratch */
+_temp2:			dc.l 0	/* my_200hz scratch */
 _cur_tcb:		dc.b 0
 _padding:		dc.b 0
 _fpu_info:		dc.w 0xffff/* 0xffff=no fpu, 0x0000=6888X, 0x0002=68060 */
@@ -122,12 +159,26 @@ _fpu_info:		dc.w 0xffff/* 0xffff=no fpu, 0x0000=6888X, 0x0002=68060 */
 old_trap4:
 	dc.l	0
 my_trap4:
-	move.w	#0x2700,sr
 my_trap4_from_isr:
+	move.w	#0x2700,sr				/* the fake frame's SR may carry a low IPL */
 	btst.b	#5,(sp)					/* don't preempt if thread is in supervisor */
 	bne.b	1f
 	tst.l	_thread_func(pc)		/* threads enabled? */
-	bne.b	.select
+	beq.b	1f
+	move.l	a0,_temp				/* interrupted in user mode: is it our process? */
+	move.l	%usp,a0
+	cmp.l	_tpa_lo(pc),a0
+	bcs.b	3f						/* usp outside our TPA: check the PC too, */
+	cmp.l	_tpa_hi(pc),a0			/* a7 may be misused as a data register */
+	bcs.b	4f						/* usp within our TPA: it's us */
+3:	move.l	2(sp),a0				/* interrupted PC */
+	cmp.l	_tpa_lo(pc),a0
+	bcs.b	2f						/* neither usp nor pc in our TPA: */
+	cmp.l	_tpa_hi(pc),a0			/* foreign process */
+	bcc.b	2f
+4:	move.l	_temp(pc),a0
+	bra.b	.select
+2:	move.l	_temp(pc),a0
 1:	rte
 
 .select:
@@ -207,6 +258,8 @@ SYM(atari_thread_init):
 2:	move.l	0x90.w,old_trap4		/* general setup */
 	move.l	#my_trap4,0x90.w
 	move.l	6(sp),_thread_func
+	move.l	10(sp),_tpa_lo
+	move.l	14(sp),_tpa_hi
 	move.b	#0,_cur_tcb
 
 	lea.l	_tcb1_top(pc),a0		/* init thread1 context */
@@ -254,6 +307,9 @@ SYM(atari_thread_shutdown):
  *
  * Recursive mutex
  *
+ * byte 0:    lock flag (tas)
+ * byte 1:    owner thread id (0xff = none)
+ * bytes 2-3: recursion counter
  * -----------------------------------------------------------------------*/
 
 SYM(atari_mutex_lock):
@@ -264,7 +320,7 @@ SYM(atari_mutex_lock):
 	cmp.b	1(a0),d0				/* was ours? */
 	beq.b	1f
 	trap	#4						/* no, yield and try again */
-	bra.b	atari_mutex_lock
+	bra.b	SYM(atari_mutex_lock)
 1:	addq.w	#1,2(a0)				/* yes, increment counter */
 	rts
 2:	move.b	d0,1(a0)				/* init owner id */
@@ -275,7 +331,7 @@ SYM(atari_mutex_unlock):
 	move.l	4(sp),a0
 	subq.w	#1,2(a0)				/* decrement counter */
 	bne.b	1f
-	move.b	#0,(a0)					/* unlock */
+	move.w	#0x00ff,(a0)			/* unlock and invalidate owner id in one write */
 1:	rts
 
 

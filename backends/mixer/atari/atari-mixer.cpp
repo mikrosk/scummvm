@@ -28,6 +28,7 @@
 #include <mint/ostruct.h>
 #include <usound.h>
 
+#include "backends/platform/atari/thread.h"
 #include "common/config-manager.h"
 #include "common/debug.h"
 #include "common/textconsole.h"
@@ -43,6 +44,18 @@
 #endif
 
 static USoundContext usoundContext;
+
+// update() is called from the worker thread while init(), deinit(),
+// suspendAudio() and resumeAudio() are called from the main thread;
+// serialize them (AtariMutex is recursive, resumeAudio() -> update() is fine)
+static AtariMutex s_mutex;
+
+namespace {
+struct MutexLocker {
+	MutexLocker() { s_mutex.lock(); }
+	~MutexLocker() { s_mutex.unlock(); }
+};
+}
 
 void AtariAudioShutdown() {
 	Jdisint(MFP_TIMERA);
@@ -97,6 +110,8 @@ AtariMixerManager::~AtariMixerManager() {
 
 void AtariMixerManager::init() {
 	debug("audio init");
+
+	MutexLocker lock;
 
 	assert(!_mixer);
 
@@ -182,6 +197,8 @@ void AtariMixerManager::init() {
 void AtariMixerManager::deinit() {
 	debug("audio deinit");
 
+	MutexLocker lock;
+
 	suspendAudio();
 
 	AtariAudioShutdown();
@@ -202,6 +219,8 @@ void AtariMixerManager::deinit() {
 void AtariMixerManager::suspendAudio() {
 	debug("suspendAudio");
 
+	MutexLocker lock;
+
 	Buffoper(0x00);
 	s_playbackState = kPlaybackStopped;
 	_audioSuspended = true;
@@ -209,6 +228,8 @@ void AtariMixerManager::suspendAudio() {
 
 int AtariMixerManager::resumeAudio() {
 	debug("resumeAudio");
+
+	MutexLocker lock;
 
 	_audioSuspended = false;
 	update();
@@ -232,6 +253,8 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 }
 
 void AtariMixerManager::update() {
+	MutexLocker lock;
+
 	if (_audioSuspended) {
 		return;
 	}

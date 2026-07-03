@@ -26,6 +26,7 @@
 #include <time.h>
 
 #include <gem.h>
+#include <mint/basepage.h>
 #include <mint/cookie.h>
 #include <mint/falcon.h>
 #include <mint/osbind.h>
@@ -49,7 +50,7 @@
 #include "backends/graphics/atari/atari-graphics.h"
 #include "backends/keymapper/hardware-input.h"
 #include "backends/mixer/atari/atari-mixer.h"
-#include "backends/mutex/null/null-mutex.h"
+#include "backends/platform/atari/thread.h"
 #ifdef DYNAMIC_MODULES
 #include "backends/plugins/atari/atari-provider.h"
 #endif
@@ -83,59 +84,57 @@ static void (*s_old_procterm)(void) = nullptr;
 
 static char s_lastErrorMessage[1024+1];
 
-static volatile uint32 counter_200hz;
-
 static bool s_dtor_already_called = false;
 
-static long atari_200hz_init(void)
-{
-	__asm__ __volatile__(
-	"\tmove		%%sr,-(%%sp)\n"
-	"\tor.w		#0x700,%%sr\n"
+static DefaultTimerManager *s_timerManager;
+static AtariMixerManager *s_mixerManager;
 
-	"\tmove.l	0x114.w,old_200hz\n"
-	"\tmove.l	#my_200hz,0x114.w\n"
+static volatile bool s_parkThread;
+static volatile bool s_threadParked;
 
-	"\tmove		(%%sp)+,%%sr\n"
-	"\tjbra		1f\n"
+// worker thread, preemptively switched with the main thread at 200 Hz:
+// runs timer callbacks and feeds the DMA sound buffers
+static void atari_thread_main(void) {
+	while (true) {
+		if (s_parkThread) {
+			// OSystem_Atari dtor waits for this before deleting the managers
+			s_threadParked = true;
+		} else {
+			if (s_timerManager)
+				s_timerManager->checkTimers();
+			if (s_mixerManager)
+				s_mixerManager->update();
+		}
+		atari_thread_yield();
+	}
+}
 
-	"\tdc.l		0x58425241\n" /* "XBRA" */
-	"\tdc.l		0x5343554d\n" /* "SCUM" */
-"old_200hz:\n"
-	"\tdc.l		0\n"
-"my_200hz:\n"
-	"\taddq.l	#1,%0\n"
+// mintlib private: TPA size kept after crt0's Mshrink (text+data+bss+stack).
+// _base->p_hitpa can't be used as the upper bound: neither Mshrink nor crt0
+// updates it, so it still points at the top of the original Pexec allocation.
+extern "C" unsigned long _PgmSize;
 
-	"\tmove.l	old_200hz(%%pc),-(%%sp)\n"
-	"\trts\n"
-"1:\n"
-	: /* output */
-	: "m"(counter_200hz) /* inputs */
-	: "memory", "cc");
-
+static long init_thread(void) {
+	atari_200hz_init();
+	atari_thread_init(atari_thread_main, _base, (const char *)_base + _PgmSize);
 	return 0;
 }
 
-static long atari_200hz_shutdown(void)
-{
-	__asm__ __volatile__(
-	"\tmove		%%sr,-(%%sp)\n"
-	"\tor.w		#0x700,%%sr\n"
+static long shutdown_thread(void) {
+	atari_thread_shutdown();
+	return 0;
+}
 
-	"\tmove.l	old_200hz,0x114.w\n"
-
-	"\tmove		(%%sp)+,%%sr\n"
-	: /* output */
-	: /* inputs */
-	: "memory", "cc");
-
+static long shutdown_200hz(void) {
+	atari_200hz_shutdown();
 	return 0;
 }
 
 static void critical_restore() {
 	//debug("critical_restore()");
 
-	Supexec(atari_200hz_shutdown);
+	Supexec(shutdown_thread);
+	Supexec(shutdown_200hz);
 
 #ifdef INPUT_ACTIVE
 	if (atari_old_kbdvec && atari_old_mousevec) {
@@ -225,8 +224,8 @@ OSystem_Atari::OSystem_Atari() {
 	kbdvecs->mousevec = atari_mousevec;
 #endif
 
-	Supexec(atari_200hz_init);
-	_startTime = counter_200hz;
+	Supexec(init_thread);
+	_startTime = atari_200hz_counter;
 	_timerInitialized = true;
 
 	// protect against sudden exit()
@@ -240,6 +239,20 @@ OSystem_Atari::~OSystem_Atari() {
 	debug("OSystem_Atari::~OSystem_Atari()");
 
 	s_dtor_already_called = true;
+
+	if (_timerInitialized) {
+		// park the worker thread so that it no longer touches the managers
+		// which are about to be deleted (timeout in case this dtor runs *on*
+		// the worker thread, e.g. after error() in a timer callback)
+		const uint32 deadline = getMillis() + 1000;
+		s_parkThread = true;
+		while (!s_threadParked && getMillis() < deadline)
+			atari_thread_yield();
+		Supexec(shutdown_thread);
+	}
+
+	s_timerManager = nullptr;
+	s_mixerManager = nullptr;
 
 	// _audiocdManager needs to be deleted before _mixerManager to avoid a crash.
 	delete _audiocdManager;
@@ -264,7 +277,7 @@ OSystem_Atari::~OSystem_Atari() {
 	_fsFactory = nullptr;
 
 	if (_timerInitialized) {
-		Supexec(atari_200hz_shutdown);
+		Supexec(shutdown_200hz);
 		_timerInitialized = false;
 	}
 
@@ -328,6 +341,8 @@ void OSystem_Atari::initBackend() {
 	}
 
 	_timerManager = new DefaultTimerManager();
+	s_timerManager = (DefaultTimerManager *)_timerManager;
+
 	_savefileManager = new DefaultSaveFileManager("saves");
 
 	AtariEventSource *atariEventSource = new AtariEventSource();
@@ -365,6 +380,7 @@ void OSystem_Atari::initBackend() {
 
 	// init() will be called upon starting a new game
 	_mixerManager = new AtariMixerManager();
+	s_mixerManager = (AtariMixerManager *)_mixerManager;
 
 	_audiocdManager = new AtariAudioCDManager();
 
@@ -396,18 +412,18 @@ void OSystem_Atari::engineAfterDelete() {
 }
 
 Common::MutexInternal *OSystem_Atari::createMutex() {
-	return new NullMutexInternal();
+	return new AtariMutex();
 }
 
 uint32 OSystem_Atari::getMillis(bool skipRecord) {
 	// CLOCKS_PER_SEC is 200, so no need to use floats
-	return 1000 * (counter_200hz - _startTime) / CLOCKS_PER_SEC;
+	return 1000 * (atari_200hz_counter - _startTime) / CLOCKS_PER_SEC;
 }
 
 void OSystem_Atari::delayMillis(uint msecs) {
 	const uint32 threshold = getMillis() + msecs;
 	while (getMillis() < threshold) {
-		update();
+		atari_thread_yield();
 	}
 }
 
@@ -543,26 +559,6 @@ Common::Path OSystem_Atari::getDefaultConfigFileName() {
 	}
 
 	return baseConfigName;
-}
-
-void OSystem_Atari::update() {
-	// avoid a recursion loop if a timer callback decides to call OSystem::delayMillis()
-	static bool inTimer = false;
-
-	if (!inTimer) {
-		inTimer = true;
-		((DefaultTimerManager *)_timerManager)->checkTimers();
-		inTimer = false;
-	} else {
-		const Common::ConfigManager::Domain *activeDomain = ConfMan.getActiveDomain();
-		assert(activeDomain);
-
-		warning("%s/%s calls update() from timer",
-			activeDomain->getValOrDefault("engineid").c_str(),
-			activeDomain->getValOrDefault("gameid").c_str());
-	}
-
-	((AtariMixerManager *)_mixerManager)->update();
 }
 
 OSystem *OSystem_Atari_create() {
