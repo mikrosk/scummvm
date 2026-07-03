@@ -38,7 +38,7 @@ then
 	--disable-highres \
 	--disable-bink \
 	--enable-verbose-build \
-	--disable-engine=hugo,director,cine,ultima \
+	--disable-engine=hugo,director,ultima \
 	${PLUGINS_FLAGS}
 fi
 
