@@ -52,8 +52,6 @@ public:
 	void addSysArchivesToSearchSet(Common::SearchSet &s, int priority) override;
 	Common::Path getDefaultConfigFileName() override;
 
-	void update();
-
 private:
 	long _startTime;
 

@@ -26,7 +26,6 @@
 #include <mint/osbind.h>
 
 #include "backends/graphics/atari/atari-graphics.h"
-#include "backends/platform/atari/osystem_atari.h"
 #include "common/rect.h"
 
 #define SCANCODES_SIZE 256
@@ -47,9 +46,6 @@ volatile int16	g_atari_ikbd_mouse_delta_x = 0;
 volatile int16	g_atari_ikbd_mouse_delta_y = 0;
 
 AtariEventSource::AtariEventSource() {
-	_system = dynamic_cast<OSystem_Atari*>(g_system);
-	assert(_system != nullptr);
-
 	_KEYTAB *pKeyTables = (_KEYTAB *)Keytbl(KT_NOCHANGE, KT_NOCHANGE, KT_NOCHANGE);
 
 	memcpy(_unshiftToAscii, pKeyTables->unshift, 128);
@@ -119,8 +115,6 @@ AtariEventSource::AtariEventSource() {
 bool AtariEventSource::pollEvent(Common::Event &event) {
 	if (!_graphicsManager)
 		return false;
-
-	_system->update();
 
 	if (g_atari_ikbd_mousebuttons_head != g_atari_ikbd_mousebuttons_tail) {
 		byte buttonState = g_atari_ikbd_mousebuttons[g_atari_ikbd_mousebuttons_tail++];
