@@ -62,30 +62,33 @@ void AtariAudioShutdown() {
 	USoundDeinitXbios(&usoundContext);
 }
 
-static volatile enum {
-	kPlaybackStopped,	// DMA not playing (initial or after starvation)
+static enum {
+	kPlaybackStopped,	// DMA not playing
 	kPlay1stHalf,		// DMA looping [Beg, Mid)
 	kPlay2ndHalf		// DMA looping [Mid, End)
 } s_playbackState = kPlaybackStopped;
 
-static volatile uint32 s_updatePulse;
-static volatile bool s_dmaWrapped;
-static volatile bool s_isrStoppedDma;
+// incremented at each frame (half buffer) boundary; consumed by update()
+static volatile uint32 s_halvesDone;
+static uint32 s_halvesConsumed;
+static long s_halfMs;
 
 static void __attribute__((interrupt)) timerA(void) {
-	static uint32 s_lastPulseSeen;
-
-	if (s_updatePulse == s_lastPulseSeen) {
-		// update() didn't run since the previous wrap: stop the playback
-		*((volatile byte *)0xFFFF8901L) = 0;
-		s_isrStoppedDma = true;
-	} else {
-		s_dmaWrapped = true;
-	}
-	s_lastPulseSeen = s_updatePulse;
+	s_halvesDone++;
 
 	// clear in-service bit
 	*((volatile byte *)0xFFFFFA0FL) = ~(1 << 5);
+}
+
+static void warnUnderrun(const char *fmt, long ms) {
+	// diagnostic only; rate-limited as warning() itself costs I/O
+	static uint32 s_lastWarning;
+
+	const uint32 now = g_system->getMillis();
+	if (now - s_lastWarning >= 1000) {
+		s_lastWarning = now;
+		warning(fmt, ms);
+	}
 }
 
 AtariMixerManager::AtariMixerManager() : MixerManager() {
@@ -188,6 +191,9 @@ void AtariMixerManager::init() {
 	_sampleBufferSize = _samples * _outputChannels * 4;	// always 32-bit
 	_sampleBuffer = new uint8[_sampleBufferSize];
 
+	// one half plays for _samples/_outputRate seconds
+	s_halfMs = (long)_samples * 1000 / _outputRate;
+
 	_mixer = new Audio::MixerImpl(_outputRate, _outputChannels == 2, _samples, 4, false);
 	_mixer->setReady(true);
 
@@ -261,14 +267,6 @@ void AtariMixerManager::update() {
 
 	assert(_mixer);
 
-	s_updatePulse++;
-
-	// Translate ISR's starvation signal into a state transition. Done
-	// here so that update() is the only writer of s_playbackState.
-	if (s_isrStoppedDma) {
-		s_isrStoppedDma = false;
-		s_playbackState = kPlaybackStopped;
-	}
 
 	byte *atariSampleBuffer1stHalf = _atariSampleBuffer;
 	byte *atariSampleBuffer2ndHalf = _atariSampleBuffer + _atariSampleBufferSize/2;
@@ -278,30 +276,39 @@ void AtariMixerManager::update() {
 
 	if (s_playbackState == kPlaybackStopped) {
 		memset(_atariSampleBuffer, 0, _atariSampleBufferSize);
+		s_halvesDone = s_halvesConsumed = 0;
 		Setbuffer(SR_PLAY, atariSampleBuffer1stHalf, atariSampleBuffer2ndHalf);
 		Buffoper(SB_PLA_ENA | SB_PLA_RPT);
 		s_playbackState = kPlay1stHalf;
 		// Buffoper's 0->ENA transition can fire a spurious SI_PLAY which
-		// would set s_dmaWrapped here. The resulting extra state toggle
-		// is benign — it just shuffles which physical half holds the next
+		// would bump s_halvesDone here. The resulting extra state toggle
+		// is benign - it just shuffles which physical half holds the next
 		// mix. Audio output is continuous either way.
 		needsMix = true;
-	}
-
-	if (s_dmaWrapped) {
-		s_dmaWrapped = false;
-		if (s_playbackState == kPlay1stHalf)
-			s_playbackState = kPlay2ndHalf;
-		else if (s_playbackState == kPlay2ndHalf)
-			s_playbackState = kPlay1stHalf;
-		needsMix = true;
+	} else {
+		const uint32 done = s_halvesDone;
+		const uint32 n = done - s_halvesConsumed;
+		if (n != 0) {
+			s_halvesConsumed = done;
+			// more than one boundary since the previous update means the
+			// DMA kept looping the same half, i.e. played stale data
+			if (n > 1)
+				warnUnderrun("audio: update() ran %ld ms late (heavy disk I/O? try increasing audio_buffer_size)", (n - 1) * s_halfMs);
+			// the DMA has wrapped into the previously queued half; if we
+			// missed boundaries it has been looping that same half, so a
+			// single flip is correct for any n
+			s_playbackState = (s_playbackState == kPlay1stHalf)
+				? kPlay2ndHalf
+				: kPlay1stHalf;
+			needsMix = true;
+		}
 	}
 
 	if (!needsMix)
 		return;
 
-	// Mix into the half DMA is NOT currently playing, and Setbuffer to
-	// it so DMA wraps there at the next frame boundary.
+	// Mix into the half the DMA is NOT currently playing, and Setbuffer to
+	// it so the DMA wraps there at the next frame boundary.
 	byte *buf;
 	if (s_playbackState == kPlay1stHalf) {
 		buf = atariSampleBuffer2ndHalf;
@@ -406,4 +413,10 @@ void AtariMixerManager::update() {
 	if (processed > 0 && processed != _samples) {
 		warning("processed: %d, _samples: %d", processed, _samples);
 	}
+
+	// if another frame boundary has fired in the meantime, the DMA entered
+	// the half we have just been writing, i.e. detection + mixing took
+	// longer than one half's duration
+	if (s_halvesDone != s_halvesConsumed)
+		warnUnderrun("audio: mixing is too CPU heavy (took more than %ld ms)", s_halfMs);
 }
