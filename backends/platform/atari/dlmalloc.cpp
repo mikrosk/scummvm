@@ -403,13 +403,19 @@ static FORCEINLINE int win32munmap(void* ptr, size_t size) {
 #else
 #if USE_LOCKS > 1
 /* -----------------------  User-defined locks ------------------------ */
-/* Define your own lock implementation here */
-/* #define INITIAL_LOCK(lk)  ... */
-/* #define DESTROY_LOCK(lk)  ... */
-/* #define ACQUIRE_LOCK(lk)  ... */
-/* #define RELEASE_LOCK(lk)  ... */
-/* #define TRY_LOCK(lk) ... */
-/* static MLOCK_T malloc_global_mutex = ... */
+/* Recursive mutex from the two-thread scheduler (thread.S)
+ * byte 0: lock flag, byte 1: owner thread id (0xff = none), bytes 2-3:
+ * recursion counter.
+ */
+#define MLOCK_T               volatile unsigned int	/* = uint32 in thread.h */
+extern "C" void atari_mutex_lock(MLOCK_T *);
+extern "C" void atari_mutex_unlock(MLOCK_T *);
+#define ATARI_MUTEX_INIT      0x00ff0000U
+#define INITIAL_LOCK(lk)      (*(lk) = ATARI_MUTEX_INIT, 0)
+#define DESTROY_LOCK(lk)      (0)
+#define ACQUIRE_LOCK(lk)      (atari_mutex_lock(lk), 0)
+#define RELEASE_LOCK(lk)      (atari_mutex_unlock(lk), 0)
+static MLOCK_T malloc_global_mutex = ATARI_MUTEX_INIT;
 
 #elif USE_SPIN_LOCKS
 
