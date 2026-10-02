@@ -39,6 +39,11 @@ static inline bool hasMove16() {
 static inline bool haveSameAlignment(uintptr a, uintptr b) {
 	return ((a ^ b) & (MALLOC_ALIGNMENT - 1)) == 0;
 }
+
+// in TT RAM move16 is slower than move.l for rows shorter than 256 bytes
+static inline uint move16MinWidth(const byte *dst) {
+	return (uintptr)dst >= 0xA0000000 ? 16 : 256;
+}
 #endif
 
 // writes are made long-aligned by copying a byte/word head first, reads from src may be misaligned
@@ -192,7 +197,7 @@ void copyBlit(byte *dst, const byte *src,
 #endif
 	if (dstPitch == srcPitch && dstPitch == (w * bytesPerPixel)) {
 #ifdef USE_MOVE16
-		if (hasMove16() && dstPitch * h >= 16 && haveSameAlignment((uintptr)src, (uintptr)dst)) {
+		if (hasMove16() && dstPitch * h >= move16MinWidth(dst) && haveSameAlignment((uintptr)src, (uintptr)dst)) {
 			__asm__ volatile(
 			"	move.l	%2,%%d0\n"
 			// copy the head up to the next 16-byte boundary
@@ -374,7 +379,7 @@ void copyBlit(byte *dst, const byte *src,
 		}
 	} else {
 #ifdef USE_MOVE16
-		if (hasMove16() && w >= 16 && haveSameAlignment((uintptr)src, (uintptr)dst) && haveSameAlignment(srcPitch, dstPitch)) {
+		if (hasMove16() && w * bytesPerPixel >= move16MinWidth(dst) && haveSameAlignment((uintptr)src, (uintptr)dst) && haveSameAlignment(srcPitch, dstPitch)) {
 			int loopCount = h - 1;
 			__asm__ volatile(
 			"0:\n"
