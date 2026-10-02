@@ -259,112 +259,27 @@ void copyBlit(byte *dst, const byte *src,
 			"	dbra	%%d0,1b\n"
 			// handle the tail after the last 16-byte boundary
 			"3:\n"
-			"	lsl.l	#4,%%d2\n"
-			"	jmp		(9f,%%pc,%%d2.l)\n"
-			// 16-byte entries, one for each tail length
-			"9:\n"
-			// 0 bytes
-			"	bra.w	4f\n"
+			"	btst	#3,%%d2\n"
+			"	beq.b	4f\n"
 
-			// 1 byte
-			"	.org	9b+16\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 2 bytes
-			"	.org	9b+32\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 3 bytes
-			"	.org	9b+48\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 4 bytes
-			"	.org	9b+64\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 5 bytes
-			"	.org	9b+80\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 6 bytes
-			"	.org	9b+96\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 7 bytes
-			"	.org	9b+112\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 8 bytes
-			"	.org	9b+128\n"
 			"	move.l	(%0)+,(%1)+\n"
 			"	move.l	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 9 bytes
-			"	.org	9b+144\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 10 bytes
-			"	.org	9b+160\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 11 bytes
-			"	.org	9b+176\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 12 bytes
-			"	.org	9b+192\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 13 bytes
-			"	.org	9b+208\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 14 bytes
-			"	.org	9b+224\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	bra.w	4f\n"
-
-			// 15 bytes
-			"	.org	9b+240\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
 			"4:\n"
+			"	btst	#2,%%d2\n"
+			"	beq.b	5f\n"
+
+			"	move.l	(%0)+,(%1)+\n"
+			"5:\n"
+			"	btst	#1,%%d2\n"
+			"	beq.b	6f\n"
+
+			"	move.w	(%0)+,(%1)+\n"
+			"6:\n"
+			"	btst	#0,%%d2\n"
+			"	beq.b	7f\n"
+
+			"	move.b	(%0)+,(%1)+\n"
+			"7:\n"
 				: "+a"(src), "+a"(dst) // outputs
 				: "g"(dstPitch * h) // inputs
 				: "d0", "d1", "d2", "cc" AND_MEMORY
@@ -443,160 +358,30 @@ void copyBlit(byte *dst, const byte *src,
 			"	dbra	%%d0,1b\n"
 			// handle the tail after the last 16-byte boundary
 			"3:\n"
-			"	lsl.l	#5,%%d2\n"
-			"	jmp		(9f,%%pc,%%d2.l)\n"
-			// 32-byte entries, one for each tail length
-			"9:\n"
-			// 0 bytes
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
+			"	btst	#3,%%d2\n"
+			"	beq.b	4f\n"
 
-			// 1 byte
-			"	.org	9b+32\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 2 bytes
-			"	.org	9b+64\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 3 bytes
-			"	.org	9b+96\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 4 bytes
-			"	.org	9b+128\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 5 bytes
-			"	.org	9b+160\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 6 bytes
-			"	.org	9b+192\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 7 bytes
-			"	.org	9b+224\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 8 bytes
-			"	.org	9b+256\n"
 			"	move.l	(%0)+,(%1)+\n"
 			"	move.l	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 9 bytes
-			"	.org	9b+288\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 10 bytes
-			"	.org	9b+320\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 11 bytes
-			"	.org	9b+352\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 12 bytes
-			"	.org	9b+384\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 13 bytes
-			"	.org	9b+416\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 14 bytes
-			"	.org	9b+448\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
-			"	bra.w	4f\n"
-
-			// 15 bytes
-			"	.org	9b+480\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.l	(%0)+,(%1)+\n"
-			"	move.w	(%0)+,(%1)+\n"
-			"	move.b	(%0)+,(%1)+\n"
-			"	add.l	%4,%1\n"
-			"	add.l	%5,%0\n"
-			"	dbra	%2,0b\n"
 			"4:\n"
+			"	btst	#2,%%d2\n"
+			"	beq.b	5f\n"
+
+			"	move.l	(%0)+,(%1)+\n"
+			"5:\n"
+			"	btst	#1,%%d2\n"
+			"	beq.b	6f\n"
+
+			"	move.w	(%0)+,(%1)+\n"
+			"6:\n"
+			"	btst	#0,%%d2\n"
+			"	beq.b	7f\n"
+
+			"	move.b	(%0)+,(%1)+\n"
+			"7:\n"
+			"	add.l	%4,%1\n"
+			"	add.l	%5,%0\n"
+			"	dbra	%2,0b\n"
 				: "+a"(src), "+a"(dst), "+d"(loopCount) // outputs
 				: "g"(w * bytesPerPixel),
 				  "r"(dstPitch - w * bytesPerPixel), "r"(srcPitch - w * bytesPerPixel) // inputs
