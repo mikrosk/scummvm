@@ -106,6 +106,80 @@ static inline void copyLong(byte *dst, const byte *src, uint w, uint h, uint dst
 	);
 }
 
+// copyLong() with a movem.l body; kept out of line so that only wide rows pay for saving its registers
+static void __attribute__((noinline)) copyMovem(byte *dst, const byte *src, uint w, uint h, uint dstSkip, uint srcSkip) {
+	int loopCount = h - 1;
+	int blockCount;
+	__asm__ volatile(
+	"0:\n"
+	"	move.l	%4,%%d0\n"
+	// copy the head up to the next 4-byte boundary of dst
+	"	move.l	%1,%%d1\n"
+	"	neg.l	%%d1\n"
+	"	and.l	#3,%%d1\n"
+	"	sub.l	%%d1,%%d0\n"
+	"	lsr.l	#1,%%d1\n"
+	"	bcc.b	1f\n"
+
+	"	move.b	(%0)+,(%1)+\n"
+	"1:\n"
+	"	lsr.l	#1,%%d1\n"
+	"	bcc.b	2f\n"
+
+	"	move.w	(%0)+,(%1)+\n"
+	"2:\n"
+	// 256-byte blocks
+	"	move.l	%%d0,%%d1\n"
+	"	lsr.l	#8,%%d1\n"
+	"	move.l	%%d1,%3\n"
+	"	bra.b	4f\n"
+	"3:\n"
+	"	movem.l	(%0)+,%%d1-%%d7/%%a2-%%a5\n"
+	"	movem.l	%%d1-%%d7/%%a2-%%a5,(%1)\n"
+	"	movem.l	(%0)+,%%d1-%%d7/%%a2-%%a5\n"
+	"	movem.l	%%d1-%%d7/%%a2-%%a5,(44,%1)\n"
+	"	movem.l	(%0)+,%%d1-%%d7/%%a2-%%a5\n"
+	"	movem.l	%%d1-%%d7/%%a2-%%a5,(88,%1)\n"
+	"	movem.l	(%0)+,%%d1-%%d7/%%a2-%%a5\n"
+	"	movem.l	%%d1-%%d7/%%a2-%%a5,(132,%1)\n"
+	"	movem.l	(%0)+,%%d1-%%d7/%%a2-%%a5\n"
+	"	movem.l	%%d1-%%d7/%%a2-%%a5,(176,%1)\n"
+	"	movem.l	(%0)+,%%d1-%%d7/%%a2-%%a3\n"
+	"	movem.l	%%d1-%%d7/%%a2-%%a3,(220,%1)\n"
+	"	lea		(256,%1),%1\n"
+	"4:\n"
+	"	subq.l	#1,%3\n"
+	"	bpl.b	3b\n"
+
+	"	move.w	%%d0,%%d1\n"
+	"	and.w	#0xff,%%d1\n"
+	"	lsr.w	#2,%%d1\n"
+	"	bra.b	6f\n"
+	"5:\n"
+	"	move.l	(%0)+,(%1)+\n"
+	"6:\n"
+	"	dbra	%%d1,5b\n"
+	// copy the tail after the last long
+	"	btst	#1,%%d0\n"
+	"	beq.b	7f\n"
+
+	"	move.w	(%0)+,(%1)+\n"
+	"7:\n"
+	"	btst	#0,%%d0\n"
+	"	beq.b	8f\n"
+
+	"	move.b	(%0)+,(%1)+\n"
+	"8:\n"
+	"	add.l	%5,%1\n"
+	"	add.l	%6,%0\n"
+	"	subq.l	#1,%2\n"
+	"	bpl.w	0b\n"
+		: "+a"(src), "+a"(dst), "+m"(loopCount), "=m"(blockCount) // outputs
+		: "g"(w), "g"(dstSkip), "g"(srcSkip) // inputs
+		: "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "a2", "a3", "a4", "a5", "cc" AND_MEMORY
+	);
+}
+
 namespace Graphics {
 
 // Function to blit a rect with a transparent color key
@@ -287,7 +361,9 @@ void copyBlit(byte *dst, const byte *src,
 			// WARNING: src and dst are modified by the asm code
 		} else
 #endif
-		if (dstPitch * h >= 4) {
+		if (dstPitch * h >= 256) {
+			copyMovem(dst, src, dstPitch * h, 1, 0, 0);
+		} else if (dstPitch * h >= 4) {
 			copyLong(dst, src, dstPitch * h, 1, 0, 0);
 		} else {
 			memcpy(dst, src, dstPitch * h);
@@ -390,7 +466,9 @@ void copyBlit(byte *dst, const byte *src,
 			// WARNING: src and dst are modified by the asm code
 		} else
 #endif
-		if (w * bytesPerPixel >= 4) {
+		if (w * bytesPerPixel >= 256) {
+			copyMovem(dst, src, w * bytesPerPixel, h, dstPitch - w * bytesPerPixel, srcPitch - w * bytesPerPixel);
+		} else if (w * bytesPerPixel >= 4) {
 			copyLong(dst, src, w * bytesPerPixel, h, dstPitch - w * bytesPerPixel, srcPitch - w * bytesPerPixel);
 		} else {
 			for (uint i = 0; i < h; ++i) {
