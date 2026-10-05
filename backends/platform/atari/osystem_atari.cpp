@@ -125,6 +125,11 @@ static long shutdown_thread(void) {
 	return 0;
 }
 
+static void stop_main_thread_if_on_worker() {
+	if (atari_thread_current() != 0)
+		Supexec(shutdown_thread);
+}
+
 static long shutdown_200hz(void) {
 	atari_200hz_shutdown();
 	return 0;
@@ -241,14 +246,19 @@ OSystem_Atari::~OSystem_Atari() {
 	s_dtor_already_called = true;
 
 	if (_timerInitialized) {
-		// park the worker thread so that it no longer touches the managers
-		// which are about to be deleted (timeout in case this dtor runs *on*
-		// the worker thread, e.g. after error() in a timer callback)
-		const uint32 deadline = getMillis() + 1000;
-		s_parkThread = true;
-		while (!s_threadParked && getMillis() < deadline)
-			atari_thread_yield();
-		Supexec(shutdown_thread);
+		if (atari_thread_current() == 0) {
+			// park the worker thread so that it no longer touches the managers
+			// which are about to be deleted (timeout in case the worker waits
+			// for a mutex held by the main thread, e.g. after error())
+			const uint32 deadline = getMillis() + 1000;
+			s_parkThread = true;
+			while (!s_threadParked && getMillis() < deadline)
+				atari_thread_yield();
+			Supexec(shutdown_thread);
+		} else {
+			// exit() called from a timer callback / mixer
+			stop_main_thread_if_on_worker();
+		}
 	}
 
 	s_timerManager = nullptr;
@@ -488,6 +498,15 @@ void OSystem_Atari::fatalError() {
 void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
 	extern long nf_stderr_id;
 
+	// error() terminates the program and its error handler may run the
+	// engine's debugger, which must not run in parallel with the main thread
+	if (type == LogMessageType::kError)
+		stop_main_thread_if_on_worker();
+
+	// both threads log; serialize the static buffer and stdio
+	static AtariMutex s_logMutex;
+	s_logMutex.lock();
+
 	static char str[1024+1];
 	snprintf(str, sizeof(str), "[%08d] %s", getMillis(), message);
 
@@ -518,6 +537,8 @@ void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
 			(void)(*((volatile uint16 *)(CARTRIDGE_ROM3 + ((*s & 0xFF)<<1))));
 #endif
 	}
+
+	s_logMutex.unlock();
 }
 
 void OSystem_Atari::addSysArchivesToSearchSet(Common::SearchSet &s, int priority) {

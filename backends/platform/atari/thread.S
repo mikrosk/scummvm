@@ -65,6 +65,7 @@
 	.global SYM(atari_thread_init)
 	.global SYM(atari_thread_shutdown)
 	.global SYM(atari_thread_yield)
+	.global SYM(atari_thread_current)
 	.global SYM(atari_mutex_lock)
 	.global SYM(atari_mutex_unlock)
 
@@ -228,7 +229,16 @@ my_trap4_from_isr:
 
 /*--------------------------------------------------------------------*/
 SYM(atari_thread_yield):
+	tst.l	_thread_func(pc)		/* threads running? trap #4 is not ours */
+	beq.b	1f						/* otherwise */
 	trap	#4
+1:	rts
+
+
+/*--------------------------------------------------------------------*/
+SYM(atari_thread_current):
+	moveq	#0,d0
+	move.b	_cur_tcb(pc),d0
 	rts
 
 
@@ -323,26 +333,35 @@ SYM(atari_thread_shutdown):
  * byte 0:    lock flag (tas)
  * byte 1:    owner thread id (0xff = none)
  * bytes 2-3: recursion counter
+ *
+ * Lock and unlock do nothing while threads are not running (before
+ * atari_thread_init() or after atari_thread_shutdown()): only one
+ * thread executes then, and a lock left held by the other, stopped
+ * thread must not block it (there is nobody to yield to anymore).
  * -----------------------------------------------------------------------*/
 
 SYM(atari_mutex_lock):
+	tst.l	_thread_func(pc)		/* threads running? */
+	beq.b	2f
 #ifndef __FASTCALL__
 	move.l	4(sp),a0
 #endif
 3:	move.b	_cur_tcb(pc),d0
 	tas		(a0)					/* try lock */
-	beq.b	2f
+	beq.b	4f
 	cmp.b	1(a0),d0				/* was ours? */
 	beq.b	1f
 	trap	#4						/* no, yield and try again */
 	bra.b	3b
 1:	addq.w	#1,2(a0)				/* yes, increment counter */
 	rts
-2:	move.b	d0,1(a0)				/* init owner id */
+4:	move.b	d0,1(a0)				/* init owner id */
 	move.w	#1,2(a0)				/* init counter */
-	rts
+2:	rts
 
 SYM(atari_mutex_unlock):
+	tst.l	_thread_func(pc)		/* threads running? */
+	beq.b	1f
 #ifndef __FASTCALL__
 	move.l	4(sp),a0
 #endif
@@ -357,5 +376,6 @@ SYM(atari_mutex_unlock):
 /*--------------------------------------------------------------------*/
 
 	.align 16
-_stack1_btm:				ds.l 8191
+/* same size as the main thread's stack (-Wl,--stack,256k in configure) */
+_stack1_btm:				ds.l 65535
 _stack1_top:				ds.l 1
