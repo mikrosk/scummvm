@@ -31,6 +31,7 @@
 #include "audio/mixer.h"
 #include "audio/fmopl.h"
 #include "audio/nfmopl.h"
+#include "common/mutex.h"
 
 extern "C"
 {
@@ -66,6 +67,8 @@ private:
 	bool _incapableDevice;
 	bool _needsSupervisor;	// driver accesses I/O registers directly
 	bool _inSupervisor;		// set while a SupervisorScope holds supervisor mode
+
+	Common::Mutex _mutex;
 public:
 	explicit OPL(Config::OplType type, enum NfmOPL::OplDevice deviceType);
 	~OPL();
@@ -228,6 +231,7 @@ OPL::~OPL() {
 	stop();
 
 	if (_initialized == true) {
+		Common::StackLock lock(_mutex);
 		SupervisorScope supervisor(_needsSupervisor, _inSupervisor);
 
 		if (_useBuffer) {
@@ -283,6 +287,7 @@ bool OPL::init() {
 }
 
 void OPL::reset() {
+	Common::StackLock lock(_mutex);
 	SupervisorScope supervisor(_needsSupervisor, _inSupervisor);
 
 	for (int16_t i = 0; i < 256; i ++) {
@@ -327,6 +332,8 @@ void OPL::writeReg(int reg, int value) {
 
 	value &= 0xff;
 
+	Common::StackLock lock(_mutex);
+
 	if (emulateDualOpl2OnOpl3(reg, value, _type)) {
 		SupervisorScope supervisor(_needsSupervisor, _inSupervisor);
 		sOplRegisterWrite regWrite;
@@ -348,6 +355,7 @@ void OPL::writeReg(int reg, int value) {
 void OPL::onTimer() {
 	if (_useBuffer) {
 		if (_initialized) {
+			Common::StackLock lock(_mutex);
 			SupervisorScope supervisor(_needsSupervisor, _inSupervisor);
 			_oplFlush();
 		}

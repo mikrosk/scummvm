@@ -26,9 +26,7 @@
  * We, unfortunately, could not use the SEQ driver because the /dev/midi under
  * FreeMiNT (and hence in libc) is considered to be a serial port for machine
  * access.  So, we just use OS calls then to send the data to the MIDI ports
- * directly.  The current implementation is sending 1 byte at a time because
- * in most cases we are only sending up to 3 bytes, I believe this saves a few
- * cycles.  I might change so sysex messages are sent the other way later.
+ * directly.
  */
 
 // Disable symbol overrides so that we can use system headers.
@@ -73,9 +71,10 @@ void MidiDriver_STMIDI::close() {
 void MidiDriver_STMIDI::send(uint32 b) {
 	midiDriverCommonSend(b);
 
-	byte status_byte = (b & 0x000000FF);
-	byte first_byte = (b & 0x0000FF00) >> 8;
-	byte second_byte = (b & 0x00FF0000) >> 16;
+	byte buf[3];
+	buf[0] = (b & 0x000000FF);
+	buf[1] = (b & 0x0000FF00) >> 8;
+	buf[2] = (b & 0x00FF0000) >> 16;
 
 //	warning("ST MIDI Packet sent");
 
@@ -85,14 +84,11 @@ void MidiDriver_STMIDI::send(uint32 b) {
 	case 0xA0:	// Polyphonic Key Pressure
 	case 0xB0:	// Controller
 	case 0xE0:	// Pitch Bend
-		Bconout(DEV_MIDI, status_byte);
-		Bconout(DEV_MIDI, first_byte);
-		Bconout(DEV_MIDI, second_byte);
+		Midiws(3-1, buf);
 		break;
 	case 0xC0:	// Program Change
 	case 0xD0:	// Aftertouch
-		Bconout(DEV_MIDI, status_byte);
-		Bconout(DEV_MIDI, first_byte);
+		Midiws(2-1, buf);
 		break;
 	default:
 		fprintf(stderr, "Unknown : %08x\n", (int)b);
@@ -105,9 +101,14 @@ void MidiDriver_STMIDI::sysEx (const byte *msg, uint16 length) {
 
 	warning("Sending SysEx Message (%d bytes)", length);
 
-	Bconout(DEV_MIDI, 0xF0);
-	Midiws(length-1, msg);
-	Bconout(DEV_MIDI, 0xF7);
+	byte buf[1 + 268 + 1];
+	assert(length + 2 <= ARRAYSIZE(buf));
+
+	buf[0] = 0xF0;
+	memcpy(buf + 1, msg, length);
+	buf[1 + length] = 0xF7;
+
+	Midiws(length + 2 - 1, buf);
 }
 
 // Plugin interface

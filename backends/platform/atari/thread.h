@@ -36,6 +36,7 @@ extern "C" long atari_thread_init(void (*func)(void),
 								  const void *tpaLo, const void *tpaHi);	/* call in super */
 extern "C" long atari_thread_shutdown(void);			/* call in super */
 extern "C" void atari_thread_yield(void);
+extern "C" long atari_thread_current(void);				/* 0 = main thread, 1 = worker */
 
 extern "C" void atari_mutex_lock(volatile uint32 *m);
 extern "C" void atari_mutex_unlock(volatile uint32 *m);

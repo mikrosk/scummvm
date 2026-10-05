@@ -242,7 +242,9 @@ int AtariMixerManager::resumeAudio() {
 bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 	switch (event.type) {
 	case Common::EVENT_QUIT:
-	case Common::EVENT_RETURN_TO_LAUNCHER:
+	case Common::EVENT_RETURN_TO_LAUNCHER: {
+		MutexLocker lock;
+
 		if (s_playbackState != kPlaybackStopped) {
 			debug("silencing the mixer");
 			// Stop the DMA but don't suspend the mixer: nothing would
@@ -251,6 +253,7 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
 			s_playbackState = kPlaybackStopped;
 		}
 		return false;
+	}
 	default:
 		break;
 	}
