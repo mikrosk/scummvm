@@ -30,7 +30,12 @@
  *  - Usermode threads only, does not preempt or yield
  *    threads which are in supervisor mode.
  *
- *  - Preempts by tail-calling yield from the 200hz timer
+ *  - Preempts by tail-calling yield from the 200hz timer, only
+ *    from the main thread to the task thread: the task thread runs
+ *    until it yields itself (after each iteration of its loop, while
+ *    waiting for a mutex or in delayMillis()). Preempting it as well
+ *    would give it only every other timer period when the main thread
+ *    is busy, i.e. its work would take twice as long.
  *
  *  - Preempts only when the interrupted USP or PC lies within our
  *    TPA: under a multitasking OS (FreeMiNT, MagiC) the interrupted
@@ -106,6 +111,8 @@ my_200hz:
 	addq.l	#1,SYM(atari_200hz_counter)
 	tst.l	_thread_func(pc)		/* threads enabled? */
 	beq.b	1f
+	tst.b	_cur_tcb(pc)			/* task thread running? let it yield itself */
+	bne.b	1f
 	btst.b	#5,(sp)					/* interrupted in supervisor? nothing to preempt */
 	bne.b	1f
 	move.l	a0,_temp2				/* interrupted in user mode: is it our process? */
