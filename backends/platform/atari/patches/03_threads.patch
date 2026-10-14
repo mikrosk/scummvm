@@ -1,0 +1,1618 @@
+From a15a15597ebfe281d9a317675f6fd02e7ae5f974 Mon Sep 17 00:00:00 2001
+From: agranlund <granlund23@yahoo.se>
+Date: Fri, 3 Jul 2026 22:54:48 +1000
+Subject: [PATCH 1/7] BACKENDS: ATARI: Add minimal two-thread preemptive
+ context switcher
+
+A 200 Hz TimerC-driven scheduler with two usermode threads, trap #4
+yield and a recursive spin-yield mutex.
+---
+ backends/platform/atari/module.mk |   1 +
+ backends/platform/atari/thread.S  | 288 ++++++++++++++++++++++++++++++
+ backends/platform/atari/thread.h  |  48 +++++
+ 3 files changed, 337 insertions(+)
+ create mode 100644 backends/platform/atari/thread.S
+ create mode 100644 backends/platform/atari/thread.h
+
+diff --git a/backends/platform/atari/module.mk b/backends/platform/atari/module.mk
+index 015ae50f7eb..52b4f969cae 100644
+--- a/backends/platform/atari/module.mk
++++ b/backends/platform/atari/module.mk
+@@ -4,6 +4,7 @@ MODULE_OBJS := \
+ 	osystem_atari.o \
+ 	atari_ikbd.o \
+ 	native_features.o \
++	thread.o \
+ 	dlmalloc.o
+ 
+ # We don't use rules.mk but rather manually update OBJS and MODULE_DIRS.
+diff --git a/backends/platform/atari/thread.S b/backends/platform/atari/thread.S
+new file mode 100644
+index 00000000000..68d12783a69
+--- /dev/null
++++ b/backends/platform/atari/thread.S
+@@ -0,0 +1,288 @@
++/* ScummVM - Graphic Adventure Engine
++*
++ * ScummVM is the legal property of its developers, whose names
++ * are too numerous to list here. Please refer to the COPYRIGHT
++ * file distributed with this source distribution.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ */
++
++ #include "symbols.h"
++
++/* -------------------------------------------------------------------------
++ * Minimal two-thread preemptive context switcher
++ *
++ * Thread0 is main thread inheriting context from application
++ * Thread1 is task thread started via atari_thread_init().
++ * 
++ *  - Usermode threads only, does not preempt or yield
++ *    threads which are in supervisor mode.
++ *
++ *  - Preempts by tail-calling yield from the 200hz timer
++ *
++ *  - Manual yield is provided by atari_thread_yield()
++ *    Uses Trap #4 internally
++ *
++ *  - my_trap4 is guaranteed to always receive a stacked format0 frame.
++ *    interrupts are disabled inside. the use of some global temp
++ *    variable inside is safe.
++ *
++ *  - threads spin-yield when waiting on mutex
++ *    not super efficient and if needed we could/should add
++ *    sleep mechanism with wake-on-mutex-unlock.
++ * -----------------------------------------------------------------------*/
++
++	.extern SYM(Getcookie)
++
++	.global SYM(atari_200hz_init)
++	.global SYM(atari_200hz_shutdown)
++	.global	SYM(atari_200hz_counter)
++	.global SYM(atari_thread_init)
++	.global SYM(atari_thread_shutdown)
++	.global SYM(atari_thread_yield)
++	.global SYM(atari_mutex_lock)
++	.global SYM(atari_mutex_unlock)
++
++	.text
++	.even
++
++/* -------------------------------------------------------------------------
++ *
++ * TimerC
++ *
++ * -----------------------------------------------------------------------*/
++
++SYM(atari_200hz_init):
++	move.w	sr,-(sp)
++	or.w	#0x700,sr
++	move.l	0x114,old_200hz			/* save old timerc vector */
++	move.l	#my_200hz,0x114.w		/* set new timerc vector */
++	move.w	(sp)+,sr
++	moveq.l	#0,d0
++	rts
++
++SYM(atari_200hz_shutdown):
++	move.w	sr,-(sp)
++	or.w	#0x700,sr
++	move.l	old_200hz(pc),0x114.w	/* restore old timerc vector */
++	move.w	(sp)+,sr
++	moveq.l	#0,d0
++	rts
++
++	.align 16
++SYM(atari_200hz_counter):
++	dc.l	0
++	dc.l	0x58425241	/* XBRA */
++	dc.l	0x5343554d	/* SCUM */
++old_200hz:
++	dc.l	0
++my_200hz:
++	addq.l	#1,SYM(atari_200hz_counter)
++	move.w	#0,-(sp)				/* push a fake format0 frame for tail-calling */
++	pea.l	my_trap4_from_isr(pc)	/* into thread scheduler after TOS timerC handler */
++	move.w	#0x2700,-(sp)			/* with interrupts disabled */
++	jmp		([old_200hz,pc])		/* now jump to the TOS timerC handler */
++
++
++/* -------------------------------------------------------------------------
++ *
++ * Context switcher
++ *
++ * -----------------------------------------------------------------------*/
++
++	.align 16
++_tcb0_btm:		ds.l 127
++_tcb0_top:		ds.l 1
++_tcb1_btm:		ds.l 127
++_tcb1_top:		ds.l 1
++
++	.align 16
++_thread_func:	dc.l 0
++_sav_sp:		dc.l 0
++_cur_tcb:		dc.b 0
++_padding:		dc.b 0
++_fpu_info:		dc.w 0xffff/* 0xffff=no fpu, 0x0000=6888X, 0x0002=68060 */
++
++	.align 16
++	dc.l	0
++	dc.l	0x58425241	/* XBRA */
++	dc.l	0x5343554d	/* SCUM */
++old_trap4:
++	dc.l	0
++my_trap4:
++	move.w	#0x2700,sr
++my_trap4_from_isr:
++	btst.b	#5,(sp)					/* don't preempt if thread is in supervisor */
++	bne.b	1f
++	tst.l	_thread_func(pc)		/* threads enabled? */
++	bne.b	.select
++1:	rte
++
++.select:
++	move.l	sp,_sav_sp				/* save ssp */
++	eor.b	#1,_cur_tcb				/* select next thread */
++	beq.b	2f
++	lea.l	_tcb0_top(pc),sp
++	move.l	_tcb1_top(pc),(sp)
++	bra.b	.save
++2:	lea.l	_tcb1_top(pc),sp
++	move.l	_tcb0_top(pc),(sp)
++
++.save:
++	movem.l	d0-d7/a0-a6,-(sp)		/* cpu */
++	move.l	%usp,a0					/* usp */
++	lea.l	60(sp),a5
++	move.l	a0,-(sp)
++	move.w	_fpu_info(pc),d0		/* fpu */
++	bmi.b	3f
++	fsave	-(sp)
++	move.b	(sp,d0.w),d0
++	beq.b	3f
++	fmovem.x %fp0-%fp7,-(sp)
++	fmovem.l %fpcr/%fpsr/%fpiar,-(sp)
++3:	move.w	d0,-(sp)
++	move.l	_sav_sp(pc),a0			/* exception frame */
++	move.l	(a5),a4
++	move.l	(a0)+,-(sp)
++	move.l	(a0),-(sp)
++	move.l	sp,(a5)					/* context ptr */
++
++.restore:
++	move.l	(a4)+,(a0)				/* exception frame */
++	move.l	(a4)+,-(a0)
++	move.w	(a4)+,d0				/* fpu */
++	bmi.b	5f
++	beq.b	4f
++	fmovem.l (a4)+,%fpcr/%fpsr/%fpiar
++	fmovem.x (a4)+,%fp0-%fp7
++4:	frestore (a4)+
++5:	move.l	(a4)+,a1				/* usp */
++	move.l	a0,sp					/* restore ssp */
++	move.l	a1,%usp
++	movem.l	(a4),d0-d7/a0-a6		/* cpu */
++	rte
++
++
++/*--------------------------------------------------------------------*/
++SYM(atari_thread_yield):
++	trap	#4
++	rts
++
++
++/*--------------------------------------------------------------------*/
++SYM(atari_thread_init):
++	move.w	sr,-(sp)
++	or.w	#0x0700,sr
++
++	move.w	#0xffff,_fpu_info		/* determine fpu info */
++	move.l	#0,-(sp)
++	move.l	sp,-(sp)
++	move.l	#0x5F465055,-(sp)		/* _FPU */
++	jsr		SYM(Getcookie)
++	addq.l	#8,sp
++	move.l	(sp)+,d1
++	tst.l	d0						/* C_FOUND */
++	bne.b	2f
++	swap	d1
++	btst.b	#4,d1					/* 68060 */
++	beq.b	1f
++	move.w	#2,_fpu_info
++	bra.b	2f
++1:	and.b	#0x0e,d1				/* 68040, 68882, 68881 */
++	beq.b	2f
++	move.w	#0,_fpu_info
++
++2:	move.l	0x90.w,old_trap4		/* general setup */
++	move.l	#my_trap4,0x90.w
++	move.l	6(sp),_thread_func
++	move.b	#0,_cur_tcb
++
++	lea.l	_tcb1_top(pc),a0		/* init thread1 context */
++	movem.l	d0-d7/a0-a6,-(a0)		/* cpu */
++	move.l	#_stack1_top,-(a0)		/* usp */
++	moveq	#0,d1					/* fpu */
++	move.w	_fpu_info(pc),d0
++	bmi.b	4f
++	beq.b	3f
++	move.l	d1,-(a0)				/* 68060 null frame */
++	move.l	d1,-(a0)
++3:	move.l	d1,-(a0)				/* 68XXX null frame */
++	move.b	d1,d0
++4:	move.w	d0,-(a0)				/* fpu context info */
++	move.w	d1,-(a0)				/* exception frame: fmt/vec */
++	move.l	#thread_tramp,-(a0)		/* exception frame: pc */
++	move.w	(sp),d0					/* exception frame: sr */
++	and.w	#0x700,d0
++	move.w	d0,-(a0)
++	move.l	(a0)+,d0				/* swap frame around */
++	move.l	(a0),d1
++	move.l	d0,(a0)
++	move.l	d1,-(a0)
++	move.l	a0,_tcb1_top			/* context ptr */
++	move.w	(sp)+,sr
++	moveq.l	#0,d0
++	rts
++thread_tramp:
++	jsr		([_thread_func,pc])
++1:	bra.b	1b
++
++
++/*--------------------------------------------------------------------*/
++SYM(atari_thread_shutdown):
++	move.w	sr,-(sp)
++	or.w	#0x700,sr
++	move.l	old_trap4(pc),0x90.w	/* restore old trap4 */
++	move.l	#0,_thread_func			/* clear thread1 func */
++	move.w	(sp)+,sr
++	moveq.l	#0,d0
++	rts
++
++
++/* -------------------------------------------------------------------------
++ *
++ * Recursive mutex
++ *
++ * -----------------------------------------------------------------------*/
++
++SYM(atari_mutex_lock):
++	move.b	_cur_tcb(pc),d0
++	move.l	4(sp),a0
++	tas		(a0)					/* try lock */
++	beq.b	2f
++	cmp.b	1(a0),d0				/* was ours? */
++	beq.b	1f
++	trap	#4						/* no, yield and try again */
++	bra.b	atari_mutex_lock
++1:	addq.w	#1,2(a0)				/* yes, increment counter */
++	rts
++2:	move.b	d0,1(a0)				/* init owner id */
++	move.w	#1,2(a0)				/* init counter */
++	rts
++
++SYM(atari_mutex_unlock):
++	move.l	4(sp),a0
++	subq.w	#1,2(a0)				/* decrement counter */
++	bne.b	1f
++	move.b	#0,(a0)					/* unlock */
++1:	rts
++
++
++/*--------------------------------------------------------------------*/
++	.bss
++/*--------------------------------------------------------------------*/
++
++	.align 16
++_stack1_btm:				ds.l 8191
++_stack1_top:				ds.l 1
+diff --git a/backends/platform/atari/thread.h b/backends/platform/atari/thread.h
+new file mode 100644
+index 00000000000..008cd2a73f4
+--- /dev/null
++++ b/backends/platform/atari/thread.h
+@@ -0,0 +1,48 @@
++/* ScummVM - Graphic Adventure Engine
++ *
++ * ScummVM is the legal property of its developers, whose names
++ * are too numerous to list here. Please refer to the COPYRIGHT
++ * file distributed with this source distribution.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ */
++
++#ifndef ATARI_THREAD_H
++#define ATARI_THREAD_H
++
++#include "common/mutex.h"
++
++extern "C" long atari_200hz_init(void);					/* call in super */
++extern "C" long atari_200hz_shutdown(void);				/* call in super */
++extern "C" uint32 atari_200hz_counter;
++
++extern "C" long atari_thread_init(void(*func)(void));	/* call in super */
++extern "C" long atari_thread_shutdown(void);			/* call in super */
++extern "C" void atari_thread_yield(void);
++
++extern "C" void atari_mutex_lock(volatile uint32_t* m);
++extern "C" void atari_mutex_unlock(volatile uint32_t* m);
++
++class AtariMutex : public Common::MutexInternal {
++private:
++	volatile uint32_t _lock;
++public:
++	AtariMutex() { _lock = 0; }
++	~AtariMutex() { }
++	bool lock() override { atari_mutex_lock(&_lock); return true; }
++	bool unlock() override { atari_mutex_unlock(&_lock); return true; }
++};
++
++#endif
+-- 
+2.43.0
+
+
+From ca0dd84bda639f5aa54e0d0e650d25021cf3c361 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Fri, 3 Jul 2026 22:54:48 +1000
+Subject: [PATCH 2/7] BACKENDS: ATARI: Use the new thread scheduler
+
+Fix a couple of potential bugs and make it FreeMiNT friendly, too:
+
+- Preempt only when the interrupted user-mode USP lies within our
+  process, otherwise the tick may hijack a foreign process' context;
+  possible since MiNT's memory protection doesn't remap addresses.
+
+- If the USP check fails, the interrupted PC is checked as well: the
+  code may misuse a7 as a data register (on the other hand, the PC check
+  doesn't work well for plugins so both checks are essential).
+
+- The fake tail frame now preserves the interrupted IPL instead of a
+  constant 0x2700 which blinded mint_vbl's stacked-SR checks.
+
+- Known limitation: MiNT cannot forcibly timeslice ScummVM while threads
+  are on (the tail frame must be a supervisor one); other processes run
+  when ScummVM blocks in the kernel.
+---
+ backends/events/atari/atari-events.cpp    |   6 -
+ backends/events/atari/atari-events.h      |   2 -
+ backends/mixer/atari/atari-mixer.cpp      |  23 ++++
+ backends/platform/atari/osystem_atari.cpp | 128 +++++++++++-----------
+ backends/platform/atari/osystem_atari.h   |   2 -
+ backends/platform/atari/thread.S          |  97 ++++++++++++++--
+ backends/platform/atari/thread.h          |  20 +++-
+ 7 files changed, 184 insertions(+), 94 deletions(-)
+
+diff --git a/backends/events/atari/atari-events.cpp b/backends/events/atari/atari-events.cpp
+index c1dc3f7947e..1c0a2e60402 100644
+--- a/backends/events/atari/atari-events.cpp
++++ b/backends/events/atari/atari-events.cpp
+@@ -26,7 +26,6 @@
+ #include <mint/osbind.h>
+ 
+ #include "backends/graphics/atari/atari-graphics.h"
+-#include "backends/platform/atari/osystem_atari.h"
+ #include "common/rect.h"
+ 
+ #define SCANCODES_SIZE 256
+@@ -47,9 +46,6 @@ volatile int16	g_atari_ikbd_mouse_delta_x = 0;
+ volatile int16	g_atari_ikbd_mouse_delta_y = 0;
+ 
+ AtariEventSource::AtariEventSource() {
+-	_system = dynamic_cast<OSystem_Atari*>(g_system);
+-	assert(_system != nullptr);
+-
+ 	_KEYTAB *pKeyTables = (_KEYTAB *)Keytbl(KT_NOCHANGE, KT_NOCHANGE, KT_NOCHANGE);
+ 
+ 	memcpy(_unshiftToAscii, pKeyTables->unshift, 128);
+@@ -120,8 +116,6 @@ bool AtariEventSource::pollEvent(Common::Event &event) {
+ 	if (!_graphicsManager)
+ 		return false;
+ 
+-	_system->update();
+-
+ 	if (g_atari_ikbd_mousebuttons_head != g_atari_ikbd_mousebuttons_tail) {
+ 		byte buttonState = g_atari_ikbd_mousebuttons[g_atari_ikbd_mousebuttons_tail++];
+ 		g_atari_ikbd_mousebuttons_tail &= MOUSEBUTTONS_SIZE-1;
+diff --git a/backends/events/atari/atari-events.h b/backends/events/atari/atari-events.h
+index cb12fa258dc..7cd02e41454 100644
+--- a/backends/events/atari/atari-events.h
++++ b/backends/events/atari/atari-events.h
+@@ -27,7 +27,6 @@
+ #include "common/hashmap.h"
+ 
+ class AtariGraphicsManager;
+-class OSystem_Atari;
+ 
+ /**
+  * The Atari event source.
+@@ -41,7 +40,6 @@ public:
+ 	void setGraphicsManager(AtariGraphicsManager *graphicsManager) { _graphicsManager = graphicsManager; }
+ 
+ private:
+-	OSystem_Atari *_system = nullptr;
+ 	AtariGraphicsManager *_graphicsManager = nullptr;
+ 
+ 	bool _lmbDown = false;
+diff --git a/backends/mixer/atari/atari-mixer.cpp b/backends/mixer/atari/atari-mixer.cpp
+index a1cd4797a56..4bcb2282926 100644
+--- a/backends/mixer/atari/atari-mixer.cpp
++++ b/backends/mixer/atari/atari-mixer.cpp
+@@ -28,6 +28,7 @@
+ #include <mint/ostruct.h>
+ #include <usound.h>
+ 
++#include "backends/platform/atari/thread.h"
+ #include "common/config-manager.h"
+ #include "common/debug.h"
+ #include "common/textconsole.h"
+@@ -44,6 +45,18 @@
+ 
+ static USoundContext usoundContext;
+ 
++// update() is called from the worker thread while init(), deinit(),
++// suspendAudio() and resumeAudio() are called from the main thread;
++// serialize them (AtariMutex is recursive, resumeAudio() -> update() is fine)
++static AtariMutex s_mutex;
++
++namespace {
++struct MutexLocker {
++	MutexLocker() { s_mutex.lock(); }
++	~MutexLocker() { s_mutex.unlock(); }
++};
++}
++
+ void AtariAudioShutdown() {
+ 	Jdisint(MFP_TIMERA);
+ 	USoundDeinitXbios(&usoundContext);
+@@ -98,6 +111,8 @@ AtariMixerManager::~AtariMixerManager() {
+ void AtariMixerManager::init() {
+ 	debug("audio init");
+ 
++	MutexLocker lock;
++
+ 	assert(!_mixer);
+ 
+ 	// read either from game domain or from defaults
+@@ -179,6 +194,8 @@ void AtariMixerManager::init() {
+ void AtariMixerManager::deinit() {
+ 	debug("audio deinit");
+ 
++	MutexLocker lock;
++
+ 	suspendAudio();
+ 
+ 	AtariAudioShutdown();
+@@ -199,6 +216,8 @@ void AtariMixerManager::deinit() {
+ void AtariMixerManager::suspendAudio() {
+ 	debug("suspendAudio");
+ 
++	MutexLocker lock;
++
+ 	Buffoper(0x00);
+ 	s_playbackState = kPlaybackStopped;
+ 	_audioSuspended = true;
+@@ -207,6 +226,8 @@ void AtariMixerManager::suspendAudio() {
+ int AtariMixerManager::resumeAudio() {
+ 	debug("resumeAudio");
+ 
++	MutexLocker lock;
++
+ 	_audioSuspended = false;
+ 	update();
+ 	return 0;
+@@ -232,6 +253,8 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
+ }
+ 
+ void AtariMixerManager::update() {
++	MutexLocker lock;
++
+ 	if (_audioSuspended) {
+ 		return;
+ 	}
+diff --git a/backends/platform/atari/osystem_atari.cpp b/backends/platform/atari/osystem_atari.cpp
+index 55ce47797d9..b04bb5cf581 100644
+--- a/backends/platform/atari/osystem_atari.cpp
++++ b/backends/platform/atari/osystem_atari.cpp
+@@ -26,6 +26,7 @@
+ #include <time.h>
+ 
+ #include <gem.h>
++#include <mint/basepage.h>
+ #include <mint/cookie.h>
+ #include <mint/falcon.h>
+ #include <mint/osbind.h>
+@@ -49,7 +50,7 @@
+ #include "backends/graphics/atari/atari-graphics.h"
+ #include "backends/keymapper/hardware-input.h"
+ #include "backends/mixer/atari/atari-mixer.h"
+-#include "backends/mutex/null/null-mutex.h"
++#include "backends/platform/atari/thread.h"
+ #ifdef DYNAMIC_MODULES
+ #include "backends/plugins/atari/atari-provider.h"
+ #endif
+@@ -83,59 +84,57 @@ static void (*s_old_procterm)(void) = nullptr;
+ 
+ static char s_lastErrorMessage[1024+1];
+ 
+-static volatile uint32 counter_200hz;
+-
+ static bool s_dtor_already_called = false;
+ 
+-static long atari_200hz_init(void)
+-{
+-	__asm__ __volatile__(
+-	"\tmove		%%sr,-(%%sp)\n"
+-	"\tor.w		#0x700,%%sr\n"
+-
+-	"\tmove.l	0x114.w,old_200hz\n"
+-	"\tmove.l	#my_200hz,0x114.w\n"
+-
+-	"\tmove		(%%sp)+,%%sr\n"
+-	"\tjbra		1f\n"
+-
+-	"\tdc.l		0x58425241\n" /* "XBRA" */
+-	"\tdc.l		0x5343554d\n" /* "SCUM" */
+-"old_200hz:\n"
+-	"\tdc.l		0\n"
+-"my_200hz:\n"
+-	"\taddq.l	#1,%0\n"
++static DefaultTimerManager *s_timerManager;
++static AtariMixerManager *s_mixerManager;
++
++static volatile bool s_parkThread;
++static volatile bool s_threadParked;
++
++// worker thread, preemptively switched with the main thread at 200 Hz:
++// runs timer callbacks and feeds the DMA sound buffers
++static void atari_thread_main(void) {
++	while (true) {
++		if (s_parkThread) {
++			// OSystem_Atari dtor waits for this before deleting the managers
++			s_threadParked = true;
++		} else {
++			if (s_timerManager)
++				s_timerManager->checkTimers();
++			if (s_mixerManager)
++				s_mixerManager->update();
++		}
++		atari_thread_yield();
++	}
++}
+ 
+-	"\tmove.l	old_200hz(%%pc),-(%%sp)\n"
+-	"\trts\n"
+-"1:\n"
+-	: /* output */
+-	: "m"(counter_200hz) /* inputs */
+-	: "memory", "cc");
++// mintlib private: TPA size kept after crt0's Mshrink (text+data+bss+stack).
++// _base->p_hitpa can't be used as the upper bound: neither Mshrink nor crt0
++// updates it, so it still points at the top of the original Pexec allocation.
++extern "C" unsigned long _PgmSize;
+ 
++static long init_thread(void) {
++	atari_200hz_init();
++	atari_thread_init(atari_thread_main, _base, (const char *)_base + _PgmSize);
+ 	return 0;
+ }
+ 
+-static long atari_200hz_shutdown(void)
+-{
+-	__asm__ __volatile__(
+-	"\tmove		%%sr,-(%%sp)\n"
+-	"\tor.w		#0x700,%%sr\n"
+-
+-	"\tmove.l	old_200hz,0x114.w\n"
+-
+-	"\tmove		(%%sp)+,%%sr\n"
+-	: /* output */
+-	: /* inputs */
+-	: "memory", "cc");
++static long shutdown_thread(void) {
++	atari_thread_shutdown();
++	return 0;
++}
+ 
++static long shutdown_200hz(void) {
++	atari_200hz_shutdown();
+ 	return 0;
+ }
+ 
+ static void critical_restore() {
+ 	//debug("critical_restore()");
+ 
+-	Supexec(atari_200hz_shutdown);
++	Supexec(shutdown_thread);
++	Supexec(shutdown_200hz);
+ 
+ #ifdef INPUT_ACTIVE
+ 	if (atari_old_kbdvec && atari_old_mousevec) {
+@@ -225,8 +224,8 @@ OSystem_Atari::OSystem_Atari() {
+ 	kbdvecs->mousevec = atari_mousevec;
+ #endif
+ 
+-	Supexec(atari_200hz_init);
+-	_startTime = counter_200hz;
++	Supexec(init_thread);
++	_startTime = atari_200hz_counter;
+ 	_timerInitialized = true;
+ 
+ 	// protect against sudden exit()
+@@ -241,6 +240,20 @@ OSystem_Atari::~OSystem_Atari() {
+ 
+ 	s_dtor_already_called = true;
+ 
++	if (_timerInitialized) {
++		// park the worker thread so that it no longer touches the managers
++		// which are about to be deleted (timeout in case this dtor runs *on*
++		// the worker thread, e.g. after error() in a timer callback)
++		const uint32 deadline = getMillis() + 1000;
++		s_parkThread = true;
++		while (!s_threadParked && getMillis() < deadline)
++			atari_thread_yield();
++		Supexec(shutdown_thread);
++	}
++
++	s_timerManager = nullptr;
++	s_mixerManager = nullptr;
++
+ 	// _audiocdManager needs to be deleted before _mixerManager to avoid a crash.
+ 	delete _audiocdManager;
+ 	_audiocdManager = nullptr;
+@@ -264,7 +277,7 @@ OSystem_Atari::~OSystem_Atari() {
+ 	_fsFactory = nullptr;
+ 
+ 	if (_timerInitialized) {
+-		Supexec(atari_200hz_shutdown);
++		Supexec(shutdown_200hz);
+ 		_timerInitialized = false;
+ 	}
+ 
+@@ -328,6 +341,8 @@ void OSystem_Atari::initBackend() {
+ 	}
+ 
+ 	_timerManager = new DefaultTimerManager();
++	s_timerManager = (DefaultTimerManager *)_timerManager;
++
+ 	_savefileManager = new DefaultSaveFileManager("saves");
+ 
+ 	AtariEventSource *atariEventSource = new AtariEventSource();
+@@ -365,6 +380,7 @@ void OSystem_Atari::initBackend() {
+ 
+ 	// init() will be called upon starting a new game
+ 	_mixerManager = new AtariMixerManager();
++	s_mixerManager = (AtariMixerManager *)_mixerManager;
+ 
+ 	_audiocdManager = new AtariAudioCDManager();
+ 
+@@ -396,18 +412,18 @@ void OSystem_Atari::engineAfterDelete() {
+ }
+ 
+ Common::MutexInternal *OSystem_Atari::createMutex() {
+-	return new NullMutexInternal();
++	return new AtariMutex();
+ }
+ 
+ uint32 OSystem_Atari::getMillis(bool skipRecord) {
+ 	// CLOCKS_PER_SEC is 200, so no need to use floats
+-	return 1000 * (counter_200hz - _startTime) / CLOCKS_PER_SEC;
++	return 1000 * (atari_200hz_counter - _startTime) / CLOCKS_PER_SEC;
+ }
+ 
+ void OSystem_Atari::delayMillis(uint msecs) {
+ 	const uint32 threshold = getMillis() + msecs;
+ 	while (getMillis() < threshold) {
+-		update();
++		atari_thread_yield();
+ 	}
+ }
+ 
+@@ -545,26 +561,6 @@ Common::Path OSystem_Atari::getDefaultConfigFileName() {
+ 	return baseConfigName;
+ }
+ 
+-void OSystem_Atari::update() {
+-	// avoid a recursion loop if a timer callback decides to call OSystem::delayMillis()
+-	static bool inTimer = false;
+-
+-	if (!inTimer) {
+-		inTimer = true;
+-		((DefaultTimerManager *)_timerManager)->checkTimers();
+-		inTimer = false;
+-	} else {
+-		const Common::ConfigManager::Domain *activeDomain = ConfMan.getActiveDomain();
+-		assert(activeDomain);
+-
+-		warning("%s/%s calls update() from timer",
+-			activeDomain->getValOrDefault("engineid").c_str(),
+-			activeDomain->getValOrDefault("gameid").c_str());
+-	}
+-
+-	((AtariMixerManager *)_mixerManager)->update();
+-}
+-
+ OSystem *OSystem_Atari_create() {
+ 	return new OSystem_Atari();
+ }
+diff --git a/backends/platform/atari/osystem_atari.h b/backends/platform/atari/osystem_atari.h
+index f8691a38698..7e014c1a857 100644
+--- a/backends/platform/atari/osystem_atari.h
++++ b/backends/platform/atari/osystem_atari.h
+@@ -52,8 +52,6 @@ public:
+ 	void addSysArchivesToSearchSet(Common::SearchSet &s, int priority) override;
+ 	Common::Path getDefaultConfigFileName() override;
+ 
+-	void update();
+-
+ private:
+ 	long _startTime;
+ 
+diff --git a/backends/platform/atari/thread.S b/backends/platform/atari/thread.S
+index 68d12783a69..dbf1a4e23ec 100644
+--- a/backends/platform/atari/thread.S
++++ b/backends/platform/atari/thread.S
+@@ -1,5 +1,5 @@
+ /* ScummVM - Graphic Adventure Engine
+-*
++ *
+  * ScummVM is the legal property of its developers, whose names
+  * are too numerous to list here. Please refer to the COPYRIGHT
+  * file distributed with this source distribution.
+@@ -26,18 +26,31 @@
+  *
+  * Thread0 is main thread inheriting context from application
+  * Thread1 is task thread started via atari_thread_init().
+- * 
++ *
+  *  - Usermode threads only, does not preempt or yield
+  *    threads which are in supervisor mode.
+  *
+  *  - Preempts by tail-calling yield from the 200hz timer
+  *
++ *  - Preempts only when the interrupted USP or PC lies within our
++ *    TPA: under a multitasking OS (FreeMiNT, MagiC) the interrupted
++ *    user context may belong to a foreign process which must not
++ *    be touched. Addresses are unique system-wide (MiNT's memory
++ *    protection doesn't remap, virtual = physical). Neither check
++ *    alone is sufficient: our code may misuse a7 as a data register
++ *    (USP check fails) while plugins execute from heap-allocated
++ *    memory outside the TPA (PC check fails).
++ *
++ *  - The fake tail frame preserves the interrupted IPL (supervisor
++ *    bit forced, trace bits cleared) so that FreeMiNT's mint_vbl,
++ *    which inspects the stacked SR of what it believes is the
++ *    interrupted context, still performs its housekeeping.
++ *
+  *  - Manual yield is provided by atari_thread_yield()
+  *    Uses Trap #4 internally
+  *
+- *  - my_trap4 is guaranteed to always receive a stacked format0 frame.
+- *    interrupts are disabled inside. the use of some global temp
+- *    variable inside is safe.
++ *  - my_trap4 masks interrupts as its first instruction; the use
++ *    of some global temp variable inside is safe.
+  *
+  *  - threads spin-yield when waiting on mutex
+  *    not super efficient and if needed we could/should add
+@@ -90,10 +103,30 @@ old_200hz:
+ 	dc.l	0
+ my_200hz:
+ 	addq.l	#1,SYM(atari_200hz_counter)
++	tst.l	_thread_func(pc)		/* threads enabled? */
++	beq.b	1f
++	btst.b	#5,(sp)					/* interrupted in supervisor? nothing to preempt */
++	bne.b	1f
++	move.l	a0,_temp2				/* interrupted in user mode: is it our process? */
++	move.l	%usp,a0
++	cmp.l	_tpa_lo(pc),a0
++	bcs.b	3f						/* usp outside our TPA: check the PC too, */
++	cmp.l	_tpa_hi(pc),a0			/* a7 may be misused as a data register */
++	bcs.b	4f						/* usp within our TPA: it's us */
++3:	move.l	2(sp),a0				/* interrupted PC */
++	cmp.l	_tpa_lo(pc),a0
++	bcs.b	2f						/* neither usp nor pc in our TPA: foreign */
++	cmp.l	_tpa_hi(pc),a0			/* process, leave its frame alone so the */
++	bcc.b	2f						/* OS can timeslice it normally */
++4:	move.l	_temp2(pc),a0
+ 	move.w	#0,-(sp)				/* push a fake format0 frame for tail-calling */
+ 	pea.l	my_trap4_from_isr(pc)	/* into thread scheduler after TOS timerC handler */
+-	move.w	#0x2700,-(sp)			/* with interrupts disabled */
++	move.w	6(sp),-(sp)				/* copy the interrupted SR... */
++	and.w	#0x0700,(sp)			/* ...keep only its IPL */
++	or.w	#0x2000,(sp)			/* ...force supervisor mode, clear trace bits */
+ 	jmp		([old_200hz,pc])		/* now jump to the TOS timerC handler */
++2:	move.l	_temp2(pc),a0
++1:	jmp		([old_200hz,pc])		/* now jump to the TOS timerC handler */
+ 
+ 
+ /* -------------------------------------------------------------------------
+@@ -111,6 +144,10 @@ _tcb1_top:		ds.l 1
+ 	.align 16
+ _thread_func:	dc.l 0
+ _sav_sp:		dc.l 0
++_tpa_lo:		dc.l 0	/* our process' TPA start (basepage) */
++_tpa_hi:		dc.l 0	/* our process' TPA end (p_hitpa) */
++_temp:			dc.l 0	/* my_trap4 scratch */
++_temp2:			dc.l 0	/* my_200hz scratch */
+ _cur_tcb:		dc.b 0
+ _padding:		dc.b 0
+ _fpu_info:		dc.w 0xffff/* 0xffff=no fpu, 0x0000=6888X, 0x0002=68060 */
+@@ -122,12 +159,26 @@ _fpu_info:		dc.w 0xffff/* 0xffff=no fpu, 0x0000=6888X, 0x0002=68060 */
+ old_trap4:
+ 	dc.l	0
+ my_trap4:
+-	move.w	#0x2700,sr
+ my_trap4_from_isr:
++	move.w	#0x2700,sr				/* the fake frame's SR may carry a low IPL */
+ 	btst.b	#5,(sp)					/* don't preempt if thread is in supervisor */
+ 	bne.b	1f
+ 	tst.l	_thread_func(pc)		/* threads enabled? */
+-	bne.b	.select
++	beq.b	1f
++	move.l	a0,_temp				/* interrupted in user mode: is it our process? */
++	move.l	%usp,a0
++	cmp.l	_tpa_lo(pc),a0
++	bcs.b	3f						/* usp outside our TPA: check the PC too, */
++	cmp.l	_tpa_hi(pc),a0			/* a7 may be misused as a data register */
++	bcs.b	4f						/* usp within our TPA: it's us */
++3:	move.l	2(sp),a0				/* interrupted PC */
++	cmp.l	_tpa_lo(pc),a0
++	bcs.b	2f						/* neither usp nor pc in our TPA: */
++	cmp.l	_tpa_hi(pc),a0			/* foreign process */
++	bcc.b	2f
++4:	move.l	_temp(pc),a0
++	bra.b	.select
++2:	move.l	_temp(pc),a0
+ 1:	rte
+ 
+ .select:
+@@ -186,12 +237,28 @@ SYM(atari_thread_init):
+ 	move.w	sr,-(sp)
+ 	or.w	#0x0700,sr
+ 
++#ifdef __FASTCALL__
++	move.l	a0,_thread_func
++	move.l	a1,_tpa_lo
++	move.l	6(sp),_tpa_hi
++#else
++	move.l	6(sp),_thread_func
++	move.l	10(sp),_tpa_lo
++	move.l	14(sp),_tpa_hi
++#endif
++
+ 	move.w	#0xffff,_fpu_info		/* determine fpu info */
+ 	move.l	#0,-(sp)
++#ifdef __FASTCALL__
++	move.l	sp,a0
++	move.l	#0x5F465055,d0			/* _FPU */
++	jsr		SYM(Getcookie)
++#else
+ 	move.l	sp,-(sp)
+ 	move.l	#0x5F465055,-(sp)		/* _FPU */
+ 	jsr		SYM(Getcookie)
+ 	addq.l	#8,sp
++#endif
+ 	move.l	(sp)+,d1
+ 	tst.l	d0						/* C_FOUND */
+ 	bne.b	2f
+@@ -206,7 +273,6 @@ SYM(atari_thread_init):
+ 
+ 2:	move.l	0x90.w,old_trap4		/* general setup */
+ 	move.l	#my_trap4,0x90.w
+-	move.l	6(sp),_thread_func
+ 	move.b	#0,_cur_tcb
+ 
+ 	lea.l	_tcb1_top(pc),a0		/* init thread1 context */
+@@ -254,17 +320,22 @@ SYM(atari_thread_shutdown):
+  *
+  * Recursive mutex
+  *
++ * byte 0:    lock flag (tas)
++ * byte 1:    owner thread id (0xff = none)
++ * bytes 2-3: recursion counter
+  * -----------------------------------------------------------------------*/
+ 
+ SYM(atari_mutex_lock):
+-	move.b	_cur_tcb(pc),d0
++#ifndef __FASTCALL__
+ 	move.l	4(sp),a0
++#endif
++3:	move.b	_cur_tcb(pc),d0
+ 	tas		(a0)					/* try lock */
+ 	beq.b	2f
+ 	cmp.b	1(a0),d0				/* was ours? */
+ 	beq.b	1f
+ 	trap	#4						/* no, yield and try again */
+-	bra.b	atari_mutex_lock
++	bra.b	3b
+ 1:	addq.w	#1,2(a0)				/* yes, increment counter */
+ 	rts
+ 2:	move.b	d0,1(a0)				/* init owner id */
+@@ -272,10 +343,12 @@ SYM(atari_mutex_lock):
+ 	rts
+ 
+ SYM(atari_mutex_unlock):
++#ifndef __FASTCALL__
+ 	move.l	4(sp),a0
++#endif
+ 	subq.w	#1,2(a0)				/* decrement counter */
+ 	bne.b	1f
+-	move.b	#0,(a0)					/* unlock */
++	move.w	#0x00ff,(a0)			/* unlock and invalidate owner id in one write */
+ 1:	rts
+ 
+ 
+diff --git a/backends/platform/atari/thread.h b/backends/platform/atari/thread.h
+index 008cd2a73f4..7bb23a7973a 100644
+--- a/backends/platform/atari/thread.h
++++ b/backends/platform/atari/thread.h
+@@ -26,21 +26,29 @@
+ 
+ extern "C" long atari_200hz_init(void);					/* call in super */
+ extern "C" long atari_200hz_shutdown(void);				/* call in super */
+-extern "C" uint32 atari_200hz_counter;
++extern "C" volatile uint32 atari_200hz_counter;
+ 
+-extern "C" long atari_thread_init(void(*func)(void));	/* call in super */
++/* tpaLo/tpaHi: bounds of the memory our process actually owns (basepage,
++ * top of the region kept by Mshrink); the scheduler preempts only user-mode
++ * contexts whose USP lies within them so that foreign processes are left alone.
++ */
++extern "C" long atari_thread_init(void (*func)(void),
++								  const void *tpaLo, const void *tpaHi);	/* call in super */
+ extern "C" long atari_thread_shutdown(void);			/* call in super */
+ extern "C" void atari_thread_yield(void);
+ 
+-extern "C" void atari_mutex_lock(volatile uint32_t* m);
+-extern "C" void atari_mutex_unlock(volatile uint32_t* m);
++extern "C" void atari_mutex_lock(volatile uint32 *m);
++extern "C" void atari_mutex_unlock(volatile uint32 *m);
+ 
+ class AtariMutex : public Common::MutexInternal {
+ private:
+-	volatile uint32_t _lock;
++	// byte 0: lock flag, byte 1: owner thread id (0xff = none), bytes 2-3: recursion counter
++	volatile uint32 _lock;
++
+ public:
+-	AtariMutex() { _lock = 0; }
++	AtariMutex() { _lock = 0x00ff0000; }
+ 	~AtariMutex() { }
++
+ 	bool lock() override { atari_mutex_lock(&_lock); return true; }
+ 	bool unlock() override { atari_mutex_unlock(&_lock); return true; }
+ };
+-- 
+2.43.0
+
+
+From f63ad540f79f01930d0dd7827313c4b5aa68b44b Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Sat, 4 Jul 2026 23:26:15 +1000
+Subject: [PATCH 3/7] BACKENDS: ATARI: Remove underrun handling
+
+As an experiment. Let's see how many "worker stalled" reports we get
+(this means that I/O is taking too much time => nothing to do about it).
+---
+ backends/mixer/atari/atari-mixer.cpp | 85 ++++++++++++++++------------
+ 1 file changed, 49 insertions(+), 36 deletions(-)
+
+diff --git a/backends/mixer/atari/atari-mixer.cpp b/backends/mixer/atari/atari-mixer.cpp
+index 4bcb2282926..293f8c36f3f 100644
+--- a/backends/mixer/atari/atari-mixer.cpp
++++ b/backends/mixer/atari/atari-mixer.cpp
+@@ -62,32 +62,35 @@ void AtariAudioShutdown() {
+ 	USoundDeinitXbios(&usoundContext);
+ }
+ 
+-static volatile enum {
+-	kPlaybackStopped,	// DMA not playing (initial or after starvation)
++static enum {
++	kPlaybackStopped,	// DMA not playing
+ 	kPlay1stHalf,		// DMA looping [Beg, Mid)
+ 	kPlay2ndHalf		// DMA looping [Mid, End)
+ } s_playbackState = kPlaybackStopped;
+ 
+-static volatile uint32 s_updatePulse;
+-static volatile bool s_dmaWrapped;
+-static volatile bool s_isrStoppedDma;
++// incremented at each frame (half buffer) boundary; consumed by update()
++static volatile uint32 s_halvesDone;
++static uint32 s_halvesConsumed;
++static long s_halfMs;
+ 
+ static void __attribute__((interrupt)) timerA(void) {
+-	static uint32 s_lastPulseSeen;
+-
+-	if (s_updatePulse == s_lastPulseSeen) {
+-		// update() didn't run since the previous wrap: stop the playback
+-		*((volatile byte *)0xFFFF8901L) = 0;
+-		s_isrStoppedDma = true;
+-	} else {
+-		s_dmaWrapped = true;
+-	}
+-	s_lastPulseSeen = s_updatePulse;
++	s_halvesDone++;
+ 
+ 	// clear in-service bit
+ 	*((volatile byte *)0xFFFFFA0FL) = ~(1 << 5);
+ }
+ 
++static void warnUnderrun(const char *fmt, long ms) {
++	// diagnostic only; rate-limited as warning() itself costs I/O
++	static uint32 s_lastWarning;
++
++	const uint32 now = g_system->getMillis();
++	if (now - s_lastWarning >= 1000) {
++		s_lastWarning = now;
++		warning(fmt, ms);
++	}
++}
++
+ AtariMixerManager::AtariMixerManager() : MixerManager() {
+ 	debug("AtariMixerManager()");
+ 
+@@ -185,6 +188,9 @@ void AtariMixerManager::init() {
+ 	_sampleBufferSize = _samples * _outputChannels * 4;	// always 32-bit
+ 	_sampleBuffer = new uint8[_sampleBufferSize];
+ 
++	// one half plays for _samples/_outputRate seconds
++	s_halfMs = (long)_samples * 1000 / _outputRate;
++
+ 	_mixer = new Audio::MixerImpl(_outputRate, _outputChannels == 2, _samples, 4, false);
+ 	_mixer->setReady(true);
+ 
+@@ -261,14 +267,6 @@ void AtariMixerManager::update() {
+ 
+ 	assert(_mixer);
+ 
+-	s_updatePulse++;
+-
+-	// Translate ISR's starvation signal into a state transition. Done
+-	// here so that update() is the only writer of s_playbackState.
+-	if (s_isrStoppedDma) {
+-		s_isrStoppedDma = false;
+-		s_playbackState = kPlaybackStopped;
+-	}
+ 
+ 	byte *atariSampleBuffer1stHalf = _atariSampleBuffer;
+ 	byte *atariSampleBuffer2ndHalf = _atariSampleBuffer + _atariSampleBufferSize/2;
+@@ -278,30 +276,39 @@ void AtariMixerManager::update() {
+ 
+ 	if (s_playbackState == kPlaybackStopped) {
+ 		memset(_atariSampleBuffer, 0, _atariSampleBufferSize);
++		s_halvesDone = s_halvesConsumed = 0;
+ 		Setbuffer(SR_PLAY, atariSampleBuffer1stHalf, atariSampleBuffer2ndHalf);
+ 		Buffoper(SB_PLA_ENA | SB_PLA_RPT);
+ 		s_playbackState = kPlay1stHalf;
+ 		// Buffoper's 0->ENA transition can fire a spurious SI_PLAY which
+-		// would set s_dmaWrapped here. The resulting extra state toggle
+-		// is benign — it just shuffles which physical half holds the next
++		// would bump s_halvesDone here. The resulting extra state toggle
++		// is benign - it just shuffles which physical half holds the next
+ 		// mix. Audio output is continuous either way.
+ 		needsMix = true;
+-	}
+-
+-	if (s_dmaWrapped) {
+-		s_dmaWrapped = false;
+-		if (s_playbackState == kPlay1stHalf)
+-			s_playbackState = kPlay2ndHalf;
+-		else if (s_playbackState == kPlay2ndHalf)
+-			s_playbackState = kPlay1stHalf;
+-		needsMix = true;
++	} else {
++		const uint32 done = s_halvesDone;
++		const uint32 n = done - s_halvesConsumed;
++		if (n != 0) {
++			s_halvesConsumed = done;
++			// more than one boundary since the previous update means the
++			// DMA kept looping the same half, i.e. played stale data
++			if (n > 1)
++				warnUnderrun("audio: update() ran %ld ms late (heavy disk I/O? try increasing audio_buffer_size)", (n - 1) * s_halfMs);
++			// the DMA has wrapped into the previously queued half; if we
++			// missed boundaries it has been looping that same half, so a
++			// single flip is correct for any n
++			s_playbackState = (s_playbackState == kPlay1stHalf)
++				? kPlay2ndHalf
++				: kPlay1stHalf;
++			needsMix = true;
++		}
+ 	}
+ 
+ 	if (!needsMix)
+ 		return;
+ 
+-	// Mix into the half DMA is NOT currently playing, and Setbuffer to
+-	// it so DMA wraps there at the next frame boundary.
++	// Mix into the half the DMA is NOT currently playing, and Setbuffer to
++	// it so the DMA wraps there at the next frame boundary.
+ 	byte *buf;
+ 	if (s_playbackState == kPlay1stHalf) {
+ 		buf = atariSampleBuffer2ndHalf;
+@@ -406,4 +413,10 @@ void AtariMixerManager::update() {
+ 	if (processed > 0 && processed != _samples) {
+ 		warning("processed: %d, _samples: %d", processed, _samples);
+ 	}
++
++	// if another frame boundary has fired in the meantime, the DMA entered
++	// the half we have just been writing, i.e. detection + mixing took
++	// longer than one half's duration
++	if (s_halvesDone != s_halvesConsumed)
++		warnUnderrun("audio: mixing is too CPU heavy (took more than %ld ms)", s_halfMs);
+ }
+-- 
+2.43.0
+
+
+From ef1298ad9aa7bf26d64ef7638d27673be8cd16a3 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Fri, 14 Aug 2026 23:10:38 +1000
+Subject: [PATCH 4/7] BACKENDS: ATARI: Make dlmalloc thread-safe
+
+---
+ backends/platform/atari/dlmalloc.cpp | 20 +++++++++++++-------
+ backends/platform/atari/dlmalloc.h   |  1 +
+ 2 files changed, 14 insertions(+), 7 deletions(-)
+
+diff --git a/backends/platform/atari/dlmalloc.cpp b/backends/platform/atari/dlmalloc.cpp
+index a90cef9b874..59ad4439b09 100644
+--- a/backends/platform/atari/dlmalloc.cpp
++++ b/backends/platform/atari/dlmalloc.cpp
+@@ -410,13 +410,19 @@ static FORCEINLINE int win32munmap(void* ptr, size_t size) {
+ #else
+ #if USE_LOCKS > 1
+ /* -----------------------  User-defined locks ------------------------ */
+-/* Define your own lock implementation here */
+-/* #define INITIAL_LOCK(lk)  ... */
+-/* #define DESTROY_LOCK(lk)  ... */
+-/* #define ACQUIRE_LOCK(lk)  ... */
+-/* #define RELEASE_LOCK(lk)  ... */
+-/* #define TRY_LOCK(lk) ... */
+-/* static MLOCK_T malloc_global_mutex = ... */
++/* Recursive mutex from the two-thread scheduler (thread.S)
++ * byte 0: lock flag, byte 1: owner thread id (0xff = none), bytes 2-3:
++ * recursion counter.
++ */
++#define MLOCK_T               volatile unsigned int	/* = uint32 in thread.h */
++extern "C" void atari_mutex_lock(MLOCK_T *);
++extern "C" void atari_mutex_unlock(MLOCK_T *);
++#define ATARI_MUTEX_INIT      0x00ff0000U
++#define INITIAL_LOCK(lk)      (*(lk) = ATARI_MUTEX_INIT, 0)
++#define DESTROY_LOCK(lk)      (0)
++#define ACQUIRE_LOCK(lk)      (atari_mutex_lock(lk), 0)
++#define RELEASE_LOCK(lk)      (atari_mutex_unlock(lk), 0)
++static MLOCK_T malloc_global_mutex = ATARI_MUTEX_INIT;
+ 
+ #elif USE_SPIN_LOCKS
+ 
+diff --git a/backends/platform/atari/dlmalloc.h b/backends/platform/atari/dlmalloc.h
+index 0ac3fbf360f..75f7b75d655 100644
+--- a/backends/platform/atari/dlmalloc.h
++++ b/backends/platform/atari/dlmalloc.h
+@@ -30,6 +30,7 @@
+ #define LACKS_TIME_H /* time(0) calls malloc... */
+ #define MSPACES 1
+ #define MALLOC_ALIGNMENT ((size_t)16U) /* 16B cache line */
++#define USE_LOCKS 2 /* own implementation */
+ 
+ #pragma GCC diagnostic push
+ /* warning: 'mallinfo mallinfo()' hides constructor for 'struct mallinfo' [-Wshadow] */
+-- 
+2.43.0
+
+
+From 868daf9890096545a0bb5fb5edaf36015de177db Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Mon, 5 Oct 2026 22:08:56 +1000
+Subject: [PATCH 5/7] BACKENDS: ATARI: Make ST MIDI/nFM OPL/logging thread-safe
+
+---
+ audio/nfmopl.cpp                          |  8 +++++
+ backends/midi/stmidi.cpp                  | 29 +++++++++---------
+ backends/mixer/atari/atari-mixer.cpp      |  5 ++-
+ backends/platform/atari/osystem_atari.cpp | 37 ++++++++++++++++++-----
+ backends/platform/atari/thread.S          | 28 ++++++++++++++---
+ backends/platform/atari/thread.h          |  1 +
+ 6 files changed, 81 insertions(+), 27 deletions(-)
+
+diff --git a/audio/nfmopl.cpp b/audio/nfmopl.cpp
+index 6c261a463c4..ef28564ea4d 100644
+--- a/audio/nfmopl.cpp
++++ b/audio/nfmopl.cpp
+@@ -31,6 +31,7 @@
+ #include "audio/mixer.h"
+ #include "audio/fmopl.h"
+ #include "audio/nfmopl.h"
++#include "common/mutex.h"
+ 
+ extern "C"
+ {
+@@ -66,6 +67,8 @@ private:
+ 	bool _incapableDevice;
+ 	bool _needsSupervisor;	// driver accesses I/O registers directly
+ 	bool _inSupervisor;		// set while a SupervisorScope holds supervisor mode
++
++	Common::Mutex _mutex;
+ public:
+ 	explicit OPL(Config::OplType type, enum NfmOPL::OplDevice deviceType);
+ 	~OPL();
+@@ -228,6 +231,7 @@ OPL::~OPL() {
+ 	stop();
+ 
+ 	if (_initialized == true) {
++		Common::StackLock lock(_mutex);
+ 		SupervisorScope supervisor(_needsSupervisor, _inSupervisor);
+ 
+ 		if (_useBuffer) {
+@@ -283,6 +287,7 @@ bool OPL::init() {
+ }
+ 
+ void OPL::reset() {
++	Common::StackLock lock(_mutex);
+ 	SupervisorScope supervisor(_needsSupervisor, _inSupervisor);
+ 
+ 	for (int16_t i = 0; i < 256; i ++) {
+@@ -327,6 +332,8 @@ void OPL::writeReg(int reg, int value) {
+ 
+ 	value &= 0xff;
+ 
++	Common::StackLock lock(_mutex);
++
+ 	if (emulateDualOpl2OnOpl3(reg, value, _type)) {
+ 		SupervisorScope supervisor(_needsSupervisor, _inSupervisor);
+ 		sOplRegisterWrite regWrite;
+@@ -348,6 +355,7 @@ void OPL::writeReg(int reg, int value) {
+ void OPL::onTimer() {
+ 	if (_useBuffer) {
+ 		if (_initialized) {
++			Common::StackLock lock(_mutex);
+ 			SupervisorScope supervisor(_needsSupervisor, _inSupervisor);
+ 			_oplFlush();
+ 		}
+diff --git a/backends/midi/stmidi.cpp b/backends/midi/stmidi.cpp
+index 600b071d26b..ac0a8dfe6c1 100644
+--- a/backends/midi/stmidi.cpp
++++ b/backends/midi/stmidi.cpp
+@@ -26,9 +26,7 @@
+  * We, unfortunately, could not use the SEQ driver because the /dev/midi under
+  * FreeMiNT (and hence in libc) is considered to be a serial port for machine
+  * access.  So, we just use OS calls then to send the data to the MIDI ports
+- * directly.  The current implementation is sending 1 byte at a time because
+- * in most cases we are only sending up to 3 bytes, I believe this saves a few
+- * cycles.  I might change so sysex messages are sent the other way later.
++ * directly.
+  */
+ 
+ // Disable symbol overrides so that we can use system headers.
+@@ -73,9 +71,10 @@ void MidiDriver_STMIDI::close() {
+ void MidiDriver_STMIDI::send(uint32 b) {
+ 	midiDriverCommonSend(b);
+ 
+-	byte status_byte = (b & 0x000000FF);
+-	byte first_byte = (b & 0x0000FF00) >> 8;
+-	byte second_byte = (b & 0x00FF0000) >> 16;
++	byte buf[3];
++	buf[0] = (b & 0x000000FF);
++	buf[1] = (b & 0x0000FF00) >> 8;
++	buf[2] = (b & 0x00FF0000) >> 16;
+ 
+ //	warning("ST MIDI Packet sent");
+ 
+@@ -85,14 +84,11 @@ void MidiDriver_STMIDI::send(uint32 b) {
+ 	case 0xA0:	// Polyphonic Key Pressure
+ 	case 0xB0:	// Controller
+ 	case 0xE0:	// Pitch Bend
+-		Bconout(DEV_MIDI, status_byte);
+-		Bconout(DEV_MIDI, first_byte);
+-		Bconout(DEV_MIDI, second_byte);
++		Midiws(3-1, buf);
+ 		break;
+ 	case 0xC0:	// Program Change
+ 	case 0xD0:	// Aftertouch
+-		Bconout(DEV_MIDI, status_byte);
+-		Bconout(DEV_MIDI, first_byte);
++		Midiws(2-1, buf);
+ 		break;
+ 	default:
+ 		fprintf(stderr, "Unknown : %08x\n", (int)b);
+@@ -105,9 +101,14 @@ void MidiDriver_STMIDI::sysEx (const byte *msg, uint16 length) {
+ 
+ 	warning("Sending SysEx Message (%d bytes)", length);
+ 
+-	Bconout(DEV_MIDI, 0xF0);
+-	Midiws(length-1, msg);
+-	Bconout(DEV_MIDI, 0xF7);
++	byte buf[1 + 268 + 1];
++	assert(length + 2 <= ARRAYSIZE(buf));
++
++	buf[0] = 0xF0;
++	memcpy(buf + 1, msg, length);
++	buf[1 + length] = 0xF7;
++
++	Midiws(length + 2 - 1, buf);
+ }
+ 
+ // Plugin interface
+diff --git a/backends/mixer/atari/atari-mixer.cpp b/backends/mixer/atari/atari-mixer.cpp
+index 293f8c36f3f..0bff16f74e6 100644
+--- a/backends/mixer/atari/atari-mixer.cpp
++++ b/backends/mixer/atari/atari-mixer.cpp
+@@ -242,7 +242,9 @@ int AtariMixerManager::resumeAudio() {
+ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
+ 	switch (event.type) {
+ 	case Common::EVENT_QUIT:
+-	case Common::EVENT_RETURN_TO_LAUNCHER:
++	case Common::EVENT_RETURN_TO_LAUNCHER: {
++		MutexLocker lock;
++
+ 		if (s_playbackState != kPlaybackStopped) {
+ 			debug("silencing the mixer");
+ 			// Stop the DMA but don't suspend the mixer: nothing would
+@@ -251,6 +253,7 @@ bool AtariMixerManager::notifyEvent(const Common::Event &event) {
+ 			s_playbackState = kPlaybackStopped;
+ 		}
+ 		return false;
++	}
+ 	default:
+ 		break;
+ 	}
+diff --git a/backends/platform/atari/osystem_atari.cpp b/backends/platform/atari/osystem_atari.cpp
+index b04bb5cf581..9df84fda353 100644
+--- a/backends/platform/atari/osystem_atari.cpp
++++ b/backends/platform/atari/osystem_atari.cpp
+@@ -125,6 +125,11 @@ static long shutdown_thread(void) {
+ 	return 0;
+ }
+ 
++static void stop_main_thread_if_on_worker() {
++	if (atari_thread_current() != 0)
++		Supexec(shutdown_thread);
++}
++
+ static long shutdown_200hz(void) {
+ 	atari_200hz_shutdown();
+ 	return 0;
+@@ -241,14 +246,19 @@ OSystem_Atari::~OSystem_Atari() {
+ 	s_dtor_already_called = true;
+ 
+ 	if (_timerInitialized) {
+-		// park the worker thread so that it no longer touches the managers
+-		// which are about to be deleted (timeout in case this dtor runs *on*
+-		// the worker thread, e.g. after error() in a timer callback)
+-		const uint32 deadline = getMillis() + 1000;
+-		s_parkThread = true;
+-		while (!s_threadParked && getMillis() < deadline)
+-			atari_thread_yield();
+-		Supexec(shutdown_thread);
++		if (atari_thread_current() == 0) {
++			// park the worker thread so that it no longer touches the managers
++			// which are about to be deleted (timeout in case the worker waits
++			// for a mutex held by the main thread, e.g. after error())
++			const uint32 deadline = getMillis() + 1000;
++			s_parkThread = true;
++			while (!s_threadParked && getMillis() < deadline)
++				atari_thread_yield();
++			Supexec(shutdown_thread);
++		} else {
++			// exit() called from a timer callback / mixer
++			stop_main_thread_if_on_worker();
++		}
+ 	}
+ 
+ 	s_timerManager = nullptr;
+@@ -488,6 +498,15 @@ void OSystem_Atari::fatalError() {
+ void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
+ 	extern long nf_stderr_id;
+ 
++	// error() terminates the program and its error handler may run the
++	// engine's debugger, which must not run in parallel with the main thread
++	if (type == LogMessageType::kError)
++		stop_main_thread_if_on_worker();
++
++	// both threads log; serialize the static buffer and stdio
++	static AtariMutex s_logMutex;
++	s_logMutex.lock();
++
+ 	static char str[1024+1];
+ 	snprintf(str, sizeof(str), "[%08d] %s", getMillis(), message);
+ 
+@@ -518,6 +537,8 @@ void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
+ 			(void)(*((volatile uint16 *)(CARTRIDGE_ROM3 + ((*s & 0xFF)<<1))));
+ #endif
+ 	}
++
++	s_logMutex.unlock();
+ }
+ 
+ void OSystem_Atari::addSysArchivesToSearchSet(Common::SearchSet &s, int priority) {
+diff --git a/backends/platform/atari/thread.S b/backends/platform/atari/thread.S
+index dbf1a4e23ec..28ff0e33a02 100644
+--- a/backends/platform/atari/thread.S
++++ b/backends/platform/atari/thread.S
+@@ -65,6 +65,7 @@
+ 	.global SYM(atari_thread_init)
+ 	.global SYM(atari_thread_shutdown)
+ 	.global SYM(atari_thread_yield)
++	.global SYM(atari_thread_current)
+ 	.global SYM(atari_mutex_lock)
+ 	.global SYM(atari_mutex_unlock)
+ 
+@@ -228,7 +229,16 @@ my_trap4_from_isr:
+ 
+ /*--------------------------------------------------------------------*/
+ SYM(atari_thread_yield):
++	tst.l	_thread_func(pc)		/* threads running? trap #4 is not ours */
++	beq.b	1f						/* otherwise */
+ 	trap	#4
++1:	rts
++
++
++/*--------------------------------------------------------------------*/
++SYM(atari_thread_current):
++	moveq	#0,d0
++	move.b	_cur_tcb(pc),d0
+ 	rts
+ 
+ 
+@@ -323,26 +333,35 @@ SYM(atari_thread_shutdown):
+  * byte 0:    lock flag (tas)
+  * byte 1:    owner thread id (0xff = none)
+  * bytes 2-3: recursion counter
++ *
++ * Lock and unlock do nothing while threads are not running (before
++ * atari_thread_init() or after atari_thread_shutdown()): only one
++ * thread executes then, and a lock left held by the other, stopped
++ * thread must not block it (there is nobody to yield to anymore).
+  * -----------------------------------------------------------------------*/
+ 
+ SYM(atari_mutex_lock):
++	tst.l	_thread_func(pc)		/* threads running? */
++	beq.b	2f
+ #ifndef __FASTCALL__
+ 	move.l	4(sp),a0
+ #endif
+ 3:	move.b	_cur_tcb(pc),d0
+ 	tas		(a0)					/* try lock */
+-	beq.b	2f
++	beq.b	4f
+ 	cmp.b	1(a0),d0				/* was ours? */
+ 	beq.b	1f
+ 	trap	#4						/* no, yield and try again */
+ 	bra.b	3b
+ 1:	addq.w	#1,2(a0)				/* yes, increment counter */
+ 	rts
+-2:	move.b	d0,1(a0)				/* init owner id */
++4:	move.b	d0,1(a0)				/* init owner id */
+ 	move.w	#1,2(a0)				/* init counter */
+-	rts
++2:	rts
+ 
+ SYM(atari_mutex_unlock):
++	tst.l	_thread_func(pc)		/* threads running? */
++	beq.b	1f
+ #ifndef __FASTCALL__
+ 	move.l	4(sp),a0
+ #endif
+@@ -357,5 +376,6 @@ SYM(atari_mutex_unlock):
+ /*--------------------------------------------------------------------*/
+ 
+ 	.align 16
+-_stack1_btm:				ds.l 8191
++/* same size as the main thread's stack (-Wl,--stack,256k in configure) */
++_stack1_btm:				ds.l 65535
+ _stack1_top:				ds.l 1
+diff --git a/backends/platform/atari/thread.h b/backends/platform/atari/thread.h
+index 7bb23a7973a..cd3f47f5a94 100644
+--- a/backends/platform/atari/thread.h
++++ b/backends/platform/atari/thread.h
+@@ -36,6 +36,7 @@ extern "C" long atari_thread_init(void (*func)(void),
+ 								  const void *tpaLo, const void *tpaHi);	/* call in super */
+ extern "C" long atari_thread_shutdown(void);			/* call in super */
+ extern "C" void atari_thread_yield(void);
++extern "C" long atari_thread_current(void);				/* 0 = main thread, 1 = worker */
+ 
+ extern "C" void atari_mutex_lock(volatile uint32 *m);
+ extern "C" void atari_mutex_unlock(volatile uint32 *m);
+-- 
+2.43.0
+
+
+From fbfecf1eafe183be038825573383c5d86b30516c Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Mon, 5 Oct 2026 22:09:16 +1000
+Subject: [PATCH 6/7] BACKENDS: ATARI: Don't preempt the worker thread
+
+The 200 Hz timer switched to the other thread on every tick, whichever
+was running. With a busy main thread, the worker got only every other
+5 ms period, so mixing an audio buffer took twice as long in wall
+clock time and the time left before the DMA reaches the half being
+mixed was effectively halved.
+---
+ backends/platform/atari/thread.S | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/backends/platform/atari/thread.S b/backends/platform/atari/thread.S
+index 28ff0e33a02..b5e44de415a 100644
+--- a/backends/platform/atari/thread.S
++++ b/backends/platform/atari/thread.S
+@@ -30,7 +30,12 @@
+  *  - Usermode threads only, does not preempt or yield
+  *    threads which are in supervisor mode.
+  *
+- *  - Preempts by tail-calling yield from the 200hz timer
++ *  - Preempts by tail-calling yield from the 200hz timer, only
++ *    from the main thread to the task thread: the task thread runs
++ *    until it yields itself (after each iteration of its loop, while
++ *    waiting for a mutex or in delayMillis()). Preempting it as well
++ *    would give it only every other timer period when the main thread
++ *    is busy, i.e. its work would take twice as long.
+  *
+  *  - Preempts only when the interrupted USP or PC lies within our
+  *    TPA: under a multitasking OS (FreeMiNT, MagiC) the interrupted
+@@ -106,6 +111,8 @@ my_200hz:
+ 	addq.l	#1,SYM(atari_200hz_counter)
+ 	tst.l	_thread_func(pc)		/* threads enabled? */
+ 	beq.b	1f
++	tst.b	_cur_tcb(pc)			/* task thread running? let it yield itself */
++	bne.b	1f
+ 	btst.b	#5,(sp)					/* interrupted in supervisor? nothing to preempt */
+ 	bne.b	1f
+ 	move.l	a0,_temp2				/* interrupted in user mode: is it our process? */
+-- 
+2.43.0
+
+
+From b9e3df96a57fc96acc4f9064b0a69c10b7900e02 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Mon, 12 Oct 2026 15:55:35 +1000
+Subject: [PATCH 7/7] BACKENDS: ATARI: Correct readme.txt and re-add DOSBox
+ into Full
+
+Commit 62d83229444 disabled DOSBox OPL for all builds for some reason.
+---
+ configure | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/configure b/configure
+index ff45575dde9..0e0ad973762 100755
+--- a/configure
++++ b/configure
+@@ -3911,7 +3911,6 @@ if test -n "$_host"; then
+ 			#	append_var LDFLAGS "-s"
+ 			#fi
+ 			append_var DEFINES "-DSCUMM_OPTIMISED_CODE"
+-			append_var DEFINES "-DDISABLE_DOSBOX_OPL"
+ 
+ 			# auto -> no
+ 			if test "$_optimizations" = "yes"; then
+-- 
+2.43.0
+

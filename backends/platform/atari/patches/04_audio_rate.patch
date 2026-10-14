@@ -1,0 +1,66 @@
+From cda66ffa11b03e116d7b94a2f9e95f0dbdd8e954 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Fri, 16 Oct 2026 21:11:38 +1000
+Subject: [PATCH] BACKENDS: ATARI: Set SDL audio rate and buffer size
+
+387ceddef1d (2022-12-27, "AUDIO: Use 49170 Hz instead of 44100 Hz for
+the FreeMiNT platform") picked the Falcon rate closest to 44100 Hz.
+Request 22050 Hz instead, the same rate the native Atari builds use.
+FireTOS provides it exactly.
+
+Register 2048 samples as the default audio_buffer_size, reflecting
+tests on real hardware.
+
+Also fix the latency comments from 93fba2e9722 (2026-07-04, "BACKENDS:
+ATARI: Adjust audio latency"): on a Falcon, 22050 Hz and 11025 Hz
+resolve to 19668 Hz and 9834 Hz, not to 24585 Hz and 12292 Hz.
+---
+ backends/mixer/atari/atari-mixer.cpp | 4 ++--
+ backends/mixer/sdl/sdl-mixer.cpp     | 6 +++---
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/backends/mixer/atari/atari-mixer.cpp b/backends/mixer/atari/atari-mixer.cpp
+index 3c47d217dc2..cfdbc9435aa 100644
+--- a/backends/mixer/atari/atari-mixer.cpp
++++ b/backends/mixer/atari/atari-mixer.cpp
+@@ -35,11 +35,11 @@
+ #ifdef DISABLE_FANCY_THEMES
+ #define DEFAULT_OUTPUT_RATE			11025
+ #define DEFAULT_OUTPUT_CHANNELS		1
+-#define DEFAULT_SAMPLES				512		// 2 * 46ms (42ms at 12292 Hz) latency
++#define DEFAULT_SAMPLES				512		// 2 * 46ms (52ms at 9834 Hz) latency
+ #else
+ #define DEFAULT_OUTPUT_RATE			22050
+ #define DEFAULT_OUTPUT_CHANNELS		2
+-#define DEFAULT_SAMPLES				1024	// 2 * 46ms (42ms at 24585 Hz) latency
++#define DEFAULT_SAMPLES				1024	// 2 * 46ms (52ms at 19668 Hz) latency
+ #endif
+ 
+ static USoundContext usoundContext;
+diff --git a/backends/mixer/sdl/sdl-mixer.cpp b/backends/mixer/sdl/sdl-mixer.cpp
+index 3107e1b8e6a..81c2dec3542 100644
+--- a/backends/mixer/sdl/sdl-mixer.cpp
++++ b/backends/mixer/sdl/sdl-mixer.cpp
+@@ -32,7 +32,7 @@
+ #if defined(PLAYSTATION3) || defined(PSP2) || defined(NINTENDO_SWITCH)
+ #define SAMPLES_PER_SEC 48000
+ #elif defined(__MINT__)
+-#define SAMPLES_PER_SEC 49170
++#define SAMPLES_PER_SEC 22050
+ #else
+ #define SAMPLES_PER_SEC 44100
+ #endif
+@@ -194,8 +194,8 @@ SDL_AudioSpec SdlMixerManager::getAudioSpec(uint32 outputRate) {
+ 	// characteristics which are not easily measured, so allow advanced users to
+ 	// tweak their audio buffer size if they are experience excess latency or
+ 	// drop-outs by setting this value in their ScummVM config file directly
+-	if (ConfMan.hasKey("audio_buffer_size", Common::ConfigManager::kApplicationDomain))
+-		samples = ConfMan.getInt("audio_buffer_size", Common::ConfigManager::kApplicationDomain);
++	ConfMan.registerDefault("audio_buffer_size", 2048);
++	samples = ConfMan.getInt("audio_buffer_size", Common::ConfigManager::kApplicationDomain);
+ 
+ 	// 256 is an arbitrary minimum; 32768 is the largest power-of-two value
+ 	// representable with uint16
+-- 
+2.55.0
+

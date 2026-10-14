@@ -7,7 +7,7 @@ mkdir -p build-release030
 cd build-release030
 
 PLATFORM=m68k-atari-mintelf
-FASTCALL=false
+FASTCALL=true
 PLUGINS=true
 export ASFLAGS="-m68030"
 export CXXFLAGS="-m68030 -DDISABLE_FANCY_THEMES -DDISABLE_DOSBOX_OPL -DDISABLE_MAME_OPL"
@@ -29,6 +29,33 @@ else
 	PLUGINS_FLAGS=""
 fi
 
+BASE_BRANCH=release-2026.4.0
+BRANCH=atari-patched
+PATCHES="../backends/platform/atari/patches/*.patch"
+
+if [ -d ../.git/rebase-apply ]; then
+	set +e
+	git -C .. am --abort
+	git -C .. checkout "$BASE_BRANCH"
+	git -C .. branch -D "$BRANCH"
+	set -e
+fi
+
+if git -C .. rev-parse --verify "$BRANCH" >/dev/null 2>&1
+then
+	git -C .. checkout "$BRANCH"
+else
+	git -C .. checkout -b "$BRANCH" "$BASE_BRANCH"
+	for p in $PATCHES; do
+		if ! git -C .. am "${p#../}"; then
+			git -C .. am --abort
+			git -C .. checkout "$BASE_BRANCH"
+			git -C .. branch -D "$BRANCH"
+			exit 1
+		fi
+	done
+fi
+
 if [ ! -f config.log ]
 then
 ../configure \
@@ -38,8 +65,18 @@ then
 	--disable-highres \
 	--disable-bink \
 	--enable-verbose-build \
-	--disable-engine=hugo,director,cine,ultima \
+	--disable-engine=hugo,director,ultima \
 	${PLUGINS_FLAGS}
 fi
 
 make -j$(getconf _NPROCESSORS_CONF) atarilitedist
+
+VERSION=$(grep SCUMMVM_VERSION ../base/internal_version.h | cut -d\" -f2)
+DIST_DIR=scummvm-${VERSION}-atari-lite
+mkdir -p "$DIST_DIR/patches"
+cp $PATCHES "$DIST_DIR/patches"
+
+if [ "${CREATE_ZIP:-}" = "y" ]
+then
+	zip -r -9 "../$DIST_DIR.zip" "$DIST_DIR/patches"
+fi

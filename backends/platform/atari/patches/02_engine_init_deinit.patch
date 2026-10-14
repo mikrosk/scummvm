@@ -1,0 +1,393 @@
+From e7f4f5a22c0b87a32d6500cea3793cb78cc45ecb Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Thu, 26 Mar 2026 14:29:25 +1000
+Subject: [PATCH] BACKENDS: ATARI: Allow setting output_rate & friends per-game
+
+This also disables sample mixing while being in the launcher.
+---
+ backends/audiocd/default/default-audiocd.cpp | 16 +++---
+ backends/audiocd/default/default-audiocd.h   |  1 -
+ backends/audiocd/linux/linux-audiocd.cpp     |  2 +-
+ backends/audiocd/macosx/macosx-audiocd.cpp   |  4 +-
+ backends/audiocd/win32/win32-audiocd.cpp     |  2 +-
+ backends/graphics/atari/atari-graphics.cpp   |  4 +-
+ backends/mixer/atari/atari-mixer.cpp         | 57 +++++++++++++-------
+ backends/mixer/atari/atari-mixer.h           |  3 +-
+ backends/platform/atari/osystem_atari.cpp    | 17 ++++--
+ backends/platform/atari/osystem_atari.h      |  2 +
+ base/main.cpp                                |  9 ++++
+ common/system.h                              | 14 +++++
+ 12 files changed, 94 insertions(+), 37 deletions(-)
+
+diff --git a/backends/audiocd/default/default-audiocd.cpp b/backends/audiocd/default/default-audiocd.cpp
+index 8bc4dca86da..21182643b50 100644
+--- a/backends/audiocd/default/default-audiocd.cpp
++++ b/backends/audiocd/default/default-audiocd.cpp
+@@ -35,9 +35,7 @@ DefaultAudioCDManager::DefaultAudioCDManager() {
+ 	_cd.numLoops = 0;
+ 	_cd.volume = Audio::Mixer::kMaxChannelVolume;
+ 	_cd.balance = 0;
+-	_mixer = g_system->getMixer();
+ 	_emulating = false;
+-	assert(_mixer);
+ }
+ 
+ DefaultAudioCDManager::~DefaultAudioCDManager() {
+@@ -128,8 +126,8 @@ bool DefaultAudioCDManager::play(int track, int numLoops, int startFrame, int du
+ 			repetitions. Finally, -1 means infinitely many
+ 			*/
+ 			_emulating = true;
+-			_mixer->playStream(soundType, &_handle,
+-			                        Audio::makeLoopingAudioStream(stream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops), -1, _cd.volume, _cd.balance);
++			g_system->getMixer()->playStream(soundType, &_handle,
++				Audio::makeLoopingAudioStream(stream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops), -1, _cd.volume, _cd.balance);
+ 			return true;
+ 		}
+ 	}
+@@ -162,7 +160,7 @@ bool DefaultAudioCDManager::playAbsolute(int startFrame, int numLoops, int durat
+ void DefaultAudioCDManager::stop() {
+ 	if (_emulating) {
+ 		// Audio CD emulation
+-		_mixer->stopHandle(_handle);
++		g_system->getMixer()->stopHandle(_handle);
+ 		_emulating = false;
+ 	}
+ }
+@@ -170,7 +168,7 @@ void DefaultAudioCDManager::stop() {
+ bool DefaultAudioCDManager::isPlaying() const {
+ 	// Audio CD emulation
+ 	if (_emulating)
+-		return _mixer->isSoundHandleActive(_handle);
++		return g_system->getMixer()->isSoundHandleActive(_handle);
+ 
+ 	// The default class only handles emulation
+ 	return false;
+@@ -181,7 +179,7 @@ void DefaultAudioCDManager::setVolume(byte volume) {
+ 
+ 	// Audio CD emulation
+ 	if (_emulating && isPlaying())
+-		_mixer->setChannelVolume(_handle, _cd.volume);
++		g_system->getMixer()->setChannelVolume(_handle, _cd.volume);
+ }
+ 
+ void DefaultAudioCDManager::setBalance(int8 balance) {
+@@ -189,13 +187,13 @@ void DefaultAudioCDManager::setBalance(int8 balance) {
+ 
+ 	// Audio CD emulation
+ 	if (_emulating && isPlaying())
+-		_mixer->setChannelBalance(_handle, _cd.balance);
++		g_system->getMixer()->setChannelBalance(_handle, _cd.balance);
+ }
+ 
+ void DefaultAudioCDManager::update() {
+ 	if (_emulating) {
+ 		// Check whether the audio track stopped playback
+-		if (!_mixer->isSoundHandleActive(_handle)) {
++		if (!g_system->getMixer()->isSoundHandleActive(_handle)) {
+ 			// FIXME: We do not update the numLoops parameter here (and in fact,
+ 			// currently can't do that). Luckily, only one engine ever checks
+ 			// this part of the AudioCD status, namely the SCUMM engine; and it
+diff --git a/backends/audiocd/default/default-audiocd.h b/backends/audiocd/default/default-audiocd.h
+index 26bdc08ef57..239a0b1e4b2 100644
+--- a/backends/audiocd/default/default-audiocd.h
++++ b/backends/audiocd/default/default-audiocd.h
+@@ -79,7 +79,6 @@ protected:
+ 	bool _emulating;
+ 
+ 	Status _cd;
+-	Audio::Mixer *_mixer;
+ };
+ 
+ #endif
+diff --git a/backends/audiocd/linux/linux-audiocd.cpp b/backends/audiocd/linux/linux-audiocd.cpp
+index 04152a9ed88..e83ec510d27 100644
+--- a/backends/audiocd/linux/linux-audiocd.cpp
++++ b/backends/audiocd/linux/linux-audiocd.cpp
+@@ -320,7 +320,7 @@ bool LinuxAudioCDManager::play(int track, int numLoops, int startFrame, int dura
+ 	// Fake emulation since we're really playing an AudioStream
+ 	_emulating = true;
+ 
+-	_mixer->playStream(
++	g_system->getMixer()->playStream(
+ 	    soundType,
+ 	    &_handle,
+ 	    Audio::makeLoopingAudioStream(audioStream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops),
+diff --git a/backends/audiocd/macosx/macosx-audiocd.cpp b/backends/audiocd/macosx/macosx-audiocd.cpp
+index cd7c2e2d924..b10261569f5 100644
+--- a/backends/audiocd/macosx/macosx-audiocd.cpp
++++ b/backends/audiocd/macosx/macosx-audiocd.cpp
+@@ -252,8 +252,8 @@ bool MacOSXAudioCDManager::play(int track, int numLoops, int startFrame, int dur
+ 	// Fake emulation since we're really playing an AIFF file
+ 	_emulating = true;
+ 
+-	_mixer->playStream(soundType, &_handle,
+-	                   Audio::makeLoopingAudioStream(seekStream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops), -1, _cd.volume, _cd.balance);
++	g_system->getMixer()->playStream(soundType, &_handle,
++		Audio::makeLoopingAudioStream(seekStream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops), -1, _cd.volume, _cd.balance);
+ 	return true;
+ }
+ 
+diff --git a/backends/audiocd/win32/win32-audiocd.cpp b/backends/audiocd/win32/win32-audiocd.cpp
+index ae38c82a157..669e2ff95d0 100644
+--- a/backends/audiocd/win32/win32-audiocd.cpp
++++ b/backends/audiocd/win32/win32-audiocd.cpp
+@@ -294,7 +294,7 @@ bool Win32AudioCDManager::play(int track, int numLoops, int startFrame, int dura
+ 	// Fake emulation since we're really playing an AudioStream
+ 	_emulating = true;
+ 
+-	_mixer->playStream(
++	g_system->getMixer()->playStream(
+ 	    soundType,
+ 	    &_handle,
+ 	    Audio::makeLoopingAudioStream(audioStream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops),
+diff --git a/backends/graphics/atari/atari-graphics.cpp b/backends/graphics/atari/atari-graphics.cpp
+index 15f67592087..7ab5a780de4 100644
+--- a/backends/graphics/atari/atari-graphics.cpp
++++ b/backends/graphics/atari/atari-graphics.cpp
+@@ -1151,7 +1151,9 @@ void AtariGraphicsManager::copyRectToAtariSurface(AtariSurface &dstSurface,
+ 	const Common::Rect rect = AtariSurface::alignRect(x, y, x + w, y + h);
+ 
+ 	// TODO: mask the unaligned parts and copy the rest
+-	buf -= (x - rect.left);	// HACK: this assumes pointer to a complete buffer
++	// HACK: this assumes pointer to a complete buffer
++	// NOTE: unfortunately this shows the ScummVM logo shifted in 16 colours
++	buf -= (x - rect.left);
+ 
+ 	dstSurface.copyRectToSurface(buf, pitch, rect.left, rect.top, rect.width(), rect.height());
+ }
+diff --git a/backends/mixer/atari/atari-mixer.cpp b/backends/mixer/atari/atari-mixer.cpp
+index 3c47d217dc2..a1cd4797a56 100644
+--- a/backends/mixer/atari/atari-mixer.cpp
++++ b/backends/mixer/atari/atari-mixer.cpp
+@@ -81,19 +81,8 @@ AtariMixerManager::AtariMixerManager() : MixerManager() {
+ 	suspendAudio();
+ 
+ 	ConfMan.registerDefault("output_rate", DEFAULT_OUTPUT_RATE);
+-	_outputRate = ConfMan.getInt("output_rate");
+-	if (_outputRate <= 0)
+-		_outputRate = DEFAULT_OUTPUT_RATE;
+-
+ 	ConfMan.registerDefault("output_channels", DEFAULT_OUTPUT_CHANNELS);
+-	_outputChannels = ConfMan.getInt("output_channels");
+-	if (_outputChannels <= 0 || _outputChannels > 2)
+-		_outputChannels = DEFAULT_OUTPUT_CHANNELS;
+-
+ 	ConfMan.registerDefault("audio_buffer_size", DEFAULT_SAMPLES);
+-	_samples = ConfMan.getInt("audio_buffer_size");
+-	if (_samples <= 0)
+-		_samples = DEFAULT_SAMPLES;
+ 
+ 	g_system->getEventManager()->getEventDispatcher()->registerObserver(this, 10, false);
+ }
+@@ -103,16 +92,28 @@ AtariMixerManager::~AtariMixerManager() {
+ 
+ 	g_system->getEventManager()->getEventDispatcher()->unregisterObserver(this);
+ 
+-	AtariAudioShutdown();
+-
+-	Mfree(_atariSampleBuffer);
+-	_atariSampleBuffer = nullptr;
+-
+-	delete[] _sampleBuffer;
+-	_sampleBuffer = nullptr;
++	deinit();
+ }
+ 
+ void AtariMixerManager::init() {
++	debug("audio init");
++
++	assert(!_mixer);
++
++	// read either from game domain or from defaults
++	// but never write back so 22050 Hz will stay even on TT/stock Falcon
++	_outputRate = ConfMan.getInt("output_rate");
++	if (_outputRate <= 0)
++		_outputRate = DEFAULT_OUTPUT_RATE;
++
++	_outputChannels = ConfMan.getInt("output_channels");
++	if (_outputChannels <= 0 || _outputChannels > 2)
++		_outputChannels = DEFAULT_OUTPUT_CHANNELS;
++
++	_samples = ConfMan.getInt("audio_buffer_size");
++	if (_samples <= 0)
++		_samples = DEFAULT_SAMPLES;
++
+ 	USoundSpec desired, obtained;
+ 
+ 	desired.frequency = _outputRate;
+@@ -175,6 +176,26 @@ void AtariMixerManager::init() {
+ 	resumeAudio();
+ }
+ 
++void AtariMixerManager::deinit() {
++	debug("audio deinit");
++
++	suspendAudio();
++
++	AtariAudioShutdown();
++
++	delete _mixer;
++	_mixer = nullptr;
++
++	Mfree(_atariSampleBuffer);
++	_atariSampleBuffer = nullptr;
++	_atariSampleBufferSize = 0;
++
++	delete[] _sampleBuffer;
++	_sampleBuffer = nullptr;
++	_sampleBufferSize = 0;
++	_samples = 0;
++}
++
+ void AtariMixerManager::suspendAudio() {
+ 	debug("suspendAudio");
+ 
+diff --git a/backends/mixer/atari/atari-mixer.h b/backends/mixer/atari/atari-mixer.h
+index 4ada0178c6e..e7da86fa3f9 100644
+--- a/backends/mixer/atari/atari-mixer.h
++++ b/backends/mixer/atari/atari-mixer.h
+@@ -32,9 +32,10 @@
+ class AtariMixerManager : public MixerManager, Common::EventObserver {
+ public:
+ 	AtariMixerManager();
+-	virtual ~AtariMixerManager();
++	~AtariMixerManager() override;
+ 
+ 	void init() override;
++	void deinit();
+ 	void update();
+ 
+ 	void suspendAudio() override;
+diff --git a/backends/platform/atari/osystem_atari.cpp b/backends/platform/atari/osystem_atari.cpp
+index c4722997691..55ce47797d9 100644
+--- a/backends/platform/atari/osystem_atari.cpp
++++ b/backends/platform/atari/osystem_atari.cpp
+@@ -363,15 +363,20 @@ void OSystem_Atari::initBackend() {
+ 		ConfMan.setInt("autosave_period", 0);
+ 	}
+ 
++	// init() will be called upon starting a new game
+ 	_mixerManager = new AtariMixerManager();
+-	// Setup and start mixer
+-	_mixerManager->init();
+ 
+ 	_audiocdManager = new AtariAudioCDManager();
+ 
+ 	BaseBackend::initBackend();
+ }
+ 
++void OSystem_Atari::engineBeforeCreate() {
++	debug("engineBeforeCreate");
++
++	((AtariMixerManager *)_mixerManager)->init();
++}
++
+ void OSystem_Atari::engineInit() {
+ 	//debug("engineInit");
+ 
+@@ -384,6 +389,12 @@ void OSystem_Atari::engineDone() {
+ 	g_gameEngineActive = false;
+ }
+ 
++void OSystem_Atari::engineAfterDelete() {
++	debug("engineAfterDelete");
++
++	((AtariMixerManager *)_mixerManager)->deinit();
++}
++
+ Common::MutexInternal *OSystem_Atari::createMutex() {
+ 	return new NullMutexInternal();
+ }
+@@ -416,7 +427,7 @@ void OSystem_Atari::getTimeAndDate(TimeDate &td, bool skipRecord) const {
+ Common::KeymapArray OSystem_Atari::getGlobalKeymaps() {
+ 	Common::KeymapArray globalMaps = BaseBackend::getGlobalKeymaps();
+ 
+-	Common::Keymap *keymap = ((AtariGraphicsManager*)_graphicsManager)->getKeymap();
++	Common::Keymap *keymap = ((AtariGraphicsManager *)_graphicsManager)->getKeymap();
+ 	globalMaps.push_back(keymap);
+ 
+ 	return globalMaps;
+diff --git a/backends/platform/atari/osystem_atari.h b/backends/platform/atari/osystem_atari.h
+index b45f4413b7f..f8691a38698 100644
+--- a/backends/platform/atari/osystem_atari.h
++++ b/backends/platform/atari/osystem_atari.h
+@@ -31,8 +31,10 @@ public:
+ 
+ 	void initBackend() override;
+ 
++	void engineBeforeCreate() override;
+ 	void engineInit() override;
+ 	void engineDone() override;
++	void engineAfterDelete() override;
+ 
+ 	Common::MutexInternal *createMutex() override;
+ 	uint32 getMillis(bool skipRecord = false) override;
+diff --git a/base/main.cpp b/base/main.cpp
+index ef3997f1203..418ccd16217 100644
+--- a/base/main.cpp
++++ b/base/main.cpp
+@@ -219,6 +219,9 @@ static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const
+ 	// Create the game's MetaEngine.
+ 	MetaEngine &metaEngine = enginePlugin->get<MetaEngine>();
+ 	if (err.getCode() == Common::kNoError) {
++		// Inform backend that the engine is about to be created
++		system.engineBeforeCreate();
++
+ 		// Set default values for all of the custom engine options
+ 		// Apparently some engines query them in their constructor, thus we
+ 		// need to set this up before instance creation.
+@@ -253,6 +256,9 @@ static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const
+ 
+ 		metaEngine.deleteInstance(engine, game, meDescriptor);
+ 
++		// Inform backend that the engine has been deleted
++		system.engineAfterDelete();
++
+ 		return err;
+ 	}
+ 
+@@ -344,6 +350,9 @@ static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const
+ 	// Free up memory
+ 	metaEngine.deleteInstance(engine, game, meDescriptor);
+ 
++	// Inform backend that the engine has been deleted
++	system.engineAfterDelete();
++
+ 	// Reset the file/directory mappings
+ 	SearchMan.clear();
+ 
+diff --git a/common/system.h b/common/system.h
+index 3aa1449ccc6..ecf1babe2a5 100644
+--- a/common/system.h
++++ b/common/system.h
+@@ -328,6 +328,13 @@ public:
+ 	 */
+ 	bool backendInitialized() const { return _backendInitialized; }
+ 
++	/**
++	 * Allow the backend to perform creation of engine's dependencies.
++	 *
++	 * Called just before the engine is created.
++	 */
++	virtual void engineBeforeCreate() { }
++
+ 	/**
+ 	 * Allow the backend to perform engine-specific initialization.
+ 	 *
+@@ -342,6 +349,13 @@ public:
+ 	 */
+ 	virtual void engineDone() { }
+ 
++	/**
++	 * Allow the backend to perform deletion of engine's dependencies.
++	 *
++	 * Called after the engine is deleted.
++	 */
++	virtual void engineAfterDelete() { }
++
+ 	/**
+ 	 * Identify a task that ScummVM can perform.
+ 	 */
+-- 
+2.43.0
+

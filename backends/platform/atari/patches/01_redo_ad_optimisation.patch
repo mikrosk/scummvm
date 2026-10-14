@@ -1,0 +1,520 @@
+From 80fa0d4507ed5e1436e6c2603410d9f86e860a39 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Wed, 19 Aug 2026 23:57:03 +1000
+Subject: [PATCH 1/6] AD: Don't call composeFileHashMap() for every engine
+
+If engine doesn't reference any subfolder, the result of this function
+is always the same.
+---
+ engines/advancedDetector.cpp | 22 ++++++++++++++++++----
+ engines/advancedDetector.h   | 13 +++++++++++++
+ 2 files changed, 31 insertions(+), 4 deletions(-)
+
+diff --git a/engines/advancedDetector.cpp b/engines/advancedDetector.cpp
+index 4042d1c44f5..dbdbbee48aa 100644
+--- a/engines/advancedDetector.cpp
++++ b/engines/advancedDetector.cpp
+@@ -262,11 +262,25 @@ DetectedGames AdvancedMetaEngineDetectionBase::detectGames(const Common::FSList
+ 	// the _directoryGlobsMap
+ 	preprocessDescriptions();
+ 
+-	// Compose a hashmap of all files in fslist.
+-	composeFileHashMap(allFiles, fslist, (_maxScanDepth == 0 ? 1 : _maxScanDepth));
++	// Compose a hashmap of all files in fslist. Engines which do not descend
++	// into subdirectories and match plain file names compose an identical one,
++	// so it is composed once per detection run and shared between them.
++	FileMap *files = &allFiles;
++
++	if (_globsMap.empty() && !(_flags & kADFlagMatchFullPaths)) {
++		files = ADCacheMan.getFileMap();
++
++		if (!files) {
++			files = &ADCacheMan.createFileMap();
++
++			composeFileHashMap(*files, fslist, 1);
++		}
++	} else {
++		composeFileHashMap(*files, fslist, (_maxScanDepth == 0 ? 1 : _maxScanDepth));
++	}
+ 
+ 	// Run the detector on this
+-	ADDetectedGames matches = detectGame(fslist.begin()->getParent(), allFiles, Common::UNK_LANG, Common::kPlatformUnknown, "", skipADFlags, skipIncomplete);
++	ADDetectedGames matches = detectGame(fslist.begin()->getParent(), *files, Common::UNK_LANG, Common::kPlatformUnknown, "", skipADFlags, skipIncomplete);
+ 
+ 	cleanupPirated(matches);
+ 
+@@ -289,7 +303,7 @@ DetectedGames AdvancedMetaEngineDetectionBase::detectGames(const Common::FSList
+ 	if (!foundKnownGames) {
+ 		// Use fallback detector if there were no matches by other means
+ 		ADDetectedGameExtraInfo *extraInfo = nullptr;
+-		ADDetectedGame fallbackDetectionResult = fallbackDetect(allFiles, fslist, &extraInfo);
++		ADDetectedGame fallbackDetectionResult = fallbackDetect(*files, fslist, &extraInfo);
+ 
+ 		if (fallbackDetectionResult.desc) {
+ 			DetectedGame fallbackDetectedGame = toDetectedGame(fallbackDetectionResult, extraInfo);
+diff --git a/engines/advancedDetector.h b/engines/advancedDetector.h
+index 473b5e5ffe1..a903e5ec0dd 100644
+--- a/engines/advancedDetector.h
++++ b/engines/advancedDetector.h
+@@ -26,6 +26,7 @@
+ #include "engines/engine.h"
+ 
+ #include "common/hash-str.h"
++#include "common/ptr.h"
+ 
+ #include "common/gui_options.h" // Keep it here, so detection tables can refer to them
+ 
+@@ -785,6 +786,16 @@ public:
+ 		return archiveHashMap.getValOrDefault(node.getPath(), nullptr);
+ 	}
+ 
++	AdvancedMetaEngineBase::FileMap *getFileMap() const {
++		return fileMap.get();
++	}
++
++	AdvancedMetaEngineBase::FileMap &createFileMap() {
++		fileMap.reset(new AdvancedMetaEngineBase::FileMap());
++
++		return *fileMap;
++	}
++
+ 	AdvancedDetectorCacheManager() {
+ 		clear();
+ 	}
+@@ -799,6 +810,7 @@ public:
+ 	void clear() {
+ 		md5HashMap.clear(true);
+ 		sizeHashMap.clear(true);
++		fileMap.reset();
+ 		clearArchives();
+ 	}
+ 
+@@ -811,6 +823,7 @@ private:
+ 	FileHashMap md5HashMap;
+ 	SizeHashMap sizeHashMap;
+ 	ArchiveHashMap archiveHashMap;
++	Common::ScopedPtr<AdvancedMetaEngineBase::FileMap> fileMap;
+ };
+ 
+ /** Convenience shortcut for accessing the MD5CacheManager. */
+-- 
+2.43.0
+
+
+From 72d888cbf3783f13b3cdecd308d8cd7bd86702c1 Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Thu, 20 Aug 2026 00:32:37 +1000
+Subject: [PATCH 2/6] AD: Reuse composeFileHashMap() result from top level
+ folder
+
+Even if engine lists files in subfolders, the top level folder content
+is still the same, so just copy it over.
+---
+ engines/advancedDetector.cpp | 39 ++++++++++++++++++++++--------------
+ engines/advancedDetector.h   |  2 +-
+ 2 files changed, 25 insertions(+), 16 deletions(-)
+
+diff --git a/engines/advancedDetector.cpp b/engines/advancedDetector.cpp
+index dbdbbee48aa..76690f744a3 100644
+--- a/engines/advancedDetector.cpp
++++ b/engines/advancedDetector.cpp
+@@ -253,8 +253,6 @@ bool AdvancedMetaEngineDetectionBase::cleanupPirated(ADDetectedGames &matched) c
+ }
+ 
+ DetectedGames AdvancedMetaEngineDetectionBase::detectGames(const Common::FSList &fslist, uint32 skipADFlags, bool skipIncomplete) {
+-	FileMap allFiles;
+-
+ 	if (fslist.empty())
+ 		return DetectedGames();
+ 
+@@ -262,21 +260,29 @@ DetectedGames AdvancedMetaEngineDetectionBase::detectGames(const Common::FSList
+ 	// the _directoryGlobsMap
+ 	preprocessDescriptions();
+ 
+-	// Compose a hashmap of all files in fslist. Engines which do not descend
+-	// into subdirectories and match plain file names compose an identical one,
+-	// so it is composed once per detection run and shared between them.
+-	FileMap *files = &allFiles;
++	// Compose a hashmap of all files in fslist. Every engine composes the very
++	// same one for the game directory itself, so it is composed once per
++	// detection run and shared between them; engines descending into
++	// subdirectories take a copy and add those on top of it.
++	FileMap *files = ADCacheMan.getFileMap();
+ 
+-	if (_globsMap.empty() && !(_flags & kADFlagMatchFullPaths)) {
+-		files = ADCacheMan.getFileMap();
++	if (!files) {
++		files = &ADCacheMan.createFileMap();
+ 
+-		if (!files) {
+-			files = &ADCacheMan.createFileMap();
++		composeFileHashMap(*files, fslist, 1);
++	}
+ 
+-			composeFileHashMap(*files, fslist, 1);
+-		}
+-	} else {
+-		composeFileHashMap(*files, fslist, (_maxScanDepth == 0 ? 1 : _maxScanDepth));
++	// Copy of the shared map, extended by this engine's subdirectories
++	FileMap subdirFiles;
++
++	if (!_globsMap.empty()) {
++		// The subdirectories must not be added to the shared map, otherwise
++		// every other engine would see the subdirectories of this one.
++		subdirFiles = *files;
++
++		composeFileHashMap(subdirFiles, fslist, (_maxScanDepth == 0 ? 1 : _maxScanDepth), Common::Path(), true);
++
++		files = &subdirFiles;
+ 	}
+ 
+ 	// Run the detector on this
+@@ -462,7 +468,7 @@ Common::Error AdvancedMetaEngineDetectionBase::identifyGame(DetectedGame &game,
+ 	return Common::kNoError;
+ }
+ 
+-void AdvancedMetaEngineDetectionBase::composeFileHashMap(FileMap &allFiles, const Common::FSList &fslist, int depth, const Common::Path &parentName) const {
++void AdvancedMetaEngineDetectionBase::composeFileHashMap(FileMap &allFiles, const Common::FSList &fslist, int depth, const Common::Path &parentName, bool subdirsOnly) const {
+ 	if (depth <= 0)
+ 		return;
+ 
+@@ -470,6 +476,9 @@ void AdvancedMetaEngineDetectionBase::composeFileHashMap(FileMap &allFiles, cons
+ 		return;
+ 
+ 	for (const auto &file : fslist) {
++		if (subdirsOnly && !file.isDirectory())
++			continue;
++
+ 		Common::String efname = Common::punycode_encodefilename(file.getName());
+ 		Common::Path tstr = (_flags & kADFlagMatchFullPaths) ? parentName.appendComponent(efname) : Common::Path(efname, Common::Path::kNoSeparator);
+ 
+diff --git a/engines/advancedDetector.h b/engines/advancedDetector.h
+index a903e5ec0dd..e5e1dc743d2 100644
+--- a/engines/advancedDetector.h
++++ b/engines/advancedDetector.h
+@@ -594,7 +594,7 @@ protected:
+ 	 *
+ 	 * Removes trailing dots and ignores case in the process.
+ 	 */
+-	void composeFileHashMap(FileMap &allFiles, const Common::FSList &fslist, int depth, const Common::Path &parentName = Common::Path()) const;
++	void composeFileHashMap(FileMap &allFiles, const Common::FSList &fslist, int depth, const Common::Path &parentName = Common::Path(), bool subdirsOnly = false) const;
+ 
+ 	/** Get the properties (size and MD5) of this file. */
+ 	bool getFileProperties(const FileMap &allFiles, MD5Properties md5prop, const Common::Path &fname, FileProperties &fileProps) const;
+-- 
+2.43.0
+
+
+From f73c167b4b15a37160f472cb18ff19526c74a52f Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Fri, 31 Jul 2026 11:39:17 +1000
+Subject: [PATCH 3/6] COMMON: Fix isAppleDouble out param of
+ disassembleAppleDoubleName()
+
+The parameter was initialized to false but never set to true when the
+"._" prefix was actually stripped. As a consequence, the AppleDouble
+branch in MacResManager::listFiles() was dead code and AppleDouble
+files were listed under their decorated names.
+---
+ common/macresman.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/common/macresman.cpp b/common/macresman.cpp
+index 72f7a8eb127..f18f34d9de4 100644
+--- a/common/macresman.cpp
++++ b/common/macresman.cpp
+@@ -1170,6 +1170,9 @@ Path MacResManager::disassembleAppleDoubleName(const Path &name, bool *isAppleDo
+ 	if (name.isSeparatorTerminated()) {
+ 		ret.appendInPlace("/");
+ 	}
++	if (isAppleDouble) {
++		*isAppleDouble = true;
++	}
+ 	return ret;
+ }
+ 
+-- 
+2.43.0
+
+
+From 25edc5c84ec19af8a89eaef2000b5673af41064f Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Fri, 31 Jul 2026 11:39:27 +1000
+Subject: [PATCH 4/6] COMMON: Add MacResManager::disassembleName()
+
+Given a file name as present on disk, it computes the base name under
+which open() or openFileOrDataFork() would find the file, by stripping
+the AppleDouble "._" prefix as well as the ".rsrc" (raw resource fork
+or AppleDouble) and ".bin" (MacBinary) extensions.
+
+The check is purely name-based and does not inspect file contents, so
+a stripped result only means the file *may* be a Macintosh file stored
+under one of the naming schemas, which makes the function suitable for
+conservative existence checks.
+
+Also add a test suite for it.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+---
+ common/macresman.cpp    | 32 ++++++++++++++++++++++++++++++
+ common/macresman.h      | 11 +++++++++++
+ test/common/macresman.h | 44 +++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 87 insertions(+)
+ create mode 100644 test/common/macresman.h
+
+diff --git a/common/macresman.cpp b/common/macresman.cpp
+index f18f34d9de4..78c89b9f395 100644
+--- a/common/macresman.cpp
++++ b/common/macresman.cpp
+@@ -1176,6 +1176,38 @@ Path MacResManager::disassembleAppleDoubleName(const Path &name, bool *isAppleDo
+ 	return ret;
+ }
+ 
++Path MacResManager::disassembleName(const Path &name, bool *isMacDecoratedName) {
++	String fileName = name.baseName();
++
++	// Remove the AppleDouble "._" prefix, if present
++	bool stripped = fileName.hasPrefix("._");
++	if (stripped)
++		fileName.erase(0, 2);
++
++	// Remove the extension used for raw resource forks and AppleDouble
++	// (".rsrc") or MacBinary (".bin") files, if present
++	uint extLen = 0;
++
++	if (fileName.hasSuffixIgnoreCase(".rsrc"))
++		extLen = 5;
++	else if (fileName.hasSuffixIgnoreCase(".bin"))
++		extLen = 4;
++
++	if (extLen) {
++		fileName.erase(fileName.size() - extLen);
++		stripped = true;
++	}
++
++	if (isMacDecoratedName) {
++		*isMacDecoratedName = stripped;
++	}
++
++	if (!stripped)
++		return name;
++
++	return name.getParent().appendComponent(fileName);
++}
++
+ void MacResManager::dumpRaw() {
+ 	byte *data = nullptr;
+ 	uint dataSize = 0;
+diff --git a/common/macresman.h b/common/macresman.h
+index 10fed168437..14a506e4023 100644
+--- a/common/macresman.h
++++ b/common/macresman.h
+@@ -201,6 +201,17 @@ public:
+ 	 */
+ 	static void listFiles(Array<Path> &files, const Path &pattern);
+ 
++	/**
++	 * Compute the base name for use with open() from a possibly decorated
++	 * on-disk file name, stripping the AppleDouble "._" prefix and the
++	 * ".rsrc"/".bin" extensions. Purely name-based, contents are not checked.
++	 *
++	 * @param name The file name as present on disk
++	 * @param isMacDecoratedName Set to true if any decoration was stripped
++	 * @return The potential base name (equal to name if none applies)
++	 */
++	static Path disassembleName(const Path &name, bool *isMacDecoratedName = nullptr);
++
+ 	/**
+ 	 * Close the Mac data/resource fork pair.
+ 	 */
+diff --git a/test/common/macresman.h b/test/common/macresman.h
+new file mode 100644
+index 00000000000..e6c6b2ea006
+--- /dev/null
++++ b/test/common/macresman.h
+@@ -0,0 +1,44 @@
++#include <cxxtest/TestSuite.h>
++#include "common/macresman.h"
++
++/**
++ * Test suite for the file name handling in common/macresman.h
++ */
++class MacResManagerTestSuite : public CxxTest::TestSuite {
++	public:
++
++	void checkName(const Common::Path &name, const Common::Path &expected, bool expectedDecorated) {
++		bool decorated = false;
++		Common::Path result = Common::MacResManager::disassembleName(name, &decorated);
++
++		TS_ASSERT_EQUALS(result, expected);
++		TS_ASSERT_EQUALS(decorated, expectedDecorated);
++	}
++
++	void test_disassembleName() {
++		// Plain names pass through untouched
++		checkName("JMP PP Resources", "JMP PP Resources", false);
++		checkName("data.dat", "data.dat", false);
++
++		// MacBinary ".bin" extension, case-insensitive (bug #17026)
++		checkName("JMP PP Resources.bin", "JMP PP Resources", true);
++		checkName("Foo.BIN", "Foo", true);
++
++		// Raw resource fork / AppleDouble ".rsrc" extension
++		checkName("JMP PP Resources.rsrc", "JMP PP Resources", true);
++
++		// AppleDouble "._" prefix
++		checkName("._JMP PP Resources", "JMP PP Resources", true);
++
++		// Decorations on the last component of a longer path
++		checkName("Data/._Movie", "Data/Movie", true);
++		checkName("Data/Movie.bin", "Data/Movie", true);
++
++		// Both prefix and extension are stripped
++		checkName("._Foo.rsrc", "Foo", true);
++
++		// Substrings that are not decorations are kept
++		checkName("binfile", "binfile", false);
++		checkName("x._y", "x._y", false);
++	}
++};
+-- 
+2.43.0
+
+
+From 8c23e236d1b08b2b6c0c8102197cf0b71622fa8a Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Thu, 16 Apr 2026 15:28:14 +1000
+Subject: [PATCH 5/6] AD: Skip detection for engines with no matching filenames
+
+When adding a game, every engine's detection table is traversed twice
+(once for MD5 pre-computation, once for matching) even if the game
+folder contains none of the files that engine cares about.
+
+Build a set of all unique filenames referenced by each engine's
+detection entries during preprocessDescriptions() (called once and
+cached). Before entering the expensive detection loops, check if any
+file in the game folder exists in this set. If not, skip the engine
+entirely.
+
+On the Atari backend with ~60 statically linked engines, this reduces
+the "Add game" time by about 30-40%.
+
+(cherry picked from commit 8f5741a37ae1a202d0600c4dc44f000ade832fcc)
+---
+ engines/advancedDetector.cpp | 35 +++++++++++++++++++++++++++++++++++
+ engines/advancedDetector.h   |  1 +
+ 2 files changed, 36 insertions(+)
+
+diff --git a/engines/advancedDetector.cpp b/engines/advancedDetector.cpp
+index 76690f744a3..1433f0e9021 100644
+--- a/engines/advancedDetector.cpp
++++ b/engines/advancedDetector.cpp
+@@ -755,6 +755,20 @@ ADDetectedGames AdvancedMetaEngineDetectionBase::detectGame(const Common::FSNode
+ 
+ 	preprocessDescriptions();
+ 
++	// Early rejection: if none of the file names referenced by this engine's
++	// detection entries exist in the game folder, there is no chance of a match.
++	bool anyFileFound = false;
++	for (auto it = allFiles.begin(); it != allFiles.end(); ++it) {
++		if (_fileNamesMap.contains(it->_key)) {
++			anyFileFound = true;
++			break;
++		}
++	}
++	if (!anyFileFound) {
++		debugC(3, kDebugGlobalDetection, "Skipping engine '%s': no matching file names in directory", getName());
++		return matched;
++	}
++
+ 	// Check which files are included in some ADGameDescription *and* whether
+ 	// they are present. Compute MD5s and file sizes for the available files.
+ 	for (descPtr = _gameDescriptors; ((const ADGameDescription *)descPtr)->gameId != nullptr; descPtr += _descItemSize) {
+@@ -1044,6 +1058,27 @@ void AdvancedMetaEngineDetectionBase::preprocessDescriptions() {
+ 	for (const byte *descPtr = _gameDescriptors; ((const ADGameDescription *)descPtr)->gameId != nullptr; descPtr += _descItemSize) {
+ 		const ADGameDescription *g = (const ADGameDescription *)descPtr;
+ 
++		// Collect all unique file names for early rejection
++		for (const ADGameFileDescription *fileDesc = g->filesDescriptions; fileDesc->fileName; fileDesc++) {
++			Common::String fname = fileDesc->fileName;
++
++			// For archive entries, extract the archive name
++			if (gameFileToMD5Props(fileDesc, g->flags) & kMD5Archive) {
++				Common::StringTokenizer tok(fname, ":");
++				tok.nextToken(); // skip archive type
++				fname = tok.nextToken(); // archive name
++			}
++
++			// For paths with directory components, extract the leaf filename
++			// unless kADFlagMatchFullPaths is set
++			if (!(_flags & kADFlagMatchFullPaths) && fname.contains('/')) {
++				fname = Common::Path(fname).baseName();
++			}
++
++			_fileNamesMap.setVal(Common::Path(fname, fname.contains('/')
++				? '/' : Common::Path::kNoSeparator), true);
++		}
++
+ 		// Scan for potential directory globs
+ 		for (const ADGameFileDescription *fileDesc = g->filesDescriptions; fileDesc->fileName; fileDesc++) {
+ 			if (strchr(fileDesc->fileName, '/')) {
+diff --git a/engines/advancedDetector.h b/engines/advancedDetector.h
+index e5e1dc743d2..1807c1ce576 100644
+--- a/engines/advancedDetector.h
++++ b/engines/advancedDetector.h
+@@ -555,6 +555,7 @@ private:
+ private:
+ 	Common::HashMap<Common::String, bool, Common::IgnoreCase_Hash, Common::IgnoreCase_EqualTo> _grayListMap;
+ 	Common::HashMap<Common::String, bool, Common::IgnoreCase_Hash, Common::IgnoreCase_EqualTo> _globsMap;
++	Common::HashMap<Common::Path, bool, Common::Path::IgnoreCase_Hash, Common::Path::IgnoreCase_EqualTo> _fileNamesMap;
+ 	bool _hashMapsInited;
+ 
+ protected:
+-- 
+2.43.0
+
+
+From 7043fcf641c694dc0705432da8b98aa1751484ec Mon Sep 17 00:00:00 2001
+From: Miro Kropacek <miro.kropacek@gmail.com>
+Date: Fri, 31 Jul 2026 11:40:06 +1000
+Subject: [PATCH 6/6] AD: Consider decorated Macintosh file names in early
+ rejection
+
+The early-rejection optimization compared directory file names against
+the detection entry names literally. Macintosh games, however, are often
+stored under decorated names (MacBinary ".bin", raw resource fork or
+AppleDouble ".rsrc", AppleDouble "._" prefix) which MacResManager
+resolves transparently once the MD5s are computed, so such games were
+wrongly rejected before that could happen. This is what caused bug
+#17026 and the revert in commit 8af3ca44e36.
+
+Fix this by also looking up the undecorated form of each on-disk name,
+as computed by MacResManager::disassembleName(). Unlike enumerating
+every possible on-disk variant of the detection entries, as attempted in
+PR #7756, this is much safer: in the worst case we match more files than
+needed.
+---
+ engines/advancedDetector.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/engines/advancedDetector.cpp b/engines/advancedDetector.cpp
+index 1433f0e9021..592a50c33f3 100644
+--- a/engines/advancedDetector.cpp
++++ b/engines/advancedDetector.cpp
+@@ -763,6 +763,13 @@ ADDetectedGames AdvancedMetaEngineDetectionBase::detectGame(const Common::FSNode
+ 			anyFileFound = true;
+ 			break;
+ 		}
++
++		bool isMacDecoratedName = false;
++		Common::Path undecorated = Common::MacResManager::disassembleName(it->_key, &isMacDecoratedName);
++		if (isMacDecoratedName && _fileNamesMap.contains(undecorated)) {
++			anyFileFound = true;
++			break;
++		}
+ 	}
+ 	if (!anyFileFound) {
+ 		debugC(3, kDebugGlobalDetection, "Skipping engine '%s': no matching file names in directory", getName());
+-- 
+2.43.0
+
