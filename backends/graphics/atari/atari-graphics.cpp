@@ -76,6 +76,10 @@ static bool s_shrinkVidelVisibleArea;
 static bool s_setScreenOffsets;
 static AtariSurface *s_screenSurf;
 
+static uintptr screenBase(AtariSurface *surf) {
+	return (uintptr)surf->getBasePtr(0, MAX_V_SHAKE + s_shakeYOffset + s_aspectRatioCorrectionYOffset);
+}
+
 static void VblHandler() {
 	// for easier querying
 	static AtariSurface *surf;
@@ -85,7 +89,7 @@ static void VblHandler() {
 
 	if (s_screenSurf || s_setScreenOffsets) {
 #ifdef SCREEN_ACTIVE
-		uintptr p = (unsigned long)surf->getBasePtr(0, MAX_V_SHAKE + s_shakeYOffset + s_aspectRatioCorrectionYOffset);
+		uintptr p = screenBase(surf);
 
 		if (!s_tt) {
 			const int bitsPerPixel = (surf->format == PIXELFORMAT_RGB121 ? 4 : 8);
@@ -667,6 +671,9 @@ void AtariGraphicsManager::updateScreen() {
 
 	set_sysvar_to_short(vblsem, 0);  // lock vbl
 
+	const uint32 vbclock = get_sysvar(_vbclock);
+	assert((vbclock != _screenSurfVbclock) == (s_screenSurf == nullptr));
+
 	if (screenUpdated
 		&& _overlayState == kOverlayHidden
 		&& _currentState.mode == kTripleBuffering) {
@@ -676,16 +683,8 @@ void AtariGraphicsManager::updateScreen() {
 		// - check if BACK_BUFFER2 has been displayed, if so, switch
 		//   BACK_BUFFER2 and FRONT_BUFFER and make previous BACK_BUFFER2 work screen
 
-		if (s_screenSurf == nullptr) {
+		if (vbclock != _screenSurfVbclock) {
 			// BACK_BUFFER2 has been set; guard it from overwriting while presented
-
-			// TODO: this assumes that the video base written in VblHandler() is applied
-			// in the same frame. True for Videl (video counter reloaded at VDB, after VBL)
-			// but not for TT: like ST/E, its Shifter reloads the video counter about three
-			// lines before the VBL (and again on the following line), so FRONT_BUFFER is
-			// still displayed for one more frame while it becomes BACK_BUFFER1, i.e. the
-			// work screen. On TT, the video base can be written here directly instead,
-			// BACK_BUFFER2 is then displayed once a VBL (_frclock) has passed since.
 			Screen *tmp = _screen[kBackBuffer2];
 			_screen[kBackBuffer2] = _screen[kFrontBuffer];
 			_screen[kFrontBuffer] = tmp;
@@ -708,6 +707,13 @@ void AtariGraphicsManager::updateScreen() {
 	if (_pendingScreenChanges.screenSurface()) {
 		s_screenSurf = _pendingScreenChanges.screenSurface();
 		_pendingScreenChanges.setScreenSurface(nullptr);
+		_screenSurfVbclock = vbclock;
+
+		if (_tt) {
+#ifdef SCREEN_ACTIVE
+			Setscreen(SCR_NOCHANGE, screenBase(s_screenSurf), SCR_NOCHANGE);
+#endif
+		}
 	}
 	if (_pendingScreenChanges.aspectRatioCorrectionYOffset().second)
 		s_aspectRatioCorrectionYOffset = _pendingScreenChanges.aspectRatioCorrectionYOffset().first;

@@ -156,6 +156,7 @@ private:
 
 	bool _vgaMonitor = true;
 	bool _tt = false;
+	uint32 _screenSurfVbclock = 0;
 
 	struct GraphicsState {
 		GraphicsState()
