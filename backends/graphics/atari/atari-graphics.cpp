@@ -75,6 +75,7 @@ static int s_aspectRatioCorrectionYOffset;
 static bool s_shrinkVidelVisibleArea;
 static bool s_setScreenOffsets;
 static AtariSurface *s_screenSurf;
+static Palette s_palette;
 
 static uintptr screenBase(AtariSurface *surf) {
 	return (uintptr)surf->getBasePtr(0, MAX_V_SHAKE + s_shakeYOffset + s_aspectRatioCorrectionYOffset);
@@ -120,6 +121,21 @@ static void VblHandler() {
 		s_setScreenOffsets = false;
 	}
 
+	if (s_palette.entries) {
+#ifdef SCREEN_ACTIVE
+		if (s_tt) {
+			volatile uint16 *ttPalette = (volatile uint16 *)0xFFFF8400;
+			for (int i = 0; i < s_palette.entries; ++i)
+				ttPalette[i] = s_palette.tt[i];
+		} else {
+			volatile uint32 *falconPalette = (volatile uint32 *)0xFFFF9800;
+			for (int i = 0; i < s_palette.entries; ++i)
+				falconPalette[i] = s_palette.falcon[i];
+		}
+#endif
+		s_palette.entries = 0;
+	}
+
 	if (s_shrinkVidelVisibleArea) {
 		if (!s_tt)
 			shrinkVidelVisibleArea();
@@ -162,7 +178,7 @@ static uint32 UninstallVblHandler() {
 static int  s_oldRez = -1;
 static int  s_oldMode = -1;
 static void *s_oldPhysbase = nullptr;
-static Palette s_oldPalette;
+static Palette s_oldPalette;	// Falcon: VgetRGB() format, 00000000 RRRRRRrr GGGGGGgg BBBBBBbb
 
 void AtariGraphicsShutdown() {
 	Supexec(UninstallVblHandler);
@@ -177,9 +193,6 @@ void AtariGraphicsShutdown() {
 
 		s_oldRez = -1;
 	} else if (s_oldMode != -1) {
-		static _RGB black[256];
-		VsetRGB(0, 256, black);
-
 		VsetScreen(SCR_NOCHANGE, s_oldPhysbase, SCR_NOCHANGE, SCR_NOCHANGE);
 
 		if (g_hasSuperVidel)
@@ -253,9 +266,11 @@ AtariGraphicsManager::AtariGraphicsManager()
 			_overlayPalette.tt[i] |= ((i >> format.gShift) & format.gMax()) << (4 + (format.gLoss - 4));
 			_overlayPalette.tt[i] |= ((i >> format.bShift) & format.bMax()) << (0 + (format.bLoss - 4));
 		} else {
-			_overlayPalette.falcon[i].red    = ((i >> format.rShift) & format.rMax()) << format.rLoss;
-			_overlayPalette.falcon[i].green |= ((i >> format.gShift) & format.gMax()) << format.gLoss;
-			_overlayPalette.falcon[i].blue  |= ((i >> format.bShift) & format.bMax()) << format.bLoss;
+			// Bits 31-24    Bits 23-16    Bits 15-8     Bits 7-0
+			// Red           Green         Reserved      Blue
+			_overlayPalette.falcon[i]  = (uint32)(((i >> format.rShift) & format.rMax()) << format.rLoss) << 24;
+			_overlayPalette.falcon[i] |= (uint32)(((i >> format.gShift) & format.gMax()) << format.gLoss) << 16;
+			_overlayPalette.falcon[i] |= (uint32)(((i >> format.bShift) & format.bMax()) << format.bLoss);
 		}
 	}
 	_overlayPalette.entries = overlayPaletteSize;
@@ -531,11 +546,13 @@ void AtariGraphicsManager::setPalette(const byte *colors, uint start, uint num) 
 			pal[i] |= ((colors[i * 3 + 2] >> 4) & 0x0f);
 		}
 	} else {
-		_RGB *pal = &_palette.falcon[start];
+		uint32 *pal = &_palette.falcon[start];
 		for (uint i = 0; i < num; ++i) {
-			pal[i].red   = colors[i * 3 + 0];
-			pal[i].green = colors[i * 3 + 1];
-			pal[i].blue  = colors[i * 3 + 2];
+			// Bits 31-24    Bits 23-16    Bits 15-8     Bits 7-0
+			// Red           Green         Reserved      Blue
+			pal[i]  = (uint32)colors[i * 3 + 0] << 24;
+			pal[i] |= (uint32)colors[i * 3 + 1] << 16;
+			pal[i] |= (uint32)colors[i * 3 + 2];
 		}
 	}
 
@@ -555,11 +572,13 @@ void AtariGraphicsManager::grabPalette(byte *colors, uint start, uint num) const
 			*colors++ = ((pal[i]     ) & 0x0f) << 4;
 		}
 	} else {
-		const _RGB *pal = &_palette.falcon[start];
+		const uint32 *pal = &_palette.falcon[start];
 		for (uint i = 0; i < num; ++i) {
-			*colors++ = pal[i].red;
-			*colors++ = pal[i].green;
-			*colors++ = pal[i].blue;
+			// Bits 31-24    Bits 23-16    Bits 15-8     Bits 7-0
+			// Red           Green         Reserved      Blue
+			*colors++ = (pal[i] >> 24) & 0xff;
+			*colors++ = (pal[i] >> 16) & 0xff;
+			*colors++ = (pal[i]      ) & 0xff;
 		}
 	}
 }
@@ -666,7 +685,7 @@ void AtariGraphicsManager::updateScreen() {
 
 #ifdef SCREEN_ACTIVE
 	// this assume that the screen surface is not going to be used yet
-	_pendingScreenChanges.applyBeforeVblLock(*workScreen);
+	_pendingScreenChanges.beforeVblLock(*workScreen);
 #endif
 
 	set_sysvar_to_short(vblsem, 0);  // lock vbl
@@ -701,7 +720,7 @@ void AtariGraphicsManager::updateScreen() {
 	}
 
 #ifdef SCREEN_ACTIVE
-	_pendingScreenChanges.applyAfterVblLock(*workScreen);
+	_pendingScreenChanges.afterVblLock(*workScreen);
 #endif
 
 	if (_pendingScreenChanges.screenSurface()) {
@@ -721,6 +740,14 @@ void AtariGraphicsManager::updateScreen() {
 		s_setScreenOffsets = _pendingScreenChanges.screenOffsets().first;
 	if (_pendingScreenChanges.shrinkVidelVisibleArea().second)
 		s_shrinkVidelVisibleArea = _pendingScreenChanges.shrinkVidelVisibleArea().first;
+	if (_pendingScreenChanges.palette()) {
+		const Palette *palette = _pendingScreenChanges.palette();
+		if (_tt)
+			memcpy(s_palette.tt, palette->tt, palette->entries * sizeof(uint16));
+		else
+			memcpy(s_palette.falcon, palette->falcon, palette->entries * sizeof(uint32));
+		s_palette.entries = palette->entries;
+	}
 
 	set_sysvar_to_short(vblsem, 1);  // unlock vbl
 
@@ -836,10 +863,11 @@ void AtariGraphicsManager::clearOverlay() {
 	const byte *src = (const byte*)sourceSurface.getPixels();
 	byte *dst = (byte *)_overlaySurface.getBasePtr(hzOffset, vOffset);
 
-	// for TT: 8/4/0 + (xLoss - 4) + xShift
-	static const int rShift = (_tt ? (8 - 4) : 0)
+	// for TT: 8/4/0 + (xLoss - 4) - xShift
+	// for Falcon: 24/16/0 + xLoss - xShift
+	static const int rShift = (_tt ? (8 - 4) : 24)
 		+ _overlaySurface.format.rLoss - _overlaySurface.format.rShift;
-	static const int gShift = (_tt ? (4 - 4) : 0)
+	static const int gShift = (_tt ? (4 - 4) : 16)
 		+ _overlaySurface.format.gLoss - _overlaySurface.format.gShift;
 	static const int bShift = (_tt ? (0 - 4) : 0)
 		+ _overlaySurface.format.bLoss - _overlaySurface.format.bShift;
@@ -860,10 +888,12 @@ void AtariGraphicsManager::clearOverlay() {
 					  | ((col >> gShift) & gMask)
 					  | ((col >> bShift) & bMask);
 			} else {
-				const _RGB &col = _palette.falcon[*src++];
-				pixel = ((col.red   >> rShift) & rMask)
-					  | ((col.green >> gShift) & gMask)
-					  | ((col.blue  >> bShift) & bMask);
+				// Bits 31-24    Bits 23-16    Bits 15-8     Bits 7-0
+				// Red           Green         Reserved      Blue
+				const uint32 &col = _palette.falcon[*src++];
+				pixel = ((col >> rShift) & rMask)
+					  | ((col >> gShift) & gMask)
+					  | ((col >> bShift) & bMask);
 			}
 
 			if (upscale) {
@@ -1162,4 +1192,11 @@ void AtariGraphicsManager::copyRectToAtariSurface(AtariSurface &dstSurface,
 	buf -= (x - rect.left);
 
 	dstSurface.copyRectToSurface(buf, pitch, rect.left, rect.top, rect.width(), rect.height());
+}
+
+void AtariGraphicsManager::queueBlackPalette() const {
+	set_sysvar_to_short(vblsem, 0);  // lock vbl
+	s_palette.clear();
+	s_palette.entries = 256;
+	set_sysvar_to_short(vblsem, 1);  // unlock vbl
 }

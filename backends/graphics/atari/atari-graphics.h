@@ -138,6 +138,8 @@ private:
 	void copyRectToAtariSurface(AtariSurface &dstSurface,
 								const byte *buf, int pitch, int x, int y, int w, int h);
 
+	void queueBlackPalette() const;
+
 	bool isOverlayDirectRendering() const {
 #ifndef DISABLE_FANCY_THEMES
 		// see osystem_atari.cpp

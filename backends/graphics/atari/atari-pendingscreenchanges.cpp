@@ -46,13 +46,14 @@ void PendingScreenChanges::queueAll() {
  * VsetMode() - explicitly calls Vsync()
  */
 
-void PendingScreenChanges::applyBeforeVblLock(const Screen &screen) {
+void PendingScreenChanges::beforeVblLock(const Screen &screen) {
 	_mode = screen.mode;	// avoid modifying 'Screen' content
 	_resetSuperVidel = false;
 
 	_aspectRatioCorrectionYOffset.second = false;
 	_setScreenOffsets.second = false;
 	_shrinkVidelVisibleArea.second = false;
+	_palette = nullptr;
 
 	if (_changes & kAspectRatioCorrection) {
 		processAspectRatioCorrection(screen);
@@ -67,7 +68,7 @@ void PendingScreenChanges::applyBeforeVblLock(const Screen &screen) {
 	}
 }
 
-void PendingScreenChanges::applyAfterVblLock(const Screen &screen) {
+void PendingScreenChanges::afterVblLock(const Screen &screen) {
 	// VBL doesn't process new palette nor screen address updates
 	// if _changes & kVideoMode then the Vsync handler has just returned
 
@@ -79,15 +80,7 @@ void PendingScreenChanges::applyAfterVblLock(const Screen &screen) {
 	// restore current (kVideoMode) or set new (kPalette) palette
 	if (_changes & (kVideoMode | kPalette)) {
 		if (_switchToBlackPalette || (_changes & kPalette)) {
-			// Set the palette as fast as possible. Vsync() is a big no-no, updateScreen() and
-			// therefore this function can be called multiple times per frame. In this case,
-			// EsetPalette() will set the colours immediately (oops) but VsetRGB() is fine:
-			// it will be set as soon as VBL is unlocked again.
-			if (_manager->_tt) {
-				EsetPalette(0, screen.palette->entries, screen.palette->tt);
-			} else {
-				VsetRGB(0, screen.palette->entries, screen.palette->falcon);
-			}
+			_palette = screen.palette;
 		}
 
 		_changes &= ~(kVideoMode | kPalette);
@@ -136,17 +129,13 @@ void PendingScreenChanges::processAspectRatioCorrection(const Screen &screen) {
 }
 
 void PendingScreenChanges::processVideoMode(const Screen &screen) {
-	// changing video mode implies an additional Vsync(): there's no way to change resolution
-	// and set new screen address (and/or shake offsets etc) in one go
 	if (screen.rez != -1) {
-		static uint16 black[256];
-		EsetPalette(0, screen.palette->entries, black);
+		_manager->queueBlackPalette();
 
 		// unfortunately this reinitializes VDI, too
 		Setscreen(SCR_NOCHANGE, SCR_NOCHANGE, screen.rez);
 	} else if (_mode != -1) {
-		static _RGB black[256];
-		VsetRGB(0, screen.palette->entries, black);
+		_manager->queueBlackPalette();
 
 		// VsetMode() must be called before the VBL s_ stuff is set as
 		// it resets all hz/v, scrolling and line width registers

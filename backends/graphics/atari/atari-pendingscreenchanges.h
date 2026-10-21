@@ -26,6 +26,7 @@
 
 class AtariGraphicsManager;
 class AtariSurface;
+class Palette;
 class Screen;
 
 class PendingScreenChanges {
@@ -75,9 +76,12 @@ public:
 	const std::pair<bool, bool>& shrinkVidelVisibleArea() const {
 		return _shrinkVidelVisibleArea;
 	}
+	const Palette *palette() const {
+		return _palette;
+	}
 
-	void applyBeforeVblLock(const Screen &screen);
-	void applyAfterVblLock(const Screen &screen);
+	void beforeVblLock(const Screen &screen);
+	void afterVblLock(const Screen &screen);
 
 private:
 	void processAspectRatioCorrection(const Screen &screen);
@@ -106,6 +110,7 @@ private:
 	std::pair<int, bool> _aspectRatioCorrectionYOffset;
 	std::pair<bool, bool> _setScreenOffsets;
 	std::pair<bool, bool> _shrinkVidelVisibleArea;
+	const Palette *_palette = nullptr;
 };
 
 #endif // ATARI-PENDINGSCREENCHANGES_H

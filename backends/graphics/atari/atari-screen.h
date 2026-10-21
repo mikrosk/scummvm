@@ -23,7 +23,6 @@
 #define BACKENDS_GRAPHICS_ATARI_SCREEN_H
 
 #include <unordered_set>
-#include <mint/ostruct.h>	// _RGB
 
 #include "common/ptr.h"
 
@@ -47,7 +46,7 @@ public:
 	}
 
 	uint16 *const tt = reinterpret_cast<uint16*>(_data);
-	_RGB *const falcon = reinterpret_cast<_RGB*>(_data);
+	uint32 *const falcon = reinterpret_cast<uint32*>(_data);
 
 	int entries = 0;
 
