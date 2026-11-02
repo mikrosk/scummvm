@@ -1038,6 +1038,13 @@ void AtariGraphicsManager::freeSurfaces() {
 }
 
 void AtariGraphicsManager::addDirtyRectToScreens(const Graphics::Surface &dstSurface, int x, int y, int w, int h) {
+	// chunky buffer in SV RAM: let the SuperBlitter update the whole screen instead of tracking rectangles
+	if ((uintptr)_chunkySurface.getPixels() >= 0xA0000000) {
+		x = y = 0;
+		w = dstSurface.w;
+		h = dstSurface.h;
+	}
+
 	for (int i : { kFrontBuffer, kBackBuffer1, kBackBuffer2 }) {
 		_screen[i]->addDirtyRect(dstSurface, x, y, w, h, false);
 	}

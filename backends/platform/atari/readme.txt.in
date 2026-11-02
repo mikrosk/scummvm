@@ -212,10 +212,10 @@ Cons:
 - In case of extremely fast rendering, one or more frames are dropped in favour
   of showing only the most recent one.
 
-SuperBlitter used: yes, for rectangle blitting to screen and cursor
-restoration. Sometimes also for generic copying between buffers (when ScummVM
-allocates surface via its create() function; custom/small buffers originating in
-the engine code are still copied using the CPU).
+SuperBlitter used: yes, for blitting the whole screen (instead of rectangles)
+and for cursor restoration. Sometimes also for generic copying between buffers
+(when ScummVM allocates surface via its create() function; custom/small buffers
+originating in the engine code are still copied using the CPU).
 
 
 SuperVidel and SuperBlitter
