@@ -46,19 +46,6 @@ public:
 	void setFeatureState(OSystem::Feature f, bool enable) override;
 	bool getFeatureState(OSystem::Feature f) const override;
 
-	const OSystem::GraphicsMode *getSupportedGraphicsModes() const override {
-		static const OSystem::GraphicsMode graphicsModes[] = {
-			{ "direct", "Direct rendering", kDirectRendering },
-			{ "single", "Single buffering", kSingleBuffering },
-			{ "triple", "Triple buffering", kTripleBuffering },
-			{ nullptr, nullptr, 0 }
-		};
-		return graphicsModes;
-	}
-	int getDefaultGraphicsMode() const override { return kTripleBuffering; }
-	bool setGraphicsMode(int mode, uint flags = OSystem::kGfxModeNoFlags) override;
-	int getGraphicsMode() const override { return _currentState.mode; }
-
 	void initSize(uint width, uint height, const Graphics::PixelFormat *format = NULL) override;
 
 	int getScreenChangeID() const override { return 0; }
@@ -110,13 +97,6 @@ public:
 	Common::Keymap *getKeymap() const;
 
 private:
-	enum {
-		kUnknownMode		= -1,
-		kDirectRendering	= 0,
-		kSingleBuffering	= 1,
-		kTripleBuffering	= 3
-	};
-
 	enum CustomEventAction {
 		kActionToggleAspectRatioCorrection = 100,
 	};
@@ -133,7 +113,7 @@ private:
 #endif
 
 	void addDirtyRectToScreens(const Graphics::Surface &dstSurface,
-							   int x, int y, int w, int h, bool directRendering);
+							   int x, int y, int w, int h);
 	bool updateScreenInternal(Screen *dstScreen, const Graphics::Surface *srcSurface);
 	void copyRectToAtariSurface(AtariSurface &dstSurface,
 								const byte *buf, int pitch, int x, int y, int w, int h);
@@ -145,11 +125,11 @@ private:
 		// see osystem_atari.cpp
 		extern bool g_gameEngineActive;
 #endif
-		// overlay is direct rendered if in the launcher or if game is directly rendered
+		// overlay is direct rendered if in the launcher
 		// (on SuperVidel we always want to use _overlaySurface as source for background pixels)
 		return !g_hasSuperVidel
 #ifndef DISABLE_FANCY_THEMES
-			&& (!g_gameEngineActive || _currentState.mode == kDirectRendering)
+			&& !g_gameEngineActive
 #endif
 			;
 	}
@@ -163,18 +143,12 @@ private:
 	struct GraphicsState {
 		GraphicsState()
 			: inTransaction(false)
-			, mode(kUnknownMode)
 			, width(0)
 			, height(0)
 			, format(Graphics::PixelFormat()) {
 		}
 
-		bool isValid() const {
-			return mode != kUnknownMode && width > 0 && height > 0 && format.bytesPerPixel != 0;
-		}
-
 		bool inTransaction;
-		int mode;
 		int width;
 		int height;
 		Graphics::PixelFormat format;

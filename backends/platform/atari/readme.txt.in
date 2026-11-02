@@ -52,8 +52,6 @@ Minimum hardware requirements: Atari Falcon with 4 + 32 MB RAM and 68040 CPU.
   experience (Falcon RGB overscan, chunky modes with the SuperVidel, TT 640x480
   for the overlay, ...).
 
-- Direct rendering and single/triple buffering support.
-
 - Blitting routines optimised for 68040 / 68060 CPU.
 
 - Custom (and optimal) surface drawing (especially for the cursor).
@@ -191,71 +189,11 @@ available). It prints input and output sample format as well as the name of the
 converter used. See below for details.
 
 
-Graphics modes
---------------
+Graphics rendering
+------------------
 
-This topic is more complex than it looks. ScummVM renders game graphics using
-rectangles and this port offers the following options to render them:
-
-Direct rendering
-~~~~~~~~~~~~~~~~
-
-This is direct writing of the pixels into the screen buffer. On
-SuperVidel it is done natively, on Videl a chunky to planar conversion
-takes place beforehand.
-
-Pros:
-
-- On SuperVidel this offers fastest possible rendering (especially in 640x480
-  with a lot of small rectangle updates where the buffer copying drags
-  performance down).
-
-- On Videl this _may_ offer fastest possible rendering if the rendering
-  pipeline isn't flooded with too many small rectangles (C2P setup isn't for
-  free). However with fullscreen intro sequences this is a no-brainer.
-
-Cons:
-
-- Screen tearing in most cases.
-
-- On Videl, this may not work properly if a game engine uses its own buffers
-  instead of surfaces (which are aligned on a 16pix boundary). Another source
-  of danger is if an engine draws directly to the screen surface. Fortunately,
-  each game can have its own graphics mode set separately so for games which do
-  not work properly one can still leave the default graphics mode set.
-
-- On Videl, overlay background isn't rendered (the GUI code can't work with
-  bitplanes).
-
-SuperBlitter used: sometimes (when ScummVM allocates surface via its create()
-function; custom/small buffers originating in the engine code are still copied
-using the CPU).
-
-Single buffering
-~~~~~~~~~~~~~~~~
-
-This is very similar to the previous mode with the difference that the engine
-uses an intermediate buffer for storing the rectangles but yet it remembers
-which ones they were.
-
-Pros:
-
-- Second fastest possible rendering.
-
-Cons:
-
-- Screen tearing in most cases.
-
-- If there are too many smaller rectangles, it can be less efficient than
-  updating the whole buffer at once.
-
-SuperBlitter used: yes, for rectangle blitting to screen and cursor
-restoration. Sometimes also for generic copying between buffers (see above).
-
-Triple buffering
-~~~~~~~~~~~~~~~~
-
-This is the "true" triple buffering as described in
+ScummVM renders game graphics using rectangles. This port draws them using
+"true" triple buffering as described in
 https://en.wikipedia.org/wiki/Multiple_buffering#Triple_buffering and not "swap
 chain" as described in https://en.wikipedia.org/wiki/Swap_chain. The latter
 would be slightly slower as three buffers would need to be updated instead of
@@ -265,14 +203,9 @@ Pros:
 
 - No screen tearing.
 
-- Best compromise between performance and visual experience.
-
 - Works well with both higher and lower frame rates.
 
 Cons:
-
-- If there are too many smaller rectangles, it can be less efficient than
-  single buffering.
 
 - Slightly irregular frame rate (depends solely on the game's complexity).
 
@@ -280,9 +213,9 @@ Cons:
   of showing only the most recent one.
 
 SuperBlitter used: yes, for rectangle blitting to screen and cursor
-restoration. Sometimes also for generic copying between buffers (see above).
-
-Triple buffering is the default mode.
+restoration. Sometimes also for generic copying between buffers (when ScummVM
+allocates surface via its create() function; custom/small buffers originating in
+the engine code are still copied using the CPU).
 
 
 SuperVidel and SuperBlitter
